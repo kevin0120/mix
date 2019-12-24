@@ -1,12 +1,17 @@
 package ts002
 
 import (
+	"github.com/masami10/rush/services/io"
+	"github.com/masami10/rush/services/tightening_device"
 	"sync/atomic"
 )
 
 type Service struct {
 	configValue atomic.Value
 	diag        Diagnostic
+
+	IO               *io.Service
+	TighteningDevice *tightening_device.Service
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -35,6 +40,11 @@ func (s *Service) Close() error {
 func (s Service) onTighteningResult(data interface{}) {
 	if data == nil {
 		return
+	}
+
+	tighteningResult := data.(*tightening_device.TighteningResult)
+	if tighteningResult.MeasureResult == tightening_device.RESULT_NOK {
+		// 如果结果NOK，则触发报警
 	}
 
 }

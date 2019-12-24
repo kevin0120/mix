@@ -30,18 +30,18 @@ type RushErrResp struct {
 
 // Mes->Rush 报警控制请求
 type RushAlarmReq struct {
-	Status string `json:"status"`
+	Status string `json:"status" validate:"required"`
 }
 
 // Mes->Rush PSet下发请求
 type RushPSetReq struct {
-	PSet    int    `json:"pset"`
-	ToolID  string `json:"tool_id"`
-	PointID string `json:"point_id"`
+	PSet    int    `json:"pset" validate:"required, gte=1"`
+	ToolID  string `json:"tool_id" validate:"required"`
+	PointID string `json:"point_id" validate:"required"`
 }
 
 // Mes->Rush IO输出控制
 type RushIOControlReq struct {
-	Outputs []int  `json:"outputs"`
-	Status  string `json:"status"`
+	Outputs []int  `json:"outputs" validate:"required"`
+	Status  string `json:"status" validate:"required"`
 }

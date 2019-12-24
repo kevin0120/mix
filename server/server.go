@@ -158,6 +158,8 @@ func (s *Server) appendTS002Service(projectCode string) {
 	c := s.config.TS002
 	d := s.DiagService.NewCustomizeHandler(projectCode)
 	srv := ts002.NewService(c, d)
+	srv.IO = s.IOService
+	srv.TighteningDevice = s.TighteningDeviceService
 
 	s.TS002Service = srv
 	s.AppendService(projectCode, srv)
