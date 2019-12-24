@@ -12,11 +12,9 @@ import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
 import type { tOrderStatus } from '../../modules/order/interface/typeDef';
 import { ORDER_STATUS } from '../../modules/order/constants';
-// import logo from '../../../resources/imgs/logo.jpg';
+import logo from '../../../resources/imgs/logo.jpg';
 import { stepWorkingNS } from './local';
 import { withI18n } from '../../i18n';
-
-const logo = null;
 
 const mapState = (state, props) => {
   const vOrder = orderSelectors.viewingOrder(state.order);
@@ -72,11 +70,11 @@ function StepWorking({ status, code }: Props): Node {
             </Typography>
             <Typography variant="h5">{code || ''}</Typography>
           </div>
-          {logo ? <img alt="logo" src={logo} className={classes.logo}/> : null}
+          {logo ? <img alt="logo" src={logo} className={classes.logo} /> : null}
         </Paper>
         <div className={classes.main}>
           <Paper square classes={{ root: classes.leftContainer }}>
-            <ButtonsContainer action={action}/>
+            <ButtonsContainer action={action} />
             <StepPageContainer
               bindParentAction={bindAction}
               bindParentDescription={bindDescription}
@@ -85,7 +83,7 @@ function StepWorking({ status, code }: Props): Node {
           </Paper>
           <div className={classes.rightContainer}>
             <Paper square className={classes.stepperContainer}>
-              <StepperContainer/>
+              <StepperContainer />
             </Paper>
           </div>
         </div>
