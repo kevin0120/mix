@@ -1,4 +1,5 @@
 import { lng, makeLocalBundle } from '../../i18n';
+import { stepTypeKeys } from '../../modules/step/constants';
 
 export const stepWorkingNS = 'stepWorking';
 
@@ -14,7 +15,8 @@ export const translation = {
   view: 'view',
   name: 'name',
   desc: 'desc',
-  action: 'action'
+  action: 'action',
+  ...stepTypeKeys
 };
 
 
@@ -33,7 +35,16 @@ const trans = [
     name: '名称',
     desc: '描述',
     action: '操作',
-    notSelected: '未选中工单'
+    notSelected: '未选中工单',
+    [translation.material]: '物料',
+    [translation.scanner]: '扫码',
+    [translation.screw]: '拧紧',
+    [translation.input]: '输入',
+    [translation.instruction]: '指示',
+    [translation.text]: '文字',
+    [translation.passFail]: '检测',
+    [translation.measure]: '测量',
+    [translation.video]: '视频'
   }),
   makeLocalBundle(lng.en, 'stepWorking', {
     skip: 'skip',
@@ -49,7 +60,16 @@ const trans = [
     name: 'name',
     desc: 'description',
     action: 'action',
-    notSelected: 'Order Not Selected'
+    notSelected: 'Order Not Selected',
+    [translation.material]: 'material',
+    [translation.scanner]: 'scanner',
+    [translation.screw]: 'tightening',
+    [translation.input]: 'input',
+    [translation.instruction]: 'instruction',
+    [translation.text]: 'text',
+    [translation.passFail]: 'pass/fail',
+    [translation.measure]: 'measure',
+    [translation.video]: 'video'
   })
 ];
 

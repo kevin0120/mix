@@ -94,12 +94,12 @@ export const scannerStepStatusMixin = (superTasks) => ({
   [STEP_STATUS.DOING]: doingState
 });
 
-export const onLeave = () => {
-  this._scanners.forEach(s => {
+export function onLeave(){
+  (this._scanners || []).forEach(s => {
     this._listeners.forEach(l => {
       s.removeListener(l);
     });
   });
   this._scanners = [];
   this._listeners = [];
-};
+}

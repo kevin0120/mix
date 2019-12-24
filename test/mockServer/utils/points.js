@@ -19,11 +19,11 @@ function generatePoints(name) {
   const pointConfigs = list('points');
   const pointConfigsCount = pointConfigs.length;
   const points = pointsData(demoPoints);
-  write('points', name || `demoPoint_${pointConfigsCount + 1}`, JSON.stringify(points));
+  write('points', name || `demoPoint_${pointConfigsCount + 1}`, JSON.stringify(points, null, "\t"));
 }
 
-setDir('../storage');
-generatePoints();
+// setDir('../storage');
+// generatePoints();
 
 function pointsData(groupConfigs) {
   const points = [];
@@ -61,3 +61,8 @@ function pointsData(groupConfigs) {
   });
   return points;
 }
+
+module.exports={
+  pointsData,
+  generatePoints
+};

@@ -20,7 +20,7 @@ import { push } from 'connected-react-router';
 import { orderActions } from './action';
 import { doable, orderSteps, viewingOrder, workingOrder } from './selector';
 import dialogActions from '../dialog/action';
-import i18n from '../../i18n';
+import i18n, { tNS } from '../../i18n';
 import Table from '../../components/Table/Table';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
@@ -34,7 +34,7 @@ import notifierActions from '../Notifier/action';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
 import { sGetWorkCenterMode } from '../workCenterMode/selector';
 import type { tWorkCenterMode } from '../workCenterMode/interface/typeDef';
-
+import { stepWorkingNS } from '../../containers/stepWorking/local';
 import ClsScanner from '../device/scanner/ClsScanner';
 import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
@@ -308,7 +308,7 @@ function* viewOrder({ order }: { order: IOrder }) {
         vOrderSteps.map((s: IWorkStep, idx) => [
           idx + 1,
           s.code,
-          i18n.t(`StepType.${s.type}`),
+          tNS(`${s.type}`, stepWorkingNS),
           s.desc
         ])) ||
       [];

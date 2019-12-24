@@ -54,7 +54,56 @@
   },
   "steps": [
     {
-      "code": "T0001",
+      "code": "MO0003-1",
+      "responsible_user": "工步负责人",
+      "sequence": 1,
+      "test_type": "register_consumed_materials",
+      "consume_product": "1111",
+      "desc": "将污⽔管摆放到定位位置， 连接管路并紧固牢固",
+      "text": "",
+      "failure_msg": "拧紧失败",
+      "tolerance_min": null,
+      "tolerance_max": null,
+      "target": null
+    },
+    {
+      "code": "MO0003-2",
+      "sequence": 1,
+      "test_type": "register_byproducts",
+      "consume_product": "1111",
+      "desc": "扫码",
+      "text": "",
+      "failure_msg": "扫码失败",
+      "tolerance_min": null,
+      "tolerance_max": null,
+      "target": null
+    },
+    {
+      "code": "MO0003-3",
+      "sequence": 1,
+      "test_type": "measure",
+      "consume_product": "1111",
+      "desc": "测量",
+      "text": "",
+      "failure_msg": "",
+      "tolerance_min": null,
+      "tolerance_max": null,
+      "target": null
+    },
+    {
+      "code": "MO0003-4",
+      "sequence": 1,
+      "test_type": "pass_fail",
+      "consume_product": "1111",
+      "desc": "检测",
+      "text": "",
+      "failure_msg": "",
+      "tolerance_min": null,
+      "tolerance_max": null,
+      "target": null
+    },
+    {
+      "code": "MO0003-5",
       "sequence": 1,
       "test_type": "text",
       "failure_msg": "测试文本工步失败消息",
@@ -69,7 +118,7 @@
       }
     },
     {
-      "code": "T0002",
+      "code": "MO0003-6",
       "sequence": 2,
       "test_type": "tightening",
       "failure_msg": "测试拧紧工步失败消息",

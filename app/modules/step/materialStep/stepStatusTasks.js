@@ -96,7 +96,7 @@ function* enteringState() {
     const sPayload = yield select(s =>
       stepPayload(workingStep(workingOrder(s.order)))
     );
-    items(sPayload).forEach(i => {
+    (items(sPayload) || []).forEach(i => {
       let item = null;
       ['in', 'out'].forEach(dir => {
         if (!(i && i[dir] && i[dir].sn)) {
@@ -137,13 +137,17 @@ function* enteringState() {
         .filter(calls => !!calls)
     );
 
-    const confirmIO = getDevice(sPayload.confirm.sn);
-    if (confirmIO && confirmIO instanceof ClsIOModule) {
-      this._confirm = {
-        io: confirmIO,
-        port: confirmIO.getPort(ioDirection.input, sPayload.confirm.index)
-      };
+    const confirmSN = sPayload?.confirm?.sn;
+    if (confirmSN) {
+      const confirmIO = getDevice(confirmSN);
+      if (confirmIO && confirmIO instanceof ClsIOModule) {
+        this._confirm = {
+          io: confirmIO,
+          port: confirmIO.getPort(ioDirection.input, sPayload.confirm.index)
+        };
+      }
     }
+
 
     yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
   } catch (e) {

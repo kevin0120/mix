@@ -5,9 +5,6 @@ import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import checkStepActions from '../../../modules/step/checkStep/action';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
-import PassFail from './PassFail';
-import Measure from './Measure';
-import { checkStepTypes } from '../../../modules/step/checkStep/constants';
 import type { Dispatch } from '../../../modules/typeDef';
 import type { tStepPayload } from '../../../modules/step/interface/typeDef';
 
@@ -24,11 +21,6 @@ type tSP = {|
 type tDP = {|
   submit: Dispatch
 |};
-
-const Contents = {
-  [checkStepTypes.measurement]: Measure,
-  [checkStepTypes.passFail]: PassFail
-};
 
 const mapState = (state, props: tOP): tSP => ({
   ...props,
@@ -47,11 +39,9 @@ type Props = {|
 
 function CheckStep({
                      step,
-                     type,
                      isCurrent,
                      submit,
                      bindAction,
-                     payload
                    }: Props) {
   const [value, setValue] = useState('');
 
@@ -83,15 +73,10 @@ function CheckStep({
     },
     [step]
   );
-  const RenderContent = Contents[type];
 
-  return (
-    <div>
-      {
-        RenderContent ? <RenderContent payload={payload}/> : null
-      }
-    </div>
-  );
+  return <div>
+    Measure
+  </div>;
 }
 
 

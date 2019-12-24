@@ -11,12 +11,13 @@ export const STEP_STATUS = Object.freeze({
 
 export const stepTypeKeys=Object.freeze({
   input: 'input',
-  scanner: 'scanner',
+  scanner: 'register_byproducts',
   instruction: 'text',
   text: 'text',
   screw: 'tightening',
   material: 'register_consumed_materials',
-  check: 'pass_fail',
+  passFail: 'pass_fail',
+  measure: 'measure',
   video: 'video',
 });
 

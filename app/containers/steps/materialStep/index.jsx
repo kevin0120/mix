@@ -62,7 +62,7 @@ function materialStep(props: Props) {
 
       }
     }>
-    {payload && payload.items.map(i => <img
+    {(payload && payload.items || []).map(i => <img
       style={
         {
           maxWidth: '100%',

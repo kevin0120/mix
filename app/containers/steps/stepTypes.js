@@ -4,31 +4,35 @@ import ScannerStep from './scannerStep';
 import InstructionStep from './instructionStep';
 import ScrewStep from './screwStep';
 import MaterialStep from './materialStep';
-import CheckStep from './CheckStep';
+import PassFailStep from './PassFailStep';
+import MeasureStep from './MeasureStep';
 import VideoStep from './VideoStep';
-import {stepTypeKeys as s} from '../../modules/step/constants';
+import { stepTypeKeys as s } from '../../modules/step/constants';
 
 export default {
-   [s.input]: {
+  [s.input]: {
     component: InputStep
   },
-  [s.scanner]:{
-    component:ScannerStep
+  [s.scanner]: {
+    component: ScannerStep
   },
-  [s.instruction]:{
-    component:InstructionStep,
+  [s.instruction]: {
+    component: InstructionStep
   },
-  [s.screw]:{
-    component:ScrewStep,
+  [s.screw]: {
+    component: ScrewStep
   },
-  [s.material]:{
-    component:MaterialStep,
+  [s.material]: {
+    component: MaterialStep
   },
-  [s.check]:{
-    component:CheckStep,
+  [s.measure]: {
+    component: MeasureStep
   },
-  [s.video]:{
-    component:VideoStep,
+  [s.passFail]: {
+    component: PassFailStep
+  },
+  [s.video]: {
+    component: VideoStep
   }
 };
 
