@@ -42,7 +42,7 @@ func (s *MesAPI) healthCheck() {
 	c := s.Config()
 	cc := s.ensureHttpClient()
 	r := cc.R()
-	url := fmt.Sprintf("%s%s", c.APIUrl, c.EndpointCardInfo)
+	url := fmt.Sprintf("%s%s", c.APIUrl, c.EndpointHealthzCheck)
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 	for ; ; {
