@@ -90,7 +90,7 @@
             <field name="name">测试链接1</field>
             <field name="protocol">http</field>
             <field name="ip">127.0.0.1</field>
-            <field name="port">4444</field>
+            <field name="port">8082</field>
             <field name="equipment_id" ref="masterpc_0"/>
         </record>
 

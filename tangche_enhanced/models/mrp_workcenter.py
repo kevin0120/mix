@@ -15,7 +15,7 @@ class MrpWorkCenterLoc(models.Model):
 
     io_output = fields.Integer('IO Output For Picking Indicate')
 
-    io_input = fields.Integer('IO Output For Picking Confirm')
+    io_input = fields.Integer('IO Input For Picking Confirm')
 
     _sql_constraints = [
         ('equipment_input_uniq', 'unique (equipment_id, io_input)', 'The Equipment With Input Must be unique!'),
