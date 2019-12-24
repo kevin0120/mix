@@ -75,7 +75,13 @@ func (s *Service) Open() error {
 		s.mesAPI = mes
 	}
 
+	go s.doHealthCheck()
+
 	return nil
+}
+
+func (s *Service)doHealthCheck()  {
+	s.mesAPI.healthCheck()
 }
 
 func (s *Service) Close() error {

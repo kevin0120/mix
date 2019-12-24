@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-var mapMESStatusIO = map[string]uint16 {
-	"on": io.OUTPUT_STATUS_ON,
+var mapMESStatusIO = map[string]uint16{
+	"on":  io.OUTPUT_STATUS_ON,
 	"off": io.OUTPUT_STATUS_OFF,
 }
 
@@ -34,8 +34,30 @@ type MesAPI struct {
 	diag   Diagnostic
 }
 
-func (s *MesAPI)Config() MesApiConfig  {
+func (s *MesAPI) Config() MesApiConfig {
 	return s.cfg.Load().(MesApiConfig)
+}
+
+func (s *MesAPI) healthCheck() {
+	c := s.Config()
+	cc := s.ensureHttpClient()
+	r := cc.R()
+	url := fmt.Sprintf("%s%s", c.APIUrl, c.EndpointCardInfo)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	for ; ; {
+		select {
+		case <-ticker.C:
+			if resp, err := r.Get(url); err != nil {
+				s.diag.Error("MES healzCheck", err)
+			} else {
+				if resp.StatusCode() != iris.StatusNoContent {
+					e := errors.New("MES healzCheck Fail")
+					s.diag.Error("healzCheck", e)
+				}
+			}
+		}
+	}
 }
 
 func (s *MesAPI) ensureHttpClient() *resty.Client {
@@ -64,7 +86,7 @@ func (s *MesAPI) sendNFCData(data string) error {
 	if resp, err := r.SetBody(payload).Post(url); err != nil {
 		s.diag.Error("sendNFCData Error", err)
 		return err
-	}else if resp.StatusCode() != iris.StatusOK {
+	} else if resp.StatusCode() != iris.StatusOK {
 		err := errors.New(resp.String())
 		s.diag.Error("sendNFCData Error", err)
 		return err
