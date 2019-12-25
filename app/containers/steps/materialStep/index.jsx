@@ -28,7 +28,7 @@ type ownProps = {|
 
 function materialStep(props: Props) {
   const { step, bindAction, ready, isCurrent, bindDescription } = props;
-  const { payload, desc } = step;
+  const { payload, desc, consumeProduct } = step;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     bindAction(
@@ -39,8 +39,8 @@ function materialStep(props: Props) {
     bindDescription(
       <React.Fragment>
         <Typography variant="h5" style={{ paddingBottom: '10px' }}>{desc}</Typography>
-        {(payload?.items || []).map(i =>
-          <Typography key={i.name} variant="body1">{i.name}</Typography>
+        {[consumeProduct].map(i =>
+          <Typography key={i} variant="body1">{i}</Typography>
         )}
       </React.Fragment>
     );
@@ -48,7 +48,7 @@ function materialStep(props: Props) {
       bindAction(null);
       bindDescription(null);
     };
-  }, [bindAction, bindDescription, desc, isCurrent, payload, ready]);
+  }, [bindAction, bindDescription, consumeProduct, desc, isCurrent, payload, ready]);
 
 
   return <div

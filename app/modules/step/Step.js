@@ -11,13 +11,20 @@ import { stepStatusTasks } from './stepStatusTasks';
 
 const StepMixin = (ClsWorkable: Class<IWorkable>) =>
   class Step extends ClsWorkable implements IWorkStep {
+    _status = STEP_STATUS.READY;
+
+    _statusTasks = stepStatusTasks;
+
+    constructor(stepData: ?$Shape<tStep>) {
+      super(stepData);
+      this.update(stepData);
+    }
+
     _failureMsg = '';
 
     get failureMsg() {
       return this._failureMsg;
     }
-
-    _status = STEP_STATUS.READY;
 
     _info = null;
 
@@ -65,11 +72,10 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
       return this._sequence;
     }
 
-    _statusTasks = stepStatusTasks;
+    _consumeProduct = null;
 
-    constructor(stepData: ?$Shape<tStep>) {
-      super(stepData);
-      this.update(stepData);
+    get consumeProduct() {
+      return this._consumeProduct;
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -87,7 +93,8 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
         skippable,
         undoable,
         data,
-        status
+        status,
+        consume_product: consumeProduct
       } = stepData || {};
       this._sequence = sequence;
       this._type = testType;
@@ -95,11 +102,12 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
       this._skippable = skippable;
       this._undoable = undoable;
       this._failureMsg = failureMsg;
+      this._consumeProduct = consumeProduct;
       (this: IWorkable)._status = status || STEP_STATUS.READY;
       (this: IWorkable)._desc = desc;
     }
 
-    *updateStatus({ status }: { status: tStepStatus }): Saga<void> {
+    * updateStatus({ status }: { status: tStepStatus }): Saga<void> {
       try {
         yield call([this, super.updateStatus], { status });
         yield call(orderStepUpdateApi, this.id, status);

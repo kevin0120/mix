@@ -1,31 +1,90 @@
+import { all, call, put, race, take } from 'redux-saga/effects';
 import { STEP_STATUS } from '../constants';
-import { all, call, put, race, select, take } from 'redux-saga/effects';
 import { orderActions } from '../../order/action';
 import { ioDirection, ioTriggerMode } from '../../device/io/constants';
 import actions, { MATERIAL_STEP } from './action';
 import { CommonLog } from '../../../common/utils';
 import dialogActions from '../../dialog/action';
-import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import type { IDevice } from '../../device/IDevice';
 import { getDevice } from '../../deviceManager/devices';
 import ClsIOModule from '../../device/io/ClsIOModule';
 
-const items = payload => payload?.items;
+function* enteringState(config) {
+  try {
+    const { parent } = config;
+    const { workcenter: { locations } } = parent.payload;
+    const material = this._consumeProduct;
+    if (!material) {
+      throw new Error(`consumed product not provided`);
+    }
+    const location = locations.find(l => l.product_code === material);
+    if (!location) {
+      throw new Error(`location not provided`);
+    }
+    if (!(location.equipment_sn)) {
+      throw new Error(`io module not provided`);
+    }
+    const ioModule: IDevice = getDevice(location.equipment_sn);
+    if (!(ioModule instanceof ClsIOModule)) {
+      throw new Error(`io module (${location.equipment_sn}) not found`);
+    }
+    const input = ioModule.getPort(ioDirection.input, location.io_input);
+    const output = ioModule.getPort(ioDirection.input, location.io_output);
+    this._io.add(ioModule);
+    this._ports.add(input);
+    this._items.add({ io: ioModule, in: input, out: output });
+    yield all(
+      [...this._io].map(io => {
+        if (!io?.ioContact) {
+          throw new Error(`io invalid ${io?.sn}`);
+        }
+        return call(io.ioContact);
+      })
+    );
+
+    const sPayload = this._payload;
+    const confirmSN = sPayload?.confirm?.sn;
+    if (confirmSN) {
+      const confirmIO = getDevice(confirmSN);
+      if (confirmIO && confirmIO instanceof ClsIOModule) {
+        this._confirm = {
+          io: confirmIO,
+          port: confirmIO.getPort(ioDirection.input, sPayload.confirm.index)
+        };
+      }
+    }
+
+    yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
+  } catch (e) {
+    CommonLog.lError(e);
+    yield put(orderActions.stepStatus(this, STEP_STATUS.DOING, { msg: e.message }));
+  }
+}
 
 function* doingState() {
   try {
     const listeners = [];
     [...this._items].forEach(i => {
       listeners.push({
-        listener: i.in.io.addListener(
+        listener: i.io.addListener(
           input =>
-            i.in.port === input.port &&
+            i.in === input.port &&
             ioTriggerMode.falling === input.triggerMode,
           () => actions.item(i)
         ),
-        io: i.in.io
+        io: i.io
       });
     });
+    yield all(
+      [...this._items]
+        .map(item => {
+          if (item?.io?.openIO && item?.out) {
+            return call(item.io.openIO, item.out);
+          }
+          return null;
+        })
+        .filter(calls => !!calls)
+    );
 
     let readyListener = null;
     // const confirmPort = io.getPort(ioDirection.input, confirmIdx(sPayload));
@@ -61,11 +120,12 @@ function* doingState() {
   }
 }
 
-function* failState(msg) {
+function* failState(config) {
   try {
+    const { msg } = config;
     yield put(
       dialogActions.dialogShow({
-        maxWidth:'md',
+        maxWidth: 'md',
         buttons: [
           {
             label: 'Common.Close',
@@ -89,71 +149,6 @@ function* failState(msg) {
     // yield put(orderActions.finishStep(this));
   } catch (e) {
     CommonLog.lError(e);
-  }
-}
-
-function* enteringState() {
-  try {
-    const sPayload = yield select(s =>
-      stepPayload(workingStep(workingOrder(s.order)))
-    );
-    (items(sPayload) || []).forEach(i => {
-      let item = null;
-      ['in', 'out'].forEach(dir => {
-        if (!(i && i[dir] && i[dir].sn)) {
-          throw new Error(`io module ${i[dir].sn} not provided`);
-        }
-        const io: IDevice = getDevice(i[dir].sn);
-        if (!(io instanceof ClsIOModule)) {
-          throw new Error(`io module ${i[dir].sn} not found`);
-        }
-        this._io.add(io);
-        const port = io.getPort(ioDirection.input, i[dir].index);
-        this._ports.add(port);
-        item = { io, port };
-      });
-      if (!item) {
-        return;
-      }
-      this._items.add(item);
-    });
-
-    yield all(
-      [...this._io].map(io => {
-        if (!io?.ioContact) {
-          throw new Error(`io invalid ${io?.sn}`);
-        }
-        return call(io.ioContact);
-      })
-    );
-
-    yield all(
-      [...this._items]
-        .map(item => {
-          if (item?.out?.io?.openIO && item?.out?.port) {
-            return call(item.out.io.openIO, item.out.port);
-          }
-          return null;
-        })
-        .filter(calls => !!calls)
-    );
-
-    const confirmSN = sPayload?.confirm?.sn;
-    if (confirmSN) {
-      const confirmIO = getDevice(confirmSN);
-      if (confirmIO && confirmIO instanceof ClsIOModule) {
-        this._confirm = {
-          io: confirmIO,
-          port: confirmIO.getPort(ioDirection.input, sPayload.confirm.index)
-        };
-      }
-    }
-
-
-    yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
-  } catch (e) {
-    CommonLog.lError(e);
-    yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e.message));
   }
 }
 

@@ -1,8 +1,8 @@
 // @flow
-import React from 'react';
 import type { Node } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
-import { makeStyles, Paper, Grid, Typography } from '@material-ui/core';
+import { Grid, makeStyles, Paper, Typography } from '@material-ui/core';
 import { InfoOutlined } from '@material-ui/icons';
 import clsx from 'clsx';
 import stepTypes from '../steps/stepTypes';

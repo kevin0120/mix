@@ -69,7 +69,6 @@ function* setPortsConfig(action) {
       [ioDirection.output]: prevOutputs
     } = prevIoPorts || {};
     const effects = [];
-    console.log(prevInputs, prevOutputs, inputs, outputs);
     if (prevInputs) {
       Object.keys(prevInputs).forEach((k) => {
         if (prevInputs[k] !== inputs[k]) {
@@ -131,7 +130,6 @@ function removeIOListener(action) {
       defaultIOModule.removeListener(listeners[inputType]);
       delete listeners[inputType];
     }
-    console.log(listeners);
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -169,8 +167,6 @@ function* setIOOutput(action) {
     }
     const { group, status } = action;
     const { ioPorts } = yield select(s => s.io);
-    console.log(group, status);
-
 
     const ports = group.map(
       o =>
@@ -181,7 +177,6 @@ function* setIOOutput(action) {
         )
     );
 
-    console.log(ports);
     if (status) {
       const otherPorts = defaultIOModule.ports
         .filter(p => p.direction === ioDirection.output)

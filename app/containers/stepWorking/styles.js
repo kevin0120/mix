@@ -1,6 +1,6 @@
 const layout = (theme) => ({
   root: {
-    overflow:'hidden',
+    overflow: 'hidden',
     width: '100%',
     height: '100%',
     display: 'flex',
@@ -11,7 +11,7 @@ const layout = (theme) => ({
 
   },
   main: {
-    overflow:'hidden',
+    overflow: 'hidden',
     width: '100%',
     height: '100%',
     display: 'flex',
@@ -31,7 +31,7 @@ const layout = (theme) => ({
 
   },
   leftContainer: {
-    overflow:'hidden',
+    overflow: 'hidden',
     flex: 7,
     margin: 3,
     display: 'flex',
@@ -102,7 +102,7 @@ const layout = (theme) => ({
   },
   statusFail: {
     color: theme.palette.rose.main
-  },
+  }
 });
 
 const stepperContainer = theme => ({
@@ -196,12 +196,12 @@ const stepPageContainer = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    overflow:'hidden',
+    overflow: 'hidden'
   },
   leftContent: {
     width: '100%',
     height: '100%',
-    overflow:'hidden',
+    overflow: 'hidden'
   },
   right: {
     flex: 1,
@@ -224,7 +224,8 @@ const stepPageContainer = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    padding: 16
   },
   result: {
     flex: 2
