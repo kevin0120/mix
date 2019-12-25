@@ -282,7 +282,7 @@ func (s *Service) onNFCData(data interface{}) {
 	}
 	if err := s.mesAPI.sendNFCData(code); err != nil {
 		s.diag.Error("sendNFCData Error", err)
-		return
+		//return
 	}
 
 	// 如果成功则开锁

@@ -222,7 +222,7 @@ func (s *Api) ToolPSetByIP(req *PSetSet) error {
 	}
 
 	_ = s.StorageService.UpdateTool(&storage.Guns{
-		Serial:      req.ToolSN,
+		Serial:      tool.Config().(ToolConfig).SN,
 		WorkorderID: req.WorkorderID,
 		Seq:         int(req.Sequence),
 		Count:       req.Count,

@@ -126,9 +126,9 @@ io:
     - sn: 1
       model: MOXA_E1212
       address: 192.168.3.250:502
-#    - sn: 2
-#      model: MOXA_E1212
-#      address: 192.168.3.251:502
+    - sn: 2
+      model: MOXA_E1212
+      address: 192.168.3.251:502
 #    - sn: 3
 #      model: MOXA_E1242
 #      address: 192.168.3.252:502
@@ -144,15 +144,15 @@ device:
 tightening_device:
   enable: true
   devices:
-    - model: ModelDesoutterDeltaWrench
-      protocol: OpenProtocol
-      endpoint: tcp://192.168.5.186:4545
-      sn: c1
-      tools:
-        - sn: xx4443
-          channel: 1
-        - sn: xx4443
-          channel: 0
+#    - model: ModelDesoutterDeltaWrench
+#      protocol: OpenProtocol
+#      endpoint: tcp://192.168.5.186:4545
+#      sn: c1
+#      tools:
+#        - sn: xx4443
+#          channel: 1
+#        - sn: xx4443
+#          channel: 0
 #
 #    - model: ModelDesoutterCvi3
 #      protocol: OpenProtocol
@@ -215,11 +215,12 @@ ts002:
 
   # 柜锁控制（当收刷卡登录成功时，控制相关IO输出）
   io_locker:
-    - 1
+    - 0
 
   # 报警控制（当收到MES报警请求或拧紧NOK时，控制相关IO输出，持续5秒）
   io_alarm:
     - 1
+    - 11
 
   # 报警持续时间
   io_alarm_last: 5s
