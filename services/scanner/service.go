@@ -203,6 +203,7 @@ func (s *Service) OnStatus(id string, status string) {
 		Status: status,
 	}
 
+	// 分发扫码枪状态
 	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, &scannerStatus)
 }
 
@@ -218,6 +219,7 @@ func (s *Service) OnRecv(id string, data string) {
 		Barcode: data,
 	}
 
+	// 分发条码数据
 	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, &barcodeData)
 }
 

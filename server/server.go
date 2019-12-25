@@ -402,6 +402,7 @@ func (s *Server) AppendReaderService() error {
 	srv := reader.NewService(c, d)
 	srv.WS = s.WSNotifyService
 	srv.DeviceService = s.DeviceService
+	srv.DispatcherBus = s.DispatcherBusService
 
 	s.ReaderService = srv
 	s.AppendService("reader", srv)

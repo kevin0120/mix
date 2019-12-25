@@ -54,6 +54,10 @@ func (s *Service) initGblDispatcher() {
 
 func (s *Service) Open() error {
 	c := s.Config()
+	if !c.Enable {
+		return nil
+	}
+
 	s.doConnect(false) // 初始化所有连接状态为未连接
 	if c.Enable {
 		s.DispatcherBus.LaunchDispatchersByHandlerMap(s.BrokerDispatcherMap)

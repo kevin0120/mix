@@ -329,7 +329,7 @@ func (s *Service) OnWSOrderDetailByCode(c websocket.Connection, msg *wsnotify.WS
 }
 
 // 收到工具拧紧结果
-func (s *Service) OnTighteningResult(data interface{}) {
+func (s *Service) onTighteningResult(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -357,23 +357,6 @@ func (s *Service) OnTighteningResult(data interface{}) {
 	s.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(payload))
 	s.diag.Debug(fmt.Sprintf("拧紧结果推送HMI: %s", string(payload)))
 }
-
-//// 控制器状态变化
-//func (s *Service) OnTighteningControllerStatus(data interface{}) {
-//	if data == nil {
-//		return
-//	}
-//
-//	controllerStatus := data.(*[]device.DeviceStatus)
-//
-//	msg := wsnotify.WSMsg{
-//		Type: wsnotify.NotifywsDeviceStatus,
-//		Data: controllerStatus,
-//	}
-//	payload, _ := json.Marshal(msg)
-//	s.WS.NotifyAll(wsnotify.WS_EVENT_DEVICE, string(payload))
-//	s.diag.Debug(fmt.Sprintf("控制器状态推送HMI: %s", string(payload)))
-//}
 
 // 设备连接状态变化(根据设备类型,序列号来区分具体的设备)
 func (s *Service) OnDeviceStatus(data interface{}) {
@@ -483,4 +466,9 @@ func (s *Service) OnExSysStatus(data interface{}) {
 
 	s.WS.NotifyAll(wsnotify.WS_EVENT_EXSYS, string(payload))
 	s.diag.Debug(fmt.Sprintf("第三方系统连接状态推送HMI: %s", string(payload)))
+}
+
+// 收到读卡器数据
+func (s *Service) onReaderData(data interface{}) {
+	// TODO：卡片信息推送HMI
 }

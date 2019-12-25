@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/ebfe/scard"
 	"github.com/masami10/rush/services/device"
+	dispatcherBus "github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"github.com/satori/go.uuid"
 	"sync/atomic"
 	"time"
@@ -14,11 +16,6 @@ const (
 	SEARCH_ITV = 1 * time.Second
 )
 
-type Diagnostic interface {
-	Error(msg string, err error)
-	Debug(msg string)
-}
-
 // TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
 	device.BaseDevice
@@ -27,6 +24,7 @@ type Service struct {
 	ctx           *scard.Context
 	WS            *wsnotify.Service
 	DeviceService *device.Service
+	DispatcherBus Dispatcher
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -47,6 +45,12 @@ func (s *Service) config() Config {
 func (s *Service) Open() error {
 	if !s.config().Enable {
 		return nil
+	}
+
+	s.DispatcherBus.Create(dispatcherBus.DISPATCHER_READER_DATA, utils.DefaultDispatcherBufLen)
+	err := s.DispatcherBus.Start(dispatcherBus.DISPATCHER_READER_DATA)
+	if err != nil {
+		return err
 	}
 
 	go s.search()
@@ -109,7 +113,8 @@ func (s *Service) Data() interface{} {
 }
 
 func (s *Service) notifyUID(uid string) {
-	//s.WS.WSSendReader(uid)
+	// 分发读卡器数据
+	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_READER_DATA, uid)
 }
 
 func (s *Service) search() {
