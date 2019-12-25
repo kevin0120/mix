@@ -121,17 +121,21 @@ def pack_step_payload(env, consum_lines):
     type_tightening_point_id = env.ref('quality.test_type_tightening_point').id
     for idx, step in enumerate(consum_lines.filtered(lambda t: t.test_type_id.id != type_tightening_point_id)):
         ts = {
-            "code": step.name or step.ref,
+            "code": step.name,
             "desc": step.note or '',
             "failure_msg": step.failure_message or '',
             "sequence": idx + 1,
             "skippable": step.can_do_skip,
             "undoable": step.can_do_redo,
             "test_type": step.test_type_id.technical_name,
-            "consume_product": '',
+            "consume_product": step.component_id.code,
+            "text": step.reason or '',
+            "tolerance_min": step.tolerance_min,
+            "tolerance_max": step.tolerance_max,
+            "target": step.norm,
         }
         ts.update({'tightening_image_by_step_code': step.name or step.ref})
-        if step.test_type_id.id ==type_tightening_id:
+        if step.test_type_id.id == type_tightening_id:
             val = package_tightening_points(step.operation_point_ids)
             ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
             ts.update({'tightening_total': len(step.operation_point_ids)})  # 将拧紧点的包包裹进去
@@ -141,27 +145,42 @@ def pack_step_payload(env, consum_lines):
 
 
 def convert_ts002_order(env, vals):
-    code = vals.get('requestInfo').get('MOMWIPORDER').get('WIPORDERNO')
-    mom_productno = vals.get('requestInfo').get('MOMWIPORDER').get('PRODUCTNO')
-    worksection = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('WORKCENTER')
-    date_planned_start = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDSTARTDATE')
-    date_planned_complete = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDCOMPLETIONDATE')
-    worksheet = {
-                "name": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DESCRIPT'),
-                "revision": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCVR'),
-                "url": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCURL'),
+    try:
+        code = vals.get('requestInf').get('MOMWIPORDER').get('WIPORDERNO')
+        mom_productno = vals.get('requestInfo').get('MOMWIPORDER').get('PRODUCTNO')
+        worksection = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('WORKCENTER')
+        date_planned_start = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDSTARTDATE')
+        date_planned_complete = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDCOMPLETIONDATE')
+        worksheet = {
+                    "name": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DESCRIPT'),
+                    "revision": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCVR'),
+                    "url": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCURL'),
+                }
+        modeldoc = vals.get('requestInfo').get('MOMWIPORDER').get('MODELDOCS').get('MODELDOC')
+        products = list()
+        for mo in modeldoc:
+            product = {
+                'code': mo.get('PRODUCTNO'),
+                'url': mo.get('URLLOCATION'),
             }
-    modeldoc = vals.get('requestInfo').get('MOMWIPORDER').get('MODELDOCS').get('MODELDOC')
-    products = list()
-    for mo in modeldoc:
-        product = {
-            'code': mo.get('PRODUCTNO'),
-            'url': mo.get('URLLOCATION'),
-        }
-        products.append(product)
+            products.append(product)
 
+        SYSTEMTYPE = vals.get('requestInfo').get('SYSTEMTYPE')
+        WIPORDERTYPE = vals.get('requestInfo').get('MOMWIPORDER').get('WIPORDERTYPE')
+        MOMDISPOSITIONS = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMDISPOSITIONS').get('MOMDISPOSITION')
+        MOMCONFIG = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMCONFIG')
+        RESOURCEGROUP = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('RESOURCEGROUP')
+        STARTEMPLOYEE = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('STARTEMPLOYEE')
+        RESOURCENAMES = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('RESOURCENAMES')
+        PARENTWIPORDERNO = vals.get('requestInfo').get('MOMWIPORDER').get('PARENTWIPORDERNO')
+        PARENTWIPORDERTYPE = vals.get('requestInfo').get('MOMWIPORDER').get('PARENTWIPORDERTYPE')
 
-
+    except RetryError:
+        msg = 'TS002  WorkOrder Payload is not qualifed!!'
+        return [], msg
+    except Exception :
+        msg = 'TS002  WorkOrder Payload is not qualifed!!'
+        return [], msg
 
     ret = list()
     ws = env['mrp.worksection'].search([('code', '=', worksection)])
@@ -171,7 +190,7 @@ def convert_ts002_order(env, vals):
 
         mrw = env['mrp.routing.workcenter'].search([('workcenter_id', '=', ts.id),('routing_id', '=', bom.routing_id.id)])
 
-        _steps = pack_step_payload(env,mrw.sa_step_ids)
+        _steps = pack_step_payload(env, mrw.sa_step_ids)
         vals = {
             'code': code,
             'track_no': mom_productno,
@@ -184,18 +203,28 @@ def convert_ts002_order(env, vals):
             'operation': {
                 'code': mrw.name or mrw.ref,
                 'desc': '',
-            },
-            "resources": {
-                "users": [],
-                "equipments": [],
+                "resources": {
+                    "users": [],
+                    "equipments": [],
+                },
             },
             'components': [],
             'environments': [],
+            "SYSTEMTYPE": SYSTEMTYPE,
+            "WIPORDERTYPE": WIPORDERTYPE,
+            "MOMDISPOSITIONS": MOMDISPOSITIONS,
+            "MOMCONFIG": MOMCONFIG,
+            "RESOURCEGROUP": RESOURCEGROUP,
+            "STARTEMPLOYEE": STARTEMPLOYEE,
+            "RESOURCENAMES": RESOURCENAMES,
+            "PARENTWIPORDERNO": PARENTWIPORDERNO,
+            "PARENTWIPORDERTYPE": PARENTWIPORDERTYPE,
             'steps': _steps,
         }
         ret.append(vals)
-        return ret
-    return ret
+        # FIXME: 修改demo数据后去掉第一个return
+        return ret, False
+    return ret, False
 
 # def convert_ts002_order(env, vals):
 #     ret = vals
@@ -234,6 +263,7 @@ def convert_ts002_order(env, vals):
 
 def package_workcenter_location_data(workcenter_id, val):
     ret = []
+    components = []
     entry = val['workcenter']
     if not isinstance(entry, dict):
         entry = {'code': workcenter_id.code}
@@ -250,10 +280,15 @@ def package_workcenter_location_data(workcenter_id, val):
             'io_output': loc.io_output,
             'io_input': loc.io_input
         }
+        component = {
+            'is_key': True,
+            'code': loc.product_id.default_code if loc.product_id else False,
+        }
         ret.append(data)
+        components.append(component)
     entry.update({'locations': ret})
     val['workcenter'] = entry
-
+    val['components'] = components
 
 def get_masterpc_order_url_and_package(env, vals):
     workcenter_code = vals.get('workcenter')
@@ -278,7 +313,9 @@ def get_masterpc_order_url_and_package(env, vals):
 
 @retry(wait=wait_exponential(multiplier=1, min=1, max=3), stop=stop_after_delay(5), retry=retry_if_exception_type())
 def post_order_2_masterpc(master_url, data):
-    resp = requests.post(master_url, data=json.dumps(data), headers=headers)
+    data1=json.dumps(data)
+
+    resp = requests.post(master_url, data=data1, headers=headers)
     if resp.status_code != 201:
         return False
     return True
@@ -302,7 +339,9 @@ def query_order_from_mes(order_code, workcenter_code):
 def _convert_orders_info(env, values):
     # validate_ts002_order_req_vals(values)  # make sure field is all in request body
     # validate_ts002_req_val_by_entry(values)
-    payloads = convert_ts002_order(env, values)
+    payloads, err = convert_ts002_order(env, values)
+    if err:
+        return sa_fail_response(msg=err)
     result_list = list()
     for payload in payloads:
 

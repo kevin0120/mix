@@ -50,7 +50,7 @@ class QualityPoint(models.Model):
         default="noupdate")
     worksheet_page = fields.Integer('Worksheet Page')
     # Used with type register_consumed_materials the product raw to encode.
-    component_id = fields.Many2one('product.product', 'Product To Register', check_company=True)
+    component_id = fields.Many2one('product.product', 'Product To Register')
 
     @api.onchange('product_id', 'product_tmpl_id', 'picking_type_id', 'test_type_id')
     def _onchange_product(self):
