@@ -78,6 +78,12 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
       return this._consumeProduct;
     }
 
+    _text = null;
+
+    get text() {
+      return this._text;
+    }
+
     // eslint-disable-next-line class-methods-use-this
     update(stepData: ?$Shape<tStep>) {
       if (!stepData) {
@@ -94,7 +100,8 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
         undoable,
         data,
         status,
-        consume_product: consumeProduct
+        consume_product: consumeProduct,
+        text
       } = stepData || {};
       this._sequence = sequence;
       this._type = testType;
@@ -103,6 +110,7 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
       this._undoable = undoable;
       this._failureMsg = failureMsg;
       this._consumeProduct = consumeProduct;
+      this._text = text;
       (this: IWorkable)._status = status || STEP_STATUS.READY;
       (this: IWorkable)._desc = desc;
     }

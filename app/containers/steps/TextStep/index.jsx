@@ -2,8 +2,9 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Typography } from '@material-ui/core';
 import Button from '../../../components/CustomButtons/Button';
-import stepActions  from '../../../modules/step/actions';
+import stepActions from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import styles from './styles';
@@ -14,9 +15,7 @@ type tOP = {|
 |};
 
 type tSP = {|
-  ...tOP,
-  url: string,
-  page: number
+  ...tOP
 |};
 
 type tDP = {|
@@ -38,8 +37,9 @@ type Props = {|
   ...tDP
 |};
 
-function InstructionStep({ step, isCurrent, submit, bindAction }: Props) {
+function TextStep({ step, isCurrent, submit, bindAction }: Props) {
   const classes = makeStyles(styles)();
+  const { text } = step;
   useEffect(() => {
     bindAction(
       <Button
@@ -58,10 +58,9 @@ function InstructionStep({ step, isCurrent, submit, bindAction }: Props) {
 
   return (
     <div className={classes.container}>
-      text
+      <Typography variant={'h4'}>{text}</Typography>
     </div>
-
   );
 }
 
-export default connect<Props, tOP, tSP, tDP, _, _>(mapState, mapDispatch)(InstructionStep);
+export default connect<Props, tOP, tSP, tDP, _, _>(mapState, mapDispatch)(TextStep);

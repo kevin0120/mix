@@ -1,310 +1,319 @@
 {
-		"code": "083000166995",
-		"data": "",
-		"date_planned_complete": "2019-04-10T16:00:00Z",
-		"date_planned_start": "2019-04-10T16:00:00Z",
-		"id": 546,
-		"payload": {
-			"MOMCONFIG": {
-				"CHILDCONFIGS": {
-					"CHILDCONFIG": {
-						"BOMGWDESC": "null",
-						"CGBOMID": "11820",
-						"CPRODUCTID": "100527407",
-						"CPRODUCTNO": "M003000000550",
-						"DUMMY1": "null",
-						"DUMMY2": "null",
-						"DUMMY3": "null",
-						"DUMMY4": "null",
-						"DUMMY5": "null",
-						"DUMMY6": "null",
-						"INSTALLATIONDESC": "null",
-						"INSTALLATIONPOSITION": "null",
-						"TRACKINGCODE": "2"
-					}
-				},
-				"PLABEL": "null",
-				"PPRODUCTNO": "M003000000550",
-				"PSERIALNO": "null"
-			},
-			"MOMDISPOSITIONS": [
+  "code": "083000166995",
+  "data": "",
+  "date_planned_complete": "2019-04-10T16:00:00Z",
+  "date_planned_start": "2019-04-10T16:00:00Z",
+  "id": 546,
+  "payload": {
+    "MOMCONFIG": {
+      "CHILDCONFIGS": {
+        "CHILDCONFIG": {
+          "BOMGWDESC": "null",
+          "CGBOMID": "11820",
+          "CPRODUCTID": "100527407",
+          "CPRODUCTNO": "M003000000550",
+          "DUMMY1": "null",
+          "DUMMY2": "null",
+          "DUMMY3": "null",
+          "DUMMY4": "null",
+          "DUMMY5": "null",
+          "DUMMY6": "null",
+          "INSTALLATIONDESC": "null",
+          "INSTALLATIONPOSITION": "null",
+          "TRACKINGCODE": "2"
+        }
+      },
+      "PLABEL": "null",
+      "PPRODUCTNO": "M003000000550",
+      "PSERIALNO": "null"
+    },
+    "MOMDISPOSITIONS": [
+      {
+        "ATTRIBUTE": "null",
+        "CHARACTERISTIC": "M003000000550-0010-ad196",
+        "CHARACTERISTICDESC": "K1\u0026#x0A;",
+        "CHARACTERISTICTYPE": "2",
+        "DISPOSITION": "D0000919",
+        "DTID": "100106068",
+        "LINESEQUENCENO": "1",
+        "LOWERCONTROLLIMIT": "129.975",
+        "MEANVALUE": "null",
+        "SEQUENCENO": "1",
+        "SPECIFICATIONDESC": "测量",
+        "TARGETVALUE": "130.0",
+        "TESTVALUE": "null",
+        "UOMCODE": "MM",
+        "UPPERCONTROLLIMIT": "130.0"
+      },
+      {
+        "ATTRIBUTE": "null",
+        "CHARACTERISTIC": "M003000000550-0010-ad202",
+        "CHARACTERISTICDESC": "K5\u0026#x0A;",
+        "CHARACTERISTICTYPE": "2",
+        "DISPOSITION": "D0000919",
+        "DTID": "100106069",
+        "LINESEQUENCENO": "2",
+        "LOWERCONTROLLIMIT": "79.9",
+        "MEANVALUE": "null",
+        "SEQUENCENO": "1",
+        "SPECIFICATIONDESC": "测量",
+        "TARGETVALUE": "80.0",
+        "TESTVALUE": "null",
+        "UOMCODE": "MM",
+        "UPPERCONTROLLIMIT": "80.0"
+      },
+      {
+        "ATTRIBUTE": "null",
+        "CHARACTERISTIC": "M003000000550-0010-ad199",
+        "CHARACTERISTICDESC": "K3\u0026#x0A;",
+        "CHARACTERISTICTYPE": "2",
+        "DISPOSITION": "D0000919",
+        "DTID": "100106070",
+        "LINESEQUENCENO": "3",
+        "LOWERCONTROLLIMIT": "157.965",
+        "MEANVALUE": "null",
+        "SEQUENCENO": "1",
+        "SPECIFICATIONDESC": "测量",
+        "TARGETVALUE": "158.0",
+        "TESTVALUE": "null",
+        "UOMCODE": "MM",
+        "UPPERCONTROLLIMIT": "158.0"
+      },
+      {
+        "ATTRIBUTE": "null",
+        "CHARACTERISTIC": "M003000000550-0010-ad198",
+        "CHARACTERISTICDESC": "K2\u0026#x0A;",
+        "CHARACTERISTICTYPE": "2",
+        "DISPOSITION": "D0000919",
+        "DTID": "100106071",
+        "LINESEQUENCENO": "4",
+        "LOWERCONTROLLIMIT": "157.94",
+        "MEANVALUE": "null",
+        "SEQUENCENO": "1",
+        "SPECIFICATIONDESC": "测量",
+        "TARGETVALUE": "157.96",
+        "TESTVALUE": "null",
+        "UOMCODE": "MM",
+        "UPPERCONTROLLIMIT": "157.96"
+      },
+      {
+        "ATTRIBUTE": "null",
+        "CHARACTERISTIC": "M003000000550-0010-ad197",
+        "CHARACTERISTICDESC": "K4\u0026#x0A;",
+        "CHARACTERISTICTYPE": "2",
+        "DISPOSITION": "D0000919",
+        "DTID": "100106072",
+        "LINESEQUENCENO": "5",
+        "LOWERCONTROLLIMIT": "249.97",
+        "MEANVALUE": "null",
+        "SEQUENCENO": "1",
+        "SPECIFICATIONDESC": "测量",
+        "TARGETVALUE": "250.0",
+        "TESTVALUE": "null",
+        "UOMCODE": "MM",
+        "UPPERCONTROLLIMIT": "250.0"
+      }
+    ],
+    "PARENTWIPORDERNO": "083000166996",
+    "PARENTWIPORDERTYPE": "108",
+    "RESOURCEGROUP": "ZXJZZ05",
+    "RESOURCENAMES": {
+      "RESOURCENAME": "66511"
+    },
+    "STARTEMPLOYEE": "66511",
+    "SYSTEMTYPE": "{}",
+    "WIPORDERTYPE": "108",
+    "components": [],
+    "environments": [],
+    "operation": {
+      "code": "TJ5",
+      "desc": "",
+      "resources": {
+        "equipments": [],
+        "users": []
+      }
+    },
+    "products": [
+      {
+        "code": "M003000000550",
+        "url": "http://testplm.tangche.com/Windchill/wtcore/CreoShow.jsp?oid=VR:wt.epm.EPMDocument:144735053"
+      },
+      {
+        "code": "CNR0000052662",
+        "url": "http://testplm.tangche.com/Windchill/wtcore/CreoShow.jsp?oid=VR:wt.epm.EPMDocument:46297345"
+      }
+    ],
+    "workcenter": {
+      "code": "TA2-26L-01",
+      "locations": [
         {
-				"ATTRIBUTE": "null",
-				"CHARACTERISTIC": "M003000000550-0010-ad196",
-				"CHARACTERISTICDESC": "K1\u0026#x0A;",
-				"CHARACTERISTICTYPE": "2",
-				"DISPOSITION": "D0000919",
-				"DTID": "100106068",
-				"LINESEQUENCENO": "1",
-				"LOWERCONTROLLIMIT": "129.975",
-				"MEANVALUE": "null",
-				"SEQUENCENO": "1",
-				"SPECIFICATIONDESC": "测量",
-				"TARGETVALUE": "130.0",
-				"TESTVALUE": "null",
-				"UOMCODE": "MM",
-				"UPPERCONTROLLIMIT": "130.0"
-			}, {
-				"ATTRIBUTE": "null",
-				"CHARACTERISTIC": "M003000000550-0010-ad202",
-				"CHARACTERISTICDESC": "K5\u0026#x0A;",
-				"CHARACTERISTICTYPE": "2",
-				"DISPOSITION": "D0000919",
-				"DTID": "100106069",
-				"LINESEQUENCENO": "2",
-				"LOWERCONTROLLIMIT": "79.9",
-				"MEANVALUE": "null",
-				"SEQUENCENO": "1",
-				"SPECIFICATIONDESC": "测量",
-				"TARGETVALUE": "80.0",
-				"TESTVALUE": "null",
-				"UOMCODE": "MM",
-				"UPPERCONTROLLIMIT": "80.0"
-			}, {
-				"ATTRIBUTE": "null",
-				"CHARACTERISTIC": "M003000000550-0010-ad199",
-				"CHARACTERISTICDESC": "K3\u0026#x0A;",
-				"CHARACTERISTICTYPE": "2",
-				"DISPOSITION": "D0000919",
-				"DTID": "100106070",
-				"LINESEQUENCENO": "3",
-				"LOWERCONTROLLIMIT": "157.965",
-				"MEANVALUE": "null",
-				"SEQUENCENO": "1",
-				"SPECIFICATIONDESC": "测量",
-				"TARGETVALUE": "158.0",
-				"TESTVALUE": "null",
-				"UOMCODE": "MM",
-				"UPPERCONTROLLIMIT": "158.0"
-			}, {
-				"ATTRIBUTE": "null",
-				"CHARACTERISTIC": "M003000000550-0010-ad198",
-				"CHARACTERISTICDESC": "K2\u0026#x0A;",
-				"CHARACTERISTICTYPE": "2",
-				"DISPOSITION": "D0000919",
-				"DTID": "100106071",
-				"LINESEQUENCENO": "4",
-				"LOWERCONTROLLIMIT": "157.94",
-				"MEANVALUE": "null",
-				"SEQUENCENO": "1",
-				"SPECIFICATIONDESC": "测量",
-				"TARGETVALUE": "157.96",
-				"TESTVALUE": "null",
-				"UOMCODE": "MM",
-				"UPPERCONTROLLIMIT": "157.96"
-			}, {
-				"ATTRIBUTE": "null",
-				"CHARACTERISTIC": "M003000000550-0010-ad197",
-				"CHARACTERISTICDESC": "K4\u0026#x0A;",
-				"CHARACTERISTICTYPE": "2",
-				"DISPOSITION": "D0000919",
-				"DTID": "100106072",
-				"LINESEQUENCENO": "5",
-				"LOWERCONTROLLIMIT": "249.97",
-				"MEANVALUE": "null",
-				"SEQUENCENO": "1",
-				"SPECIFICATIONDESC": "测量",
-				"TARGETVALUE": "250.0",
-				"TESTVALUE": "null",
-				"UOMCODE": "MM",
-				"UPPERCONTROLLIMIT": "250.0"
-			}],
-			"PARENTWIPORDERNO": "083000166996",
-			"PARENTWIPORDERTYPE": "108",
-			"RESOURCEGROUP": "ZXJZZ05",
-			"RESOURCENAMES": {
-				"RESOURCENAME": "66511"
-			},
-			"STARTEMPLOYEE": "66511",
-			"SYSTEMTYPE": "{}",
-			"WIPORDERTYPE": "108",
-			"components": [],
-			"environments": [],
-			"operation": {
-				"code": "TJ5",
-				"desc": "",
-				"resources": {
-					"equipments": [],
-					"users": []
-				}
-			},
-			"products": [{
-				"code": "M003000000550",
-				"url": "http://testplm.tangche.com/Windchill/wtcore/CreoShow.jsp?oid=VR:wt.epm.EPMDocument:144735053"
-			}, {
-				"code": "CNR0000052662",
-				"url": "http://testplm.tangche.com/Windchill/wtcore/CreoShow.jsp?oid=VR:wt.epm.EPMDocument:46297345"
-			}],
-			"workcenter": {
-				"code": "TA2-26L-01",
-				"locations": [{
-					"equipment_sn": "io1",
-					"io_input": 1,
-					"io_output": 1,
-					"product_code": "C1780589"
-				}]
-			},
-			"worksheet": {
-				"name": "侧窗安装",
-				"revision": "Default",
-				"url": "\\\\10.220.30.96\\Process\\TransferDocument\\FORMOM\\DOCA\\PD000100047995.pdf"
-			}
-		},
-		"product_code": "BR24J3",
-		"product_type_image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAA",
-		"status": "todo",
-		"steps": [{
-			"code": "QCP00004",
-			"consume_product": "",
-			"data": "",
-			"desc": "\u003cp\u003eQuality Control For Customized Laptop's Parts By Manufacturing Department.\u003c/p\u003e",
-			"failure_msg": "",
-			"id": 324,
-			"image": "data:image/png;base64,iVBORw0KGgoAAAANS",
-			"payload": {
-				"tightening_points": [{
-					"group_sequence": 1,
-					"is_key": true,
-					"key_num": 2,
-					"max_redo_times": 3,
-					"nut_no": "bc4749e8-807f-4abc-b577-6d7913d43221",
-					"pset": "1",
-					"sequence": 1,
-					"tightening_tool": "xx0011",
-					"x": 0,
-					"y": 0
-				}, {
-					"group_sequence": 1,
-					"is_key": true,
-					"key_num": 2,
-					"max_redo_times": 3,
-					"nut_no": "a2e46583-5887-40f0-a754-c8894ce97acc",
-					"pset": "1",
-					"sequence": 2,
-					"tightening_tool": "xx4443",
-					"x": 0,
-					"y": 0
-				}, {
-					"group_sequence": 2,
-					"is_key": false,
-					"key_num": 1,
-					"max_redo_times": 3,
-					"nut_no": "02722b6a-a0cf-47ce-8623-4bb336cb0029",
-					"pset": "1",
-					"sequence": 3,
-					"tightening_tool": "xx0011",
-					"x": 0,
-					"y": 0
-				}],
-				"tightening_total": 3
-			},
-			"sequence": 1,
-			"skippable": false,
-			"status": "ready",
-			"target": 0,
-			"test_type": "tightening",
-			"text": "\u003cp\u003eQuality Control For Customized Laptop's Parts By Manufacturing Department.\u003c/p\u003e",
-			"tolerance_max": 0,
-			"tolerance_min": 0,
-			"undoable": true
-		}, {
-			"code": "QCP00009",
-			"consume_product": "",
-			"data": "",
-			"desc": "\u003cp\u003e请按照安全管理的有关规定进行操作!!!\u003cbr\u003e\u003c/p\u003e",
-			"failure_msg": "",
-			"id": 325,
-			"image": "",
-			"payload": {
-				"text": "\u003cp\u003e请按照安全管理的有关规定进行操作!!!\u003cbr\u003e\u003c/p\u003e"
-			},
-			"sequence": 2,
-			"skippable": false,
-			"status": "ready",
-			"target": 0,
-			"test_type": "text",
-			"text": "\u003cp\u003e请按照安全管理的有关规定进行操作!!!\u003cbr\u003e\u003c/p\u003e",
-			"tolerance_max": 0,
-			"tolerance_min": 0,
-			"undoable": true
-		}, {
-			"code": "QCP00010",
-			"consume_product": "",
-			"data": "",
-			"desc": "",
-			"failure_msg": "\u003cp\u003ehh,you failed!\u003c/p\u003e",
-			"id": 326,
-			"image": "",
-			"payload": {
-				"text": ""
-			},
-			"sequence": 3,
-			"skippable": false,
-			"status": "ready",
-			"target": 0,
-			"test_type": "passfail",
-			"text": "",
-			"tolerance_max": 0,
-			"tolerance_min": 0,
-			"undoable": true
-		}, {
-			"code": "QCP00011",
-			"consume_product": "C1780589",
-			"data": "",
-			"desc": "拾取物料",
-			"failure_msg": "",
-			"id": 327,
-			"image": "",
-			"sequence": 4,
-			"skippable": false,
-			"status": "ready",
-			"target": 0,
-			"test_type": "register_consumed_materials",
-			"text": "",
-			"tolerance_max": 0,
-			"tolerance_min": 0,
-			"undoable": true
-		}, {
-			"code": "QCP00012",
-			"consume_product": "",
-			"data": "",
-			"desc": "",
-			"failure_msg": "\u003cp\u003eyour product is not qualified!!!\u003c/p\u003e",
-			"id": 328,
-			"image": "",
-			"payload": {
-				"text": ""
-			},
-			"sequence": 5,
-			"skippable": false,
-			"status": "ready",
-			"target": 777,
-			"test_type": "measure",
-			"text": "",
-			"tolerance_max": 888,
-			"tolerance_min": 666,
-			"undoable": true
-		}, {
-			"code": "QCP00013",
-			"consume_product": "999",
-			"data": "",
-			"desc": "\u003cp\u003e请扫码\u003c/p\u003e",
-			"failure_msg": "",
-			"id": 329,
-			"image": "",
-			"payload": {
-				"text": "\u003cp\u003e请扫码\u003c/p\u003e"
-			},
-			"sequence": 6,
-			"skippable": false,
-			"status": "ready",
-			"target": 0,
-			"test_type": "register_byproducts",
-			"text": "\u003cp\u003e请扫码\u003c/p\u003e",
-			"tolerance_max": 0,
-			"tolerance_min": 0,
-			"undoable": true
-		}],
-		"track_code": "",
-		"unique_num": 0
-	}
+          "equipment_sn": "io1",
+          "io_input": 1,
+          "io_output": 1,
+          "product_code": "C1780589"
+        }
+      ]
+    },
+    "worksheet": {
+      "name": "侧窗安装",
+      "revision": "Default",
+      "url": "\\\\10.220.30.96\\Process\\TransferDocument\\FORMOM\\DOCA\\PD000100047995.pdf"
+    }
+  },
+  "product_code": "BR24J3",
+  "product_type_image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAA",
+  "status": "todo",
+  "steps": [
+    {
+      "code": "QCP00004",
+      "consume_product": "",
+      "data": "",
+      "desc": "\u003cp\u003eQuality Control For Customized Laptop's Parts By Manufacturing Department.\u003c/p\u003e",
+      "failure_msg": "",
+      "id": 324,
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANS",
+      "payload": {
+        "tightening_points": [
+          {
+            "group_sequence": 1,
+            "is_key": true,
+            "key_num": 2,
+            "max_redo_times": 3,
+            "nut_no": "bc4749e8-807f-4abc-b577-6d7913d43221",
+            "pset": "1",
+            "sequence": 1,
+            "tightening_tool": "xx0011",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "group_sequence": 1,
+            "is_key": true,
+            "key_num": 2,
+            "max_redo_times": 3,
+            "nut_no": "a2e46583-5887-40f0-a754-c8894ce97acc",
+            "pset": "1",
+            "sequence": 2,
+            "tightening_tool": "xx4443",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "group_sequence": 2,
+            "is_key": false,
+            "key_num": 1,
+            "max_redo_times": 3,
+            "nut_no": "02722b6a-a0cf-47ce-8623-4bb336cb0029",
+            "pset": "1",
+            "sequence": 3,
+            "tightening_tool": "xx0011",
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "tightening_total": 3
+      },
+      "sequence": 1,
+      "skippable": false,
+      "status": "ready",
+      "target": 0,
+      "test_type": "tightening",
+      "text": "\u003cp\u003eQuality Control For Customized Laptop's Parts By Manufacturing Department.\u003c/p\u003e",
+      "tolerance_max": 0,
+      "tolerance_min": 0,
+      "undoable": true
+    },
+    {
+      "code": "QCP00009",
+      "consume_product": "",
+      "data": "",
+      "desc": "\u003cp\u003e请按照安全管理的有关规定进行操作!!!\u003cbr\u003e\u003c/p\u003e",
+      "failure_msg": "",
+      "id": 325,
+      "image": "",
+      "sequence": 2,
+      "skippable": false,
+      "status": "ready",
+      "target": 0,
+      "test_type": "text",
+      "text": "\u003cp\u003e请按照安全管理的有关规定进行操作!!!\u003cbr\u003e\u003c/p\u003e",
+      "tolerance_max": 0,
+      "tolerance_min": 0,
+      "undoable": true
+    },
+    {
+      "code": "QCP00010",
+      "consume_product": "",
+      "data": "",
+      "desc": "",
+      "failure_msg": "\u003cp\u003ehh,you failed!\u003c/p\u003e",
+      "id": 326,
+      "image": "",
+      "sequence": 3,
+      "skippable": false,
+      "status": "ready",
+      "target": 0,
+      "test_type": "passfail",
+      "text": "",
+      "tolerance_max": 0,
+      "tolerance_min": 0,
+      "undoable": true
+    },
+    {
+      "code": "QCP00011",
+      "consume_product": "C1780589",
+      "data": "",
+      "desc": "拾取物料",
+      "failure_msg": "",
+      "id": 327,
+      "image": "",
+      "sequence": 4,
+      "skippable": false,
+      "status": "ready",
+      "target": 0,
+      "test_type": "register_consumed_materials",
+      "text": "",
+      "tolerance_max": 0,
+      "tolerance_min": 0,
+      "undoable": true
+    },
+    {
+      "code": "QCP00012",
+      "consume_product": "",
+      "data": "",
+      "desc": "",
+      "failure_msg": "\u003cp\u003eyour product is not qualified!!!\u003c/p\u003e",
+      "id": 328,
+      "image": "",
+      "sequence": 5,
+      "skippable": false,
+      "status": "ready",
+      "target": 777,
+      "test_type": "measure",
+      "text": "",
+      "tolerance_max": 888,
+      "tolerance_min": 666,
+      "undoable": true
+    },
+    {
+      "code": "QCP00013",
+      "consume_product": "999",
+      "data": "",
+      "desc": "\u003cp\u003e请扫码\u003c/p\u003e",
+      "failure_msg": "",
+      "id": 329,
+      "image": "",
+      "sequence": 6,
+      "skippable": false,
+      "status": "ready",
+      "target": 0,
+      "test_type": "register_byproducts",
+      "text": "\u003cp\u003e请扫码\u003c/p\u003e",
+      "tolerance_max": 0,
+      "tolerance_min": 0,
+      "undoable": true
+    }
+  ],
+  "track_code": "",
+  "unique_num": 0
+}
