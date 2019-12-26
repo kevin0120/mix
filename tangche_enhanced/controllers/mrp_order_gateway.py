@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, SUPERUSER_ID,fields
+from odoo import api, SUPERUSER_ID, fields
 from odoo.http import request, Response, Controller, route
 from odoo.exceptions import ValidationError
 from odoo.addons.common_sa_utils.http import sa_success_resp, sa_fail_response
@@ -34,9 +34,11 @@ HAVE_SOME_REQUIRED_FIELDS = {
 
 _logger = logging.getLogger(__name__)
 
+
 def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
     return sp[0] + 'T' + sp[1] + 'Z'
+
 
 def validate_ts002_order_req_vals(vals):
     for field in ORDER_REQUIRED_FIELDS:
@@ -146,16 +148,16 @@ def pack_step_payload(env, consum_lines):
 
 def convert_ts002_order(env, vals):
     try:
-        code = vals.get('requestInf').get('MOMWIPORDER').get('WIPORDERNO')
+        code = vals.get('requestInfo').get('MOMWIPORDER').get('WIPORDERNO')
         mom_productno = vals.get('requestInfo').get('MOMWIPORDER').get('PRODUCTNO')
         worksection = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('WORKCENTER')
         date_planned_start = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDSTARTDATE')
         date_planned_complete = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDCOMPLETIONDATE')
         worksheet = {
-                    "name": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DESCRIPT'),
-                    "revision": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCVR'),
-                    "url": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCURL'),
-                }
+            "name": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DESCRIPT'),
+            "revision": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCVR'),
+            "url": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCURL'),
+        }
         modeldoc = vals.get('requestInfo').get('MOMWIPORDER').get('MODELDOCS').get('MODELDOC')
         products = list()
         for mo in modeldoc:
@@ -167,7 +169,8 @@ def convert_ts002_order(env, vals):
 
         SYSTEMTYPE = vals.get('requestInfo').get('SYSTEMTYPE')
         WIPORDERTYPE = vals.get('requestInfo').get('MOMWIPORDER').get('WIPORDERTYPE')
-        MOMDISPOSITIONS = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMDISPOSITIONS').get('MOMDISPOSITION')
+        MOMDISPOSITIONS = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMDISPOSITIONS').get(
+            'MOMDISPOSITION')
         MOMCONFIG = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMCONFIG')
         RESOURCEGROUP = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('RESOURCEGROUP')
         STARTEMPLOYEE = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('STARTEMPLOYEE')
@@ -178,7 +181,7 @@ def convert_ts002_order(env, vals):
     except RetryError:
         msg = 'TS002  WorkOrder Payload is not qualifed!!'
         return [], msg
-    except Exception :
+    except Exception:
         msg = 'TS002  WorkOrder Payload is not qualifed!!'
         return [], msg
 
@@ -188,16 +191,20 @@ def convert_ts002_order(env, vals):
         pro = env['product.product'].search([('default_code', '=', mom_productno)])
         bom = env['mrp.bom'].search([('product_id', '=', pro.id)])
 
-        mrw = env['mrp.routing.workcenter'].search([('workcenter_id', '=', ts.id),('routing_id', '=', bom.routing_id.id)])
+        # mrw1 = env['mrp.routing.workcenter'].search(
+        #     [('workcenter_id.id', '=', ts.id)]).filtered(lambda r: bom.routing_id in r.sa_routing_ids)
 
+        mrw = bom.routing_id.sa_operation_ids.filtered(lambda r: r.workcenter_id.id == ts.id)
         _steps = pack_step_payload(env, mrw.sa_step_ids)
         vals = {
             'code': code,
             'track_no': mom_productno,
             'product_code': mom_productno,
             'workcenter': ts.code,
-            'date_planned_start': str_time_to_rfc3339(date_planned_start) if date_planned_start else str_time_to_rfc3339(fields.Datetime.now()),
-            'date_planned_complete': str_time_to_rfc3339(date_planned_complete) if date_planned_complete else str_time_to_rfc3339(fields.Datetime.now()),
+            'date_planned_start': str_time_to_rfc3339(
+                date_planned_start) if date_planned_start else str_time_to_rfc3339(fields.Datetime.now()),
+            'date_planned_complete': str_time_to_rfc3339(
+                date_planned_complete) if date_planned_complete else str_time_to_rfc3339(fields.Datetime.now()),
             'worksheet': worksheet,
             'products': products,
             'operation': {
@@ -222,9 +229,10 @@ def convert_ts002_order(env, vals):
             'steps': _steps,
         }
         ret.append(vals)
-        # FIXME: 修改demo数据后去掉第一个return
-        return ret, False
+        # fixme: 当前demo数据还没补全，提前返回
+        # return ret, False
     return ret, False
+
 
 # def convert_ts002_order(env, vals):
 #     ret = vals
@@ -290,6 +298,7 @@ def package_workcenter_location_data(workcenter_id, val):
     val['workcenter'] = entry
     val['components'] = components
 
+
 def get_masterpc_order_url_and_package(env, vals):
     workcenter_code = vals.get('workcenter')
     if not workcenter_code:
@@ -313,12 +322,15 @@ def get_masterpc_order_url_and_package(env, vals):
 
 @retry(wait=wait_exponential(multiplier=1, min=1, max=3), stop=stop_after_delay(5), retry=retry_if_exception_type())
 def post_order_2_masterpc(master_url, data):
-    data1=json.dumps(data)
-
-    resp = requests.post(master_url, data=data1, headers=headers)
-    if resp.status_code != 201:
+    try:
+        resp = requests.post(master_url, data=json.dumps(data), headers=headers)
+        if resp.status_code != 201:
+            return False
+        return True
+    except RetryError:
         return False
-    return True
+    except Exception:
+        return False
 
 
 @retry(wait=wait_exponential(multiplier=1, min=1, max=3), stop=stop_after_delay(5), retry=retry_if_exception_type())
@@ -344,14 +356,13 @@ def _convert_orders_info(env, values):
         return sa_fail_response(msg=err)
     result_list = list()
     for payload in payloads:
-
         workcenter_id, master_url = get_masterpc_order_url_and_package(env, payload)
         package_workcenter_location_data(workcenter_id, payload)
         _logger.debug("TS002 Get Order: {0}".format(pprint.pformat(payload)))
 
         resp = post_order_2_masterpc(master_url, [payload])
         result_list.append(resp)
-    if False in result_list:
+    if all(result_list):
         msg = 'TS002 Post WorkOrder To MasterPC Fail'
         return sa_fail_response(msg=msg)
     msg = "Tightening System Create Work Order Success"

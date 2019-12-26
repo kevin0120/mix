@@ -9,9 +9,20 @@
             <field name="name">测试车架1</field>
             <field name="type">product</field>
             <field name="sa_type">carriage</field>
-            <field name="default_code">M000001780589</field>
+            <field name="default_code">M003000000550</field>
             <field name="product_tmpl_id" ref="product_template_100"/>
         </record>
+
+
+
+        <record id="mrp_bom_7" model="mrp.bom">
+            <field name="product_tmpl_id" ref="product_template_100"/>
+            <field name="product_id" ref="product_product_100"/>
+            <field name="routing_id" ref="sa_base.routing_0"/>
+            <field name="code">bom001</field>
+        </record>
+
+
 
         <record id="product_template_300" model="product.template">
             <field name="name">测试耗材胶水</field>
@@ -26,13 +37,31 @@
             <field name="product_tmpl_id" ref="product_template_300"/>
         </record>
 
-        <record id="workcenter_location" model="mrp.workcenter.loc">
+        <record id="workcenter_location_0" model="mrp.workcenter.loc">
             <field name="workcenter_id" ref="sa_base.mrp_workcenter_0"/>
             <field name="equipment_id" ref="sa_base.io_0" />
             <field name="io_input">1</field>
             <field name="io_output">1</field>
             <field name="product_id" ref="product_product_300"/>
         </record>
+
+         <record id="workcenter_location_1" model="mrp.workcenter.loc">
+            <field name="workcenter_id" ref="sa_base.mrp_workcenter_1"/>
+            <field name="equipment_id" ref="sa_base.io_1" />
+            <field name="io_input">2</field>
+            <field name="io_output">2</field>
+            <field name="product_id" ref="product_product_300"/>
+        </record>
+
+        <record id="workcenter_location_2" model="mrp.workcenter.loc">
+            <field name="workcenter_id" ref="sa_base.mrp_workcenter_2"/>
+            <field name="equipment_id" ref="sa_base.io_2" />
+            <field name="io_input">3</field>
+            <field name="io_output">3</field>
+            <field name="product_id" ref="product_product_300"/>
+        </record>
+
+
         <!---->
         <!--<record id="object3" model="tangche_enhanced.tangche_enhanced"> -->
         <!--<field name="name">Object 3</field> -->

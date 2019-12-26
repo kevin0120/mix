@@ -8,7 +8,7 @@ import json
 class QualityPoint(models.Model):
     _inherit = "sa.quality.point"
 
-    ref = fields.Char('Reference')
+    ref = fields.Char('Reference', related='name', store=True)
 
     can_do_skip = fields.Boolean(string='Allow Do Skip', default=False, Help='Whether This Step Can Be Skipped')
     can_do_redo = fields.Boolean(string='Allow Do Redo', default=True, Help='Whether This Step Can Be Redo')
