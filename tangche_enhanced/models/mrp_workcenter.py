@@ -36,6 +36,7 @@ class MrpWorkCenter(models.Model):
             'sa_workcenter_ids': [(4, ret.id, None)]
         }
         self.env['mrp.workcenter.group'].sudo().create(val)
+        return ret
 
     @api.multi
     def button_sync_operations(self):
