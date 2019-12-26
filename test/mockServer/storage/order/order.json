@@ -254,7 +254,7 @@
       "status": "ready",
       "target": 0,
       "test_type": "passfail",
-      "text": "",
+      "text": "If true, the text will not wrap, but instead will truncate with a text overflow ellipsis.\nNote that text overflow can only happen with block or inline-block level elements (the element needs to have a width in order to overflow).",
       "tolerance_max": 0,
       "tolerance_min": 0,
       "undoable": true

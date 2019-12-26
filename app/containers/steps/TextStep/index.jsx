@@ -58,9 +58,12 @@ function TextStep({ step, isCurrent, submit, bindAction }: Props) {
 
   return (
     <div className={classes.container}>
-      <Typography variant={'h4'}>{text}</Typography>
+      <Typography variant="h4">{text}</Typography>
     </div>
   );
 }
 
-export default connect<Props, tOP, tSP, tDP, _, _>(mapState, mapDispatch)(TextStep);
+export default connect<Props, tOP, tSP, tDP, _, _>(
+  mapState,
+  mapDispatch
+)(TextStep);

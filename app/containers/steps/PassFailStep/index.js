@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import { connect } from 'react-redux';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Typography } from '@material-ui/core';
 import stepActions from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
@@ -21,7 +21,7 @@ type tDP = {|
 |};
 
 const mapState = (state, props: tOP): tSP => ({
-  ...props,
+  ...props
 });
 
 const mapDispatch: tDP = {
@@ -33,29 +33,36 @@ type Props = {|
   ...tDP
 |};
 
-function PassFailStep({ isCurrent, submit }: Props) {
+function PassFailStep({ step, isCurrent, submit }: Props) {
   const classes = makeStyles(styles)();
-
+  const { text } = step;
   return (
     <div className={classes.root}>
-      <Button
-        variant="contained"
-        color="danger"
-        className={classes.button}
-        disabled={!isCurrent}
-        onClick={() => submit(false)}
-      >
-        Fail
-      </Button>
-      <Button
-        variant="contained"
-        color="info"
-        className={classes.button}
-        disabled={!isCurrent}
-        onClick={() => submit(true)}
-      >
-        Pass
-      </Button>
+      {text ? (
+        <Typography variant="h4" className={classes.text}>
+          {text}
+        </Typography>
+      ) : null}
+      <div className={classes.buttonsContainer}>
+        <Button
+          variant="contained"
+          color="danger"
+          className={classes.button}
+          disabled={!isCurrent}
+          onClick={() => submit(false)}
+        >
+          Fail
+        </Button>
+        <Button
+          variant="contained"
+          color="info"
+          className={classes.button}
+          disabled={!isCurrent}
+          onClick={() => submit(true)}
+        >
+          Pass
+        </Button>
+      </div>
     </div>
   );
 }

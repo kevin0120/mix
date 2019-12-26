@@ -3,14 +3,25 @@ export default {
     width: '100%',
     height: '100%',
     display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: 'column',
+    justifyContent: 'center',
     alignItems: 'center',
     padding: '20px'
   },
+  text: {
+    marginBottom: '70px'
+  },
+  buttonsContainer: {
+    width: '100%',
+    height: '150px',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center'
+  },
   button: {
     width: '37%',
-    height: '150px'
+    height: '100%'
   },
   buttonPass: {},
   buttonFail: {}
