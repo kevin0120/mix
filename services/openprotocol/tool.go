@@ -365,3 +365,7 @@ func (s *TighteningTool) OnCurve(curve interface{}) {
 func (s *TighteningTool) GetDispatch(name string) *utils.Dispatcher {
 	return nil
 }
+
+func (s *TighteningTool) Config() interface{} {
+	return s.cfg
+}

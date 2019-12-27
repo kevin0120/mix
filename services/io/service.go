@@ -47,12 +47,13 @@ func (s *Service) config() Config {
 
 func (s *Service) GetIOSerialNumberByIdx(index int) string {
 	ii := 0
-	for sn := range s.ios {
+	for _, v := range s.config().IOS {
 		if ii == index {
-			return sn
+			return v.SN
 		}
 		ii++
 	}
+
 	return ""
 }
 

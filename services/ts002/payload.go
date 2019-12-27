@@ -39,7 +39,7 @@ type RushAlarmReq struct {
 
 // Mes->Rush PSet下发请求
 type RushPSetReq struct {
-	PSet    int    `json:"pset" validate:"required, gte=1"`
+	PSet    int    `json:"pset" validate:"required,gte=1"`
 	ToolID  string `json:"tool_id" validate:"required"`
 	PointID string `json:"point_id" validate:"required"`
 }
