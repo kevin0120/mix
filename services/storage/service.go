@@ -796,7 +796,7 @@ func (s *Service) ResetTightning(controller_sn string) error {
 }
 
 func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
-	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ?, workcenter_id = ? where operation_id = ? and product_type = ?"
+	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ?, workcenter_id = ? where id = ?"
 	_, err := s.eng.Exec(sql,
 		ro.Job,
 		ro.MaxOpTime,
@@ -808,8 +808,7 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 		ro.VehicleTypeImg,
 		ro.Points,
 		ro.WorkcenterID,
-		ro.OperationID,
-		ro.ProductType)
+		ro.Id)
 
 	if err != nil {
 		return err
@@ -818,11 +817,11 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 	}
 }
 
-func (s *Service) GetRoutingOperations(name string, model string) (RoutingOperations, error) {
+func (s *Service) GetRoutingOperations(name string, model string,step string) (RoutingOperations, error) {
 
 	var ro RoutingOperations
 
-	rt, err := s.eng.Alias("r").Where("r.name = ?", name).And("r.product_type = ?", model).Get(&ro)
+	rt, err := s.eng.Alias("r").Where("r.name = ?", name).And("r.product_type = ?", model).And("r.tightening_step_ref = ?", step).Get(&ro)
 
 	if err != nil {
 		return ro, err

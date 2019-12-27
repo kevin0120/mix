@@ -83,9 +83,9 @@ websocket:
 
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_dev
-  db_user: admin
-  db_pwd: admin
+  db_name: rush_hardware
+  db_user: odoo
+  db_pwd: odoo
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -120,7 +120,7 @@ scanner:
   enable: false
 #  entity_label: 3118:2305
 io:
-  enable: true
+  enable: false
   flash_inteval: 1s
   ios:
     - sn: 1
@@ -211,7 +211,7 @@ controller_service:
 #        channel: 2
 
 ts002:
-  enable: true
+  enable: false
 
   # 柜锁控制（当收刷卡登录成功时，控制相关IO输出）
   io_locker:
