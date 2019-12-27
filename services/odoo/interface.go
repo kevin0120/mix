@@ -25,7 +25,7 @@ type IStorageService interface {
 	WorkorderOut(order string, workorderID int64) (interface{}, error)
 	DeleteRoutingOperations(rds []storage.RoutingOperationDelete) error
 	DeleteAllRoutingOperations() error
-	GetRoutingOperations(name string, model string) (storage.RoutingOperations, error)
+	GetRoutingOperations(name string, model string, step string) (storage.RoutingOperations, error)
 	Store(data interface{}) error
 	UpdateRoutingOperations(ro *storage.RoutingOperations) error
 }

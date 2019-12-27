@@ -143,6 +143,10 @@ func (s *Service) LaunchDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
 
 func (s *Service) ReleaseDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
 	for name, handler := range dispatcherMap {
+		if handler == nil {
+			continue
+		}
+
 		if err := s.Release(name, handler.ID); err != nil {
 			s.diag.Error("Release Dispatcher Failed", err)
 		}

@@ -71,7 +71,7 @@ func (s *Service) putSyncRoutingOpertions(ctx iris.Context) {
 
 	points, _ := json.Marshal(ro.Points)
 
-	dbRo, err := s.storageService.GetRoutingOperations(ro.Name, ro.ProductType)
+	dbRo, err := s.storageService.GetRoutingOperations(ro.Name, ro.ProductType, ro.TignteningStepRef)
 	if err != nil {
 		dbRo = storage.RoutingOperations{
 			OperationID: ro.OperationID,
