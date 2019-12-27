@@ -817,7 +817,7 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 	}
 }
 
-func (s *Service) GetRoutingOperations(name string, model string,step string) (RoutingOperations, error) {
+func (s *Service) GetRoutingOperations(name string, model string, step string) (RoutingOperations, error) {
 
 	var ro RoutingOperations
 
