@@ -48,12 +48,11 @@ class MrpRoutingWorkcenter(models.Model):
         self.ensure_one()
         operation_id = self
         bom_ids = self.env['mrp.bom'].search([('routing_id.sa_operation_ids', 'in', operation_id.ids)])
-        if len(bom_ids) != 1:
+        if not bom_ids:
             _logger.debug("_push_mrp_routing_workcenter, BOM:{0}".format(pprint.pformat(bom_ids.ids, indent=4)))
             msg = "Can Not Found MRP BOM Within The Operation:{0}".format(operation_id.name)
             _logger.error(msg)
             raise ValidationError(msg)
-        bom_id = bom_ids[0]
         tightening_step_ids = operation_id.sa_step_ids.filtered(lambda step: step.test_type == 'tightening')
         if not tightening_step_ids:
             msg = "Can Not Found Tightening Step For Operation:{0}".format(operation_id.name)
@@ -75,34 +74,36 @@ class MrpRoutingWorkcenter(models.Model):
                     'consu_product_id': point.product_id.id if point.product_id.id else 0,
                     'nut_no': point.name,  # 螺栓编号为拧紧点上的名称
                 })
-            val = {
-                # "id": operation_id.id,
-                'tightening_step_ref': tightening_step_id.ref or tightening_step_id.name,  #fixme：考虑ref已经为空
-                'tightening_step_name': tightening_step_id.name,
-                "workcenter_id": operation_id.workcenter_id.id,
-                "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else 0,
-                "max_op_time": operation_id.max_op_time,
-                "name": u"[{0}]{1}@{2}/{3}".format(operation_id.name, operation_id.group_id.code,
-                                                   operation_id.workcenter_id.name,
-                                                   operation_id.routing_id.name),
-                "img": u'data:{0};base64,{1}'.format('image/png',
-                                                     tightening_step_id.worksheet_img) if tightening_step_id.worksheet_img else "",
-                "product_id": bom_id.product_id.id if bom_id else 0,
-                "product_type": bom_id.product_id.default_code if bom_id else "",
-                "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
-                'product_type_image': u'data:{0};base64,{1}'.format('image/png',
+
+            for bom_id in bom_ids:
+                val = {
+                    # "id": operation_id.id,
+                    'tightening_step_ref': tightening_step_id.ref or tightening_step_id.name,  #fixme：考虑ref已经为空
+                    'tightening_step_name': tightening_step_id.name,
+                    "workcenter_id": operation_id.workcenter_id.id,
+                    "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else 0,
+                    "max_op_time": operation_id.max_op_time,
+                    "name": u"[{0}]{1}@{2}/{3}".format(operation_id.name, operation_id.group_id.code,
+                                                    operation_id.workcenter_id.name,
+                                                    operation_id.routing_id.name),
+                    "img": u'data:{0};base64,{1}'.format('image/png',
+                                                        tightening_step_id.worksheet_img) if tightening_step_id.worksheet_img else "",
+                    "product_id": bom_id.product_id.id if bom_id else 0,
+                    "product_type": bom_id.product_id.default_code if bom_id else "",
+                    "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
+                    'product_type_image': u'data:{0};base64,{1}'.format('image/png',
                                                                     bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
-                "points": _points
-            }
-            try:
-                ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
-                if ret.status_code == 200:
-                    # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
-                    self.env.user.notify_info(u'下发工艺成功')
-            except ConnectionError as e:
-                self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
-            except RequestException as e:
-                self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+                    "points": _points
+                }
+                try:
+                    ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
+                    if ret.status_code == 200:
+                        # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
+                        self.env.user.notify_info(u'下发工艺成功')
+                except ConnectionError as e:
+                    self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+                except RequestException as e:
+                    self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
 
         return True
 
