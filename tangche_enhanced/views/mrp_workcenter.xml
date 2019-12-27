@@ -21,6 +21,9 @@
                 <xpath expr="//page[@name='workcenter_place']//tree[@name='workcenter_loc']//field[@name='product_id']"
                        position="attributes">
                     <attribute name="domain">[('sa_type', '=', 'consu')]</attribute>
+                    <attribute name="context">{'default_type':'consu','default_tracking':'none','default_sa_type':'consu','search_default_consu': 1}</attribute>
+
+                    <!--tangche_enhanced.product_product_action_consum-->
                 </xpath>
             </field>
         </record>
