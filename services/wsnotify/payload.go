@@ -3,9 +3,8 @@ package wsnotify
 import "github.com/kataras/iris/websocket"
 
 const (
-	WS_REG        = "WS_REG"
-	WS_RUSH_DATA  = "WS_RUSH_DATA"
-	WS_READER_UID = "WS_READER_UID"
+	WS_REG       = "WS_REG"
+	WS_RUSH_DATA = "WS_RUSH_DATA"
 )
 
 type WSRegist struct {
@@ -45,26 +44,12 @@ type WSJobSelect struct {
 	JobID int `json:"job_id"`
 }
 
-type WSScanner struct {
-	Barcode string `json:"barcode"`
-}
-
-//type WSIO struct {
-//	Barcode string `json:"barcode"`
-//}
-
 type WSRegistMsg struct {
 	Msg string `json:"msg"`
 }
 
 type WSOdooStatus struct {
 	Status string `json:"status"`
-}
-
-type WSToolStatus struct {
-	ToolSN string `json:"tool_sn"`
-	Status string `json:"status"`
-	Reason string `json:"reason"`
 }
 
 type WSMsg struct {
@@ -81,8 +66,4 @@ type WSRequest struct {
 type WSReply struct {
 	Result int    `json:"result"`
 	Msg    string `json:"msg"`
-}
-
-type WSReaderUID struct {
-	UID string `json:"uid"`
 }

@@ -94,7 +94,7 @@ func (s *Service) initWSRequestHandlers() {
 func (s *Service) OnWSIOStatus(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	ioStatus := IoStatus{}
+	ioStatus := device.DeviceStatus{}
 	err := json.Unmarshal(byteData, &ioStatus)
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
@@ -236,12 +236,6 @@ func (s *Service) OnChangeIOStatus(sn string, t string, status string) {
 		ioContact.Outputs = status
 	}
 
-	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_IO, &ioContact)
-
-	//io, _ := json.Marshal(wsnotify.WSMsg{
-	//	Type: wsnotify.WS_IO_CONTACT,
-	//	Data: ioContact,
-	//})
-	//
-	//s.WS.WSSendIO(string(io))
+	// IO数据输出状态分发
+	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_IO, ioContact)
 }

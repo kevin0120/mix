@@ -1,7 +1,6 @@
 package scanner
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
 	"github.com/masami10/rush/services/device"
@@ -197,14 +196,16 @@ func (s *Service) OnStatus(id string, status string) {
 		s.removeScanner(id)
 	}
 
-	scannerStatus := device.DeviceStatus{
-		SN:     id,
-		Type:   device.BaseDeviceTypeScanner,
-		Status: status,
+	scannerStatus := []device.DeviceStatus{
+		{
+			SN:     id,
+			Type:   device.BaseDeviceTypeScanner,
+			Status: status,
+		},
 	}
 
 	// 分发扫码枪状态
-	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, &scannerStatus)
+	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, scannerStatus)
 }
 
 func (s *Service) OnRecv(id string, data string) {
@@ -221,15 +222,4 @@ func (s *Service) OnRecv(id string, data string) {
 
 	// 分发条码数据
 	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, &barcodeData)
-}
-
-func (s *Service) SendBarcode(src string, sn string, barcode string) {
-	wsMsg := wsnotify.GenerateWSMsg(0, WS_SCANNER_READ, ScannerRead{
-		Src:     src,
-		SN:      sn,
-		Barcode: barcode,
-	})
-
-	body, _ := json.Marshal(wsMsg)
-	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, string(body))
 }
