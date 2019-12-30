@@ -496,8 +496,14 @@ func (s *Service) OnWS_ORDER_START_REQUEST(data interface{}) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
+
+	wStart, err := s.DB.WorkorderStart(orderReq.Code, 0)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
 	s.ChStart <- 1
-	go s.Aiis.PutMesOpenRequest(msg.SN, msg.Type, orderReq.Code, sData, s.ChStart)
+	go s.Aiis.PutMesOpenRequest(msg.SN, msg.Type, orderReq.Code, wStart, s.ChStart)
 }
 
 // 完工请求
@@ -518,8 +524,15 @@ func (s *Service) OnWS_ORDER_FINISH_REQUEST(data interface{}) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
+
+	wFinished, err := s.DB.WorkorderFinished(orderReq.Code, 0)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
 	s.ChFinish <- 1
-	go s.Aiis.PutMesFinishRequest(msg.SN, msg.Type, orderReq.Code, sData, s.ChFinish)
+	go s.Aiis.PutMesFinishRequest(msg.SN, msg.Type, orderReq.Code, wFinished, s.ChFinish)
 
 }
 

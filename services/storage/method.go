@@ -240,6 +240,78 @@ func (s *Service) WorkorderOut(order string, workorderID int64) (interface{}, er
 	return workOrderOut, nil
 }
 
+func (s *Service) WorkorderStart(order string, workorderID int64) (StartRequest, error) {
+	var startpayload StartRequest
+	var workPayload WorkorderPayload
+	var workorder Workorders
+	var ss *xorm.Session
+	if order == "" {
+		ss = s.eng.Alias("r").Where("r.id = ?", workorderID)
+	} else {
+		ss = s.eng.Alias("r").Where("r.code = ?", order)
+	}
+
+	bool, e := ss.Get(&workorder)
+	if e != nil || !bool {
+		return startpayload, e
+	}
+
+	err := json.Unmarshal([]byte(workorder.Workorder), &workPayload)
+	if err != nil {
+		return startpayload, err
+	}
+
+	startpayload = StartRequest{
+		WIPORDERNO:    workorder.Code,
+		WIPORDERTYPE:  workPayload.WIPORDERTYPE,
+		OPRSEQUENCENO: workPayload.OPRSEQUENCENO,
+		UPDATEON:      time.Now(),
+		UPDATEBY:      workPayload.STARTEMPLOYEE,
+		LOCATION:      workPayload.LOCATION,
+		RESOURCEGROUP: workPayload.RESOURCEGROUP,
+		SKILL:         workPayload.SKILL,
+		RESOURCENAME:  workPayload.RESOURCENAMES,
+	}
+
+	return startpayload, nil
+}
+
+func (s *Service) WorkorderFinished(order string, workorderID int64) (FinishedRequest, error) {
+	var finishedpayload FinishedRequest
+	var workPayload WorkorderPayload
+	var workorder Workorders
+	var ss *xorm.Session
+	if order == "" {
+		ss = s.eng.Alias("r").Where("r.id = ?", workorderID)
+	} else {
+		ss = s.eng.Alias("r").Where("r.code = ?", order)
+	}
+
+	bool, e := ss.Get(&workorder)
+	if e != nil || !bool {
+		return finishedpayload, e
+	}
+
+	err := json.Unmarshal([]byte(workorder.Workorder), &workPayload)
+	if err != nil {
+		return finishedpayload, err
+	}
+
+	finishedpayload = FinishedRequest{
+		WIPORDERNO:    workorder.Code,
+		WIPORDERTYPE:  workPayload.WIPORDERTYPE,
+		OPRSEQUENCENO: workPayload.OPRSEQUENCENO,
+		UPDATEON:      time.Now(),
+		UPDATEBY:      workPayload.STARTEMPLOYEE,
+		LOCATION:      workPayload.LOCATION,
+		RESOURCEGROUP: workPayload.RESOURCEGROUP,
+		SKILL:         workPayload.SKILL,
+		RESOURCENAME:  workPayload.RESOURCENAMES,
+	}
+
+	return finishedpayload, nil
+}
+
 func strucToMap(in interface{}) (m map[string]interface{}) {
 	j, _ := json.Marshal(in)
 	json.Unmarshal(j, &m)

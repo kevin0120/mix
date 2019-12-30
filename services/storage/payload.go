@@ -77,6 +77,9 @@ type WorkorderPayload struct {
 	RESOURCENAMES      interface{} `json:"RESOURCENAMES"`
 	PARENTWIPORDERNO   interface{} `json:"PARENTWIPORDERNO"`
 	PARENTWIPORDERTYPE interface{} `json:"PARENTWIPORDERTYPE"`
+	LOCATION           interface{} `json:"LOCATION"`
+	OPRSEQUENCENO      interface{} `json:"OPRSEQUENCENO"`
+	SKILL              interface{} `json:"SKILL"`
 }
 
 type StepTextPayload struct {
@@ -85,4 +88,30 @@ type StepTextPayload struct {
 type StepTighteningPayload struct {
 	TighteningTotal int           `json:"tightening_total"`
 	TighteningPoint []interface{} `json:"tightening_points"`
+}
+
+type StartRequest struct {
+	WIPORDERNO    interface{} `json:"WIPORDERNO"`    //订单号
+	WIPORDERTYPE  interface{} `json:"WIPORDERTYPE"`  //订单类型
+	OPRSEQUENCENO interface{} `json:"OPRSEQUENCENO"` //工序
+	UPDATEON      interface{} `json:"UPDATEON"`      //操作时间
+	UPDATEBY      interface{} `json:"UPDATEBY"`      //操作人
+	LOCATION      interface{} `json:"LOCATION"`      //台位
+	DEVICE        interface{} `json:"DEVICE"`        //设备
+	RESOURCEGROUP interface{} `json:"RESOURCEGROUP"` //班组
+	SKILL         interface{} `json:"SKILL"`         //技能
+	RESOURCENAME  interface{} `json:"RESOURCENAME"`  //人员
+}
+
+type FinishedRequest struct {
+	WIPORDERNO    interface{} `json:"WIPORDERNO"`    //订单号
+	WIPORDERTYPE  interface{} `json:"WIPORDERTYPE"`  //订单类型
+	OPRSEQUENCENO interface{} `json:"OPRSEQUENCENO"` //工序
+	UPDATEON      interface{} `json:"UPDATEON"`      //操作时间
+	UPDATEBY      interface{} `json:"UPDATEBY"`      //操作人
+	LOCATION      interface{} `json:"LOCATION"`      //台位
+	DEVICE        interface{} `json:"DEVICE"`        //设备
+	RESOURCEGROUP interface{} `json:"RESOURCEGROUP"` //班组
+	SKILL         interface{} `json:"SKILL"`         //技能
+	RESOURCENAME  interface{} `json:"RESOURCENAME"`  //人员
 }
