@@ -169,6 +169,11 @@ def convert_ts002_order(env, vals):
 
         SYSTEMTYPE = vals.get('requestInfo').get('SYSTEMTYPE')
         WIPORDERTYPE = vals.get('requestInfo').get('MOMWIPORDER').get('WIPORDERTYPE')
+        LOCATION = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('LOCATION')
+        SKILL = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('SKILLS').get('SKILL')
+
+
+        OPRSEQUENCENO = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('OPRSEQUENCENO')
         MOMDISPOSITIONS = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMDISPOSITIONS').get(
             'MOMDISPOSITION')
         MOMCONFIG = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMCONFIG')
@@ -177,7 +182,6 @@ def convert_ts002_order(env, vals):
         RESOURCENAMES = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('RESOURCENAMES')
         PARENTWIPORDERNO = vals.get('requestInfo').get('MOMWIPORDER').get('PARENTWIPORDERNO')
         PARENTWIPORDERTYPE = vals.get('requestInfo').get('MOMWIPORDER').get('PARENTWIPORDERTYPE')
-
     except RetryError:
         msg = 'TS002  WorkOrder Payload is not qualifed!!'
         return [], msg
@@ -226,6 +230,10 @@ def convert_ts002_order(env, vals):
             "RESOURCENAMES": RESOURCENAMES,
             "PARENTWIPORDERNO": PARENTWIPORDERNO,
             "PARENTWIPORDERTYPE": PARENTWIPORDERTYPE,
+            "LOCATION": LOCATION,
+            "OPRSEQUENCENO": OPRSEQUENCENO,
+            "SKILL": SKILL,
+
             'steps': _steps,
         }
         ret.append(vals)
