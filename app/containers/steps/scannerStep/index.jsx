@@ -7,7 +7,7 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 // import QRcode from 'qrcode.react';
 import Button from '../../../components/CustomButtons/Button';
 import styles from './styles';
-import { scannerStepAction } from '../../../modules/step/scannerStep/action';
+import stepAction  from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/typeDef';
@@ -43,8 +43,8 @@ const mapState = (state, props: tOP): tSP => ({
 });
 
 const mapDispatch: tDP = {
-  submit: scannerStepAction.submit,
-  getValue: scannerStepAction.getValue
+  submit: stepAction.submit,
+  getValue: stepAction.input
 };
 
 function ScannerStep({
@@ -70,7 +70,7 @@ function ScannerStep({
   return (
     <div className={classes.root}>
       {/*<QRcode value="This Is Demo QR Code" size={400}/>*/}
-      <ScanIcon width="200" height="200" viewBox="0 0 24 24" fill="#424242"/>
+      <ScanIcon width="400" height="400" viewBox="0 0 24 24" fill="#424242"/>
       <TextField
         className={classes.input}
         label={label || '请扫描或输入条码'}
@@ -78,6 +78,7 @@ function ScannerStep({
         margin="normal"
         value={result || ''}
         variant="outlined"
+        size="medium"
         onClick={() => {
           if (isCurrent) {
             keyboardInput({

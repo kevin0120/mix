@@ -1,9 +1,10 @@
 // @flow
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Typography } from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
-import { stepPayload, viewingStep } from '../../../modules/order/selector';
+import Assignment from '@material-ui/icons/Assignment';
+import { stepData, stepPayload, viewingStep } from '../../../modules/order/selector';
 import stepActions from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
@@ -11,6 +12,10 @@ import type { Dispatch } from '../../../modules/typeDef';
 import type { tStepPayload } from '../../../modules/step/interface/typeDef';
 import withKeyboard from '../../../components/Keyboard';
 import styles from './styles';
+import Card from '../../../components/Card/Card';
+import CardHeader from '../../../components/Card/CardHeader';
+import CardIcon from '../../../components/Card/CardIcon';
+import CardBody from '../../../components/Card/CardBody';
 
 type tOP = {|
   ...tStepProps
@@ -29,11 +34,13 @@ type tDP = {|
 const mapState = (state, props: tOP): tSP => ({
   ...props,
   type: stepPayload(viewingStep(state.order))?.type || '',
-  payload: stepPayload(viewingStep(state.order))
+  payload: stepPayload(viewingStep(state.order)),
+  value: stepData(viewingStep(state.order)).result
 });
 
 const mapDispatch: tDP = {
-  submit: stepActions.submit
+  submit: stepActions.submit,
+  measureInput: stepActions.input
 };
 
 type Props = {|
@@ -49,9 +56,10 @@ function MeasureStep({
                        keyboardInput,
                        target,
                        max,
-                       min
+                       min,
+                       measureInput,
+                       value
                      }: Props) {
-  const [value, setValue] = useState('');
   const classes = makeStyles(styles)();
   useEffect(
     () => {
@@ -72,55 +80,65 @@ function MeasureStep({
     [step, bindAction, isCurrent, value, submit]
   );
 
-  useEffect(
-    () => {
-      setValue('');
-    },
-    [step]
-  );
-
   return <div className={classes.root}>
-    <TextField
-      label="目标值"
-      disabled
-      margin="normal"
-      value={target || '未指定'}
-      variant="outlined"
-    />
-    <TextField
-      label="最小值"
-      disabled
-      margin="normal"
-      value={min || '未指定'}
-      variant="outlined"
-    />
-    <TextField
-      label="最大值"
-      disabled
-      margin="normal"
-      value={max || '未指定'}
-      variant="outlined"
-    />
-    <TextField
-      label="测量值"
-      disabled={!isCurrent}
-      // color="primary"
-      margin="normal"
-      value={value || ''}
-      variant="outlined"
-      onClick={() => {
-        if (isCurrent) {
-          keyboardInput({
-            onSubmit: text => {
-              setValue(text);
-            },
-            text: value || '',
-            title: '请输入测量值',
-            label: '请输入测量值'
-          });
-        }
-      }}
-    />
+    <Card className={classes.card}>
+      <CardHeader color="info" icon>
+        <CardIcon color="info">
+          <Assignment/>
+        </CardIcon>
+        <Typography variant="h6" className={classes.cardIconTitle}>测量</Typography>
+      </CardHeader>
+      <CardBody className={classes.cardContent}>
+        <table>
+          <tbody>
+          {[
+            {
+              label: '目标值：',
+              content: <Typography variant="h4" className={classes.label}>{target || '未指定'}</Typography>
+            }, {
+              label: '最小值：',
+              content: <Typography variant="h4" className={classes.label}>{min || '未指定'}</Typography>
+            }, {
+              label: '最大值：',
+              content: <Typography variant="h4" className={classes.label}>{max || '未指定'}</Typography>
+            }, {
+              label: '测量值：',
+              content: <TextField
+                label="测量值"
+                disabled={!isCurrent}
+                // color="primary"
+                margin="normal"
+                value={value || ''}
+                variant="outlined"
+                onClick={() => {
+                  if (isCurrent) {
+                    keyboardInput({
+                      onSubmit: text => {
+                        measureInput({
+                          data: text,
+                          time: new Date(),
+                          name: 'input'
+                        });
+                      },
+                      text: value || '',
+                      title: '请输入测量值',
+                      label: '请输入测量值'
+                    });
+                  }
+                }}
+              />
+            }
+          ].map(row => (
+            <tr className={classes.row}>
+              <td><Typography variant="h4" className={classes.label}>{row.label}</Typography></td>
+              <td>{row.content}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </CardBody>
+    </Card>
+
   </div>;
 }
 

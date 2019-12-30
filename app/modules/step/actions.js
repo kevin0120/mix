@@ -4,5 +4,9 @@ export default {
   submit:(result)=>({
     type:STEP_ACTIONS.SUBMIT,
     result
+  }),
+  input:(input)=>({
+    type:STEP_ACTIONS.INPUT,
+    input
   })
 }

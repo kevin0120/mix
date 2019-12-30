@@ -7,14 +7,29 @@ const styles = (theme) => ({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  inputSecondary: {
-    borderColor: `${theme.palette.secondary.main} !important`,
-    color: `${theme.palette.secondary.main} !important`
+  card: {
+    width:'fit-content'
   },
-  inputPrimary: {
-    borderColor: `${theme.palette.secondary.main} !important`,
-    color: `${theme.palette.secondary.main} !important`
-  }
+  cardIconTitle: {
+    ...theme.title.card,
+    marginTop: '15px',
+    marginBottom: '0px'
+  },
+  cardContent: {
+    width:'fit-content',
+    padding: 60
+  },
+  row: {
+    // display: 'flex',
+    // flexDirection: 'row',
+    // justifyContent: 'center',
+    // alignItems: 'center',
+    // marginTop: 10,
+    // marginBottom: 10
+  },
+  label: {
+    // marginRight: 20
+  },
 });
 
 export default styles;
