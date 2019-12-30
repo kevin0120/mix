@@ -50,6 +50,10 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes,
     try {
       const orderState = yield select(s => s.order);
       const newList = [...orderState.list];
+      if (!data || !data.code) {
+        yield put(orderActions.getDetailSuccess());
+        return;
+      }
       const newOrder = newList.find(o => o.code === data.code);
       if (newOrder) {
         newOrder.update(data);

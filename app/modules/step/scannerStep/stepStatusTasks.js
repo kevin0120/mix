@@ -36,16 +36,14 @@ function* doingState() {
       const result = yield select(
         s => stepData(workingStep(workingOrder(s.order)))?.result
       );
-      const label = yield select(
-        s => stepPayload(workingStep(workingOrder(s.order)))?.label
-      );
+      // const label = yield select(
+      //   s => stepPayload(workingStep(workingOrder(s.order)))?.label
+      // );
       switch (action.type) {
         case SCANNER_STEP.GET_VALUE:
           yield call(this.updateData, d => ({
             ...(d || {}),
-            result: {
-              [label]: action?.input?.data
-            },
+            result: action?.input?.data,
             timeLine: [
               {
                 title: action?.input?.name,
@@ -64,11 +62,7 @@ function* doingState() {
           // if(this._steps.length>0){
           //   yield call(this.runSubStep,this._steps[0])
           // }
-          if (Object.hasOwnProperty.call(result || {}, label)) {
-            yield put(
-              orderActions.stepStatus(this, STEP_STATUS.FINISHED)
-            );
-          }
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED));
           break;
         default:
           break;
@@ -94,7 +88,7 @@ export const scannerStepStatusMixin = (superTasks) => ({
   [STEP_STATUS.DOING]: doingState
 });
 
-export function onLeave(){
+export function onLeave() {
   (this._scanners || []).forEach(s => {
     this._listeners.forEach(l => {
       s.removeListener(l);

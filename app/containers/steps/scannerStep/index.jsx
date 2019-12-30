@@ -21,7 +21,7 @@ type tDP = {|
 |};
 type tSP = {|
   ...tOP,
-  result: {},
+  result: string,
   label: string
 |};
 
@@ -38,7 +38,7 @@ type Props = {
 
 const mapState = (state, props: tOP): tSP => ({
   ...props,
-  result: stepData(viewingStep(state.order))?.result || {},
+  result: stepData(viewingStep(state.order))?.result || '',
   label: stepPayload(viewingStep(state.order))?.label || ''
 });
 
@@ -76,7 +76,7 @@ function ScannerStep({
         label={label || '请扫描或输入条码'}
         disabled={!isCurrent}
         margin="normal"
-        value={result?.[label] || ''}
+        value={result || ''}
         variant="outlined"
         onClick={() => {
           if (isCurrent) {
@@ -88,7 +88,7 @@ function ScannerStep({
                   name: 'input'
                 });
               },
-              text: result?.[label] || '',
+              text: result || '',
               title: label,
               label
             });

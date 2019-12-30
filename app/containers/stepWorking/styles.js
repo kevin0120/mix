@@ -225,7 +225,9 @@ const stepPageContainer = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16
+    padding: 16,
+    overflow:'auto',
+    wordBreak:'break-word'
   },
   result: {
     flex: 2
