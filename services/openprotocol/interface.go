@@ -22,9 +22,6 @@ type IOpenProtocolController interface {
 	// Vendor Model定义(MID，IO等)
 	GetVendorModel() map[string]interface{}
 
-	//可设置特定的默认数值
-	DefaultControllerGet() IOpenProtocolController
-
 	//控制器状态变化影响相关工具的状态变化
 	UpdateToolStatus(status string)
 
@@ -48,4 +45,6 @@ type IOpenProtocolController interface {
 
 	//曲线解析
 	CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64)
+
+	New() IOpenProtocolController
 }

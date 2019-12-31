@@ -29,25 +29,6 @@ const (
 	DEFAULT_TCP_KEEPALIVE = time.Duration(5 * time.Second)
 )
 
-func NewController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) (tightening_device.ITighteningController, error) {
-
-	var c IOpenProtocolController
-	switch deviceConfig.Model {
-	case tightening_device.ModelDesoutterCvi3:
-		c = &CVI3Controller{}
-	case tightening_device.ModelDesoutterCvi2:
-		c = &CVI2Controller{}
-	case tightening_device.ModelDesoutterDeltaWrench:
-		c = &WrenchController{}
-	default:
-		return nil, errors.New(fmt.Sprintf("Controller Model:%s Not Support", deviceConfig.Model))
-	}
-
-	controllerInstance := c.DefaultControllerGet()
-	controllerInstance.initController(deviceConfig, d, service, dp)
-	return controllerInstance, nil
-}
-
 type ControllerSubscribe func() error
 
 type handlerPkg struct {
@@ -89,20 +70,6 @@ type TighteningController struct {
 	device.BaseDevice
 }
 
-func (c *TighteningController) DefaultControllerGet() IOpenProtocolController {
-
-	c.buffer = make(chan []byte, 1024)
-	c.closing = make(chan chan struct{})
-	c.keepPeriod = time.Duration(OpenProtocolDefaultKeepAlivePeriod)
-	c.reqTimeout = time.Duration(OpenProtocolDefaultKeepAlivePeriod)
-	c.getToolInfoPeriod = time.Duration(OpenProtocolDefaultGetTollInfoPeriod)
-	c.protocol = tightening_device.TIGHTENING_OPENPROTOCOL
-	c.dispatcherMap = map[string]dispatcherbus.DispatcherMap{}
-	c.tempResultCurve = map[int]*tightening_device.TighteningCurve{}
-	c.sockClients = map[string]*socket_writer.SocketWriter{}
-
-	return c
-}
 func (c *TighteningController) createToolsByConfig() error {
 	conf := c.deviceConf
 	d := c.diag
@@ -121,6 +88,17 @@ func (c *TighteningController) createToolsByConfig() error {
 }
 
 func (c *TighteningController) initController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) {
+
+	c.buffer = make(chan []byte, 1024)
+	c.closing = make(chan chan struct{})
+	c.keepPeriod = time.Duration(OpenProtocolDefaultKeepAlivePeriod)
+	c.reqTimeout = time.Duration(OpenProtocolDefaultKeepAlivePeriod)
+	c.getToolInfoPeriod = time.Duration(OpenProtocolDefaultGetTollInfoPeriod)
+	c.protocol = tightening_device.TIGHTENING_OPENPROTOCOL
+	c.dispatcherMap = map[string]dispatcherbus.DispatcherMap{}
+	c.tempResultCurve = map[int]*tightening_device.TighteningCurve{}
+	c.sockClients = map[string]*socket_writer.SocketWriter{}
+
 	c.BaseDevice = device.CreateBaseDevice(deviceConfig.Model, d, service)
 	c.diag = d
 	c.deviceConf = deviceConfig
@@ -132,7 +110,7 @@ func (c *TighteningController) initController(deviceConfig *tightening_device.Ti
 	c.initSubscribeInfos()
 
 	if err := c.createToolsByConfig(); err != nil {
-		d.Error("NewController createToolsByConfig Error", err)
+		d.Error("newController createToolsByConfig Error", err)
 	}
 }
 
@@ -1002,4 +980,8 @@ func (c *TighteningController) GetVendorMid(mid string) (string, error) {
 	}
 
 	return rev.(string), nil
+}
+
+func (c *TighteningController) New() IOpenProtocolController {
+	return &TighteningController{}
 }

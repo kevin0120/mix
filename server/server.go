@@ -16,6 +16,7 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
+	"github.com/masami10/rush/services/openprotocol/vendors"
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/storage"
@@ -209,7 +210,7 @@ func (s *Server) appendAudiVWService() {
 func (s *Server) initOpenProtocolService() error {
 	c := s.config.OpenProtocol
 	d := s.DiagService.NewOpenProtocolHandler()
-	srv := openprotocol.NewService(c, d)
+	srv := openprotocol.NewService(c, d, vendors.OpenProtocolVendors)
 
 	s.OpenprotocolService = srv
 

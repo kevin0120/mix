@@ -32,14 +32,16 @@ type Service struct {
 
 	devices []*TighteningController
 	tightening_device.ITighteningProtocol
+	vendors map[string]IOpenProtocolController
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, vendors map[string]IOpenProtocolController) *Service {
 
 	s := &Service{
 		name:    tightening_device.TIGHTENING_OPENPROTOCOL,
 		diag:    d,
 		devices: []*TighteningController{},
+		vendors: vendors,
 	}
 
 	s.configValue.Store(c)
@@ -72,7 +74,7 @@ func (s *Service) Write(sn string, buf []byte) error {
 }
 
 func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
-	return NewController(cfg, s.diag, s, dp)
+	return s.newController(cfg, s.diag, s, dp)
 }
 
 func (s *Service) Open() error {
@@ -113,4 +115,16 @@ func (s *Service) OnStatus(string, string) {
 
 func (s *Service) OnRecv(string, string) {
 	return
+}
+
+func (s *Service) newController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) (tightening_device.ITighteningController, error) {
+
+	c, exist := s.vendors[deviceConfig.Model]
+	if !exist {
+		return nil, errors.New(fmt.Sprintf("Controller Model:%s Not Support", deviceConfig.Model))
+	}
+
+	controllerInstance := c.New()
+	controllerInstance.initController(deviceConfig, d, service, dp)
+	return controllerInstance, nil
 }
