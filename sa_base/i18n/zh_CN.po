@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-31 08:36+0000\n"
-"PO-Revision-Date: 2019-12-31 08:36+0000\n"
+"POT-Creation-Date: 2019-12-31 09:12+0000\n"
+"PO-Revision-Date: 2019-12-31 09:12+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -122,12 +122,7 @@ msgstr "拧紧程序"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_form_inherit_mrp
 msgid "Assembly Process(JOB)"
-msgstr "拧紧程序号(JOB)"
-
-#. module: sa_base
-#: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_form_inherit_mrp
-msgid "Assembly Process(JOB)"
-msgstr "Assembly Process(JOB)"
+msgstr "拧紧程序号(JOB))"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_maintenance_equipment_category
@@ -212,16 +207,6 @@ msgstr "物料清单行"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
 msgid "Can Redo"
-msgstr "可重做"
-
-#. module: sa_base
-#: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
-msgid "Can Skip"
-msgstr "可跳过"
-
-#. module: sa_base
-#: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
-msgid "Can Redo"
 msgstr "Can Redo"
 
 #. module: sa_base
@@ -233,11 +218,6 @@ msgstr "Can Skip"
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
 msgid "Cancel"
 msgstr "取消"
-
-#. module: sa_base
-#: model:ir.ui.menu,name:sa_base.menu_mrp_vehicle_form
-msgid "Carriage"
-msgstr "Carriage"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_maintenance_equipment_view_form_inherit
@@ -388,11 +368,6 @@ msgid "Connections count"
 msgstr "连接数"
 
 #. module: sa_base
-#: selection:product.template,sa_type:0
-msgid "Consumable Component"
-msgstr "Consumable Component"
-
-#. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_product_id
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workorder_consu_work_order_line_ids
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_product_id
@@ -418,7 +393,7 @@ msgstr "控制日期"
 #: model:ir.model.fields,field_description:sa_base.field_controller_program_control_mode
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_control_mode
 msgid "Control Mode For Tightening"
-msgstr "Control Mode For Tightening"
+msgstr "拧紧控制模式"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_point_id
@@ -627,7 +602,7 @@ msgstr "Equipment External URL"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_healthz_url
 msgid "Equipment Health Check URL"
-msgstr "Equipment Health Check URL"
+msgstr "设备心跳URL"
 
 #. module: sa_base
 #: model:ir.actions.report.xml,name:sa_base.report_equipment_labels
@@ -681,7 +656,7 @@ msgstr "Factory Name"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_failure_message
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_failure_message
 msgid "Failure Message"
-msgstr "Failure Message"
+msgstr "失败信息"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_finished_lot_id
@@ -1152,13 +1127,13 @@ msgid "Odoo uses these BoMs to automatically propose manufacturing\n"
 msgstr "根据补货规则Odoo用BOM自动的生产生产订单"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:214
+#: code:addons/sa_base/models/mrp_routing.py:215
 #, python-format
 msgid "Only SuperUser can delete Job ID"
 msgstr "Only SuperUser can delete Job ID"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:250
+#: code:addons/sa_base/models/mrp_routing.py:251
 #, python-format
 msgid "Only SuperUser can delete program"
 msgstr "Only SuperUser can delete program"
@@ -1232,7 +1207,7 @@ msgstr "拧紧点组(多轴)"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_workcenter_group_id
 msgid "Operation Work Center Group"
-msgstr "Operation Work Center Group"
+msgstr "工位组"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_dispatch_mrp_workorder_operation_id
@@ -1391,7 +1366,7 @@ msgstr "产品模板"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_component_id
 msgid "Product To Register"
-msgstr "Product To Register"
+msgstr "所需物料"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:40
@@ -1940,11 +1915,6 @@ msgstr "Tightening Tool(Gun/Wrench)"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_group_tool_tool_id
 msgid "Tightening Tool(Tightening Gun/Wrench)"
-msgstr "Tightening Tool(Tightening Gun/Wrench)"
-
-#. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_group_tool_tool_id
-msgid "Tightening Tool(Tightening Gun/Wrench)"
 msgstr "拧紧工具(Tightening Gun/Wrench)"
 
 #. module: sa_base
@@ -2017,16 +1987,6 @@ msgstr "扭矩/角度 拧紧"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_production_filter_inherit
 msgid "Track Number"
-msgstr "追踪号(VIN/序列号)"
-
-#. module: sa_base
-#: selection:product.template,sa_type:0
-msgid "Train Carriage"
-msgstr "Train Carriage"
-
-#. module: sa_base
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_production_filter_inherit
-msgid "Track Number"
 msgstr "追踪码"
 
 #. module: sa_base
@@ -2089,6 +2049,7 @@ msgstr "用户"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.product_product_action_vehicle
+#: model:ir.ui.menu,name:sa_base.menu_mrp_vehicle_form
 #: model:ir.ui.view,arch_db:sa_base.product_search_form_view_sa
 #: selection:product.template,sa_type:0
 msgid "Vehicle"
@@ -2179,7 +2140,7 @@ msgstr "工作中心名称"
 #: model:ir.model.fields,field_description:sa_base.field_dispatch_mrp_workorder_workcenter_ids
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_workcenter_ids
 msgid "Work Center Set"
-msgstr "工位组"
+msgstr "工位集合"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_routing_workcenter
@@ -2318,7 +2279,7 @@ msgstr "工段"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_worksheet
 msgid "Worksheet"
-msgstr "工作记录表"
+msgstr "工作记录"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_worksheet_page
