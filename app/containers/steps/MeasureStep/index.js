@@ -1,8 +1,8 @@
 // @flow
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles, Typography } from '@material-ui/core';
-import TextField from '@material-ui/core/TextField';
+import classNames from 'classnames';
 import Assignment from '@material-ui/icons/Assignment';
 import { stepData, stepPayload, viewingStep } from '../../../modules/order/selector';
 import stepActions from '../../../modules/step/actions';
@@ -80,8 +80,15 @@ function MeasureStep({
     [step, bindAction, isCurrent, value, submit]
   );
 
+  const inputRef = useRef(null);
+  useEffect(() => {
+    if (inputRef && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputRef]);
+
   return <div className={classes.root}>
-    <Card className={classes.card}>
+    <Card className={classes.card} login>
       <CardHeader color="info" icon>
         <CardIcon color="info">
           <Assignment/>
@@ -94,22 +101,20 @@ function MeasureStep({
           {[
             {
               label: '目标值：',
-              content: <Typography variant="h4" className={classes.label}>{target || '未指定'}</Typography>
+              content: target || '未指定'
             }, {
               label: '最小值：',
-              content: <Typography variant="h4" className={classes.label}>{min || '未指定'}</Typography>
+              content: min || '未指定'
             }, {
               label: '最大值：',
-              content: <Typography variant="h4" className={classes.label}>{max || '未指定'}</Typography>
+              content: max || '未指定'
             }, {
               label: '测量值：',
-              content: <TextField
-                label="测量值"
-                disabled={!isCurrent}
-                // color="primary"
-                margin="normal"
-                value={value || ''}
-                variant="outlined"
+              content: <span
+                className={classNames({
+                  [classes.inputContainer]: true,
+                  [classes.inputContainerDisabled]: !isCurrent
+                })}
                 onClick={() => {
                   if (isCurrent) {
                     keyboardInput({
@@ -126,12 +131,20 @@ function MeasureStep({
                     });
                   }
                 }}
-              />
+              ><Typography variant="h4" className={classNames({
+                [classes.inputText]: !!value && isCurrent,
+                [classes.inputTextDisabled]: !value || !isCurrent,
+              })}>{value || '请输入'}</Typography></span>
             }
           ].map(row => (
             <tr className={classes.row}>
-              <td><Typography variant="h4" className={classes.label}>{row.label}</Typography></td>
-              <td>{row.content}</td>
+              <td><Typography variant="h4">{row.label}</Typography></td>
+              <td className={classes.rowContent}>{
+                typeof row.content === 'string' || typeof row.content === 'number' ?
+                  <Typography variant="h4" className={classes.inputText}>{row.content}</Typography>
+                  : row.content
+              }
+              </td>
             </tr>
           ))}
           </tbody>
