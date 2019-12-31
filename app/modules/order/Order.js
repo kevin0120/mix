@@ -199,12 +199,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
                 STEP_STATUS.READY
               );
 
+            } else if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
+              yield put(orderActions.stepStatus(this, ORDER_STATUS.FAIL));
             } else {
-              if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
-                yield put(orderActions.stepStatus(this, ORDER_STATUS.FAIL));
-              } else {
-                yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
-              }
+              yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
             }
           }
         } catch (e) {
@@ -266,7 +264,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       }
     };
 
-    _components: [];
+    _components = [];
 
     get components() {
       return this._components;
@@ -320,18 +318,18 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
               label: 'Common.Yes',
               color: 'info'
             };
-            const data = this._steps.map(s => [
+            const data = (this: IWorkable)._steps.map(s => [
               s.code,
               durationString(s.timeCost()),
               stepStatus(s.status)
             ]);
             if (reportFinish) {
-              const code = this._id;
+              const code = (this: IWorkable)._id;
               const trackCode = '';
               const workCenterCode = yield select(s => s.systemInfo.workcenter);
               const productCode = '';
               const dateComplete = new Date();
-              const { operation } = this.payload;
+              const { operation } = this.payload || {};
               closeAction = [
                 orderActions.reportFinish(
                   code,
@@ -350,7 +348,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             }
             yield put(
               dialogActions.dialogShow({
-                maxWidth:'md',
+                maxWidth: 'md',
                 buttons: [confirm],
                 closeAction,
                 title: i18n.t('Common.Result'),
@@ -373,7 +371,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             break;
         }
       } catch (e) {
-        CommonLog.lError(e, { at: 'order onLeave', code: this._code });
+        CommonLog.lError(e, { at: 'order onLeave', code: (this: IWorkable)._code });
       }
     }
 

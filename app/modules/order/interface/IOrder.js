@@ -30,7 +30,7 @@ export interface IOrder extends IWorkable {
   +productCode: ?string,
 
   _components: Array<tComponent>,
-  components: ?Array<tComponent>,
+  +components: Array<tComponent>,
 
 
   +failSteps: Array<IWorkStep>,
