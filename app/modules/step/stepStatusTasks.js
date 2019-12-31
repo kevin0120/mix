@@ -34,7 +34,7 @@ function* doingState(config) {
             result: action?.input?.data,
             timeLine: [
               {
-                title: action?.input?.name,
+                title: action?.input?.source,
                 color: 'info',
                 footerTitle:
                   action &&

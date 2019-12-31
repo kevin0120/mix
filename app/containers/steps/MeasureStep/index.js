@@ -122,7 +122,7 @@ function MeasureStep({
                         measureInput({
                           data: text,
                           time: new Date(),
-                          name: 'input'
+                          source: 'input'
                         });
                       },
                       text: value || '',

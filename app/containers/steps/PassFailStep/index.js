@@ -81,7 +81,7 @@ function PassFailStep({ bindAction, step, isCurrent, submit, passFailInput, valu
           onClick={() => passFailInput({
             data: false,
             time: new Date(),
-            name: 'input'
+            source: 'input'
           })}
         >
           <Close style={{ fontSize: 40 }}/>
@@ -97,7 +97,7 @@ function PassFailStep({ bindAction, step, isCurrent, submit, passFailInput, valu
           onClick={() => passFailInput({
             data: true,
             time: new Date(),
-            name: 'input'
+            source: 'input'
           })}
         >
           <Check style={{ fontSize: 40 }}/>

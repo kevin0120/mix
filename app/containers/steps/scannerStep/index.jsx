@@ -86,7 +86,7 @@ function ScannerStep({
                 getValue({
                   data: text,
                   time: new Date(),
-                  name: 'input'
+                  source: 'input'
                 });
               },
               text: result || '',

@@ -87,7 +87,7 @@ export default class Device extends CommonExternalEntity implements IDevice {
 
       const input: tInput = {
         data,
-        source: this.Name,
+        source: this.source,
         time: new Date()
       };
       const state = yield select();
