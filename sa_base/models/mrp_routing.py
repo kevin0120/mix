@@ -159,7 +159,8 @@ class MrpRoutingWorkcenter(models.Model):
 
     @api.multi
     def unlink(self):
-        raise ValidationError(u'不允许删除作业')
+        if self.env.uid != SUPERUSER_ID:
+            raise ValidationError(u'不允许删除作业')
 
     @api.multi
     def name_get(self):
