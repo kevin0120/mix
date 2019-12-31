@@ -107,7 +107,8 @@ type ODOOStatus struct {
 	Status string `json:"status"`
 }
 
-type SystemStatus struct {
+// 服务状态(aiis, odoo, 外部系统等)
+type ServiceStatus struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
 }

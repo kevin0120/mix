@@ -70,43 +70,10 @@ type ControllerOutput struct {
 	Status   string `json:"status"`
 }
 
-type TighteningResult struct {
-
-	// 控制器序列号
-	ControllerSN string `json:"controller_sn"`
-
-	// 错误代码
-	ErrorCode string `json:"errorCode"`
+type BaseResult struct {
 
 	// 工具序列号
 	ToolSN string `json:"tool_sn"`
-
-	// 工具通道号
-	ChannelID int
-
-	// 收到时间
-	UpdateTime time.Time `json:"update_time"`
-
-	// job号
-	Job int `json:"job"`
-
-	// pset号
-	PSet int `json:"pset"`
-
-	// 批次信息
-	Batch string `json:"batch"`
-
-	// 当前拧紧次数
-	Count int `json:"count"`
-
-	// 当前点位次序
-	Seq int `json:"seq"`
-
-	// 当前点位次序
-	GroupSeq int `json:"group_seq"`
-
-	// 拧紧ID
-	TighteningID string `json:"tightening_id"`
 
 	// 实际结果
 	MeasureResult string `json:"measure_result"`
@@ -119,6 +86,47 @@ type TighteningResult struct {
 
 	// 实际耗时
 	MeasureTime float64 `json:"measure_time"`
+
+	// 批次信息
+	Batch string `json:"batch"`
+
+	// 当前点位次序
+	Seq int `json:"seq"`
+
+	// 当前点位次序
+	GroupSeq int `json:"group_seq"`
+
+	// 当前拧紧次数
+	Count int `json:"count"`
+}
+
+type JobInfo struct {
+
+	// job号
+	Job int `json:"job"`
+}
+
+type TighteningResult struct {
+	BaseResult
+	JobInfo
+
+	// 控制器序列号
+	ControllerSN string `json:"controller_sn"`
+
+	// 错误代码
+	ErrorCode string `json:"errorCode"`
+
+	// 工具通道号
+	ChannelID int
+
+	// 收到时间
+	UpdateTime time.Time `json:"update_time"`
+
+	// pset号
+	PSet int `json:"pset"`
+
+	// 拧紧ID
+	TighteningID string `json:"tightening_id"`
 
 	// 拧紧策略
 	Strategy string `json:"strategy"`

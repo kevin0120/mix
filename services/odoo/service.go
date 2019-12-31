@@ -101,12 +101,12 @@ func (s *Service) UpdateStatus(status string) {
 }
 
 func (s *Service) PushStatus() {
-	odooStatus := wsnotify.WSOdooStatus{
-		Status: s.status,
-	}
-
-	str, _ := json.Marshal(odooStatus)
-	s.WS.NotifyAll(wsnotify.WS_EVENT_ODOO, string(str))
+	//odooStatus := wsnotify.WSOdooStatus{
+	//	Status: s.status,
+	//}
+	//
+	//str, _ := json.Marshal(odooStatus)
+	//s.WS.NotifyAll(wsnotify.WS_EVENT_ODOO, string(str))
 }
 
 func (s *Service) GetEndpoints(name string) []Endpoint {

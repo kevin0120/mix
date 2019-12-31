@@ -2,7 +2,6 @@ package hmi
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
@@ -153,27 +152,9 @@ func (s *Service) onTighteningResult(data interface{}) {
 	}
 
 	tighteningResult := data.(*tightening_device.TighteningResult)
-	result := []wsnotify.WSResult{
-		{
-			Result: tighteningResult.MeasureResult,
-			MI:     tighteningResult.MeasureTorque,
-			WI:     tighteningResult.MeasureAngle,
-			TI:     tighteningResult.MeasureTime,
-			Seq:    tighteningResult.Seq,
-			Batch:  tighteningResult.Batch,
-			ToolSN: tighteningResult.ToolSN,
-		},
-	}
 
-	msg := wsnotify.WSMsg{
-		Type: wsnotify.WS_TIGHTENING_RESULT,
-		Data: result,
-	}
-
-	payload, _ := json.Marshal(msg)
-
-	s.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(payload))
-	s.diag.Debug(fmt.Sprintf("拧紧结果推送HMI: %s", string(payload)))
+	// 拧紧结果推送HMI
+	s.wsSendTighteningResult([]tightening_device.BaseResult{tighteningResult.BaseResult})
 }
 
 // 设备连接状态变化(根据设备类型,序列号来区分具体的设备)
@@ -323,4 +304,14 @@ func (s *Service) wsSendDeviceStatus(deviceStatus []device.DeviceStatus) {
 	})
 
 	s.WS.NotifyAll(wsnotify.WS_EVENT_DEVICE, string(data))
+}
+
+// websocket发送拧紧结果
+func (s *Service) wsSendTighteningResult(results []tightening_device.BaseResult) {
+	data, _ := json.Marshal(wsnotify.WSMsg{
+		Type: wsnotify.WS_TIGHTENING_RESULT,
+		Data: results,
+	})
+
+	s.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(data))
 }

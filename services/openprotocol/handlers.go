@@ -8,7 +8,6 @@ import (
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils/ascii"
 	"strconv"
 	"strings"
@@ -247,8 +246,8 @@ func handleMID_0035_JOB_INFO(c *TighteningController, pkg *handlerPkg) error {
 		job_info.JobTighteningStatus == 0 {
 		// 推送job选择信息
 
-		job_select := wsnotify.WSJobSelect{
-			JobID: job_info.JobID,
+		job_select := tightening_device.JobInfo{
+			Job: job_info.JobID,
 		}
 
 		ws_str, _ := json.Marshal(job_select)
@@ -284,21 +283,23 @@ func handleMID_0101_MULTI_SPINDLE_RESULT(c *TighteningController, pkg *handlerPk
 	ms := MultiSpindleResult{}
 	ms.Deserialize(pkg.Body)
 
-	wsResults := make([]wsnotify.WSResult, len(ms.Spindles), len(ms.Spindles))
-	//wsResult := wsnotify.WSResult{}
-	for idx, v := range ms.Spindles {
-		wsResults[idx].Result = v.Result
-		wsResults[idx].MI = v.Torque
-		wsResults[idx].WI = v.Angle
-		//wsResults = append(wsResults, wsResult)
-	}
+	//wsResults := make([]wsnotify.WSResult, len(ms.Spindles), len(ms.Spindles))
+	////wsResult := wsnotify.WSResult{}
+	//for idx, v := range ms.Spindles {
+	//	wsResults[idx].Result = v.Result
+	//	wsResults[idx].MI = v.Torque
+	//	wsResults[idx].WI = v.Angle
+	//	//wsResults = append(wsResults, wsResult)
+	//}
 
-	wsStrs, err := json.Marshal(wsResults)
-	if err == nil {
-		c.ProtocolService.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(wsStrs))
-	}
+	//wsStrs, err := json.Marshal(wsResults)
+	//if err == nil {
+	//	c.ProtocolService.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(wsStrs))
+	//}
 
-	return err
+	//return err
+
+	return nil
 }
 
 // 收到条码推送

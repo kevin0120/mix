@@ -378,8 +378,16 @@ func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	}
 
 	return &tightening_device.TighteningResult{
-		// 工具序列号
-		ToolSN: strings.TrimSpace(rd.ToolSerialNumber),
+		BaseResult: tightening_device.BaseResult{
+			ToolSN:        strings.TrimSpace(rd.ToolSerialNumber),
+			MeasureResult: measureResult,
+			MeasureTorque: rd.Torque / 100,
+			MeasureAngle:  rd.Angle,
+		},
+
+		JobInfo: tightening_device.JobInfo{
+			Job: rd.JobID,
+		},
 
 		//错误信息解析
 		ErrorCode: strings.Join(parseOpenProtocolErrorCode(rd.TighteningErrorStatus), ","),
@@ -390,26 +398,11 @@ func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 		// 收到时间
 		UpdateTime: time.Now(),
 
-		// job号
-		Job: rd.JobID,
-
 		// pset号
 		PSet: rd.PSetID,
 
 		// 拧紧ID
 		TighteningID: rd.TightingID,
-
-		// 实际结果
-		MeasureResult: measureResult,
-
-		// 实际扭矩
-		MeasureTorque: rd.Torque / 100,
-
-		// 实际角度
-		MeasureAngle: rd.Angle,
-
-		// 实际耗时
-		MeasureTime: 0,
 
 		// 拧紧策略
 		Strategy: strategy,
@@ -510,36 +503,25 @@ func (ord *ResultDataOld) ToTighteningResult() *tightening_device.TighteningResu
 	}
 
 	return &tightening_device.TighteningResult{
+		BaseResult: tightening_device.BaseResult{
+			ToolSN:        strings.TrimSpace(ord.ToolSerialNumber),
+			MeasureResult: measureResult,
+			MeasureTorque: ord.Torque / 100,
+			MeasureAngle:  ord.Angle,
+		},
 
-		// 工具序列号
-		ToolSN: strings.TrimSpace(ord.ToolSerialNumber),
-
-		// 工具通道号
-		//ChannelID: ord.ChannelID,
+		JobInfo: tightening_device.JobInfo{
+			Job: ord.JobID,
+		},
 
 		// 收到时间
 		UpdateTime: time.Now(),
-
-		// job号
-		Job: ord.JobID,
 
 		// pset号
 		PSet: ord.PSetID,
 
 		// 拧紧ID
 		TighteningID: ord.TightingID,
-
-		// 实际结果
-		MeasureResult: measureResult,
-
-		// 实际扭矩
-		MeasureTorque: ord.Torque / 100,
-
-		// 实际角度
-		MeasureAngle: ord.Angle,
-
-		// 实际耗时
-		MeasureTime: 0,
 
 		// 拧紧策略
 		Strategy: strategy,
