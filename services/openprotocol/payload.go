@@ -35,6 +35,7 @@ const (
 	LEN_HEADER         = 20
 	DEFAULT_REV        = "000"
 	LEN_SINGLE_SPINDLE = 18
+	IO_MODEL           = "IO_MODEL"
 
 	MID_0001_START                   = "0001"
 	MID_0002_START_ACK               = "0002"

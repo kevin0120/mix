@@ -39,11 +39,11 @@ type Service struct {
 	SerialNumber  string
 	rpc           *GRPCClient
 
-	TighteningService *tightening_device.Service
-	Broker            *broker.Service
-	opened            bool
-	toolCollector     chan string
-	closing           chan struct{}
+	//TighteningService *tightening_device.Service
+	Broker        *broker.Service
+	opened        bool
+	toolCollector chan string
+	closing       chan struct{}
 }
 
 func NewService(c Config, d Diagnostic, port string, dp Dispatcher) *Service {
@@ -67,14 +67,15 @@ func NewService(c Config, d Diagnostic, port string, dp Dispatcher) *Service {
 
 func (s *Service) initGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
+		dispatcherbus.DISPATCHER_SERVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
 		//dispatcherBus.DISPATCH_ODOO_STATUS:   utils.CreateDispatchHandlerStruct(nil),
 		//dispatcherBus.DISPATCH_AIIS_STATUS:   utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCH_NEW_TOOL:      utils.CreateDispatchHandlerStruct(s.onNewTool),
-		dispatcherbus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(s.onBrokerStatus),
-		dispatcherbus.DISPATCH_RESULT:        utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
+		//dispatcherbus.DISPATCH_NEW_TOOL:      utils.CreateDispatchHandlerStruct(s.onNewTool),
+		//dispatcherbus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(s.onBrokerStatus),
+		//dispatcherbus.DISPATCH_RESULT:        utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
 	}
-	s.rpc.AppendRPCGlbDispatch(dispatcherbus.DISPATCH_RPC_STATUS, utils.CreateDispatchHandlerStruct(s.OnRPCStatus))
-	s.rpc.AppendRPCGlbDispatch(dispatcherbus.DISPATCH_RPC_RECV, utils.CreateDispatchHandlerStruct(s.OnRPCRecv))
+	//s.rpc.AppendRPCGlbDispatch(dispatcherbus.DISPATCH_RPC_STATUS, utils.CreateDispatchHandlerStruct(s.OnRPCStatus))
+	//s.rpc.AppendRPCGlbDispatch(dispatcherbus.DISPATCH_RPC_RECV, utils.CreateDispatchHandlerStruct(s.OnRPCRecv))
 }
 
 func (s *Service) AddToQueue(id int64) error {
@@ -182,9 +183,9 @@ func (s *Service) OnRPCStatus(data interface{}) {
 	status := data.(string)
 	// 如果RPC连接断开， 认为ODOO连接也断开
 	if status == RPC_OFFLINE {
-		s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_ODOO_STATUS, utils.STATUS_OFFLINE)
+		//s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_ODOO_STATUS, utils.STATUS_OFFLINE)
 	}
-	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_AIIS_STATUS, status)
+	//s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_AIIS_STATUS, status)
 }
 
 func (s *Service) OnRPCRecv(data interface{}) {
@@ -213,9 +214,9 @@ func (s *Service) OnRPCRecv(data interface{}) {
 	//	break
 
 	case TYPE_ODOO_STATUS:
-		status := ODOOStatus{}
+		status := ServiceStatus{}
 		json.Unmarshal(strData, &status)
-		s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_ODOO_STATUS, status.Status)
+		s.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status)
 		break
 
 	case TYPE_MES_STATUS:

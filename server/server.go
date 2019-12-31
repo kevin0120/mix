@@ -285,7 +285,6 @@ func (s *Server) appendAiisService() error {
 	d := s.DiagService.NewAiisHandler()
 	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress, s.DispatcherBusService)
 
-	srv.TighteningService = s.TighteningDeviceService
 	srv.SerialNumber = s.config.SN
 	srv.DB = s.StorageServie
 	srv.WS = s.WSNotifyService

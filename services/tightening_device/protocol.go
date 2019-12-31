@@ -7,7 +7,4 @@ type ITighteningProtocol interface {
 
 	// 创建控制器
 	CreateController(cfg *TighteningDeviceConfig, dp Dispatcher) (ITighteningController, error)
-
-	// 判断协议是否支持
-	IsSupport(model string) bool
 }

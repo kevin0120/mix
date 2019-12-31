@@ -28,12 +28,15 @@ const (
 	// 当检测到新工具时，会通过此分发器进行新工具分发
 	DISPATCH_NEW_TOOL = "DISPATCH_NEW_TOOL"
 
-	// ********************************AIIS***********************************
-	DISPATCH_ODOO_STATUS = "DISPATCH_ODOO_STATUS"
-	DISPATCH_AIIS_STATUS = "DISPATCH_AIIS_STATUS"
+	// ********************************Service***********************************
+	// 当检测到服务状态变化时(aiis, odoo, 外部系统等)，会通过此分发器进行状态分发
+	DISPATCHER_SERVICE_STATUS = "DISPATCHER_SERVICE_STATUS"
 
-	DISPATCH_RPC_STATUS = "DISPATCH_RPC_STATUS"
-	DISPATCH_RPC_RECV   = "DISPATCH_RPC_RECV"
+	//DISPATCH_ODOO_STATUS = "DISPATCH_ODOO_STATUS"
+	//DISPATCH_AIIS_STATUS = "DISPATCH_AIIS_STATUS"
+	//
+	//DISPATCH_RPC_STATUS = "DISPATCH_RPC_STATUS"
+	DISPATCH_RPC_RECV = "DISPATCH_RPC_RECV"
 
 	// ********************************BROKER***********************************
 	// 当Broker(MQ)服务状态变化时， 会通过此分发器进行状态分发

@@ -71,21 +71,7 @@ func (s *Service) Write(sn string, buf []byte) error {
 	return nil
 }
 
-func (s *Service) IsSupport(model string) bool {
-	_, err := GetModel(model)
-	if err != nil {
-		return false
-	}
-
-	return true
-}
-
 func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
-	// 检测型号是否支持
-	if !s.IsSupport(cfg.Model) {
-		return nil, errors.New("Not Supported")
-	}
-
 	return NewController(cfg, s.diag, s, dp)
 }
 

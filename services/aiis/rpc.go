@@ -151,7 +151,7 @@ func (c *GRPCClient) updateStatus(status string) {
 			go c.Connect()
 		}
 
-		c.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_RPC_STATUS, status)
+		c.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status)
 
 		// 将最新状态推送给hmi
 		//s := wsnotify.WSStatus{

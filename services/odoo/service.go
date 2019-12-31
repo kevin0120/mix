@@ -89,7 +89,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 
 func (s *Service) initGblDispatch() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCH_ODOO_STATUS: utils.CreateDispatchHandlerStruct(s.OnStatus),
+		dispatcherbus.DISPATCHER_SERVICE_STATUS: utils.CreateDispatchHandlerStruct(s.OnStatus),
 	}
 }
 

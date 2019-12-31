@@ -40,10 +40,10 @@ func NewController(deviceConfig *tightening_device.TighteningDeviceConfig, d Dia
 	case tightening_device.ModelDesoutterDeltaWrench:
 		c = &WrenchController{}
 	default:
-		return nil, errors.New(fmt.Sprintf("Controller Model:%s Not Found", deviceConfig.Model))
+		return nil, errors.New(fmt.Sprintf("Controller Model:%s Not Support", deviceConfig.Model))
 	}
 
-	controllerInstance := c.defaultControllerGet()
+	controllerInstance := c.DefaultControllerGet()
 	controllerInstance.initController(deviceConfig, d, service, dp)
 	return controllerInstance, nil
 }
@@ -89,7 +89,7 @@ type TighteningController struct {
 	device.BaseDevice
 }
 
-func (c *TighteningController) defaultControllerGet() *TighteningController {
+func (c *TighteningController) DefaultControllerGet() IOpenProtocolController {
 
 	c.buffer = make(chan []byte, 1024)
 	c.closing = make(chan chan struct{})
@@ -127,7 +127,7 @@ func (c *TighteningController) initController(deviceConfig *tightening_device.Ti
 	c.ProtocolService = service
 	c.dispatcherBus = dp
 
-	c.BaseDevice.Cfg = VendorModels[c.deviceConf.Model][IO_CONFIG]
+	c.BaseDevice.Cfg = c.GetVendorModel()[IO_MODEL]
 
 	c.initSubscribeInfos()
 
@@ -207,7 +207,7 @@ func (c *TighteningController) ProcessSubscribeControllerInfo() {
 }
 
 func (c *TighteningController) ProcessRequest(mid string, noack string, station string, spindle string, data string) (interface{}, error) {
-	rev, err := GetVendorMid(c.Model(), mid)
+	rev, err := c.GetVendorMid(mid)
 	if err != nil {
 		return nil, err
 	}
@@ -521,7 +521,7 @@ func (c *TighteningController) getTighteningCount() {
 	for {
 		select {
 		case <-time.After(c.getToolInfoPeriod):
-			rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
+			rev, err := c.GetVendorMid(MID_0040_TOOL_INFO_REQUEST)
 			if err == nil {
 				continue
 			}
@@ -539,7 +539,7 @@ func (c *TighteningController) getTighteningCount() {
 }
 
 func (c *TighteningController) ToolInfoReq() error {
-	rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
+	rev, err := c.GetVendorMid(MID_0040_TOOL_INFO_REQUEST)
 	if err != nil {
 		return err
 	}
@@ -989,4 +989,17 @@ func (c *TighteningController) DeviceType() string {
 
 func (c *TighteningController) GetDispatch(name string) *utils.Dispatcher {
 	return c.externalDispatches[name]
+}
+
+func (c *TighteningController) GetVendorModel() map[string]interface{} {
+	return nil
+}
+
+func (c *TighteningController) GetVendorMid(mid string) (string, error) {
+	rev, exist := c.GetVendorModel()[mid]
+	if !exist {
+		return "", errors.New(fmt.Sprintf("MID %s Not Supported", mid))
+	}
+
+	return rev.(string), nil
 }
