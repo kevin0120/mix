@@ -1,9 +1,8 @@
 import {STEP_ACTIONS} from './constants';
 
 export default {
-  submit:(result)=>({
+  submit:()=>({
     type:STEP_ACTIONS.SUBMIT,
-    result
   }),
   input:(input)=>({
     type:STEP_ACTIONS.INPUT,

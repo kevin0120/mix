@@ -60,12 +60,12 @@ function ScannerStep({
   const classes = makeStyles(styles)();
   useEffect(() => {
     bindAction(
-      <Button onClick={() => submit()} disabled={!isCurrent} color="primary">
+      <Button onClick={() => submit(result)} disabled={!isCurrent} color="primary">
         完成
       </Button>
     );
     return () => bindAction(null);
-  }, [bindAction, isCurrent, step, submit]);
+  }, [bindAction, isCurrent, result, step, submit]);
 
   return (
     <div className={classes.root}>

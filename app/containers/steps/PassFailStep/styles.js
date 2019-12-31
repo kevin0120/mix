@@ -9,7 +9,9 @@ export default {
     padding: '20px'
   },
   text: {
-    marginBottom: '70px'
+    marginBottom: '70px',
+    display: 'flex',
+    flexDirection: 'row'
   },
   buttonsContainer: {
     width: '100%',

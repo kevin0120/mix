@@ -1,4 +1,4 @@
-import { call, put, take } from 'redux-saga/effects';
+import { call, put, take, actionChannel } from 'redux-saga/effects';
 import { orderActions } from '../order/action';
 import { STEP_ACTIONS, STEP_STATUS } from './constants';
 import { CommonLog } from '../../common/utils';
@@ -21,11 +21,12 @@ function* enteringState(config) {
 
 function* doingState(config) {
   try {
+    const stepChannel = yield actionChannel([
+      STEP_ACTIONS.INPUT,
+      STEP_ACTIONS.SUBMIT
+    ]);
     while (true) {
-      const action = yield take([
-        STEP_ACTIONS.INPUT,
-        STEP_ACTIONS.SUBMIT
-      ]);
+      const action = yield take(stepChannel);
       switch (action.type) {
         case STEP_ACTIONS.INPUT:
           yield call(this.updateData, d => ({
@@ -39,15 +40,21 @@ function* doingState(config) {
                   action &&
                   action.input &&
                   action.input.time.toLocaleString(),
-                body: action?.input?.data
+                body: String(action?.input?.data)
               },
               ...(d?.timeLine || [])
             ]
           }));
           break;
-        case STEP_ACTIONS.SUBMIT:
+        case STEP_ACTIONS.SUBMIT: {
+          const { result } = action;
+          yield call(this.updateData, d => ({
+            ...(d || {}),
+            result
+          }));
           yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED));
           break;
+        }
         default:
           break;
       }
