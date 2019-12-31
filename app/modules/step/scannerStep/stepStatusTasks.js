@@ -13,7 +13,7 @@ function* enteringState() {
     yield all(
       scanners.map(s => {
         this._listeners.push(
-          s.addListener(() => true, stepActions.getValue)
+          s.addListener(() => true, stepActions.input)
         );
         return call(s.Enable);
       })

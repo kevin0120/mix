@@ -62,9 +62,9 @@ export default function* root(): Saga<void> {
 }
 
 function* setStepStatus({
-                          step,
-                          status
-                        }: {
+  step,
+  status
+}: {
   step: IWorkable,
   status: tAnyStatus
 }) {
@@ -96,7 +96,9 @@ function onNewScanner({ scanner }) {
     // TODO: filter scanner input
     scanner.Enable();
     scanner.addListener(
-      () => true,
+      (input, state) => {
+        return !workingOrder(state.order);
+      },
       input => orderActions.tryViewCode(input.data)
     );
   } catch (e) {
@@ -105,13 +107,13 @@ function onNewScanner({ scanner }) {
 }
 
 function* reportFinish({
-                         code,
-                         trackCode,
-                         productCode,
-                         workCenterCode,
-                         dateComplete,
-                         operation
-                       }) {
+  code,
+  trackCode,
+  productCode,
+  workCenterCode,
+  dateComplete,
+  operation
+}) {
   try {
     yield call(
       orderReportFinishApi,
@@ -140,10 +142,10 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-                           order,
-                           code,
-                           config
-                         }: {
+  order,
+  code,
+  config
+}: {
   order: IOrder,
   code: string | number
 }) {
@@ -255,9 +257,9 @@ function* getOrderList() {
 }
 
 function* tryViewOrder({
-                         order,
-                         code
-                       }: {
+  order,
+  code
+}: {
   order: IOrder,
   code: string | number
 }) {
@@ -324,7 +326,7 @@ function* viewOrder({ order }: { order: IOrder }) {
       doable(order);
     yield put(
       dialogActions.dialogShow({
-        maxWidth:'lg',
+        maxWidth: 'lg',
         buttons: [
           {
             label: 'Common.Close',

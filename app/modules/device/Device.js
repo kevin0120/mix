@@ -1,7 +1,7 @@
 // @flow
 import { isEmpty, isNil, isString } from 'lodash-es';
 import type { Saga } from 'redux-saga';
-import { put, all } from 'redux-saga/effects';
+import { put, all, select } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import type {
   tInput,
@@ -90,7 +90,8 @@ export default class Device extends CommonExternalEntity implements IDevice {
         source: this.Name,
         time: new Date()
       };
-      const actions = this._inputListener.check(input);
+      const state = yield select();
+      const actions = this._inputListener.check(input, state);
 
       yield all(actions.map(a => put(a)));
     } catch (e) {

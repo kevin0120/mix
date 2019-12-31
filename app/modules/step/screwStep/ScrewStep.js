@@ -3,6 +3,7 @@ import { ClsOrderOperationPoints } from './classes/ClsOrderOperationPoints';
 import type { IWorkStep } from '../interface/IWorkStep';
 import type { IScrewStep } from './interface/IScrewStep';
 import { onLeave, screwStepStatusTasksMixin } from './stepStatusTasks';
+import type { IWorkable } from '../../workable/IWorkable';
 
 
 const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
@@ -24,7 +25,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       super(...args);
       this.isValid = true; // 设置此工步是合法的
       this._onLeave = this._onLeave.bind(this);
-      this._statusTasks=screwStepStatusTasksMixin(this._statusTasks);
+      (this: IWorkable)._statusTasks = screwStepStatusTasksMixin((this: IWorkable)._statusTasks);
     }
 
     get points() {
