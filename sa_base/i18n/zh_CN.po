@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-31 07:29+0000\n"
-"PO-Revision-Date: 2019-12-31 07:29+0000\n"
+"POT-Creation-Date: 2019-12-31 08:36+0000\n"
+"PO-Revision-Date: 2019-12-31 08:36+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -68,7 +68,7 @@ msgstr "地址"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_alert_ids
 msgid "Alerts"
-msgstr "警告"
+msgstr "警报"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_can_do_redo
@@ -123,6 +123,11 @@ msgstr "拧紧程序"
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_form_inherit_mrp
 msgid "Assembly Process(JOB)"
 msgstr "拧紧程序号(JOB)"
+
+#. module: sa_base
+#: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_form_inherit_mrp
+msgid "Assembly Process(JOB)"
+msgstr "Assembly Process(JOB)"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_maintenance_equipment_category
@@ -213,6 +218,16 @@ msgstr "可重做"
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
 msgid "Can Skip"
 msgstr "可跳过"
+
+#. module: sa_base
+#: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
+msgid "Can Redo"
+msgstr "Can Redo"
+
+#. module: sa_base
+#: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
+msgid "Can Skip"
+msgstr "Can Skip"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
@@ -1295,7 +1310,7 @@ msgstr "拣货类型"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_picture
 msgid "Picture"
-msgstr "Picture"
+msgstr "图片"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
@@ -1428,7 +1443,7 @@ msgstr "程序设置(Pset)"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_program_id
 msgid "Program id"
-msgstr "程序号(pset)"
+msgstr "Program id"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_proposal_key_num
@@ -1920,7 +1935,12 @@ msgstr "拧紧轴"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_tool_id
 msgid "Tightening Tool(Gun/Wrench)"
-msgstr "拧紧工具(拧紧枪/扳手)"
+msgstr "Tightening Tool(Gun/Wrench)"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_group_tool_tool_id
+msgid "Tightening Tool(Tightening Gun/Wrench)"
+msgstr "Tightening Tool(Tightening Gun/Wrench)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_group_tool_tool_id
@@ -2003,6 +2023,11 @@ msgstr "追踪号(VIN/序列号)"
 #: selection:product.template,sa_type:0
 msgid "Train Carriage"
 msgstr "Train Carriage"
+
+#. module: sa_base
+#: model:ir.ui.view,arch_db:sa_base.sa_mrp_production_filter_inherit
+msgid "Track Number"
+msgstr "追踪码"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_type
@@ -2154,7 +2179,7 @@ msgstr "工作中心名称"
 #: model:ir.model.fields,field_description:sa_base.field_dispatch_mrp_workorder_workcenter_ids
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_workcenter_ids
 msgid "Work Center Set"
-msgstr "Work Center Set"
+msgstr "工位组"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_routing_workcenter
@@ -2193,12 +2218,12 @@ msgstr "Work Centers allow you to create and manage manufacturing\n"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_group_tool_workcenter_id
 msgid "Work Centre"
-msgstr "Work Centre"
+msgstr "工作中心"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_group_tool_workgroup_id
 msgid "Work Group"
-msgstr "Work Group"
+msgstr "工位组"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_workorder
@@ -2245,6 +2270,7 @@ msgstr "工段"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_step_action
+#: model:ir.ui.menu,name:sa_base.menu_mrp_step_form_action
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_step_search_view
 msgid "Work Step"
@@ -2297,7 +2323,7 @@ msgstr "工作记录表"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_worksheet_page
 msgid "Worksheet Page"
-msgstr "Worksheet Page"
+msgstr "工艺文档"
 
 #. module: sa_base
 #: model:ir.actions.act_window,help:sa_base.product_product_action_screw
