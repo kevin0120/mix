@@ -29,10 +29,24 @@ const (
 	DEFAULT_TCP_KEEPALIVE = time.Duration(5 * time.Second)
 )
 
-//type ToolDispatch struct {
-//	resultDispatch *utils.Dispatcher
-//	curveDispatch  *utils.Dispatcher
-//}
+func NewController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) (tightening_device.ITighteningController, error) {
+
+	var c IOpenProtocolController
+	switch deviceConfig.Model {
+	case tightening_device.ModelDesoutterCvi3:
+		c = &CVI3Controller{}
+	case tightening_device.ModelDesoutterCvi2:
+		c = &CVI2Controller{}
+	case tightening_device.ModelDesoutterDeltaWrench:
+		c = &WrenchController{}
+	default:
+		return nil, errors.New(fmt.Sprintf("Controller Model:%s Not Found", deviceConfig.Model))
+	}
+
+	controllerInstance := c.defaultControllerGet()
+	controllerInstance.initController(deviceConfig, d, service, dp)
+	return controllerInstance, nil
+}
 
 type ControllerSubscribe func() error
 
@@ -75,18 +89,19 @@ type TighteningController struct {
 	device.BaseDevice
 }
 
-func defaultControllerGet() *TighteningController {
-	return &TighteningController{
-		buffer:            make(chan []byte, 1024),
-		closing:           make(chan chan struct{}),
-		keepPeriod:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
-		reqTimeout:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
-		getToolInfoPeriod: time.Duration(OpenProtocolDefaultGetTollInfoPeriod),
-		protocol:          tightening_device.TIGHTENING_OPENPROTOCOL,
-		dispatcherMap:     map[string]dispatcherbus.DispatcherMap{},
-		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
-		sockClients:       map[string]*socket_writer.SocketWriter{},
-	}
+func (c *TighteningController) defaultControllerGet() *TighteningController {
+
+	c.buffer = make(chan []byte, 1024)
+	c.closing = make(chan chan struct{})
+	c.keepPeriod = time.Duration(OpenProtocolDefaultKeepAlivePeriod)
+	c.reqTimeout = time.Duration(OpenProtocolDefaultKeepAlivePeriod)
+	c.getToolInfoPeriod = time.Duration(OpenProtocolDefaultGetTollInfoPeriod)
+	c.protocol = tightening_device.TIGHTENING_OPENPROTOCOL
+	c.dispatcherMap = map[string]dispatcherbus.DispatcherMap{}
+	c.tempResultCurve = map[int]*tightening_device.TighteningCurve{}
+	c.sockClients = map[string]*socket_writer.SocketWriter{}
+
+	return c
 }
 func (c *TighteningController) createToolsByConfig() error {
 	conf := c.deviceConf
@@ -105,10 +120,7 @@ func (c *TighteningController) createToolsByConfig() error {
 	return nil
 }
 
-// TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
-func NewController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) *TighteningController {
-
-	c := defaultControllerGet()
+func (c *TighteningController) initController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) {
 	c.BaseDevice = device.CreateBaseDevice(deviceConfig.Model, d, service)
 	c.diag = d
 	c.deviceConf = deviceConfig
@@ -122,7 +134,6 @@ func NewController(deviceConfig *tightening_device.TighteningDeviceConfig, d Dia
 	if err := c.createToolsByConfig(); err != nil {
 		d.Error("NewController createToolsByConfig Error", err)
 	}
-	return c
 }
 
 func (c *TighteningController) UpdateToolStatus(status string) {
@@ -222,7 +233,7 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 	return reply, nil
 }
 
-func CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
+func (c *TighteningController) CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
 	lenO := len(original)
 	data := make([]byte, lenO, lenO) // 最大只会这些数据
 	writeOffset := 0

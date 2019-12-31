@@ -16,6 +16,7 @@ import (
 
 const (
 	ModelDesoutterCvi3        = "ModelDesoutterCvi3"
+	ModelDesoutterCvi2        = "ModelDesoutterCvi2"
 	ModelDesoutterDeltaWrench = "ModelDesoutterDeltaWrench"
 )
 
