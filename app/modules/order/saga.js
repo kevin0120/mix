@@ -332,7 +332,7 @@ function* viewOrder({ order }: { order: IOrder }) {
       doable(order);
     yield put(
       dialogActions.dialogShow({
-        maxWidth: 'lg',
+        maxWidth: 'md',
         buttons: [
           {
             label: 'Common.Close',

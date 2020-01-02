@@ -88,7 +88,7 @@ function customDialog(props: Props) {
           <DialogActions>
             {
               buttons && buttons.map((b, idx) => b ?
-                <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} regular size='lg'
+                <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} size='lg'
                         className={classes.diagButton} fullWidth>
                   {t(b.label || '')}
                 </Button> : null) || null

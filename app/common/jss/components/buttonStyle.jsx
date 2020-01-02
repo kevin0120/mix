@@ -399,7 +399,7 @@ const buttonStyle = (theme) => ({
   },
   lg: {
     padding: '1.125rem 2.25rem',
-    fontSize: '0.875rem',
+    fontSize: '1.125rem',
     lineHeight: '1.333333'
     // borderRadius: '0.2rem'
   },
@@ -466,7 +466,15 @@ const buttonStyle = (theme) => ({
     }
   },
   regular: {
-    padding: '12px'
+    '&$lg': {
+      padding: '1.125rem 1.125rem',
+    },
+    '&$md': {
+      padding: '0.875rem 0.875rem',
+    },
+    '&$sm': {
+      padding: '0.40625rem 0.40625rem',
+    },
   },
   fileButton: {
     display: 'inline-block'
