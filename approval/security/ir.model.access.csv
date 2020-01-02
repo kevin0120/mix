@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_approval_approval,approval.approval.user,model_approval_approval,approval.group_approval_user,1,1,1,0
+access_approval_approval_manager,approval.approval.manager,model_approval_approval,approval.group_approval_manager,1,1,1,1
+access_approval_category,approval.category.user,model_approval_category,approval.group_approval_user,1,0,0,0
+access_approval_category_manager,approval.category.manager,model_approval_category,approval.group_approval_manager,1,1,1,1
+access_approval_flowline_user,approval.flow.line.user,model_approval_flow_line,approval.group_approval_user,1,0,0,0
+access_approval_flowline_manager,approval.flow.line.manager,model_approval_flow_line,approval.group_approval_manager,1,1,1,1
+access_approval_flowl_user,approval.flow.user,model_approval_flow,approval.group_approval_user,1,1,1,1
+access_approval_flowl_manager,approval.flow.manager,model_approval_flow,approval.group_approval_manager,1,1,1,1
+access_mail_alias,mail.alias,mail.model_mail_alias,approval.group_approval_manager,1,1,1,1
