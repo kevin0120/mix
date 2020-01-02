@@ -306,6 +306,11 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       return ((ret: any): Array<IWorkStep>);
     }
 
+    clearData(){
+      this._steps = [];
+      this._workingIndex = 0;
+    }
+
     * _onLeave() {
       try {
         const { workCenterMode } = yield select();

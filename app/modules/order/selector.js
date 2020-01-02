@@ -63,8 +63,8 @@ export const isCancel = (order: ?IOrder): boolean =>
 export const doable = (order: ?IOrder): boolean =>
   order?.status === ORDER_STATUS.WIP ||
   order?.status === ORDER_STATUS.TODO ||
-  order?.status === ORDER_STATUS.DONE ||
-  order?.status === ORDER_STATUS.FAIL ||
+  // order?.status === ORDER_STATUS.DONE ||
+  // order?.status === ORDER_STATUS.FAIL ||
   (order && !order.status) ||
   false;
 

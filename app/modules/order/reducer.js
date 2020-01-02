@@ -113,6 +113,21 @@ const orderReducer: {
       ...state,
       viewingIndex: vIndex
     };
+  },
+  [ORDER.CLEAR_DATA](state, { order }) {
+    const vOrder = viewingOrder(state);
+    const wOrder = workingOrder(state);
+    if(wOrder!==order){
+      order.clearData();
+    }
+    if (vOrder === order) {
+      return {
+        ...state,
+        viewingIndex: 0,
+        viewingOrder: null
+      };
+    }
+    return state;
   }
 };
 

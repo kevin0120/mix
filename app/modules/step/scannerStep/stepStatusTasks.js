@@ -5,6 +5,7 @@ import { deviceType } from '../../deviceManager/constants';
 import { orderActions } from '../../order/action';
 import { CommonLog } from '../../../common/utils';
 import stepActions from '../actions';
+import { stepDataApi } from '../../../api/order';
 
 function* enteringState() {
   try {
@@ -29,12 +30,17 @@ export const scannerStepStatusMixin = (superTasks) => ({
   [STEP_STATUS.ENTERING]: enteringState
 });
 
-export function onLeave() {
-  (this._scanners || []).forEach(s => {
-    this._listeners.forEach(l => {
-      s.removeListener(l);
+export function *onLeave() {
+  try{
+    yield call(stepDataApi, this.id, this._data);
+    (this._scanners || []).forEach(s => {
+      this._listeners.forEach(l => {
+        s.removeListener(l);
+      });
     });
-  });
-  this._scanners = [];
-  this._listeners = [];
+    this._scanners = [];
+    this._listeners = [];
+  }catch(e){
+    CommonLog.lError(e,{at:'scanner step onLeave'})
+  }
 }

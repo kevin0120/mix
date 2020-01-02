@@ -8,6 +8,7 @@ import dialogActions from '../../dialog/action';
 import type { IDevice } from '../../device/IDevice';
 import { getDevice } from '../../deviceManager/devices';
 import ClsIOModule from '../../device/io/ClsIOModule';
+import { stepDataApi } from '../../../api/order';
 
 function* enteringState(config) {
   try {
@@ -160,6 +161,7 @@ export const materialStepStatusMixin = (superTasks) => ({
 
 export function* onLeave(): Saga<void> {
   try {
+    yield call(stepDataApi, this.id, this._data);
     yield all(
       [...this._io].map(io =>
         call(io.closeIO, [...this._ports].filter(p => io.hasPort(p)))

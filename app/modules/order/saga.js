@@ -282,7 +282,13 @@ function* tryViewOrder({
     //   yield put(notifierActions.enqueueSnackbar('Warn', `工单不存在: ${code}`));
     //   return;
     // }
-    yield put(push('/app/working'));
+    // yield put(push('/app/working'));
+    const vOrder: IOrder = yield select(s => viewingOrder(s.order));
+    const WIPOrder: IOrder = yield select(s => workingOrder(s.order));
+
+    if (WIPOrder !== vOrder) {
+      yield put(orderActions.clearData(vOrder));
+    }
     yield call(getOrderDetail, { code: triggerCode });
   } catch (e) {
     yield put(loadingActions.stop());

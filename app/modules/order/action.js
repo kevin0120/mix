@@ -120,6 +120,10 @@ export const orderActions = Object.freeze({
     type: ORDER.NEW_SCANNER,
     scanner
   }),
+  clearData: (order) => ({
+    type: ORDER.CLEAR_DATA,
+    order
+  }),
   reportFinish: (
     code: string,
     trackCode: string,

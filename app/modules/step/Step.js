@@ -1,10 +1,10 @@
 // @flow
 import type { Saga } from 'redux-saga';
-import { call } from 'redux-saga/effects';
+import { all, call } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import type { IWorkStep } from './interface/IWorkStep';
 import type { IWorkable } from '../workable/IWorkable';
-import { orderStepUpdateApi } from '../../api/order';
+import { orderStepUpdateApi, stepDataApi } from '../../api/order';
 import type { tStep, tStepStatus } from './interface/typeDef';
 import { STEP_STATUS, stepTypeKeys } from './constants';
 import { stepStatusTasks } from './stepStatusTasks';
@@ -121,6 +121,16 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
         yield call(orderStepUpdateApi, this.id, status);
       } catch (e) {
         CommonLog.lError(e);
+      }
+    }
+
+    *_onLeave() {
+      try {
+        yield call(stepDataApi, this.id, this._data);
+      } catch (e) {
+        CommonLog.lError(e, {
+          at: `step (${String((this: IWorkable)._code)})._onLeave`
+        });
       }
     }
   };
