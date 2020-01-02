@@ -67,9 +67,8 @@ function* doingState() {
     [...this._items].forEach(i => {
       listeners.push({
         listener: i.io.addListener(
-          input =>
-            i.in === input.port &&
-            ioTriggerMode.falling === input.triggerMode,
+          input => i.in === input.data.port &&
+            ioTriggerMode.falling === input.data.triggerMode,
           () => actions.item(i)
         ),
         io: i.io

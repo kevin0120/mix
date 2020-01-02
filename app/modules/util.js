@@ -1,7 +1,6 @@
 // @flow
 import type { Saga, TakeableChannel, Effect } from 'redux-saga';
 import { fork, take } from 'redux-saga/effects';
-import type { Action } from 'redux';
 import { remove } from 'lodash-es';
 import type {
   tAction,

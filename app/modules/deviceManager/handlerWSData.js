@@ -52,7 +52,7 @@ export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
         // try make a new device if dv doesn't exist
         if (!dv) {
           dv = newDevice(type, `${type}-${sn}`, sn, {
-            config,
+            ...config,
             invisible
           }, dData, children);
           newDeviceActions = [

@@ -155,7 +155,6 @@ export default class ClsIOModule extends Device implements IIOModule {
         return;
       }
 
-      this._storeDataField(data);
       const inputs = this._getIOChanges(data).map(c => ({
         data: {
           port: c.port,
@@ -164,6 +163,7 @@ export default class ClsIOModule extends Device implements IIOModule {
         source: this.Name,
         time: new Date()
       }));
+      this._storeDataField(data);
 
       let actions = [];
       inputs.forEach(i => {
