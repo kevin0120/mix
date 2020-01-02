@@ -84,6 +84,24 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
       return this._text;
     }
 
+    _toleranceMax = null;
+
+    get toleranceMax() {
+      return this._toleranceMax;
+    }
+
+    _toleranceMin = null;
+
+    get toleranceMin() {
+      return this._toleranceMin;
+    }
+
+    _target = null;
+
+    get target() {
+      return this._target;
+    }
+
     // eslint-disable-next-line class-methods-use-this
     update(stepData: ?$Shape<tStep>) {
       if (!stepData) {
@@ -101,11 +119,17 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
         data,
         status,
         consume_product: consumeProduct,
-        text
+        text,
+        tolerance_min,
+        tolerance_max,
+        target
       } = stepData || {};
       this._sequence = sequence;
       this._type = testType;
       this._image = image;
+      this._toleranceMin = tolerance_min;
+      this._toleranceMax = tolerance_max;
+      this._target = target;
       this._skippable = skippable;
       this._undoable = undoable;
       this._failureMsg = failureMsg;

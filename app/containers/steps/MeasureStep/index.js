@@ -35,7 +35,10 @@ const mapState = (state, props: tOP): tSP => ({
   ...props,
   type: stepPayload(viewingStep(state.order))?.type || '',
   payload: stepPayload(viewingStep(state.order)),
-  value: stepData(viewingStep(state.order)).result
+  value: stepData(viewingStep(state.order)).result,
+  target:viewingStep(state.order).target,
+  max:viewingStep(state.order).toleranceMax,
+  min:viewingStep(state.order).toleranceMin,
 });
 
 const mapDispatch: tDP = {
