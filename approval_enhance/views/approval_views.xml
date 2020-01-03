@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="approval_category_view_form_inherit" model="ir.ui.view">
+        <field name="name">approval.category.form.inherit</field>
+        <field name="model">approval.category</field>
+        <field name="inherit_id" ref="approval.approval_category_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//group[@name='Information']" position="inside">
+                <group>
+                    <field name="model_id" groups="approval.group_approval_manager"/>
+                    <field name='res_model' groups="approval.group_approval_manager" invisible="1"/>
+                    <field name="finish_action" groups="approval.group_approval_manager"/>                    
+                </group>
+                <group>
+                    <field name="condition" groups="approval.group_approval_manager"/>
+                    <field name="edit_group_id" groups="approval.group_approval_manager"/>
+                    <field name="back_pre_step" />
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='flow_line_ids']/tree/field[@name='sequence']" position="after">
+                <field name="name" required="1" string="审批节点" help="定义审批节点名，如'销售总监审批'"/>
+                <field name="model_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='flow_line_ids']/tree/field[@name='employee_id']" position="after">
+                <field name="condition_employee" attrs="{'required':[('employee_id','=',False)]}" />
+            </xpath>
+            <xpath expr="//field[@name='flow_line_ids']/tree/field[@name='employee_id']" position="replace">
+                <field name="employee_id" attrs="{'required':['|',('condition_employee','=',False),('model_id','=',False)]}" />
+            </xpath>
+            <xpath expr="//field[@name='flow_line_ids']/tree/field[@name='category_id']" position="after">
+                <field name="condition" help="python表达式，如：True or record.amount_total &gt; 10000。单据满足此条件时，执行此审批环节。默认执行。"  />
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="view_approval_request_form_inherit" model="ir.ui.view">
+        <field name="name">approval.approval.form.inherit</field>
+        <field name="model">approval.approval</field>
+        <field name="inherit_id" ref="approval.view_approval_request_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='oe_button_box']" position="inside">
+                <button name="open_to_approval_object" type="object"  string="业务单" class="oe_stat_button" icon="fa-file"  attrs="{'invisible':[('res_model','=',False)]}">
+                    <field name='res_model' invisible="1"/>
+                </button>
+            </xpath> 
+            <xpath expr="//button[@name='action_canceled']" position="attributes">
+                <attribute name='attrs'>{'invisible':['|',('have_operation_access','=',False),('state','=','cancel')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='stage_ids']/tree/field[@name='employee_id']" position="after">
+                <field name="real_emplyee_id" />
+            </xpath>            
+        </field>
+    </record>
+    
+    <record id="view_approval_requests_tree_inherit" model="ir.ui.view">
+        <field name="name">approval.approval.tree.inherit</field>
+        <field name="model">approval.approval</field>
+        <field name="inherit_id" ref="approval.view_approval_requests_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='flow_id']" position="attributes">
+                <attribute name='string'>审批节点</attribute>
+            </xpath>
+            <xpath expr="//field[@name='flow_id']" position="after">
+                <field name='employee_id'/>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <button name='open_to_approval_object' string="业务单" type="object"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_approval_requests_filter_inherit" model="ir.ui.view">
+        <field name="name">approval.approval.list.select.inherit</field>
+        <field name="model">approval.approval</field>
+        <field name="inherit_id" ref="approval.view_approval_requests_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='todo_requests']" position="attributes">
+                <attribute name="domain">[('state','in',('start',)),'|',('flow_id.employee_id.user_id','=',uid),'&amp;',('flow_id.employee_id.agent_enable','=',True),('flow_id.employee_id.agent_user_id.user_id','=',uid)]</attribute>
+            </xpath>                     
+        </field>
+    </record>
+</odoo>

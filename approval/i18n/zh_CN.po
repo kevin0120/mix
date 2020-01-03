@@ -1,0 +1,951 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* approval
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-11-13 06:20+0000\n"
+"PO-Revision-Date: 2017-11-13 06:20+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: approval
+#: model:mail.template,body_html:approval.approval_approve_template_mail
+msgid "\n"
+"\n"
+"\n"
+"<div style='background-image:url(/approval/static/img/green-approved-stamp.png);background-size:75px 55px;\n"
+"background-repeat:no-repeat;padding:30px;margin-bottom:20px'>\n"
+"<p style='font-size:16px;co lor;font-weight:bold'>Dear ${object.owner_user_id.user_id.name}\n"
+"% if object.owner_user_id.user_id.parent_id:\n"
+"    (<i>${object.owner_user_id.user_id.parent_id.name}</i>)\n"
+"% endif\n"
+":</p>\n"
+"<p style='font-size:14px;'>\n"
+"Your Approval <span style='color:rgb(197, 193, 193)'>${object.name}</span> have been <span style='color:rgb(197, 193, 193)'>Approved</span> by ${(user.name or '')|safe} !\n"
+"</p>\n"
+"</div>\n"
+"<p>\n"
+"Reason:\n"
+"\n"
+"from ${user.name}.\n"
+"</p>\n"
+"\n"
+"Best regards,\n"
+"${user.signature | safe}\n"
+"Sent by ${user.company_id.name}\n"
+""
+msgstr "\n"
+"\n"
+"\n"
+"<div style='background-image:url(/approval/static/img/green-approved-stamp.png);background-size:75px 55px;\n"
+"background-repeat:no-repeat;padding:30px;margin-bottom:20px'>\n"
+"<p style='font-size:16px;co lor;font-weight:bold'>Dear ${object.owner_user_id.user_id.name}\n"
+"% if object.owner_user_id.user_id.parent_id:\n"
+"    (<i>${object.owner_user_id.user_id.parent_id.name}</i>)\n"
+"% endif\n"
+":</p>\n"
+"<p style='font-size:14px;'>\n"
+"Your Approval <span style='color:rgb(197, 193, 193)'>${object.name}</span> have been <span style='color:rgb(197, 193, 193)'>Approved</span> by ${(user.name or '')|safe} !\n"
+"</p>\n"
+"</div>\n"
+"<p>\n"
+"Reason:\n"
+"\n"
+"from ${user.name}.\n"
+"</p>\n"
+"\n"
+"Best regards,\n"
+"${user.signature | safe}\n"
+"Sent by ${user.company_id.name}\n"
+""
+
+#. module: approval
+#: model:mail.template,body_html:approval.approval_reject_template_mail
+msgid "\n"
+"\n"
+"<div style='background-image:url(/approval/static/img/red-rejected-stamp.png);background-size:75px 55px;\n"
+"background-repeat:no-repeat;padding:30px;margin-bottom:20px'>\n"
+"<p style='font-size:16px;co lor;font-weight:bold'>Dear ${object.owner_user_id.user_id.name}\n"
+"% if object.owner_user_id.user_id.parent_id:\n"
+"    (<i>${object.owner_user_id.user_id.parent_id.name}</i>)\n"
+"% endif\n"
+",</p>\n"
+"<p style='font-size:14px;'>\n"
+"Your Approval <span style='color:rgb(197, 193, 193)'>${object.name}</span> have been <span style='color:rgb(197, 193, 193)'>Rejected</span> by ${(user.name or '')|safe} !\n"
+"</p>\n"
+"</div>\n"
+"<p>\n"
+"Reason:\n"
+"<br/>\n"
+"You can replace your reason here!\n"
+"<br/>\n"
+"from ${user.name}.\n"
+"</p>\n"
+"\n"
+"Best regards,\n"
+"<br/>\n"
+"${user.signature | safe}\n"
+"Sent by ${user.company_id.name}\n"
+""
+msgstr "\n"
+"\n"
+"<div style='background-image:url(/approval/static/img/red-rejected-stamp.png);background-size:75px 55px;\n"
+"background-repeat:no-repeat;padding:30px;margin-bottom:20px'>\n"
+"<p style='font-size:16px;co lor;font-weight:bold'>Dear ${object.owner_user_id.user_id.name}\n"
+"% if object.owner_user_id.user_id.parent_id:\n"
+"    (<i>${object.owner_user_id.user_id.parent_id.name}</i>)\n"
+"% endif\n"
+",</p>\n"
+"<p style='font-size:14px;'>\n"
+"Your Approval <span style='color:rgb(197, 193, 193)'>${object.name}</span> have been <span style='color:rgb(197, 193, 193)'>Rejected</span> by ${(user.name or '')|safe} !\n"
+"</p>\n"
+"</div>\n"
+"<p>\n"
+"Reason:\n"
+"<br/>\n"
+"You can replace your reason here!\n"
+"<br/>\n"
+"from ${user.name}.\n"
+"</p>\n"
+"\n"
+"Best regards,\n"
+"<br/>\n"
+"${user.signature | safe}\n"
+"Sent by ${user.company_id.name}\n"
+""
+
+#. module: approval
+#: model:mail.template,body_html:approval.approval_template_needaction_mail
+msgid "\n"
+"<div summary=\"o_mail_template\" style=\"padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777\">\n"
+"% set colors = {'draft': 'grey', 'start': 'green', 'approved': '#FFFF00',  'rejected': 'red'}\n"
+"    <table cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;border-collapse:collapse;background:inherit;color:inherit\">\n"
+"        <tbody><tr>\n"
+"            <td valign=\"center\" width=\"200\" style=\"padding:10px 10px 10px 5px;font-size: 12px\">\n"
+"                <img src=\"/logo.png\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${user.company_id.name}\">\n"
+"            </td>\n"
+"            <td valign=\"center\" align=\"right\" width=\"340\" style=\"padding:10px 10px 10px 5px; font-size: 12px;\">\n"
+"                <p>\n"
+"                    <a href=\"/approval/view?db=${'dbname' in ctx and ctx['dbname'] or ''}&token=${object.access_token}&action=${'action_id' in ctx and ctx['action_id'] or ''}&active_id=${'active_id' in ctx and ctx['active_id'] or ''}\" style=\"padding: 5px 10px; font-size: 12px; line-height: 18px; color: #FFFFFF; border-color:#875A7B; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius:3px\">View</a>\n"
+"                </p>\n"
+"            </td>\n"
+"        </tr></tbody>\n"
+"    </table>\n"
+"    <table cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;border-collapse:collapse;background:inherit;color:inherit\">\n"
+"        <tbody><tr>\n"
+"            <td valign=\"top\" style=\"width:600px; padding:10px 10px 10px 5px;\">\n"
+"                <div>\n"
+"                    <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0;margin:15px auto;padding:0\">\n"
+"                </div>\n"
+"            </td>\n"
+"        </tr></tbody>\n"
+"    </table>\n"
+"</div>\n"
+"<div style=\"padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777\">\n"
+"    <table cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;border-collapse:collapse;background:inherit;color:inherit\">\n"
+"        <tbody><tr>\n"
+"            <td style=\"padding:10px 10px 10px 5px;font-size: 14px;\">\n"
+"                <p style=\"font-size: 20px; text-align: center;\">Invitation to <strong>${object.name}</strong></p>\n"
+"                <p>\n"
+"                    <strong>Dear ${object.employee_id.name}</strong>,<br />\n"
+"                    ${user.name} invited you for the ${object.approval_id.name}.</p>\n"
+"                <table style=\"margin-top: 20px;\"><tr>\n"
+"                    <td width=\"20px;\"/>\n"
+"                    <td>\n"
+"                        <p>Details of the approval</p>\n"
+"                        <ul>\n"
+"                        % if object.description :\n"
+"                            <li>Description: ${object.approval_id.description}</li>\n"
+"                        % endif\n"
+"                        <li>Approval Flows\n"
+"                        <ul>\n"
+"                        % for flow in object.approval_id.stage_ids:\n"
+"                            <li>\n"
+"                                <div style=\"display:inline-block; border-radius: 50%; width:10px; height:10px;background:${colors[flow.state] or 'white'};\"></div>\n"
+"                                % if flow.id != object.id:\n"
+"                                <span style=\"margin-left:5px\">${flow.employee_id.name}</span>\n"
+"                                % else:\n"
+"                                <span style=\"margin-left:5px\">You</span>\n"
+"                                % endif\n"
+"                            </li>\n"
+"                        % endfor\n"
+"                        </ul></li>\n"
+"                        </ul>\n"
+"                    </td>\n"
+"                </tr></table>\n"
+"            </td>\n"
+"        </tr></tbody>\n"
+"    </table>\n"
+"</div>"
+msgstr "\n"
+"<div summary=\"o_mail_template\" style=\"padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777\">\n"
+"% set colors = {'draft': 'grey', 'start': 'green', 'approved': '#FFFF00',  'rejected': 'red'}\n"
+"    <table cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;border-collapse:collapse;background:inherit;color:inherit\">\n"
+"        <tbody><tr>\n"
+"            <td valign=\"center\" width=\"200\" style=\"padding:10px 10px 10px 5px;font-size: 12px\">\n"
+"                <img src=\"/logo.png\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${user.company_id.name}\">\n"
+"            </td>\n"
+"            <td valign=\"center\" align=\"right\" width=\"340\" style=\"padding:10px 10px 10px 5px; font-size: 12px;\">\n"
+"                <p>\n"
+"                    <a href=\"/approval/view?db=${'dbname' in ctx and ctx['dbname'] or ''}&token=${object.access_token}&action=${'action_id' in ctx and ctx['action_id'] or ''}&active_id=${'active_id' in ctx and ctx['active_id'] or ''}\" style=\"padding: 5px 10px; font-size: 12px; line-height: 18px; color: #FFFFFF; border-color:#875A7B; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer; white-space: nowrap; background-image: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius:3px\">View</a>\n"
+"                </p>\n"
+"            </td>\n"
+"        </tr></tbody>\n"
+"    </table>\n"
+"    <table cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;border-collapse:collapse;background:inherit;color:inherit\">\n"
+"        <tbody><tr>\n"
+"            <td valign=\"top\" style=\"width:600px; padding:10px 10px 10px 5px;\">\n"
+"                <div>\n"
+"                    <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0;margin:15px auto;padding:0\">\n"
+"                </div>\n"
+"            </td>\n"
+"        </tr></tbody>\n"
+"    </table>\n"
+"</div>\n"
+"<div style=\"padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777\">\n"
+"    <table cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;border-collapse:collapse;background:inherit;color:inherit\">\n"
+"        <tbody><tr>\n"
+"            <td style=\"padding:10px 10px 10px 5px;font-size: 14px;\">\n"
+"                <p style=\"font-size: 20px; text-align: center;\">Invitation to <strong>${object.name}</strong></p>\n"
+"                <p>\n"
+"                    <strong>Dear ${object.employee_id.name}</strong>,<br />\n"
+"                    ${user.name} invited you for the ${object.approval_id.name}.</p>\n"
+"                <table style=\"margin-top: 20px;\"><tr>\n"
+"                    <td width=\"20px;\"/>\n"
+"                    <td>\n"
+"                        <p>Details of the approval</p>\n"
+"                        <ul>\n"
+"                        % if object.description :\n"
+"                            <li>Description: ${object.approval_id.description}</li>\n"
+"                        % endif\n"
+"                        <li>Approval Flows\n"
+"                        <ul>\n"
+"                        % for flow in object.approval_id.stage_ids:\n"
+"                            <li>\n"
+"                                <div style=\"display:inline-block; border-radius: 50%; width:10px; height:10px;background:${colors[flow.state] or 'white'};\"></div>\n"
+"                                % if flow.id != object.id:\n"
+"                                <span style=\"margin-left:5px\">${flow.employee_id.name}</span>\n"
+"                                % else:\n"
+"                                <span style=\"margin-left:5px\">You</span>\n"
+"                                % endif\n"
+"                            </li>\n"
+"                        % endfor\n"
+"                        </ul></li>\n"
+"                        </ul>\n"
+"                    </td>\n"
+"                </tr></table>\n"
+"            </td>\n"
+"        </tr></tbody>\n"
+"    </table>\n"
+"</div>"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_kanban
+msgid "<b>Category:</b>"
+msgstr "<b>类别:</b>"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_kanban
+msgid "<b>Pending on:</b>"
+msgstr "<b>Pending on:</b>"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_category_kanban
+msgid "<span class=\"o_label\">Request</span>"
+msgstr "<span class=\"o_label\">申请</span>"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_category_kanban
+msgid "<span class=\"o_label\">Todo</span>"
+msgstr "<span class=\"o_label\">待审批</span>"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_active
+#: model:ir.model.fields,field_description:approval.field_approval_category_active
+msgid "Active"
+msgstr "有效"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_hr_employee_agent_user_id
+#: model:ir.ui.view,arch_db:approval.view_employee_form_inherit_approval
+msgid "Agent"
+msgstr "Agent"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_hr_employee_agent_start_time
+msgid "Agent Start Time"
+msgstr "Agent Start Time"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_hr_employee_agent_stop_time
+msgid "Agent Stop Time"
+msgstr "Agent Stop Time"
+
+#. module: approval
+#: model:ir.actions.act_window,name:approval.approval_category_dashboard_action
+#: model:ir.model.fields,field_description:approval.field_approval_flow_approval_id
+#: model:ir.ui.menu,name:approval.menu_approval_title
+msgid "Approval"
+msgstr "审批"
+
+#. module: approval
+#: model:mail.template,subject:approval.approval_template_needaction_mail
+msgid "Approval (Ref ${object.approval_id.name or 'n/a'}) Notification"
+msgstr "审批 (Ref ${object.approval_id.name or 'n/a'}) 通知"
+
+#. module: approval
+#: model:mail.message.subtype,description:approval.mt_approval_canceled
+#: model:mail.message.subtype,name:approval.mt_approval_canceled
+msgid "Approval Canceled"
+msgstr "审批已取消"
+
+#. module: approval
+#: model:ir.actions.act_window,name:approval.approval_category_action_settings
+#: model:ir.ui.menu,name:approval.menu_approval_category
+#: model:ir.ui.view,arch_db:approval.approval_category_view_form
+msgid "Approval Categories"
+msgstr "审批类别"
+
+#. module: approval
+#: model:mail.message.subtype,description:approval.mt_approval_created
+#: model:mail.message.subtype,name:approval.mt_approval_created
+msgid "Approval Created"
+msgstr "审批已创建"
+
+#. module: approval
+#: model:mail.message.subtype,description:approval.mt_approval_done
+#: model:mail.message.subtype,name:approval.mt_approval_done
+msgid "Approval Done"
+msgstr "审批已完成"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.approval_category_view_form
+msgid "Approval Flow"
+msgstr "审批流程"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.approval_category_view_form
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Approval Flows"
+msgstr "审批流程"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_owner_user_id
+#: model:ir.ui.view,arch_db:approval.view_approval_category_filter
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Approval Maker"
+msgstr "申请人"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:412
+#, python-format
+msgid "Approval Reject Mail"
+msgstr "审批意见"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Approval Request"
+msgstr "审批需求"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Approval Request Name"
+msgstr "审批参照"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+msgid "Approval Request Search"
+msgstr "审批需求搜索"
+
+#. module: approval
+#: model:ir.actions.act_window,name:approval.act_approval_approval_all
+#: model:ir.actions.act_window,name:approval.act_approval_approval_my
+#: model:ir.actions.act_window,name:approval.act_approval_approval_todo
+#: model:ir.model.fields,field_description:approval.field_approval_category_favorite_request_count
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_tree
+msgid "Approval Requests"
+msgstr "审批需求"
+
+#. module: approval
+#: model:mail.message.subtype,description:approval.mt_approval_start
+#: model:mail.message.subtype,name:approval.mt_approval_start
+msgid "Approval Start"
+msgstr "提交申请"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_state
+#: model:ir.model.fields,field_description:approval.field_approval_flow_state
+msgid "Approval State"
+msgstr "审批状态"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_category_flow_line_ids
+msgid "Approval flow"
+msgstr "审批流程"
+
+#. module: approval
+#: model:mail.template,subject:approval.approval_approve_template_mail
+msgid "Approval(Ref ${object.name or 'n/a'}) Approved by ${(user.name or '')|safe}"
+msgstr "审批单(Ref ${object.name or 'n/a'}) 已被 ${(user.name or '')|safe}批准"
+
+#. module: approval
+#: model:mail.template,subject:approval.approval_reject_template_mail
+msgid "Approval(Ref ${object.name or 'n/a'}) Rejected by ${(user.name or '')|safe}"
+msgstr "审批单(Ref ${object.name or 'n/a'}) 已被 ${(user.name or '')|safe}拒绝"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_category_approval_ids
+#: model:ir.model.fields,field_description:approval.field_approval_category_todo_approval_count
+#: model:ir.model.fields,field_description:approval.field_hr_employee_flow_ids
+#: model:ir.ui.menu,name:approval.menu_approval
+msgid "Approvals"
+msgstr "审批"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Approve"
+msgstr "批准"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:169
+#: selection:approval.flow,state:0
+#, python-format
+msgid "Approved"
+msgstr "批准"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_category_archive
+msgid "Archive"
+msgstr "归档"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+#: model:ir.ui.view,arch_db:approval.view_approval_category_filter
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Archived"
+msgstr "归档"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Are you sure you want to cancel this approval?"
+msgstr "你确定要取消此审批吗？"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_flow_id
+#: model:ir.model.fields,field_description:approval.field_approval_flow_employee_id
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_employee_id
+msgid "Auditor"
+msgstr "审批人"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.approval_category_view_tree
+msgid "Auditors"
+msgstr "审批人"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Basic Information"
+msgstr "基本信息"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:434
+#: selection:approval.approval,state:0
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+#, python-format
+msgid "Cancel"
+msgstr "取消"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Canceled"
+msgstr "取消"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.approval_category_view_tree
+msgid "Categories"
+msgstr "类别"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_category_id
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_category_id
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+#: model:ir.ui.view,arch_db:approval.view_approval_category_filter
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Category"
+msgstr "标签"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_category_name
+#: model:ir.ui.view,arch_db:approval.approval_category_view_form
+#: model:ir.ui.view,arch_db:approval.approval_category_view_search
+msgid "Category Name"
+msgstr "类别名称"
+
+#. module: approval
+#: model:ir.actions.act_window,help:approval.approval_category_action_settings
+msgid "Click to add a new Approval category."
+msgstr "点击来创建一个新的审批类别。"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_close_date
+msgid "Close Date"
+msgstr "关闭日期"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_category_color
+msgid "Color Index"
+msgstr "颜色索引"
+
+#. module: approval
+#: model:ir.ui.menu,name:approval.menu_approval_configuration
+msgid "Configuration"
+msgstr "配置"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_create_date
+msgid "Create Date"
+msgstr "创建日期"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+msgid "Created By"
+msgstr "创建人"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_create_uid
+#: model:ir.model.fields,field_description:approval.field_approval_category_create_uid
+#: model:ir.model.fields,field_description:approval.field_approval_flow_create_uid
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_create_uid
+msgid "Created by"
+msgstr "创建人"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_category_create_date
+#: model:ir.model.fields,field_description:approval.field_approval_flow_create_date
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_create_date
+msgid "Created on"
+msgstr "创建时间"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_pending_employee_id
+msgid "Current Auditor"
+msgstr "当前审批人"
+
+#. module: approval
+#: model:ir.ui.menu,name:approval.menu_m_dashboard
+msgid "Dashboard"
+msgstr "仪表板"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_kanban
+msgid "Delete"
+msgstr "刪除"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_description
+#: model:ir.model.fields,field_description:approval.field_approval_category_description
+#: model:ir.ui.view,arch_db:approval.approval_category_view_form
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Description"
+msgstr "说明"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_display_name
+#: model:ir.model.fields,field_description:approval.field_approval_category_display_name
+#: model:ir.model.fields,field_description:approval.field_approval_flow_display_name
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_display_name
+msgid "Display Name"
+msgstr "显示名称"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:435
+#: selection:approval.approval,state:0
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+#, python-format
+msgid "Done"
+msgstr "完成"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:166
+#: code:addons/approval/models/approval.py:432
+#: selection:approval.approval,state:0
+#: selection:approval.flow,state:0
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+#, python-format
+msgid "Draft"
+msgstr "草稿"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+msgid "Draft by"
+msgstr "创建草稿人"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_kanban
+msgid "Edit..."
+msgstr "编辑..."
+
+#. module: approval
+#: model:ir.model,name:approval.model_mail_compose_message
+msgid "Email composition wizard"
+msgstr "Email撰写向导"
+
+#. module: approval
+#: model:ir.model,name:approval.model_hr_employee
+msgid "Employee"
+msgstr "员工"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_hr_employee_agent_enable
+msgid "Enable Agent"
+msgstr "Enable Agent"
+
+#. module: approval
+#: model:ir.model.fields,help:approval.field_hr_employee_agent_enable
+msgid "Enable Agent."
+msgstr "Enable Agent."
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_category_sequence_id
+msgid "Entry Sequence"
+msgstr "分录序列"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Flow Activities"
+msgstr "Flow Activities"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_category_filter
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Group By"
+msgstr "分组"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.approval_category_view_search
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+msgid "Group by..."
+msgstr "分组 于"
+
+#. module: approval
+#: model:ir.model,name:approval.model_approval_approval
+msgid "HR Approval"
+msgstr "HR Approval"
+
+#. module: approval
+#: model:ir.model,name:approval.model_approval_category
+msgid "HR Approval Category"
+msgstr "HR Approval Category"
+
+#. module: approval
+#: model:ir.model,name:approval.model_approval_flow
+#: model:ir.model,name:approval.model_approval_flow_line
+msgid "HR Approval Flow"
+msgstr "HR Approval Flow"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_id
+#: model:ir.model.fields,field_description:approval.field_approval_category_id
+#: model:ir.model.fields,field_description:approval.field_approval_flow_id
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_id
+msgid "ID"
+msgstr "ID"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_flow_actived
+msgid "In the flow"
+msgstr "是审批人"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval___last_update
+#: model:ir.model.fields,field_description:approval.field_approval_category___last_update
+#: model:ir.model.fields,field_description:approval.field_approval_flow___last_update
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line___last_update
+msgid "Last Modified on"
+msgstr "最后修改日"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_write_uid
+#: model:ir.model.fields,field_description:approval.field_approval_category_write_uid
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_write_uid
+#: model:ir.model.fields,field_description:approval.field_approval_flow_write_uid
+msgid "Last Updated by"
+msgstr "最后更新人"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_write_date
+#: model:ir.model.fields,field_description:approval.field_approval_category_write_date
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_write_date
+#: model:ir.model.fields,field_description:approval.field_approval_flow_write_date
+msgid "Last Updated on"
+msgstr "最后更新时间"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_last_update_employee_id
+msgid "Last update Employee"
+msgstr "最后更新的员工"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_hr_employee_favorite_request_count
+#: model:ir.ui.view,arch_db:approval.view_employee_form_inherit_approval
+msgid "Launched Approval"
+msgstr "Launched Approval"
+
+#. module: approval
+#: model:res.groups,name:approval.group_approval_manager
+msgid "Manager"
+msgstr "管理员"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_category_kanban
+msgid "More <i class=\"fa fa-caret-down\"/>"
+msgstr "更多 <i class=\"fa fa-caret-down\"/>"
+
+#. module: approval
+#: model:ir.ui.menu,name:approval.menu_approval_requests_my
+msgid "My Approval"
+msgstr "我的申请"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "My Requests"
+msgstr "我的申请"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_name
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_name
+#: model:ir.model.fields,field_description:approval.field_approval_flow_name
+#: model:ir.ui.view,arch_db:approval.approval_category_view_tree
+msgid "Name"
+msgstr "名称"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:78
+#: code:addons/approval/models/approval.py:95
+#, python-format
+msgid "Now, You can not do this operation"
+msgstr "当前你不能做此操作"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Reject"
+msgstr "拒绝"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:168
+#: selection:approval.flow,state:0
+#, python-format
+msgid "Rejected"
+msgstr "拒绝"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_tree
+msgid "Request Number"
+msgstr "参照"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_category_approval_request_needaction_count
+msgid "Requests"
+msgstr "需求"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Reset Approval"
+msgstr "重置"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Reset the approval request to draft state"
+msgstr "重置审批申请至草稿状态"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.approval_category_view_search
+msgid "Search"
+msgstr "搜索"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_category_filter
+msgid "Search Approval Category"
+msgstr "搜索审批类别"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Search Approval Requests"
+msgstr "搜索审批请求"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_flow_access_token
+msgid "Security Token"
+msgstr "安全令牌"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_flow_line_sequence
+#: model:ir.model.fields,field_description:approval.field_approval_flow_sequence
+msgid "Sequence"
+msgstr "序号"
+
+#. module: approval
+#: model:ir.model.fields,help:approval.field_approval_category_active
+#: model:ir.model.fields,help:approval.field_approval_category_archive
+msgid "Set archive to true to hide the approval category without deleting it."
+msgstr "通过设为归档来隐藏审批类别，而不是删除它。"
+
+#. module: approval
+#: model:ir.model.fields,help:approval.field_approval_approval_active
+msgid "Set archive to true to hide the approval request without deleting it."
+msgstr "通过设为归档来隐藏审批申请，而不是删除它。"
+
+#. module: approval
+#: model:ir.model.fields,help:approval.field_hr_employee_agent_stop_time
+msgid "Set the agent stop time.If not set, It will agent forever"
+msgstr "Set the agent stop time.If not set, It will agent forever"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_category_kanban
+msgid "Settings"
+msgstr "设置"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Stage"
+msgstr "阶段"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_stage_ids
+msgid "Stage ids"
+msgstr "阶段id号"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+msgid "Stages"
+msgstr "阶段"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:167
+#: code:addons/approval/models/approval.py:433
+#: selection:approval.approval,state:0
+#: selection:approval.flow,state:0
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+#, python-format
+msgid "Start"
+msgstr "开始"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Start approval"
+msgstr "提交申请"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "State"
+msgstr "状态"
+
+#. module: approval
+#: model:ir.model.fields,help:approval.field_approval_category_sequence_id
+msgid "This field contains the information related to the numbering of approval."
+msgstr "该字段包含与审批编号有关的信息。"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "Time"
+msgstr "时间"
+
+#. module: approval
+#: model:ir.ui.menu,name:approval.menu_approval_requests_todo
+#: model:ir.ui.view,arch_db:approval.view_employee_form_inherit_approval
+msgid "Todo Approval"
+msgstr "待审批"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_hr_employee_todo_approval_count
+msgid "Todo Approval Request"
+msgstr "待审批需求"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Todo Requests"
+msgstr "待审批"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_kanban
+msgid "Unassigned"
+msgstr "未分派"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.hr_approval_request_view_search
+#: model:ir.ui.view,arch_db:approval.view_approval_requests_filter
+msgid "Unread Messages"
+msgstr "未读消息"
+
+#. module: approval
+#: model:res.groups,name:approval.group_approval_user
+msgid "User"
+msgstr "用户"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:198
+#: sql_constraint:approval.flow.line:0
+#, python-format
+msgid "You cannot have two same auditor with the same approval category on the same object!"
+msgstr "你不能在同一个单据上设置两个相同审批类别的审核人员！"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:180
+#: sql_constraint:approval.flow:0
+#, python-format
+msgid "You cannot have two same auditor with the same approval request on the same object!"
+msgstr "你不能在同一个单据上设置重复的审核人员！"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:358
+#, python-format
+msgid "You have no access to delete approval record"
+msgstr "你没有删除审批记录的权限"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:80
+#: code:addons/approval/models/approval.py:97
+#, python-format
+msgid "You have no access to do this operation"
+msgstr "你没有此操作权限"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.view_approval_request_form
+msgid "e.g. Leave #"
+msgstr "e.g. Leave #"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.approval_category_view_form
+msgid "e.g. Leave Approval"
+msgstr "e.g. Leave Approval"
+
+#. module: approval
+#: model:ir.model.fields,field_description:approval.field_approval_approval_have_operation_access
+#: model:ir.model.fields,field_description:approval.field_approval_flow_have_operation_access
+msgid "have_operation_access"
+msgstr "操作权限"
+
+#. module: approval
+#: model:ir.ui.view,arch_db:approval.approval_category_view_search
+msgid "name"
+msgstr "名称"
+
+#. module: approval
+#: code:addons/approval/models/approval.py:67
+#: sql_constraint:approval.category:0
+#, python-format
+msgid "the approval category name must be UNIQUE!"
+msgstr "审批类别名称必须唯一！"
