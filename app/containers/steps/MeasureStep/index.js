@@ -140,7 +140,7 @@ function MeasureStep({
               })}>{value || '请输入'}</Typography></span>
             }
           ].map(row => (
-            <tr className={classes.row}>
+            <tr className={classes.row} key={row.label}>
               <td><Typography variant="h4">{row.label}</Typography></td>
               <td className={classes.rowContent}>{
                 typeof row.content === 'string' || typeof row.content === 'number' ?

@@ -1,6 +1,5 @@
 // @flow
-import { defaultClient } from '../common/utils';
-import { lError } from '../logger';
+import { CommonLog, defaultClient } from '../common/utils';
 import type { tUuid } from '../modules/user/interface/typeDef';
 
 // 获取用户信息
@@ -12,7 +11,7 @@ export function getUserInfo(url: string, uuid: tUuid) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      lError(e.toString(), {
+      CommonLog.lError(e.toString(), {
         at: 'getUserInfo',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)

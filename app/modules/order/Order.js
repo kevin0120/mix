@@ -306,7 +306,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       return ((ret: any): Array<IWorkStep>);
     }
 
-    clearData(){
+    clearData() {
       this._steps = [];
       this._workingIndex = 0;
     }
@@ -328,8 +328,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
               durationString(s.timeCost()),
               stepStatus(s.status)
             ]);
-            if (reportFinish) {
-              const code = (this: IWorkable)._id;
+            if (reportFinish && (this.status === ORDER_STATUS.FAIL || this.status === ORDER_STATUS.DONE)) {
+              const code = (this: IWorkable)._code;
               const trackCode = '';
               const workCenterCode = yield select(s => s.systemInfo.workcenter);
               const productCode = '';

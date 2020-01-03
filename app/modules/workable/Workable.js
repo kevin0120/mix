@@ -81,7 +81,8 @@ export default class Workable implements IWorkable {
     const { steps, status, payload, data } = workableData || {};
     this._status = status || this._status;
     this._steps = steps
-      ? ((steps: any): Array<tStep>).map<IWorkable>((sD: tStep) => {
+      ? ((steps: any): Array<tStep>).sort((s1, s2) => s1.sequence - s2.sequence)
+      .map<IWorkable>((sD: tStep) => {
       const existStep = this._steps.find(s => s.code === sD.code);
       if (existStep) {
         existStep.update(((sD: any): tWorkableData));
