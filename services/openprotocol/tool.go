@@ -50,7 +50,7 @@ func (s *TighteningTool) ToolControl(enable bool) error {
 		cmd = MID_0043_TOOL_ENABLE
 	}
 
-	reply, err := s.controller.ProcessRequest(cmd, "", "", "", "")
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(cmd, "", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (s *TighteningTool) SetPSet(pset int) error {
 	}
 
 	data := fmt.Sprintf("%03d", pset)
-	reply, err := s.controller.ProcessRequest(MID_0018_PSET, "", "", "", data)
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0018_PSET, "", "", "", data)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (s *TighteningTool) SetJob(job int) error {
 	}
 
 	data := fmt.Sprintf("%04d", job)
-	reply, err := s.controller.ProcessRequest(MID_0038_JOB_SELECT, "", "", "", data)
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0038_JOB_SELECT, "", "", "", data)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func (s *TighteningTool) ModeSelect(mode string) error {
 		flag = OPENPROTOCOL_MODE_JOB
 	}
 
-	reply, err := s.controller.ProcessRequest(MID_0130_JOB_OFF, "", "", "", flag)
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0130_JOB_OFF, "", "", "", flag)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (s *TighteningTool) AbortJob() error {
 		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
-	reply, err := s.controller.ProcessRequest(MID_0127_JOB_ABORT, "", "", "", "")
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0127_JOB_ABORT, "", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (s *TighteningTool) SetPSetBatch(pset int, batch int) error {
 	}
 
 	data := fmt.Sprintf("%03d%02d", pset, batch)
-	reply, err := s.controller.ProcessRequest(MID_0019_PSET_BATCH_SET, "", "", "", data)
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0019_PSET_BATCH_SET, "", "", "", data)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (s *TighteningTool) GetPSetList() ([]int, error) {
 		return nil, errors.New(device.BaseDeviceStatusOffline)
 	}
 
-	reply, err := s.controller.ProcessRequest(MID_0010_PSET_LIST_REQUEST, "", "", "", "")
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0010_PSET_LIST_REQUEST, "", "", "", "")
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +183,7 @@ func (s *TighteningTool) GetPSetDetail(pset int) (*tightening_device.PSetDetail,
 	}
 
 	data := fmt.Sprintf("%03d", pset)
-	reply, err := s.controller.ProcessRequest(MID_0012_PSET_DETAIL_REQUEST, "", "", "", data)
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0012_PSET_DETAIL_REQUEST, "", "", "", data)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func (s *TighteningTool) GetJobList() ([]int, error) {
 		return nil, errors.New(device.BaseDeviceStatusOffline)
 	}
 
-	reply, err := s.controller.ProcessRequest(MID_0030_JOB_LIST_REQUEST, "", "", "", "")
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0030_JOB_LIST_REQUEST, "", "", "", "")
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, er
 	}
 
 	data := fmt.Sprintf("%04d", job)
-	reply, err := s.controller.ProcessRequest(MID_0032_JOB_DETAIL_REQUEST, "", "", "", data)
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0032_JOB_DETAIL_REQUEST, "", "", "", data)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +244,7 @@ func (s *TighteningTool) TraceSet(str string) error {
 	}
 
 	id := s.controller.ProtocolService.generateIDInfo(str)
-	reply, err := s.controller.ProcessRequest(MID_0150_IDENTIFIER_SET, "", "", "", id)
+	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0150_IDENTIFIER_SET, "", "", "", id)
 	if err != nil {
 		return err
 	}

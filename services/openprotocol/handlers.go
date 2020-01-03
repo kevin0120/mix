@@ -51,10 +51,11 @@ func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
-	seq := <-c.requestChannel
-	c.Response.update(seq, request_errors["00"])
+	client := c.sockClients[pkg.SN]
+	seq := <-client.requestChannel
+	client.Response.update(seq, request_errors["00"])
 
-	go c.ProcessSubscribeControllerInfo()
+	go c.ProcessSubscribeControllerInfo(pkg.SN)
 	//go c.SolveOldResults()
 	//go c.getTighteningCount()
 
@@ -63,6 +64,7 @@ func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
 
 // 处理曲线
 func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
+	client := c.sockClients[pkg.SN]
 	//讲收到的曲线先做反序列化处理
 	var curve = CurveBody{}
 	err := ascii.Unmarshal(pkg.Body, &curve)
@@ -77,36 +79,36 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 
 	//_, ok := c.tempResultCurve[curve.ToolNumber]
 	//结果曲线 判断本toolNumber是否收到过数据
-	if _, ok := c.tempResultCurve[curve.ToolNumber]; !ok {
-		c.tempResultCurve[curve.ToolNumber] = &tightening_device.TighteningCurve{}
-	}
+	//if _, ok := client.tempResultCurve; !ok {
+	//	client.tempResultCurve = &tightening_device.TighteningCurve{}
+	//}
 	//收到的数据进行解析并将结果加到临时的切片中，等待整条曲线接收完毕。
 	torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.TorqueString), 64)
 	angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.AngleString), 64)
 	Torque, Angle := c.CurveDataDecoding([]byte(curve.Data), torqueCoefficient, angleCoefficient, c.diag)
 
-	c.tempResultCurve[curve.ToolNumber].CUR_M = append(c.tempResultCurve[curve.ToolNumber].CUR_M, Torque...)
-	c.tempResultCurve[curve.ToolNumber].CUR_W = append(c.tempResultCurve[curve.ToolNumber].CUR_W, Angle...)
+	client.tempResultCurve.CUR_M = append(client.tempResultCurve.CUR_M, Torque...)
+	client.tempResultCurve.CUR_W = append(client.tempResultCurve.CUR_W, Angle...)
 	//当本次数据为本次拧紧曲线的最后一次数据时
 	if curve.Num == curve.Id {
 		//若取到的点的数量大于协议解析出来该曲线的点数，多出的部分删掉，否则有多少发多少.
-		if curve.MeasurePoints < len(c.tempResultCurve[curve.ToolNumber].CUR_M) {
-			c.tempResultCurve[curve.ToolNumber].CUR_M = c.tempResultCurve[curve.ToolNumber].CUR_M[0:curve.MeasurePoints]
-			c.tempResultCurve[curve.ToolNumber].CUR_W = c.tempResultCurve[curve.ToolNumber].CUR_W[0:curve.MeasurePoints]
+		if curve.MeasurePoints < len(client.tempResultCurve.CUR_M) {
+			client.tempResultCurve.CUR_M = client.tempResultCurve.CUR_M[0:curve.MeasurePoints]
+			client.tempResultCurve.CUR_W = client.tempResultCurve.CUR_W[0:curve.MeasurePoints]
 		}
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
-		tool, err := c.GetToolViaChannel(curve.ToolNumber)
+		tool, err := c.getInstance().GetToolViaChannel(curve.ToolNumber)
 		if err != nil {
 			return err
 		}
 
 		sn := tool.SerialNumber()
 
-		defer delete(c.tempResultCurve, curve.ToolNumber)
-		c.tempResultCurve[curve.ToolNumber].ToolSN = sn
-		c.tempResultCurve[curve.ToolNumber].UpdateTime = time.Now()
-		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_CURVE), c.tempResultCurve[curve.ToolNumber])
+		//defer delete(client.tempResultCurve, curve.ToolNumber)
+		client.tempResultCurve.ToolSN = sn
+		client.tempResultCurve.UpdateTime = time.Now()
+		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_CURVE), client.tempResultCurve)
 	}
 	return nil
 }
@@ -125,14 +127,15 @@ func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error 
 
 // 处理历史结果
 func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
+	client := c.sockClients[pkg.SN]
 	result_data := ResultDataOld{}
 	err := ascii.Unmarshal(pkg.Body, &result_data)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, result_data.ToTighteningResult())
+	seq := <-client.requestChannel
+	client.Response.update(seq, result_data.ToTighteningResult())
 
 	//flag := c.Response.get(MID_0064_OLD_SUBSCRIBE)
 
@@ -160,72 +163,78 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 
 // pset详情
 func handleMID_0013_PSET_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
+	client := c.sockClients[pkg.SN]
 	pset_detail, err := DeserializePSetDetail(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, pset_detail)
+	seq := <-client.requestChannel
+	client.Response.update(seq, pset_detail)
 
 	return nil
 }
 
 // pset列表
 func handleMID_0011_PSET_LIST_REPLY(c *TighteningController, pkg *handlerPkg) error {
+	client := c.sockClients[pkg.SN]
 	pset_list := PSetList{}
 	err := pset_list.Deserialize(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, pset_list)
+	seq := <-client.requestChannel
+	client.Response.update(seq, pset_list)
 
 	return nil
 }
 
 // job列表
 func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) error {
+	client := c.sockClients[pkg.SN]
 	job_list := JobList{}
 	err := job_list.Deserialize(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, job_list)
+	seq := <-client.requestChannel
+	client.Response.update(seq, job_list)
 
 	return nil
 }
 
 // job详情
 func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
+	client := c.sockClients[pkg.SN]
 	jobDetaill, err := DeserializeJobDetail(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, jobDetaill)
+	seq := <-client.requestChannel
+	client.Response.update(seq, jobDetaill)
 
 	return nil
 }
 
 // 请求错误
 func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
+	client := c.sockClients[pkg.SN]
 	errCode := pkg.Body[4:6]
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, request_errors[errCode])
+	seq := <-client.requestChannel
+	client.Response.update(seq, request_errors[errCode])
 
 	return nil
 }
 
 // 请求成功
 func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
-	seq := <-c.requestChannel
-	c.Response.update(seq, request_errors["00"])
+	client := c.sockClients[pkg.SN]
+	seq := <-client.requestChannel
+	client.Response.update(seq, request_errors["00"])
 
 	return nil
 }
@@ -340,10 +349,10 @@ func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
 
 	switch ai.ErrorCode {
 	case EVT_CONTROLLER_TOOL_CONNECT:
-		c.UpdateToolStatus(device.BaseDeviceStatusOnline)
+		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOnline)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.UpdateToolStatus(device.BaseDeviceStatusOffline)
+		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOffline)
 	}
 
 	return nil
@@ -359,10 +368,10 @@ func handleMID_0076_ALARM_STATUS(c *TighteningController, pkg *handlerPkg) error
 
 	switch as.ErrorCode {
 	case EVT_CONTROLLER_NO_ERR:
-		c.UpdateToolStatus(device.BaseDeviceStatusOnline)
+		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOnline)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.UpdateToolStatus(device.BaseDeviceStatusOffline)
+		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOffline)
 	}
 
 	return nil

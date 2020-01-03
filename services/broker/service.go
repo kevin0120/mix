@@ -119,7 +119,7 @@ func (s *Service) newBroker(provider string) (ret IBrokerProvider) {
 func (s *Service) Subscribe(subject string, handler SubscribeHandler) error {
 	p := s.Provider
 	if p == nil {
-		return errors.New("Can Not Create Broker SubscribeControllerInfo, Cause Provider Is Empty")
+		return errors.New("Can Not Create Broker Subscribe, Cause Provider Is Empty")
 	}
 
 	return p.Subscribe(subject, handler)

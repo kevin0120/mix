@@ -10,7 +10,9 @@ type WrenchController struct {
 }
 
 func (c *WrenchController) New() openprotocol.IOpenProtocolController {
-	return &WrenchController{}
+	controller := WrenchController{}
+	controller.SetInstance(&controller)
+	return &controller
 }
 
 func (c *WrenchController) GetVendorModel() map[string]interface{} {

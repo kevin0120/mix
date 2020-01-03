@@ -8,7 +8,7 @@ import (
 
 const (
 	OpenProtocolDefaultKeepAlivePeriod   = toml.Duration(time.Second * 10)
-	OpenProtocolDefaultRequestTimeOut    = toml.Duration(time.Second * 3)
+	OpenProtocolDefaultRequestTimeOut    = toml.Duration(time.Millisecond * 3)
 	OpenProtocolDefaultGetTollInfoPeriod = toml.Duration(time.Hour * 12)
 )
 

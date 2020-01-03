@@ -28,20 +28,11 @@ type IOpenProtocolController interface {
 	//根据标识获取工具，通道号或者序列号或者连接(tcp)
 	GetToolViaChannel(channel int) (tightening_device.ITighteningTool, error)
 
-	//建立连接
-	Connect() error
-
 	//处理未被处理的历史数据
 	handlerOldResults() error
 
 	// 加载的协议
 	Protocol() string
-
-	//初始化需要订阅的信息
-	initSubscribeInfos()
-
-	//执行订阅相关控制器信息
-	ProcessSubscribeControllerInfo()
 
 	//曲线解析
 	CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64)

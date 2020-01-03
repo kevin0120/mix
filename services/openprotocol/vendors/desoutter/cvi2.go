@@ -10,7 +10,9 @@ type CVI2Controller struct {
 }
 
 func (c *CVI2Controller) New() openprotocol.IOpenProtocolController {
-	return &CVI2Controller{}
+	controller := CVI2Controller{}
+	controller.SetInstance(&controller)
+	return &controller
 }
 
 func (c *CVI2Controller) GetVendorModel() map[string]interface{} {
