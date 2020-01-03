@@ -202,7 +202,7 @@ def convert_ts002_order(env, vals):
         _steps = pack_step_payload(env, mrw.sa_step_ids)
         vals = {
             'code': code,
-            'track_no': mom_productno,
+            'track_code': mom_productno,
             'product_code': mom_productno,
             'workcenter': ts.code,
             'date_planned_start': str_time_to_rfc3339(
