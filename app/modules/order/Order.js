@@ -4,6 +4,7 @@ import React from 'react';
 import { push } from 'connected-react-router';
 import { call, put, select } from 'redux-saga/effects';
 import { filter, some } from 'lodash-es';
+import { Typography } from '@material-ui/core';
 import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
 import { orderReportStartApi, orderUpdateApi } from '../../api/order';
@@ -21,16 +22,15 @@ import { workModes } from '../workCenterMode/constants';
 import ioActions from '../io/action';
 import { ioOutputGroups } from '../io/constants';
 import { orderActions } from './action';
-import { Typography } from '@material-ui/core';
 
 const stepStatus = status => {
   switch (status) {
     case STEP_STATUS.FINISHED:
-      return <Typography color={'primary'}>{'完成'}</Typography>;
+      return <Typography color="primary">完成</Typography>;
     case STEP_STATUS.FAIL:
-      return <Typography color={'error'}>{'失败'}</Typography>;
+      return <Typography color="error">失败</Typography>;
     default:
-      return <Typography>{'未完成'}</Typography>;
+      return <Typography>未完成</Typography>;
   }
 };
 
@@ -109,6 +109,26 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       return this._productCode;
     }
 
+    _onPreviousStep() {
+      if (this._workingIndex - 1 >= 0) {
+        this._workingIndex -= 1;
+      }
+    }
+
+    * _onNextStep() {
+      try {
+        const mode = yield select(s => s.workCenterMode);
+        if (mode === workModes.normWorkCenterMode) {
+          this._workingIndex += 1;
+          yield put(orderActions.jumpToStep(this._workingIndex));
+        }
+      } catch (e) {
+        CommonLog.lError(e, { at: 'order._onNextStep' });
+        throw(e);
+      }
+
+    }
+
     _statusTasks = {
       * [ORDER_STATUS.TODO](config) {
         try {
@@ -173,17 +193,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             return;
           }
 
-
-          const _onPrevious = () => {
-            if (this._workingIndex - 1 >= 0) {
-              this._workingIndex -= 1;
-            }
-          };
-
-          const _onNext = () => {
-            this._workingIndex += 1;
-          };
-
           while (true) {
             CommonLog.Info(
               `Doing Order (${this.code}),at ${this.workingIndex} step (${this.workingStep?.code}) `
@@ -194,8 +203,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
                 [this, this.runSubStep],
                 wStep,
                 {
-                  onNext: _onNext,
-                  onPrevious: _onPrevious
+                  onNext: this._onNextStep.bind(this),
+                  onPrevious: this._onPreviousStep.bind(this)
                 },
                 STEP_STATUS.READY
               );

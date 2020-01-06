@@ -82,7 +82,6 @@ export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
 
     const status = {};
     const devices = getAllDevices().filter(d => !d.invisible);
-    console.log(devices);
     devices.forEach((d: IDevice) => {
       status[d.Name] = d.Healthz;
     });

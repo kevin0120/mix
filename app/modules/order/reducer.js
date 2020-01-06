@@ -87,19 +87,19 @@ const orderReducer: {
     ...state,
     viewingIndex: limitIndex(viewingOrder(state), viewingIndex(state) - 1)
   }),
-  [ORDER.STEP.JUMP_TO]: (state, { stepId }) => ({
+  [ORDER.STEP.JUMP_TO]: (state, { stepIdx }) => ({
     ...state,
-    viewingIndex: stepId
+    viewingIndex: stepIdx
   }),
   [ORDER.STEP.FINISH](state, { step }) {
-    const wOrder: ?IOrder = workingOrder(state);
-    const newIndex = workingIndex(wOrder) + 1;
-    const vIndex = limitIndex(viewingOrder(state),
-      step === viewingStep(state) ? newIndex : viewingIndex(state)
-    );
+    // const wOrder: ?IOrder = workingOrder(state);
+    // const newIndex = workingIndex(wOrder) + 1;
+    // const vIndex = limitIndex(viewingOrder(state),
+    //   step === viewingStep(state) ? newIndex : viewingIndex(state)
+    // );
     return {
       ...state,
-      viewingIndex: vIndex
+      // viewingIndex: vIndex
     };
   },
   [ORDER.STEP.DO_PREVIOUS](state) {

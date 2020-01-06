@@ -96,9 +96,9 @@ export const orderActions = Object.freeze({
   previousStep: () => ({
     type: ORDER.STEP.PREVIOUS
   }),
-  jumpToStep: (stepId: tOrderStepIdx) => ({
+  jumpToStep: (stepIdx: tOrderStepIdx) => ({
     type: ORDER.STEP.JUMP_TO,
-    stepId
+    stepIdx
   }),
   stepStatus: (step: IWorkable, status: tAnyStatus, config) => ({
     type: ORDER.STEP.STATUS,
