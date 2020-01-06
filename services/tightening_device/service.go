@@ -198,11 +198,6 @@ func (s *Service) OnWS_TOOL_JOB(c websocket.Connection, msg *wsnotify.WSMsg) {
 func (s *Service) OnWS_TOOL_PSET(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	ds := s.StorageService
-	if ds == nil {
-		s.diag.Error("WS_TOOL_PSET Fail ", errors.New("Please Inject Storage Service First"))
-		return
-	}
 	req := PSetSet{}
 	_ = json.Unmarshal(byteData, &req)
 
@@ -218,11 +213,6 @@ func (s *Service) OnWS_TOOL_PSET(c websocket.Connection, msg *wsnotify.WSMsg) {
 func (s *Service) OnWS_TOOL_PSET_BATCH(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	ds := s.StorageService
-	if ds == nil {
-		s.diag.Error("WS_TOOL_PSET_BATCH Fail ", errors.New("Please Inject Storage Service First"))
-		return
-	}
 	req := PSetBatchSet{}
 	_ = json.Unmarshal(byteData, &req)
 
