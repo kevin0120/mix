@@ -2,6 +2,8 @@ package hmi
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
@@ -87,6 +89,19 @@ func (s *Service) Open() error {
 	// 注册websocket请求
 	s.DispatcherBus.Register(dispatcherBus.DISPATCH_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
+	// 接收拧紧结果
+	s.DispatcherBus.Register(dispatcherBus.DISPATCH_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+
+	var r httpd.Route
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/ws-test",
+		HandlerFunc: s.wsTest,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
 	return nil
 }
 
@@ -95,6 +110,21 @@ func (s *Service) Close() error {
 	s.diag.Closed()
 
 	return nil
+}
+
+func (s *Service) wsTest(ctx iris.Context) {
+	ws := wsnotify.WSMsg{}
+	err := ctx.ReadJSON(&ws)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		return
+	}
+
+	payload, _ := json.Marshal(ws)
+	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_WS_NOTIFY, &wsnotify.DispatcherNotifyPackage{
+		C:    nil,
+		Data: payload,
+	})
 }
 
 func (s *Service) initWSRequestHandlers() {
@@ -155,6 +185,9 @@ func (s *Service) onTighteningResult(data interface{}) {
 
 	// 拧紧结果推送HMI
 	s.wsSendTighteningResult([]tightening_device.BaseResult{tighteningResult.BaseResult})
+
+	body, _ := json.Marshal(tighteningResult)
+	s.diag.Info(fmt.Sprintf("拧紧结果推送HMI:%s", string(body)))
 }
 
 // 设备连接状态变化(根据设备类型,序列号来区分具体的设备)

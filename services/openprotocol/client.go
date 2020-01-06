@@ -23,11 +23,12 @@ type IClientHandler interface {
 
 func createClientContext(endpoint string, diag Diagnostic, handler IClientHandler, sn string) *clientContext {
 	ctx := clientContext{
-		buffer:        make(chan []byte, 1024),
-		closing:       make(chan struct{}, 1),
-		diag:          diag,
-		clientHandler: handler,
-		sn:            sn,
+		buffer:          make(chan []byte, 1024),
+		closing:         make(chan struct{}, 1),
+		diag:            diag,
+		clientHandler:   handler,
+		sn:              sn,
+		tempResultCurve: &tightening_device.TighteningCurve{},
 	}
 
 	ctx.sockClient = socket_writer.NewSocketWriter(endpoint, &ctx)

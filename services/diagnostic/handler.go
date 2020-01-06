@@ -336,6 +336,10 @@ func (h *HmiHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
+func (h *HmiHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *HmiHandler) Close() {
 	h.l.Info("hmi server closing")
 }

@@ -480,7 +480,7 @@ func (c *TighteningController) getTransportClientBySymbol(symbol string) *client
 }
 
 func (c *TighteningController) getOldResult(sn string, last_id int64) (*tightening_device.TighteningResult, error) {
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0064_OLD_SUBSCRIBE, "", "", "", fmt.Sprintf("%010d", last_id))
+	reply, err := c.getClient(sn).ProcessRequest(MID_0064_OLD_SUBSCRIBE, "", "", "", fmt.Sprintf("%010d", last_id))
 	if err != nil {
 		return nil, err
 	}
@@ -490,7 +490,7 @@ func (c *TighteningController) getOldResult(sn string, last_id int64) (*tighteni
 
 func (c *TighteningController) PSetSubscribe(sn string) error {
 
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0014_PSET_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0014_PSET_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -503,7 +503,7 @@ func (c *TighteningController) PSetSubscribe(sn string) error {
 }
 
 func (c *TighteningController) SelectorSubscribe(sn string) error {
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0250_SELECTOR_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0250_SELECTOR_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -517,7 +517,7 @@ func (c *TighteningController) SelectorSubscribe(sn string) error {
 
 func (c *TighteningController) JobInfoSubscribe(sn string) error {
 
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0034_JOB_INFO_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0034_JOB_INFO_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -530,7 +530,7 @@ func (c *TighteningController) JobInfoSubscribe(sn string) error {
 }
 
 func (c *TighteningController) IOInputSubscribe(sn string) error {
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0210_INPUT_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0210_INPUT_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -544,7 +544,7 @@ func (c *TighteningController) IOInputSubscribe(sn string) error {
 
 func (c *TighteningController) MultiSpindleResultSubscribe(sn string) error {
 
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0100_MULTI_SPINDLE_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0100_MULTI_SPINDLE_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -557,7 +557,7 @@ func (c *TighteningController) MultiSpindleResultSubscribe(sn string) error {
 }
 
 func (c *TighteningController) VinSubscribe(sn string) error {
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0051_VIN_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0051_VIN_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -571,7 +571,7 @@ func (c *TighteningController) VinSubscribe(sn string) error {
 
 func (c *TighteningController) ResultSubcribe(sn string) error {
 
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0060_LAST_RESULT_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0060_LAST_RESULT_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -585,7 +585,7 @@ func (c *TighteningController) ResultSubcribe(sn string) error {
 
 func (c *TighteningController) AlarmSubcribe(sn string) error {
 
-	reply, err := c.sockClients[sn].ProcessRequest(MID_0070_ALARM_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0070_ALARM_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -598,7 +598,7 @@ func (c *TighteningController) AlarmSubcribe(sn string) error {
 }
 
 func (c *TighteningController) CurveSubscribe(sn string) error {
-	reply, err := c.sockClients[sn].ProcessRequest(MID_7408_LAST_CURVE_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_7408_LAST_CURVE_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}

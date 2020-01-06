@@ -109,6 +109,7 @@ func (s *Service) initWSRequestHandlers() {
 		wsnotify.WS_TOOL_ENABLE:      s.OnWS_TOOL_ENABLE,
 		wsnotify.WS_TOOL_JOB:         s.OnWS_TOOL_JOB,
 		wsnotify.WS_TOOL_PSET:        s.OnWS_TOOL_PSET,
+		wsnotify.WS_TOOL_PSET_BATCH:  s.OnWS_TOOL_PSET_BATCH,
 	})
 }
 
@@ -206,6 +207,26 @@ func (s *Service) OnWS_TOOL_PSET(c websocket.Connection, msg *wsnotify.WSMsg) {
 	_ = json.Unmarshal(byteData, &req)
 
 	err := s.Api.ToolPSetSet(&req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+func (s *Service) OnWS_TOOL_PSET_BATCH(c websocket.Connection, msg *wsnotify.WSMsg) {
+	byteData, _ := json.Marshal(msg.Data)
+
+	ds := s.StorageService
+	if ds == nil {
+		s.diag.Error("WS_TOOL_PSET_BATCH Fail ", errors.New("Please Inject Storage Service First"))
+		return
+	}
+	req := PSetBatchSet{}
+	_ = json.Unmarshal(byteData, &req)
+
+	err := s.Api.ToolPSetBatchSet(&req)
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
