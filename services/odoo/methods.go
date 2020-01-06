@@ -250,7 +250,7 @@ func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 	db_ro.MaxOpTime = ro.MaxOpTime
 	db_ro.Job = ro.Job
 	db_ro.WorkcenterID = ro.WorkcenterID
-	db_ro.Tigntening_step_ref = ro.Tigntening_step_ref
+	db_ro.TighteningStepRef = ro.Tigntening_step_ref
 	db_ro.ProductTypeImage = ro.ProductTypeImage
 
 	if err != nil {

@@ -57,3 +57,8 @@ type Dispatcher interface {
 	Release(name string, handler string) error
 	Register(name string, handler *utils.DispatchHandlerStruct)
 }
+
+type IDeviceService interface {
+	AddDevice(sn string, d IBaseDevice)
+}
+

@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
-	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
@@ -28,9 +26,9 @@ type Service struct {
 	mtxDevices         sync.Mutex
 	protocols          map[string]ITighteningProtocol
 
-	StorageService *storage.Service
+	StorageService IStorageService
 	DispatcherBus  Dispatcher
-	DeviceService  *device.Service
+	DeviceService  IDeviceService
 	dispatcherMap  dispatcherbus.DispatcherMap
 	Api            *Api
 
@@ -55,21 +53,22 @@ func (s *Service) loadTighteningController(c Config) {
 	}
 }
 
-func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Dispatcher) (*Service, error) {
+func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Dispatcher, ds IDeviceService) (*Service, error) {
 
 	s := &Service{
 		diag:               d,
 		DispatcherBus:      dp,
-		mtxDevices:         sync.Mutex{},
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
+		DeviceService:      ds,
 	}
 
 	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
 		Diag: s.diag,
 	}
 
-	s.initGlobalDispatchers()
+	//todo: dispatcher现在并未使用无需注册相关内容
+	//s.initGlobalDispatchers()
 	s.initWSRequestHandlers()
 
 	s.configValue.Store(c)
@@ -183,7 +182,7 @@ func (s *Service) OnWS_TOOL_ENABLE(c websocket.Connection, msg *wsnotify.WSMsg) 
 func (s *Service) OnWS_TOOL_JOB(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	req := JobSet{}
+	var req JobSet
 	_ = json.Unmarshal(byteData, &req)
 	err := s.Api.ToolJobSet(&req)
 	if err != nil {
@@ -198,7 +197,7 @@ func (s *Service) OnWS_TOOL_JOB(c websocket.Connection, msg *wsnotify.WSMsg) {
 func (s *Service) OnWS_TOOL_PSET(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	req := PSetSet{}
+	var req PSetSet
 	_ = json.Unmarshal(byteData, &req)
 
 	err := s.Api.ToolPSetSet(&req)
@@ -213,7 +212,7 @@ func (s *Service) OnWS_TOOL_PSET(c websocket.Connection, msg *wsnotify.WSMsg) {
 func (s *Service) OnWS_TOOL_PSET_BATCH(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	req := PSetBatchSet{}
+	var req PSetBatchSet
 	_ = json.Unmarshal(byteData, &req)
 
 	err := s.Api.ToolPSetBatchSet(&req)

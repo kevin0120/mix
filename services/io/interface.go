@@ -1,6 +1,7 @@
 package io
 
 import (
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
 )
@@ -32,3 +33,5 @@ type IO interface {
 	Read() (string, string, error)
 	Write(uint16, uint16) error
 }
+
+type IDeviceService = device.IDeviceService

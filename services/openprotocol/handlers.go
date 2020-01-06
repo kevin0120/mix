@@ -263,7 +263,7 @@ func handleMID_0035_JOB_INFO(c *TighteningController, pkg *handlerPkg) error {
 
 		ws_str, _ := json.Marshal(job_select)
 		c.ProtocolService.diag.Debug(fmt.Sprintf("push job to hmi: %s", string(ws_str)))
-		//c.ProtocolService.WS.WSSendJob(string(ws_str))
+		//c.ProtocolService.NotifyService.WSSendJob(string(ws_str))
 		// TODO: 推送控制器job
 	}
 
@@ -305,7 +305,7 @@ func handleMID_0101_MULTI_SPINDLE_RESULT(c *TighteningController, pkg *handlerPk
 
 	//wsStrs, err := json.Marshal(wsResults)
 	//if err == nil {
-	//	c.ProtocolService.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(wsStrs))
+	//	c.ProtocolService.NotifyService.NotifyAll(wsnotify.WS_EVENT_RESULT, string(wsStrs))
 	//}
 
 	//return err

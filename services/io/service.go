@@ -19,18 +19,19 @@ type Service struct {
 	diag          Diagnostic
 	WS            *wsnotify.Service
 	DispatcherBus Dispatcher
-	DeviceService *device.Service
+	DeviceService IDeviceService
 	IONotify
 
 	// websocket请求处理器
 	wsnotify.WSRequestHandlers
 }
 
-func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher, ds IDeviceService) *Service {
 
 	s := &Service{
 		diag:          d,
 		DispatcherBus: dp,
+		DeviceService: ds,
 		ios:           map[string]*IOModule{},
 	}
 
@@ -215,7 +216,7 @@ func (s *Service) OnStatus(sn string, status string) {
 	//	},
 	//})
 	//
-	//s.WS.WSSendIO(string(io))
+	//s.NotifyService.WSSendIO(string(io))
 }
 
 func (s *Service) OnRecv(string, string) {

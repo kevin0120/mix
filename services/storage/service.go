@@ -90,8 +90,8 @@ func (s *Service) Open() error {
 
 	_, err = engine.IsTableExist("guns")
 	if err == nil {
-		if err := engine.Sync2(new(Guns)); err != nil {
-			return errors.Wrapf(err, "Create Table Guns fail")
+		if err := engine.Sync2(new(Tools)); err != nil {
+			return errors.Wrapf(err, "Create Table Tools fail")
 		}
 	}
 
@@ -164,7 +164,7 @@ func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Re
 	}
 }
 
-func (s *Service) ListUnuploadResults() ([]Results, error) {
+func (s *Service) ListUnUploadResults() ([]Results, error) {
 	var results []Results
 
 	ss := s.eng.Alias("r").Where("r.has_upload = ?", false).And("r.curve_file != ?", "")
@@ -178,24 +178,24 @@ func (s *Service) ListUnuploadResults() ([]Results, error) {
 	}
 }
 
-func (s *Service) GetTool(serial string) (Guns, error) {
+func (s *Service) GetTool(serial string) (Tools, error) {
 
-	var rt_gun Guns
+	var tools Tools
 
-	rt, err := s.eng.Alias("g").Where("g.serial = ?", serial).Get(&rt_gun)
+	rt, err := s.eng.Alias("g").Where("g.serial = ?", serial).Get(&tools)
 
 	if err != nil {
-		return rt_gun, err
+		return tools, err
 	} else {
 		if !rt {
-			return rt_gun, errors.New("found gun failed")
+			return tools, errors.New("found gun failed")
 		} else {
-			return rt_gun, nil
+			return tools, nil
 		}
 	}
 }
 
-func (s *Service) UpdateTool(gun *Guns) error {
+func (s *Service) UpdateTool(gun *Tools) error {
 	g, err := s.GetTool(gun.Serial)
 	if err == nil {
 		// update
@@ -390,7 +390,7 @@ func (s *Service) ListWorkorders(hmi_sn string, workcenterCode string, status st
 	return workorders, err
 }
 
-func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
+func (s *Service) GetWorkOrder(id int64, raw bool) (Workorders, error) {
 
 	var workorder Workorders
 
@@ -915,7 +915,7 @@ func (s *Service) Steps(workorderID int64) ([]Steps, error) {
 }
 
 func (s *Service) WorkorderStep(workorderID int64) (*WorkorderStep, error) {
-	workorder, err := s.GetWorkorder(workorderID, true)
+	workorder, err := s.GetWorkOrder(workorderID, true)
 	if err != nil {
 		return nil, err
 	}

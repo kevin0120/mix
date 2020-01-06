@@ -22,3 +22,8 @@ type Dispatcher interface {
 	Release(name string, handler string) error
 	Register(name string, handler *utils.DispatchHandlerStruct)
 }
+
+type INotifyService interface {
+	GetWorkCenter() string
+	NotifyAll(evt string, payload string)
+}

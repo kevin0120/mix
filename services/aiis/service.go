@@ -24,40 +24,41 @@ type OnOdooStatus func(status string)
 type SyncGun func(string) (int64, error)
 
 type Service struct {
-	configValue   atomic.Value
-	diag          Diagnostic
-	endpoints     []*Endpoint
-	httpClient    *resty.Client
-	rush_port     string
-	DB            *storage.Service
-	ws            utils.RecConn
-	DispatcherBus Dispatcher
-	WS            *wsnotify.Service
-	updateQueue   map[int64]time.Time
-	mtx           sync.Mutex
-	dispatcherMap dispatcherbus.DispatcherMap
-	SerialNumber  string
-	rpc           *GRPCClient
+	configValue    atomic.Value
+	diag           Diagnostic
+	endpoints      []*Endpoint
+	httpClient     *resty.Client
+	StorageService IStorageService
+	ws             utils.RecConn
+	DispatcherBus  Dispatcher
+	NotifyService  INotifyService
+	updateQueue    map[int64]time.Time
+	mtx            sync.Mutex
+	dispatcherMap  dispatcherbus.DispatcherMap
+	SerialNumber   string
+	rpc            *GRPCClient
 
 	//TighteningService *tightening_device.Service
-	Broker        *broker.Service
+	Broker        IBrokerService
 	opened        bool
 	toolCollector chan string
 	closing       chan struct{}
 }
 
-func NewService(c Config, d Diagnostic, port string, dp Dispatcher) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IBrokerService, ns INotifyService) *Service {
 	e, _ := c.index()
 	s := &Service{
-		diag:          d,
-		endpoints:     e,
-		rush_port:     port,
-		rpc:           NewGRPCClient(d, dp),
-		DispatcherBus: dp,
-		updateQueue:   map[int64]time.Time{},
-		opened:        false,
-		toolCollector: make(chan string, 16),
-		closing:       make(chan struct{}, 1),
+		diag:           d,
+		endpoints:      e,
+		rpc:            NewGRPCClient(d, dp),
+		DispatcherBus:  dp,
+		updateQueue:    map[int64]time.Time{},
+		opened:         false,
+		toolCollector:  make(chan string, 16),
+		closing:        make(chan struct{}, 1),
+		StorageService: ss,
+		Broker:         bs,
+		NotifyService:  ns,
 	}
 	s.rpc.srv = s
 	s.configValue.Store(c)
@@ -204,7 +205,7 @@ func (s *Service) OnRPCRecv(data interface{}) {
 	//case TYPE_RESULT:
 	//	rp := ResultPatch{}
 	//	json.Unmarshal(strData, &rp)
-	//	err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+	//	err := s.StorageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
 	//	if err == nil {
 	//		s.RemoveFromQueue(rp.ID)
 	//		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
@@ -221,19 +222,19 @@ func (s *Service) OnRPCRecv(data interface{}) {
 
 	case TYPE_MES_STATUS:
 		// TODO: 收到mes状态更新, 通知HMI------doing
-		//s.WS.WSNotifyAll(wsnotify.WS_EVENT_MES,"MES在线")
+		//s.NotifyService.WSNotifyAll(wsnotify.WS_EVENT_MES,"MES在线")
 		body, _ := json.Marshal(wsnotify.GenerateWSMsg(0, "", payload))
-		s.WS.NotifyAll(wsnotify.WS_EVENT_MES, string(body))
+		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_MES, string(body))
 		s.diag.Debug(fmt.Sprintf("收到mes状态并推送HMI: %s", payload))
 
 		//case TYPE_ORDER_START:
 		//	// TODO: 开工响应------doing
-		//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
+		//	//s.NotifyService.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
 		//	break
 		//
 		//case TYPE_ORDER_FINISH:
 		//	// TODO: 完工响应------doing
-		//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
+		//	//s.NotifyService.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
 		//	break
 	}
 }
@@ -258,7 +259,7 @@ func (s *Service) PutResult(resultId int64, body *AIISResult) error {
 	//	Data: WSOpResult{
 	//		ResultID: resultId,
 	//		Result:   body.(AIISResult),
-	//		Port:     s.rush_port,
+	//		Port:     s.remotePort,
 	//	},
 	//}
 	//
@@ -269,7 +270,6 @@ func (s *Service) PutResult(resultId int64, body *AIISResult) error {
 	result := WSOpResult{
 		ResultID: resultId,
 		Result:   body,
-		Port:     s.rush_port,
 	}
 
 	err := s.AddToQueue(result.ResultID)
@@ -277,14 +277,11 @@ func (s *Service) PutResult(resultId int64, body *AIISResult) error {
 		return nil
 	}
 
-	str, _ := json.Marshal(result)
-	return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, body.ToolSN), str)
-	//err = s.rpc.RPCSend(string(str))
-	//if err != nil {
-	//	s.diag.Error("grpc err", err)
-	//}
-	//
-	//return err
+	if data, err := json.Marshal(result); err == nil {
+		return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, body.ToolSN), data)
+	} else {
+		return err
+	}
 }
 
 func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req interface{}, ch <-chan int) (interface{}, error) {
@@ -296,13 +293,13 @@ func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req i
 
 	if err != nil {
 		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
-		s.WS.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
+		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
 		<-ch
 		return nil, err
 	}
 	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SerialNumber, msg.Type, 0, resp.(string)))
 	body, _ := json.Marshal(wsnotify.GenerateWSMsg(sn, wsType, resp.Body()))
-	s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 	<-ch
 	return resp.Body(), nil
 }
@@ -316,13 +313,13 @@ func (s *Service) PutMesFinishRequest(sn uint64, wsType string, code string, req
 
 	if err != nil {
 		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
-		s.WS.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
+		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
 		<-ch
 		return nil, err
 	}
 	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SerialNumber, msg.Type, 0, ""))
 	body, _ := json.Marshal(wsnotify.GenerateWSMsg(sn, wsType, resp.Body()))
-	s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 	<-ch
 	return resp.Body(), nil
 }
@@ -349,7 +346,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	psetDefine := tightening_device.PSetDefine{}
 	json.Unmarshal([]byte(result.PSetDefine), &psetDefine)
 
-	dbWorkorder, err := s.DB.GetWorkorder(result.WorkorderID, true)
+	dbWorkorder, err := s.StorageService.GetWorkOrder(result.WorkorderID, true)
 	if err == nil {
 		aiisResult.Payload = dbWorkorder.Payload
 	}
@@ -448,7 +445,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 func (s *Service) ResultUploadManager() error {
 	for {
 
-		results, err := s.DB.ListUnuploadResults()
+		results, err := s.StorageService.ListUnUploadResults()
 		if err == nil {
 			for _, v := range results {
 				aiisResult, err := s.ResultToAiisResult(&v)
@@ -469,7 +466,7 @@ func (s *Service) OnTighteningResult(data interface{}) {
 	}
 
 	tighteningResult := data.(*tightening_device.TighteningResult)
-	dbResult, err := s.DB.GetResultByID(tighteningResult.ID)
+	dbResult, err := s.StorageService.GetResultByID(tighteningResult.ID)
 	if err != nil {
 		s.diag.Error("Get Result Failed", err)
 	}
@@ -525,7 +522,7 @@ func (s *Service) onResultResp(message *broker.BrokerMessage) ([]byte, error) {
 	str_data, _ := json.Marshal(rpcPayload.Data)
 	rp := ResultPatch{}
 	json.Unmarshal(str_data, &rp)
-	err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+	err := s.StorageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
 	if err == nil {
 		s.RemoveFromQueue(rp.ID)
 		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))

@@ -106,7 +106,7 @@ func (s *Service) PushStatus() {
 	//}
 	//
 	//str, _ := json.Marshal(odooStatus)
-	//s.WS.NotifyAll(wsnotify.WS_EVENT_ODOO, string(str))
+	//s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ODOO, string(str))
 }
 
 func (s *Service) GetEndpoints(name string) []Endpoint {
@@ -352,7 +352,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		exist, _ := s.DB.WorkorderExists(v.ID)
 		if exist {
 			// 忽略已存在的工单
-			o, err := s.DB.GetWorkorder(v.ID, false)
+			o, err := s.DB.GetWorkOrder(v.ID, false)
 			if err != nil {
 				continue
 			}
@@ -404,7 +404,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			//	r.NutNo = consu.NutNo
 			//	r.Batch = fmt.Sprintf("%d/%d", k+1, len(v.Consumes))
 			//
-			//	//r.WorkorderID = o.WorkorderID
+			//	//r.CurrentWorkorderID = o.CurrentWorkorderID
 			//	r.Result = storage.RESULT_NONE
 			//	r.HasUpload = false
 			//	r.Stage = storage.RESULT_STAGE_INIT

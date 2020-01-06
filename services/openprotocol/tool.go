@@ -295,15 +295,15 @@ func (s *TighteningTool) OnResult(result interface{}) {
 
 	tighteningResult := result.(*tightening_device.TighteningResult)
 	dbTool, err := s.controller.ProtocolService.DB.GetTool(s.cfg.SN)
-	if err == nil && dbTool.WorkorderID != 0 {
+	if err == nil && dbTool.CurrentWorkorderID != 0 {
 		if s.Mode() == tightening_device.MODE_JOB {
-			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.WorkorderID)
+			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.CurrentWorkorderID)
 		} else {
 			tighteningResult.Seq = dbTool.Seq
 			tighteningResult.Count = dbTool.Count
 		}
 
-		tighteningResult.WorkorderID = dbTool.WorkorderID
+		tighteningResult.WorkorderID = dbTool.CurrentWorkorderID
 		tighteningResult.UserID = dbTool.UserID
 		tighteningResult.Batch = fmt.Sprintf("%d/%d", tighteningResult.Seq, dbTool.Total)
 
