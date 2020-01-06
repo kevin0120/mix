@@ -18,13 +18,15 @@ import Notifier from './Notifier/reducer';
 import loading from './loading/reducer';
 import systemInfo from './systemInfo/reducer';
 import workCenterMode from './workCenterMode/reducer';
-import io from './io/reducer';
 import reworkPattern from './reworkPattern/reducer';
+import { rootReducer } from './indexModels';
 
 export default function createRootReducer(history: {}) {
-  const routerReducer = connectRouter(history)(() => {});
+  const routerReducer = connectRouter(history)(() => {
+  });
   return connectRouter(history)(
     combineReducers({
+      modules: rootReducer,
       router: routerReducer,
       setting,
       ...Configuration,
@@ -42,7 +44,6 @@ export default function createRootReducer(history: {}) {
       healthz,
       loading,
       systemInfo,
-      io,
       reworkPattern
     })
   );

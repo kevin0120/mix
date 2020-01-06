@@ -16,20 +16,20 @@ import { CommonLog } from '../common/utils';
 import healthz from './healthz/saga';
 import modelViewer from './modelViewer/saga';
 import notifier from './Notifier/saga';
-import workCenterMode from './workCenterMode/saga'
+import workCenterMode from './workCenterMode/saga';
 import systemInfo from './systemInfo/saga';
-import io from './io/saga';
 import reworkPatternRoot from './reworkPattern/saga';
+import { rootSaga as moduleSagas } from './indexModels';
 
 export default function* rootSaga(): Saga<void> {
   try {
     // const state = yield select();
     yield all([
       // 硬件设备
+      moduleSagas,
       watchRFIDEvent,
       watchAiis,
       watchRushEvent,
-
       user, // auth
       // watchSettingPreSave,
       sysInitFlow,
@@ -44,8 +44,7 @@ export default function* rootSaga(): Saga<void> {
       healthz,
       modelViewer,
       notifier,
-      systemInfo,
-      io
+      systemInfo
     ].filter(e => !!e).map(e => call(e || (() => {
     }))));
   } catch (e) {

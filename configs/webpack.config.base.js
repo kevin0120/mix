@@ -9,7 +9,8 @@ import { dependencies } from '../package.json';
 export default {
   externals: [...Object.keys(dependencies || {}).filter(k=>
     !([
-      'lodash-es'
+      'lodash-es',
+      'saga-modux'
     ].find(item=>item===k))
   )],
 

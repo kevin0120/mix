@@ -16,22 +16,22 @@ import type { Node } from 'react';
 import Button from '../../components/CustomButtons/Button';
 import { ioDirection } from '../../modules/device/io/constants';
 import { ioOutputs, ioInputs } from '../../modules/io/constants';
-import ioActions from '../../modules/io/action';
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';
 import { withI18n } from '../../i18n';
+import io from '../../modules/io';
 
 const mapStateToProps = (state, ownProps) => ({
   ...ownProps,
-  ioEnabled: state.io.enabled,
-  ioModule: state.io.ioModule,
-  testStatus: state.io.testStatus,
-  ioPorts: state.io.ioPorts
+  ioEnabled: io.select(state).enabled,
+  ioModule: io.select(state).ioModule,
+  testStatus: io.select(state).testStatus,
+  ioPorts: io.select(state).ioPorts
 });
 
 const mapDispatchToProps = {
-  testIO: ioActions.test,
-  setPortsConfig: ioActions.setPortsConfig
+  testIO: io.action.testPort,
+  setPortsConfig: io.action.setPortsConfig
 };
 
 function ConnectedIo(props): ?Node {
@@ -64,7 +64,8 @@ function ConnectedIo(props): ?Node {
 
   const { ports } = ioModule;
 
-  function handlePortLabelChange() {}
+  function handlePortLabelChange() {
+  }
 
   function handlePortFunctionChange(e, port) {
     const { idx, direction } = port;
@@ -83,7 +84,7 @@ function ConnectedIo(props): ?Node {
   }
 
   function handleSubmit() {
-    setPortsConfig(config);
+    setPortsConfig({ ioPorts: config });
     // setIO(config);
   }
 
@@ -115,7 +116,7 @@ function ConnectedIo(props): ?Node {
     } = cls[status];
     return (
       <div className={classes.statusWrap}>
-        <span className={`${classes.statusCircle} ${color}`} />
+        <span className={`${classes.statusCircle} ${color}`}/>
         <span className={textColor}>{text}</span>
       </div>
     );
@@ -152,7 +153,7 @@ function ConnectedIo(props): ?Node {
             <Button
               color="warning"
               size="lg"
-              onClick={() => testIO(port)}
+              onClick={() => testIO({ port })}
               className={classes.testButton}
               disabled={!portHasFunction(port) || !ioEnabled}
             >
@@ -207,7 +208,7 @@ function ConnectedIo(props): ?Node {
 
             {renderTest()}
           </ListItem>
-          {idx !== config.length - 1 ? <Divider /> : null}
+          {idx !== config.length - 1 ? <Divider/> : null}
         </List>
       ));
     });
@@ -235,7 +236,7 @@ function ConnectedIo(props): ?Node {
         className={classes.button}
         onClick={handleSubmit}
       >
-        <SaveIcon className={classes.leftIcon} />
+        <SaveIcon className={classes.leftIcon}/>
         {t('Common.Submit')}
       </Button>
     </section>

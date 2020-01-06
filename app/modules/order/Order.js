@@ -19,9 +19,9 @@ import type { tOrder, tOrderStatus } from './interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import { workModes } from '../workCenterMode/constants';
-import ioActions from '../io/action';
 import { ioOutputGroups } from '../io/constants';
 import { orderActions } from './action';
+import io from '../io';
 
 const stepStatus = status => {
   switch (status) {
@@ -132,7 +132,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     _statusTasks = {
       * [ORDER_STATUS.TODO](config) {
         try {
-          yield put(ioActions.set(ioOutputGroups.doing, true));
+          yield put(io.action.setIOOutput({ group: ioOutputGroups.doing, status: true }));
           const { workCenterMode } = yield select();
           if (workCenterMode === workModes.reworkWorkCenterMode) {
             yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP, config));
@@ -231,7 +231,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           if (this._workingIndex < 0) {
             this._workingIndex = 0;
           }
-          yield put(ioActions.set(ioOutputGroups.ready, true));
+          yield put(io.action.setIOOutput({ group: ioOutputGroups.ready, status: true }));
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
@@ -244,7 +244,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.FAIL]() {
         try {
-          yield put(ioActions.set(ioOutputGroups.error, true));
+          yield put(io.action.setIOOutput({ group: ioOutputGroups.error, status: true }));
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
@@ -254,7 +254,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.PENDING]() {
         try {
-          yield put(ioActions.set(ioOutputGroups.warning, true));
+          yield put(io.action.setIOOutput({ group: ioOutputGroups.warning, status: true }));
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
@@ -264,7 +264,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.CANCEL]() {
         try {
-          yield put(ioActions.set(ioOutputGroups.warning, true));
+          yield put(io.action.setIOOutput({ group: ioOutputGroups.warning, status: true }));
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
