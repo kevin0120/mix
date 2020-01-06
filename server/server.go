@@ -265,7 +265,7 @@ func (s *Server) appendTighteningDeviceService() error {
 	c := s.config.TighteningDevice
 	d := s.DiagService.NewTighteningDeviceHandler()
 	srv, err := tightening_device.NewService(c, d,
-		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService)
+		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService)
 
 	if err != nil {
 		return errors.Wrap(err, "append tightening_device service fail")
@@ -273,7 +273,6 @@ func (s *Server) appendTighteningDeviceService() error {
 
 	//srv.WS = s.WSNotifyService
 	srv.StorageService = s.StorageServie
-	srv.DeviceService = s.DeviceService
 
 	s.TighteningDeviceService = srv
 	s.AppendService("tightening_device", srv)
@@ -357,7 +356,7 @@ func (s *Server) AppendScannerService() error {
 	c := s.config.Scanner
 	d := s.DiagService.NewScannerHandler()
 
-	srv := scanner.NewService(c, d, s.DispatcherBusService)
+	srv := scanner.NewService(c, d, s.DispatcherBusService, s.DeviceService)
 	srv.WS = s.WSNotifyService
 	srv.DeviceService = s.DeviceService
 
@@ -385,7 +384,7 @@ func (s *Server) AppendIOService() error {
 	c := s.config.IO
 	d := s.DiagService.NewIOHandler()
 
-	srv := io.NewService(c, d, s.DispatcherBusService)
+	srv := io.NewService(c, d, s.DispatcherBusService, s.DeviceService)
 	srv.WS = s.WSNotifyService
 	srv.DeviceService = s.DeviceService
 
@@ -399,7 +398,7 @@ func (s *Server) AppendReaderService() error {
 	c := s.config.Reader
 	d := s.DiagService.NewReaderHandler()
 
-	srv := reader.NewService(c, d)
+	srv := reader.NewService(c, d, s.DeviceService)
 	srv.WS = s.WSNotifyService
 	srv.DeviceService = s.DeviceService
 	srv.DispatcherBus = s.DispatcherBusService

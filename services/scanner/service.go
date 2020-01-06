@@ -35,16 +35,17 @@ type Service struct {
 	Notify
 	dispatcher    Dispatcher
 	WS            *wsnotify.Service
-	DeviceService *device.Service
+	DeviceService IDeviceService
 }
 
-func NewService(c Config, d Diagnostic, dispatcher Dispatcher) *Service {
+func NewService(c Config, d Diagnostic, dispatcher Dispatcher, ds IDeviceService) *Service {
 
 	s := &Service{
-		diag:        d,
-		mtxScanners: sync.Mutex{},
-		scanners:    map[string]*Scanner{},
-		dispatcher:  dispatcher,
+		diag:          d,
+		mtxScanners:   sync.Mutex{},
+		scanners:      map[string]*Scanner{},
+		dispatcher:    dispatcher,
+		DeviceService: ds,
 	}
 
 	s.configValue.Store(c)

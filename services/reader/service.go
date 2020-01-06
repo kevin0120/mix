@@ -23,14 +23,15 @@ type Service struct {
 	diag          Diagnostic
 	ctx           *scard.Context
 	WS            *wsnotify.Service
-	DeviceService *device.Service
+	DeviceService IDeviceService
 	DispatcherBus Dispatcher
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, ds IDeviceService) *Service {
 
 	s := &Service{
-		diag: d,
+		diag:          d,
+		DeviceService: ds,
 	}
 	s.SetSerialNumber(uuid.NewV4().String())
 	s.configValue.Store(c)

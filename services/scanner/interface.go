@@ -1,5 +1,7 @@
 package scanner
 
+import "github.com/masami10/rush/services/device"
+
 type Diagnostic interface {
 	Info(msg string)
 	Error(msg string, err error)
@@ -11,3 +13,5 @@ type Dispatcher interface {
 	Start(name string) error
 	Dispatch(name string, data interface{}) error
 }
+
+type IDeviceService = device.IDeviceService

@@ -3,6 +3,7 @@ package tightening_device
 import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/utils"
 )
 
@@ -10,6 +11,12 @@ type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
 }
+
+type IStorageService interface {
+	UpdateTool(guns *storage.Guns) error
+}
+
+type IDeviceService = device.IDeviceService
 
 type Dispatcher interface {
 	Create(name string, len int) error
