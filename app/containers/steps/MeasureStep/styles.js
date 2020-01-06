@@ -38,8 +38,9 @@ const styles = (theme) => ({
     alignItems: 'center'
   },
   inputContainer: {
-    width: '100%',
-    height: '100%',
+    // width: '100%',
+    // height: '100%',
+    padding: '10px 15px 10px 15px',
     border: 'solid 1px',
     borderRadius: 3,
     borderColor: theme.palette.primary.main,
@@ -60,6 +61,11 @@ const styles = (theme) => ({
   },
   rowText: {
     color: theme.palette.gray[900]
+  },
+  desc:{
+    marginBottom: '50px',
+    display: 'flex',
+    flexDirection: 'row'
   }
 });
 

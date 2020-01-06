@@ -84,79 +84,104 @@ function MeasureStep({
     },
     [step, bindAction, isCurrent, value, submit]
   );
-
-  const inputRef = useRef(null);
-  useEffect(() => {
-    if (inputRef && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [inputRef]);
+  const { desc, text } = step;
 
   return <div className={classes.root}>
-    <Card className={classes.card} login>
-      <CardHeader color="info" icon>
-        <CardIcon color="info">
-          <Assignment/>
-        </CardIcon>
-        <Typography variant="h6" className={classes.cardIconTitle}>测量</Typography>
-      </CardHeader>
-      <CardBody className={classes.cardContent}>
-        <table>
-          <tbody>
-          {[
-            {
-              label: '目标值：',
-              content: isValidMeasureValue(target) ? target : '未指定'
-            }, {
-              label: '最小值：',
-              content: isValidMeasureValue(min) ? min : '未指定'
-            }, {
-              label: '最大值：',
-              content: isValidMeasureValue(max) ? max : '未指定'
-            }, {
-              label: '测量值：',
-              content: <span
-                className={classNames({
-                  [classes.inputContainer]: true,
-                  [classes.inputContainerDisabled]: !isCurrent
-                })}
-                onClick={() => {
-                  if (isCurrent) {
-                    keyboardInput({
-                      onSubmit: text => {
-                        measureInput({
-                          data: text,
-                          time: new Date(),
-                          source: 'input'
-                        });
-                      },
-                      text: value || '',
-                      title: '请输入测量值',
-                      label: '请输入测量值'
-                    });
-                  }
-                }}
-              ><Typography variant="h4" className={classNames({
-                [classes.inputText]: !!value && isCurrent,
-                [classes.inputTextDisabled]: !value || !isCurrent
-              })}>{value || '请输入'}</Typography></span>
-            }
-          ].map(row => (
-            <tr className={classes.row} key={row.label}>
-              <td><Typography variant="h4">{row.label}</Typography></td>
-              <td className={classes.rowContent}>{
-                typeof row.content === 'string' || typeof row.content === 'number' ?
-                  <Typography variant="h4" className={classes.inputText}>{row.content}</Typography>
-                  : row.content
-              }
-              </td>
-            </tr>
-          ))}
-          </tbody>
-        </table>
-      </CardBody>
-    </Card>
-
+    {/*<Card className={classes.card} login>*/}
+    {/*  <CardHeader color="info" icon>*/}
+    {/*    <CardIcon color="info">*/}
+    {/*      <Assignment/>*/}
+    {/*    </CardIcon>*/}
+    {/*    <Typography variant="h6" className={classes.cardIconTitle}>测量</Typography>*/}
+    {/*  </CardHeader>*/}
+    {/*  <CardBody className={classes.cardContent}>*/}
+    {/*    <table>*/}
+    {/*      <tbody>*/}
+    {/*      {[*/}
+    {/*        {*/}
+    {/*          label: '目标值：',*/}
+    {/*          content: isValidMeasureValue(target) ? target : '未指定'*/}
+    {/*        }, {*/}
+    {/*          label: '最小值：',*/}
+    {/*          content: isValidMeasureValue(min) ? min : '未指定'*/}
+    {/*        }, {*/}
+    {/*          label: '最大值：',*/}
+    {/*          content: isValidMeasureValue(max) ? max : '未指定'*/}
+    {/*        }, {*/}
+    {/*          label: '测量值：',*/}
+    {/*          content: <span*/}
+    {/*            className={classNames({*/}
+    {/*              [classes.inputContainer]: true,*/}
+    {/*              [classes.inputContainerDisabled]: !isCurrent*/}
+    {/*            })}*/}
+    {/*            onClick={() => {*/}
+    {/*              if (isCurrent) {*/}
+    {/*                keyboardInput({*/}
+    {/*                  onSubmit: text => {*/}
+    {/*                    measureInput({*/}
+    {/*                      data: text,*/}
+    {/*                      time: new Date(),*/}
+    {/*                      source: 'input'*/}
+    {/*                    });*/}
+    {/*                  },*/}
+    {/*                  text: value || '',*/}
+    {/*                  title: '请输入测量值',*/}
+    {/*                  label: '请输入测量值'*/}
+    {/*                });*/}
+    {/*              }*/}
+    {/*            }}*/}
+    {/*          ><Typography variant="h4" className={classNames({*/}
+    {/*            [classes.inputText]: !!value && isCurrent,*/}
+    {/*            [classes.inputTextDisabled]: !value || !isCurrent*/}
+    {/*          })}>{value || '请输入'}</Typography></span>*/}
+    {/*        }*/}
+    {/*      ].map(row => (*/}
+    {/*        <tr className={classes.row} key={row.label}>*/}
+    {/*          <td><Typography variant="h4">{row.label}</Typography></td>*/}
+    {/*          <td className={classes.rowContent}>{*/}
+    {/*            typeof row.content === 'string' || typeof row.content === 'number' ?*/}
+    {/*              <Typography variant="h4" className={classes.inputText}>{row.content}</Typography>*/}
+    {/*              : row.content*/}
+    {/*          }*/}
+    {/*          </td>*/}
+    {/*        </tr>*/}
+    {/*      ))}*/}
+    {/*      </tbody>*/}
+    {/*    </table>*/}
+    {/*  </CardBody>*/}
+    {/*</Card>*/}
+    <span className={classes.desc}>
+    {text || desc ? (
+      <Typography variant="h4">
+        {text || desc}
+      </Typography>
+    ) : null}
+    </span>
+    <span
+      className={classNames({
+        [classes.inputContainer]: true,
+        [classes.inputContainerDisabled]: !isCurrent
+      })}
+      onClick={() => {
+        if (isCurrent) {
+          keyboardInput({
+            onSubmit: text => {
+              measureInput({
+                data: text,
+                time: new Date(),
+                source: 'input'
+              });
+            },
+            text: value || '',
+            title: '请输入测量值',
+            label: '请输入测量值'
+          });
+        }
+      }}
+    ><Typography variant="h4" className={classNames({
+      [classes.inputText]: !!value && isCurrent,
+      [classes.inputTextDisabled]: !value || !isCurrent
+    })}>{value || '请输入测量值'}</Typography></span>
   </div>;
 }
 

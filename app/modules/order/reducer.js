@@ -58,7 +58,7 @@ const orderReducer: {
     viewingOrder: order || null,
     viewingIndex: 0 // first index
   }),
-  [ORDER.WORK_ON]: (state, { order, config }: { order: IOrder }) => {
+  [ORDER.WORK_ON]: (state, { order, config }: { order: IOrder, config: Object }) => {
     const { step } = config || {};
     let vIdx = workingIndex(order) >= order.steps.length ? 0 : workingIndex(order);
     if (step) {
@@ -98,7 +98,7 @@ const orderReducer: {
     //   step === viewingStep(state) ? newIndex : viewingIndex(state)
     // );
     return {
-      ...state,
+      ...state
       // viewingIndex: vIndex
     };
   },
@@ -117,7 +117,7 @@ const orderReducer: {
   [ORDER.CLEAR_DATA](state, { order }) {
     const vOrder = viewingOrder(state);
     const wOrder = workingOrder(state);
-    if(wOrder!==order){
+    if (wOrder !== order) {
       order.clearData();
     }
     if (vOrder === order) {
