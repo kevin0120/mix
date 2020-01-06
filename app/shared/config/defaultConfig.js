@@ -109,7 +109,8 @@ const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        value: 'http://192.168.4.42:8069/api/v1',
+        // value: 'http://192.168.4.42:8069/api/v1',
+        value: 'http://127.0.0.1:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {
@@ -147,7 +148,7 @@ const defaultConfigs = {
       // rush: 'http://192.168.4.32:8082',
       // rush: 'http://192.168.4.18:8082',
       // rush: 'http://192.168.3.228:8082',
-      // rush: 'http://192.168.4.163:8082',
+      // rush: 'http://192.168.4.88:8082',
       rush: 'http://127.0.0.1:8082',
       // rush: 'http://192.168.3.240:8082',
       // rush: 'http://0da41704.ngrok.io:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2

@@ -1,6 +1,6 @@
 // @flow
 import type { Saga } from 'redux-saga';
-import { all, call } from 'redux-saga/effects';
+import { all, call, put } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import type { IWorkStep } from './interface/IWorkStep';
 import type { IWorkable } from '../workable/IWorkable';
@@ -8,6 +8,8 @@ import { orderStepUpdateApi, stepDataApi } from '../../api/order';
 import type { tStep, tStepStatus } from './interface/typeDef';
 import { STEP_STATUS, stepTypeKeys } from './constants';
 import { stepStatusTasks } from './stepStatusTasks';
+import notifierActions from '../Notifier/action';
+import { orderActions } from '../order/action';
 
 const StepMixin = (ClsWorkable: Class<IWorkable>) =>
   class Step extends ClsWorkable implements IWorkStep {
@@ -144,11 +146,18 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
         yield call([this, super.updateStatus], { status });
         yield call(orderStepUpdateApi, this.id, status);
       } catch (e) {
-        CommonLog.lError(e);
+        yield put(notifierActions.enqueueSnackbar(
+          'Error', `更新工步状态失败（${e.message}）`, {
+            at: 'updateStatus',
+            code: this.code,
+            status
+          }
+        ));
+        throw(e);
       }
     }
 
-    *_onLeave() {
+    * _onLeave() {
       try {
         yield call(stepDataApi, this.id, this._data);
       } catch (e) {

@@ -1,12 +1,13 @@
 // @flow
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Typography } from '@material-ui/core';
+import { makeStyles, Typography } from '@material-ui/core';
 import materialStepActions from '../../../modules/step/materialStep/action';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/typeDef';
 import type { IMaterialStep } from '../../../modules/step/materialStep/interface/IMaterialStep';
+import styles from './styles';
 
 const mapState = (state, props: ownProps): Props => ({
   ...props
@@ -36,45 +37,34 @@ function materialStep(props: Props) {
         完成
       </Button> : null
     );
-    bindDescription(
-      <React.Fragment>
-        <Typography variant="h5" style={{ paddingBottom: '10px' }}>{desc}</Typography>
-        {[consumeProduct].map(i =>
-          <Typography key={i} variant="body1">{i}</Typography>
-        )}
-      </React.Fragment>
-    );
+    // bindDescription(
+    //   <React.Fragment>
+    //
+    //   </React.Fragment>
+    // );
     return () => {
       bindAction(null);
       bindDescription(null);
     };
   }, [bindAction, bindDescription, consumeProduct, desc, isCurrent, payload, ready]);
+  const classes = makeStyles(styles)();
 
+  return <div className={classes.root}>
+    <span className={classes.desc}>
 
-  return <div
-    style={
-      {
-        display: 'flex',
-        justifyContents: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '100%'
+    {desc ? (
+      <Typography variant="h4">
+        {desc}
+      </Typography>
+    ) : null}
+      </span>
 
-      }
-    }>
-    {(payload && payload.items || []).map(i => <img
-      style={
-        {
-          maxWidth: '100%',
-          maxHeight: '100%',
-          margin: 'auto',
-          justifySelf: 'center',
-          alignSelf: 'center',
-          resize: 'both'
-        }
-      }
-      key={i.name} src={i.image || ''} alt={i.name}
-    />)}
+    {[consumeProduct].map(i =>
+      <span>
+        <Typography key={i} variant="h5">{i}</Typography>
+      </span>
+    )}
+
   </div>;
 }
 

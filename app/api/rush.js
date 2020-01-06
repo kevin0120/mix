@@ -57,7 +57,7 @@ export function rushSendApi(msgType: string, data: any, timeout: number = defaul
       }, timeout, sn
     });
     CommonLog.Info(`rush send (${msgType})`, {
-      type:msgType,
+      type: msgType,
       sn,
       data: JSON.stringify(data)
     });

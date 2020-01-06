@@ -96,9 +96,7 @@ function onNewScanner({ scanner }) {
     // TODO: filter scanner input
     scanner.Enable();
     scanner.addListener(
-      (input, state) => {
-        return !workingOrder(state.order);
-      },
+      (input, state) => !workingOrder(state.order),
       input => orderActions.tryViewCode(input.data)
     );
   } catch (e) {
@@ -237,10 +235,11 @@ function* getOrderDetail({ code }) {
     yield put(loadingActions.stop());
   } catch (e) {
     yield put(loadingActions.stop());
-    CommonLog.lError(e, {
-      at: 'getOrderDetail',
-      code
-    });
+    yield put(notifierActions.enqueueSnackbar(
+      'Error', `获取工单详情失败（${e.message}）`, {
+        at: 'getOrderDetail'
+      }
+    ));
   }
 }
 
@@ -250,9 +249,11 @@ function* getOrderList() {
       // TODO: order query args
     });
   } catch (e) {
-    CommonLog.lError(e, {
-      at: 'getOrderList'
-    });
+    yield put(notifierActions.enqueueSnackbar(
+      'Error', `获取工单列表失败（${e.message}）`, {
+        at: 'getOrderList',
+      }
+    ));
   }
 }
 

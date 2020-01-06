@@ -36,9 +36,9 @@ const mapState = (state, props: tOP): tSP => ({
   type: stepPayload(viewingStep(state.order))?.type || '',
   payload: stepPayload(viewingStep(state.order)),
   value: stepData(viewingStep(state.order)).result,
-  target:viewingStep(state.order).target,
-  max:viewingStep(state.order).toleranceMax,
-  min:viewingStep(state.order).toleranceMin,
+  target: viewingStep(state.order).target,
+  max: viewingStep(state.order).toleranceMax,
+  min: viewingStep(state.order).toleranceMin
 });
 
 const mapDispatch: tDP = {
@@ -51,18 +51,20 @@ type Props = {|
   ...tDP
 |};
 
+const isValidMeasureValue = (v) => typeof v === 'string' || typeof v === 'number';
+
 function MeasureStep({
-                       step,
-                       isCurrent,
-                       submit,
-                       bindAction,
-                       keyboardInput,
-                       target,
-                       max,
-                       min,
-                       measureInput,
-                       value
-                     }: Props) {
+  step,
+  isCurrent,
+  submit,
+  bindAction,
+  keyboardInput,
+  target,
+  max,
+  min,
+  measureInput,
+  value
+}: Props) {
   const classes = makeStyles(styles)();
   useEffect(
     () => {
@@ -104,13 +106,13 @@ function MeasureStep({
           {[
             {
               label: '目标值：',
-              content: target || '未指定'
+              content: isValidMeasureValue(target) ? target : '未指定'
             }, {
               label: '最小值：',
-              content: min || '未指定'
+              content: isValidMeasureValue(min) ? min : '未指定'
             }, {
               label: '最大值：',
-              content: max || '未指定'
+              content: isValidMeasureValue(max) ? max : '未指定'
             }, {
               label: '测量值：',
               content: <span
@@ -136,7 +138,7 @@ function MeasureStep({
                 }}
               ><Typography variant="h4" className={classNames({
                 [classes.inputText]: !!value && isCurrent,
-                [classes.inputTextDisabled]: !value || !isCurrent,
+                [classes.inputTextDisabled]: !value || !isCurrent
               })}>{value || '请输入'}</Typography></span>
             }
           ].map(row => (
