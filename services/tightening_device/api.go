@@ -133,11 +133,11 @@ func (s *Api) ToolJobSet(req *JobSet) error {
 		req.UserID = 1
 	}
 
-	_ = s.StorageService.UpdateTool(&storage.Guns{
-		Serial:      req.ToolSN,
-		WorkorderID: req.WorkorderID,
-		Total:       req.Total,
-		UserID:      req.UserID,
+	_ = s.StorageService.UpdateTool(&storage.Tools{
+		Serial:             req.ToolSN,
+		CurrentWorkorderID: req.WorkorderID,
+		Total:              req.Total,
+		UserID:             req.UserID,
 	})
 
 	return tool.SetJob(req.Job)
@@ -175,14 +175,14 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 		req.UserID = 1
 	}
 
-	_ = s.StorageService.UpdateTool(&storage.Guns{
-		Serial:      req.ToolSN,
-		WorkorderID: req.WorkorderID,
-		Seq:         int(req.Sequence),
-		Count:       req.Count,
-		UserID:      req.UserID,
-		Total:       req.Total,
-		StepID:      req.StepID,
+	_ = s.StorageService.UpdateTool(&storage.Tools{
+		Serial:             req.ToolSN,
+		CurrentWorkorderID: req.WorkorderID,
+		Seq:                int(req.Sequence),
+		Count:              req.Count,
+		UserID:             req.UserID,
+		Total:              req.Total,
+		StepID:             req.StepID,
 	})
 
 	return tool.SetPSet(req.PSet)

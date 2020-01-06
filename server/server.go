@@ -283,10 +283,9 @@ func (s *Server) appendTighteningDeviceService() error {
 func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
-	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress, s.DispatcherBusService)
+	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress, s.DispatcherBusService, s.StorageServie)
 
 	srv.SerialNumber = s.config.SN
-	srv.DB = s.StorageServie
 	srv.WS = s.WSNotifyService
 	srv.Broker = s.BrokerService
 

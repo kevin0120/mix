@@ -13,7 +13,7 @@ type Diagnostic interface {
 }
 
 type IStorageService interface {
-	UpdateTool(guns *storage.Guns) error
+	UpdateTool(guns *storage.Tools) error
 }
 
 type IDeviceService = device.IDeviceService

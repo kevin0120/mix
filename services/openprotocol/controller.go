@@ -294,7 +294,7 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 
 func (c *TighteningController) Start() error {
 	for _, v := range c.deviceConf.Tools {
-		_ = c.ProtocolService.DB.UpdateTool(&storage.Guns{
+		_ = c.ProtocolService.DB.UpdateTool(&storage.Tools{
 			Serial: v.SN,
 			Mode:   "pset",
 		})
