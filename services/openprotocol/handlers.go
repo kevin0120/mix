@@ -106,10 +106,11 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 		sn := tool.SerialNumber()
 
 		//defer delete(client.tempResultCurve, curve.ToolNumber)
-		client.tempResultCurve = &tightening_device.TighteningCurve{}
 		client.tempResultCurve.ToolSN = sn
 		client.tempResultCurve.UpdateTime = time.Now()
 		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_CURVE), client.tempResultCurve)
+		// dispatch完后创建新的缓存拧紧曲线
+		client.tempResultCurve = tightening_device.NewTighteningCurve()
 	}
 	return nil
 }

@@ -217,6 +217,10 @@ type TighteningCurve struct {
 	TighteningCurveContent
 }
 
+func NewTighteningCurve() *TighteningCurve  {
+	return &TighteningCurve{}
+}
+
 func (c *TighteningCurve) ToDBCurve() *storage.Curves {
 	curveContent, _ := json.Marshal(c.TighteningCurveContent)
 

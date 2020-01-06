@@ -28,7 +28,7 @@ func createClientContext(endpoint string, diag Diagnostic, handler IClientHandle
 		diag:            diag,
 		clientHandler:   handler,
 		sn:              sn,
-		tempResultCurve: &tightening_device.TighteningCurve{},
+		tempResultCurve: tightening_device.NewTighteningCurve(),
 	}
 
 	ctx.sockClient = socket_writer.NewSocketWriter(endpoint, &ctx)
