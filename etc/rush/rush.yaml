@@ -5,7 +5,7 @@ doc_path: ./etc/rush/api.json
 logging:
 #  file: ./logs/%Y%m%d.log
   file: STDOUT
-  level: DEBUG
+  level: INFO
   max_age: 3000h
   rotate: 24h
 httpd:
@@ -162,9 +162,9 @@ tightening_device:
         - sn: 1234
           channel: 51
           endpoint: tcp://192.168.3.23:4545
-        - sn: 5678
-          channel: 1
-          endpoint: tcp://192.168.3.23:4546
+#        - sn: 5678
+#          channel: 1
+#          endpoint: tcp://192.168.3.23:4546
 #
 #    - model: MODEL_DESOUTTER_CVI3
 #      protocol: Audi/VW

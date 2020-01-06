@@ -353,6 +353,7 @@ func (s *TighteningTool) OnCurve(curve interface{}) {
 
 	// 分发曲线
 	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_CURVE, tighteningCurve)
+	s.diag.Info(fmt.Sprintf("缓存曲线成功 工具:%s 对应拧紧ID:%s", dbCurves.ToolSN, dbCurves.TighteningID))
 }
 
 func (s *TighteningTool) GetDispatch(name string) *utils.Dispatcher {
