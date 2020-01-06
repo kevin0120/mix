@@ -21,15 +21,16 @@ import { workModes } from '../workCenterMode/constants';
 import ioActions from '../io/action';
 import { ioOutputGroups } from '../io/constants';
 import { orderActions } from './action';
+import { Typography } from '@material-ui/core';
 
 const stepStatus = status => {
   switch (status) {
     case STEP_STATUS.FINISHED:
-      return '完成';
+      return <Typography color={'primary'}>{'完成'}</Typography>;
     case STEP_STATUS.FAIL:
-      return '失败';
+      return <Typography color={'error'}>{'失败'}</Typography>;
     default:
-      return '未完成';
+      return <Typography>{'未完成'}</Typography>;
   }
 };
 
