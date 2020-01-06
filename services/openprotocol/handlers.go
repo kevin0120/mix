@@ -51,7 +51,7 @@ func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	seq := <-client.requestChannel
 	client.Response.update(seq, request_errors["00"])
 
@@ -64,7 +64,7 @@ func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
 
 // 处理曲线
 func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	//讲收到的曲线先做反序列化处理
 	var curve = CurveBody{}
 	err := ascii.Unmarshal(pkg.Body, &curve)
@@ -128,7 +128,7 @@ func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error 
 
 // 处理历史结果
 func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	result_data := ResultDataOld{}
 	err := ascii.Unmarshal(pkg.Body, &result_data)
 	if err != nil {
@@ -164,7 +164,7 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 
 // pset详情
 func handleMID_0013_PSET_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	pset_detail, err := DeserializePSetDetail(pkg.Body)
 	if err != nil {
 		return err
@@ -178,7 +178,7 @@ func handleMID_0013_PSET_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) 
 
 // pset列表
 func handleMID_0011_PSET_LIST_REPLY(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	pset_list := PSetList{}
 	err := pset_list.Deserialize(pkg.Body)
 	if err != nil {
@@ -193,7 +193,7 @@ func handleMID_0011_PSET_LIST_REPLY(c *TighteningController, pkg *handlerPkg) er
 
 // job列表
 func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	job_list := JobList{}
 	err := job_list.Deserialize(pkg.Body)
 	if err != nil {
@@ -208,7 +208,7 @@ func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) err
 
 // job详情
 func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	jobDetaill, err := DeserializeJobDetail(pkg.Body)
 	if err != nil {
 		return err
@@ -222,7 +222,7 @@ func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) e
 
 // 请求错误
 func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	errCode := pkg.Body[4:6]
 
 	seq := <-client.requestChannel
@@ -233,7 +233,7 @@ func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
 
 // 请求成功
 func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
-	client := c.sockClients[pkg.SN]
+	client := c.getClient(pkg.SN)
 	seq := <-client.requestChannel
 	client.Response.update(seq, request_errors["00"])
 
