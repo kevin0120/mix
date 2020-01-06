@@ -114,7 +114,7 @@ func (c *TighteningController) updateStatus(status string) {
 		//}
 
 		//msg, _ := json.Marshal(s)
-		//c.Srv.WS.WSSendControllerStatus(string(msg))
+		//c.Srv.NotifyService.WSSendControllerStatus(string(msg))
 
 		c.Srv.diag.Debug(fmt.Sprintf("CVI3:%s %s\n", c.cfg.SN, status))
 

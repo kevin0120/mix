@@ -106,7 +106,7 @@ func (s *Service) PushStatus() {
 	//}
 	//
 	//str, _ := json.Marshal(odooStatus)
-	//s.WS.NotifyAll(wsnotify.WS_EVENT_ODOO, string(str))
+	//s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ODOO, string(str))
 }
 
 func (s *Service) GetEndpoints(name string) []Endpoint {

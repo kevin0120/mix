@@ -61,6 +61,11 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
+func (s *Service) GetWorkCenter() string  {
+	c := s.Config()
+	return c.Workcenter
+}
+
 func (s *Service) NewWebSocketRecvHandler(handler func(interface{})) {
 	fn := utils.CreateDispatchHandlerStruct(handler)
 	s.dispatcherBus.Register(dispatcherbus.DISPATCH_WS_NOTIFY, fn)

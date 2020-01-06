@@ -348,7 +348,7 @@ func (p *Service) HandleProcess() {
 				//	}
 				//	ws_str, _ := json.Marshal(ws)
 				//
-				//	p.WS.WSSendControllerSelectorStatus(string(ws_str))
+				//	p.NotifyService.WSSendControllerSelectorStatus(string(ws_str))
 				//}
 			}
 

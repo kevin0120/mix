@@ -28,11 +28,10 @@ type Service struct {
 	diag           Diagnostic
 	endpoints      []*Endpoint
 	httpClient     *resty.Client
-	remotePort     string //for rush
 	StorageService IStorageService
 	ws             utils.RecConn
 	DispatcherBus  Dispatcher
-	WS             *wsnotify.Service
+	NotifyService  INotifyService
 	updateQueue    map[int64]time.Time
 	mtx            sync.Mutex
 	dispatcherMap  dispatcherbus.DispatcherMap
@@ -40,18 +39,17 @@ type Service struct {
 	rpc            *GRPCClient
 
 	//TighteningService *tightening_device.Service
-	Broker        *broker.Service
+	Broker        IBrokerService
 	opened        bool
 	toolCollector chan string
 	closing       chan struct{}
 }
 
-func NewService(c Config, d Diagnostic, port string, dp Dispatcher, ss IStorageService) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IBrokerService, ns INotifyService) *Service {
 	e, _ := c.index()
 	s := &Service{
 		diag:           d,
 		endpoints:      e,
-		remotePort:     port,
 		rpc:            NewGRPCClient(d, dp),
 		DispatcherBus:  dp,
 		updateQueue:    map[int64]time.Time{},
@@ -59,6 +57,8 @@ func NewService(c Config, d Diagnostic, port string, dp Dispatcher, ss IStorageS
 		toolCollector:  make(chan string, 16),
 		closing:        make(chan struct{}, 1),
 		StorageService: ss,
+		Broker:         bs,
+		NotifyService:  ns,
 	}
 	s.rpc.srv = s
 	s.configValue.Store(c)
@@ -222,19 +222,19 @@ func (s *Service) OnRPCRecv(data interface{}) {
 
 	case TYPE_MES_STATUS:
 		// TODO: 收到mes状态更新, 通知HMI------doing
-		//s.WS.WSNotifyAll(wsnotify.WS_EVENT_MES,"MES在线")
+		//s.NotifyService.WSNotifyAll(wsnotify.WS_EVENT_MES,"MES在线")
 		body, _ := json.Marshal(wsnotify.GenerateWSMsg(0, "", payload))
-		s.WS.NotifyAll(wsnotify.WS_EVENT_MES, string(body))
+		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_MES, string(body))
 		s.diag.Debug(fmt.Sprintf("收到mes状态并推送HMI: %s", payload))
 
 		//case TYPE_ORDER_START:
 		//	// TODO: 开工响应------doing
-		//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
+		//	//s.NotifyService.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
 		//	break
 		//
 		//case TYPE_ORDER_FINISH:
 		//	// TODO: 完工响应------doing
-		//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
+		//	//s.NotifyService.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
 		//	break
 	}
 }
@@ -270,7 +270,6 @@ func (s *Service) PutResult(resultId int64, body *AIISResult) error {
 	result := WSOpResult{
 		ResultID: resultId,
 		Result:   body,
-		Port:     s.remotePort,
 	}
 
 	err := s.AddToQueue(result.ResultID)
@@ -280,7 +279,7 @@ func (s *Service) PutResult(resultId int64, body *AIISResult) error {
 
 	if data, err := json.Marshal(result); err == nil {
 		return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, body.ToolSN), data)
-	}else {
+	} else {
 		return err
 	}
 }
@@ -294,13 +293,13 @@ func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req i
 
 	if err != nil {
 		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
-		s.WS.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
+		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
 		<-ch
 		return nil, err
 	}
 	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SerialNumber, msg.Type, 0, resp.(string)))
 	body, _ := json.Marshal(wsnotify.GenerateWSMsg(sn, wsType, resp.Body()))
-	s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 	<-ch
 	return resp.Body(), nil
 }
@@ -314,13 +313,13 @@ func (s *Service) PutMesFinishRequest(sn uint64, wsType string, code string, req
 
 	if err != nil {
 		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
-		s.WS.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
+		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
 		<-ch
 		return nil, err
 	}
 	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SerialNumber, msg.Type, 0, ""))
 	body, _ := json.Marshal(wsnotify.GenerateWSMsg(sn, wsType, resp.Body()))
-	s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 	<-ch
 	return resp.Body(), nil
 }

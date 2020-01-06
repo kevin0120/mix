@@ -1,6 +1,7 @@
 package aiis
 
 import (
+	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/storage"
 )
@@ -25,4 +26,13 @@ type IStorageService interface {
 	GetResultByID(id int64) (*storage.Results, error)
 	GetWorkOrder(id int64, raw bool) (storage.Workorders, error)
 	ListUnUploadResults() ([]storage.Results, error)
+}
+
+type IBrokerService interface {
+	Publish(subject string, data []byte) error
+	Subscribe(subject string, handler broker.SubscribeHandler) error
+}
+
+type INotifyService interface {
+	NotifyAll(evt string, payload string)
 }

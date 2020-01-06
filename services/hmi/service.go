@@ -26,16 +26,16 @@ const (
 )
 
 type Service struct {
-	diag        Diagnostic
-	DB          *storage.Service
-	Httpd       *httpd.Service
-	ODOO        *odoo.Service
-	Aiis        *aiis.Service
-	ChStart     chan int
-	ChFinish    chan int
-	ChWorkorder chan int
-	SN          string
-	WS          *wsnotify.Service
+	diag          Diagnostic
+	DB            *storage.Service
+	Httpd         *httpd.Service
+	ODOO          *odoo.Service
+	Aiis          *aiis.Service
+	ChStart       chan int
+	ChFinish      chan int
+	ChWorkorder   chan int
+	SN            string
+	NotifyService INotifyService
 
 	DispatcherBus Dispatcher
 
@@ -43,7 +43,7 @@ type Service struct {
 	wsnotify.WSRequestHandlers
 }
 
-func NewService(d Diagnostic, dp Dispatcher) *Service {
+func NewService(d Diagnostic, dp Dispatcher, ns INotifyService) *Service {
 
 	s := &Service{
 		diag:          d,
@@ -51,6 +51,7 @@ func NewService(d Diagnostic, dp Dispatcher) *Service {
 		ChStart:       make(chan int, CH_LENGTH),
 		ChFinish:      make(chan int, CH_LENGTH),
 		ChWorkorder:   make(chan int, CH_LENGTH),
+		NotifyService: ns,
 	}
 
 	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
@@ -63,16 +64,16 @@ func NewService(d Diagnostic, dp Dispatcher) *Service {
 }
 
 func (s *Service) SendScannerInfo(identification string) error {
-	if s.WS == nil {
+	if s.NotifyService == nil {
 		return errors.New("Please Inject Notify Service First")
 	}
-	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, identification)
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_SCANNER, identification)
 	return nil
 }
 
 func (s *Service) Open() error {
 	//fixme: 嵌套那么深
-	//s.ControllerService.WS.OnNewClient = s.OnNewHmiConnect
+	//s.ControllerService.NotifyService.OnNewClient = s.OnNewHmiConnect
 
 	// 接收设备状态变化
 	s.DispatcherBus.Register(dispatcherBus.DISPATCHER_DEVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onDeviceStatus))
@@ -161,7 +162,7 @@ func (s *Service) OnNewHmiConnect(conn websocket.Connection) {
 
 	//主动推送工位号
 	msg := WSWorkcenter{
-		WorkCenter: s.WS.Config().Workcenter,
+		WorkCenter: s.NotifyService.GetWorkCenter(),
 	}
 	_ = s.commonSendWebSocketMsg(conn, wsnotify.WS_EVENT_REG, wsnotify.GenerateWSMsg(0, wsnotify.WS_RUSH_DATA, msg))
 }
@@ -232,7 +233,7 @@ func (s *Service) onIOContactData(data interface{}) {
 //		},
 //	})
 //
-//	s.WS.NotifyAll(wsnotify.WS_EVENT_AIIS, string(payload))
+//	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_AIIS, string(payload))
 //	s.diag.Debug(fmt.Sprintf("Aiis连接状态推送HMI: %s", string(payload)))
 //}
 //
@@ -252,7 +253,7 @@ func (s *Service) onIOContactData(data interface{}) {
 //		},
 //	})
 //
-//	s.WS.NotifyAll(wsnotify.WS_EVENT_ODOO, string(payload))
+//	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ODOO, string(payload))
 //	s.diag.Debug(fmt.Sprintf("ODOO连接状态推送HMI: %s", string(payload)))
 //}
 //
@@ -269,7 +270,7 @@ func (s *Service) onIOContactData(data interface{}) {
 //		Data: status,
 //	})
 //
-//	s.WS.NotifyAll(wsnotify.WS_EVENT_EXSYS, string(payload))
+//	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_EXSYS, string(payload))
 //	s.diag.Debug(fmt.Sprintf("第三方系统连接状态推送HMI: %s", string(payload)))
 //}
 
@@ -306,7 +307,7 @@ func (s *Service) wsSendReaderData(uid string) {
 		},
 	})
 
-	s.WS.NotifyAll(wsnotify.WS_EVENT_READER, string(data))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_READER, string(data))
 }
 
 // websocket发送条码信息
@@ -316,7 +317,7 @@ func (s *Service) wsSendBarcode(scannerData *scanner.ScannerRead) {
 		Data: scannerData,
 	})
 
-	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, string(data))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_SCANNER, string(data))
 }
 
 // websocket发送IO输入输出状态变化
@@ -326,7 +327,7 @@ func (s *Service) wsSendIOContact(ioContact *io.IoContact) {
 		Data: ioContact,
 	})
 
-	s.WS.NotifyAll(wsnotify.WS_EVENT_IO, string(data))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_IO, string(data))
 }
 
 // websocket发送设备状态
@@ -336,7 +337,7 @@ func (s *Service) wsSendDeviceStatus(deviceStatus []device.DeviceStatus) {
 		Data: deviceStatus,
 	})
 
-	s.WS.NotifyAll(wsnotify.WS_EVENT_DEVICE, string(data))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_DEVICE, string(data))
 }
 
 // websocket发送拧紧结果
@@ -346,5 +347,5 @@ func (s *Service) wsSendTighteningResult(results []tightening_device.BaseResult)
 		Data: results,
 	})
 
-	s.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(data))
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_RESULT, string(data))
 }

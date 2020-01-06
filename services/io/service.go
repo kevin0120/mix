@@ -216,7 +216,7 @@ func (s *Service) OnStatus(sn string, status string) {
 	//	},
 	//})
 	//
-	//s.WS.WSSendIO(string(io))
+	//s.NotifyService.WSSendIO(string(io))
 }
 
 func (s *Service) OnRecv(string, string) {

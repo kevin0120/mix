@@ -271,7 +271,7 @@ func (s *Server) appendTighteningDeviceService() error {
 		return errors.Wrap(err, "append tightening_device service fail")
 	}
 
-	//srv.WS = s.WSNotifyService
+	//srv.NotifyService = s.WSNotifyService
 	srv.StorageService = s.StorageServie
 
 	s.TighteningDeviceService = srv
@@ -283,11 +283,9 @@ func (s *Server) appendTighteningDeviceService() error {
 func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
-	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress, s.DispatcherBusService, s.StorageServie)
+	srv := aiis.NewService(c, d, s.DispatcherBusService, s.StorageServie, s.BrokerService, s.WSNotifyService)
 
 	srv.SerialNumber = s.config.SN
-	srv.WS = s.WSNotifyService
-	srv.Broker = s.BrokerService
 
 	s.AiisService = srv
 	s.AppendService("aiis", srv)
@@ -325,13 +323,12 @@ func (s *Server) appendWebsocketService() error {
 
 func (s *Server) appendHMIService() error {
 	d := s.DiagService.NewHMIHandler()
-	srv := hmi.NewService(d, s.DispatcherBusService)
+	srv := hmi.NewService(d, s.DispatcherBusService, s.WSNotifyService)
 
 	srv.ODOO = s.OdooService
 	srv.Httpd = s.HTTPDService //http 服务注入
 	srv.DB = s.StorageServie   // stroage 服务注入
 	srv.SN = s.config.SN
-	srv.WS = s.WSNotifyService
 	srv.Aiis = s.AiisService
 	srv.DispatcherBus = s.DispatcherBusService
 	s.AppendService("hmi", srv)
