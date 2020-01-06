@@ -2,7 +2,6 @@ package openprotocol
 
 import (
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
@@ -60,8 +59,8 @@ func (c *TighteningController) createToolsByConfig() error {
 	for _, v := range conf.Tools {
 		tool := CreateTool(c, v, d)
 		c.dispatcherMap[tool.SerialNumber()] = dispatcherbus.DispatcherMap{
-			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_RESULT): utils.CreateDispatchHandlerStruct(tool.OnResult),
-			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_CURVE):  utils.CreateDispatchHandlerStruct(tool.OnCurve),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_RESULT): utils.CreateDispatchHandlerStruct(tool.OnResult),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_CURVE):  utils.CreateDispatchHandlerStruct(tool.OnCurve),
 		}
 		c.AddChildren(v.SN, tool)
 	}
@@ -97,17 +96,19 @@ func (c *TighteningController) initClients(deviceConfig *tightening_device.Tight
 
 	for _, v := range deviceConfig.Tools {
 		endpoint := v.Endpoint
+		sn := v.SN
 		if deviceConfig.Endpoint != "" {
 			// 全局链接
 			c.isGlobalConn = true
 			endpoint = deviceConfig.Endpoint
+			sn = deviceConfig.SN
 		} else {
 			// 每个工具独立链接
 			c.isGlobalConn = false
 		}
 
-		client := createClientContext(endpoint, d, c, v.SN)
-		c.sockClients[v.SN] = client
+		client := createClientContext(endpoint, d, c, sn)
+		c.sockClients[sn] = client
 
 		if c.isGlobalConn {
 			break
@@ -134,9 +135,8 @@ func (c *TighteningController) UpdateToolStatus(status string) {
 			Status: status,
 		})
 	}
-	if data, err := json.Marshal(ss); err == nil {
-		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, data)
-	}
+
+	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ss)
 }
 
 func (c *TighteningController) GetToolViaSerialNumber(toolSN string) (tightening_device.ITighteningTool, error) {
@@ -261,7 +261,7 @@ func (c *TighteningController) handleMsg(pkg *handlerPkg) error {
 	return handler(c, pkg)
 }
 
-func (c *TighteningController) handleResult(result *tightening_device.TighteningResult) error {
+func (c *TighteningController) handleResult(result tightening_device.TighteningResult) error {
 	result.ControllerSN = c.deviceConf.SN
 	tool, err := c.getInstance().GetToolViaChannel(result.ChannelID)
 	if err != nil {
@@ -273,7 +273,7 @@ func (c *TighteningController) handleResult(result *tightening_device.Tightening
 	result.ToolSN = toolSerialNumber
 
 	// 分发结果到工具进行处理
-	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_RESULT), result)
+	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_RESULT), result)
 
 	return nil
 }
@@ -429,7 +429,7 @@ func (c *TighteningController) startComm(sn string) error {
 func (c *TighteningController) handleStatus(sn string, status string) {
 
 	if status != c.Status() {
-		c.diag.Debug(fmt.Sprintf("OpenProtocol handleStatus %s:%s %s\n", c.Model(), c.deviceConf.SN, status))
+		c.diag.Info(fmt.Sprintf("OpenProtocol handleStatus Model:%s SN:%s %s\n", c.Model(), sn, status))
 		c.UpdateStatus(status)
 		if status == device.BaseDeviceStatusOnline {
 			c.startComm(sn)
@@ -479,13 +479,13 @@ func (c *TighteningController) getTransportClientBySymbol(symbol string) *client
 	}
 }
 
-func (c *TighteningController) getOldResult(sn string, last_id int64) (*tightening_device.TighteningResult, error) {
+func (c *TighteningController) getOldResult(sn string, last_id int64) (tightening_device.TighteningResult, error) {
 	reply, err := c.getClient(sn).ProcessRequest(MID_0064_OLD_SUBSCRIBE, "", "", "", fmt.Sprintf("%010d", last_id))
 	if err != nil {
-		return nil, err
+		return tightening_device.TighteningResult{}, err
 	}
 
-	return reply.(*tightening_device.TighteningResult), nil
+	return reply.(tightening_device.TighteningResult), nil
 }
 
 func (c *TighteningController) PSetSubscribe(sn string) error {

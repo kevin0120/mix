@@ -1,28 +1,8 @@
 package aiis
 
 const (
-	WS_REG    = "reg"
-	WS_RESULT = "result"
-)
-
-const (
 	SUBJECT_RESULTS      = "saturn.results.%s"
 	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
-)
-
-const (
-	ODOO_RESULT_PASS = "pass"
-	ODOO_RESULT_FAIL = "fail"
-
-	QUALITY_STATE_PASS = "pass"
-	QUALITY_STATE_FAIL = "fail"
-	QUALITY_STATE_EX   = "exception"
-
-	HANDLER_TYPE_CURVE = "curve"
-	HANDLER_TYPE_AIIS  = "aiis"
-
-	ODOO_STATUS_ONLINE  = "online"
-	ODOO_STATUS_OFFLINE = "offline"
 )
 
 type AIISResult struct {
@@ -95,16 +75,11 @@ type CURObject struct {
 type WSOpResult struct {
 	ResultID int64       `json:"result_id"`
 	Result   interface{} `json:"result"`
-	Port     string      `json:"port"`
 }
 
 type ResultPatch struct {
 	ID        int64 `json:"id"`
 	HasUpload bool  `json:"has_upload"`
-}
-
-type ODOOStatus struct {
-	Status string `json:"status"`
 }
 
 // 服务状态(aiis, odoo, 外部系统等)

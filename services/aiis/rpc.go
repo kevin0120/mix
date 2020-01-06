@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	TYPE_RESULT       = "result_patch"
-	TYPE_ODOO_STATUS  = "odoo_status"
-	TYPE_WORKORDER    = "workorder"
-	TYPE_MES_STATUS   = "mes_status"
+	TYPE_RESULT         = "result_patch"
+	TYPE_SERVICE_STATUS = "service_status"
+	//TYPE_ODOO_STATUS  = "odoo_status"
+	TYPE_WORKORDER = "workorder"
+	//TYPE_MES_STATUS   = "mes_status"
 	TYPE_ORDER_START  = "order_start"
 	TYPE_ORDER_FINISH = "order_finish"
 
@@ -26,6 +27,9 @@ const (
 
 	RPC_OFFLINE = "offline"
 	RPC_ONLINE  = "online"
+
+	SERVICE_AIIS = "aiis"
+	SERVICE_ODOO = "odoo"
 )
 
 type RPCPayload struct {
@@ -34,8 +38,8 @@ type RPCPayload struct {
 }
 
 //
-//type OnRPCRecv func(payload string)
-//type OnRPCStatus func(status string)
+//type onRPCRecv func(payload string)
+//type onRPCStatus func(status string)
 
 type GRPCClient struct {
 	srv       *Service
@@ -44,8 +48,8 @@ type GRPCClient struct {
 	opts      []grpc.DialOption
 	rpcClient RPCAiisClient
 	diag      Diagnostic
-	//RPCRecv           OnRPCRecv
-	//OnRPCStatus       OnRPCStatus
+	//RPCRecv           onRPCRecv
+	//onRPCStatus       onRPCStatus
 	dispatcherMap dispatcherbus.DispatcherMap
 	DispatcherBus Dispatcher
 	//RPCRecvDispatcher   *utils.Dispatcher
@@ -144,6 +148,12 @@ func (c *GRPCClient) updateStatus(status string) {
 		if status == RPC_OFFLINE {
 			c.srv.diag.Debug("grpc disconnected")
 
+			// 如果RPC连接断开， 认为ODOO连接也断开
+			c.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, ServiceStatus{
+				Name:   SERVICE_ODOO,
+				Status: status,
+			})
+
 			c.conn.Close()
 			c.stream.CloseSend()
 
@@ -151,16 +161,10 @@ func (c *GRPCClient) updateStatus(status string) {
 			go c.Connect()
 		}
 
-		c.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status)
-
-		// 将最新状态推送给hmi
-		//s := wsnotify.WSStatus{
-		//	SerialNumber:     c.cfg.SerialNumber,
-		//	Status: string(status),
-		//}
-		//
-		//msg, _ := json.Marshal(s)
-		//c.ProtocolService.NotifyService.WSSendControllerStatus(string(msg))
+		c.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, ServiceStatus{
+			Name:   SERVICE_AIIS,
+			Status: status,
+		})
 	}
 }
 
@@ -232,7 +236,7 @@ func (c *GRPCClient) RecvProcess() {
 		}
 
 		c.updateKeepAliveCount(0)
-		c.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_RPC_RECV, in.Payload)
+		c.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_RPC_RECV, in.Payload)
 	}
 }
 

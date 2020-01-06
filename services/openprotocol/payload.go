@@ -224,8 +224,8 @@ func (iom *IOMonitor) Deserialize(str string) error {
 	return nil
 }
 
-func (iom *IOMonitor) ToIOInput() *io.IoContact {
-	return &io.IoContact{
+func (iom *IOMonitor) ToIOInput() io.IoContact {
+	return io.IoContact{
 		Src:    tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
 		SN:     iom.ControllerSN,
 		Inputs: iom.Inputs,
@@ -351,7 +351,7 @@ func parseOpenProtocolErrorCode(errors string) []string {
 	return ret
 }
 
-func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
+func (rd *ResultData) ToTighteningResult() tightening_device.TighteningResult {
 	measureResult := tightening_device.RESULT_OK
 	if rd.TighteningStatus == "0" {
 		measureResult = tightening_device.RESULT_NOK
@@ -378,7 +378,7 @@ func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 		strategy = tightening_device.STRATEGY_LN
 	}
 
-	return &tightening_device.TighteningResult{
+	return tightening_device.TighteningResult{
 		BaseResult: tightening_device.BaseResult{
 			ToolSN:        strings.TrimSpace(rd.ToolSerialNumber),
 			MeasureResult: measureResult,
@@ -476,7 +476,7 @@ type ResultDataOld struct {
 	StageResult string `start:"3"  end:"..."`
 }
 
-func (ord *ResultDataOld) ToTighteningResult() *tightening_device.TighteningResult {
+func (ord *ResultDataOld) ToTighteningResult() tightening_device.TighteningResult {
 	measureResult := tightening_device.RESULT_OK
 	if ord.TighteningStatus == "0" {
 		measureResult = tightening_device.RESULT_NOK
@@ -503,7 +503,7 @@ func (ord *ResultDataOld) ToTighteningResult() *tightening_device.TighteningResu
 		strategy = tightening_device.STRATEGY_LN
 	}
 
-	return &tightening_device.TighteningResult{
+	return tightening_device.TighteningResult{
 		BaseResult: tightening_device.BaseResult{
 			ToolSN:        strings.TrimSpace(ord.ToolSerialNumber),
 			MeasureResult: measureResult,

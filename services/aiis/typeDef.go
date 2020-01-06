@@ -2,7 +2,7 @@ package aiis
 
 import "github.com/masami10/rush/services/tightening_device"
 
-type TighteningResultHandler = func(data *tightening_device.TighteningResult)
+type TighteningResultHandler = func(data tightening_device.TighteningResult)
 
 type Endpoint struct {
 	url     string

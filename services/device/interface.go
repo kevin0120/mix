@@ -56,9 +56,9 @@ type Dispatcher interface {
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 	Release(name string, handler string) error
 	Register(name string, handler *utils.DispatchHandlerStruct)
+	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }
 
 type IDeviceService interface {
 	AddDevice(sn string, d IBaseDevice)
 }
-

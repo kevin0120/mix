@@ -177,7 +177,7 @@ tightening_device:
 
 
 broker:
-  enable: false
+  enable: true
   connect-urls:
     - nats://192.168.4.203:4222
     - nats://192.168.4.203:4223

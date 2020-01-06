@@ -85,13 +85,16 @@ func (s *Service) Open() error {
 	s.DispatcherBus.Register(dispatcherBus.DISPATCHER_SCANNER_DATA, utils.CreateDispatchHandlerStruct(s.onScannerData))
 
 	// 接收IO输入输出状态变化
-	s.DispatcherBus.Register(dispatcherBus.DISPATCH_IO, utils.CreateDispatchHandlerStruct(s.onIOContactData))
+	s.DispatcherBus.Register(dispatcherBus.DISPATCHER_IO, utils.CreateDispatchHandlerStruct(s.onIOContactData))
 
 	// 注册websocket请求
-	s.DispatcherBus.Register(dispatcherBus.DISPATCH_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.DispatcherBus.Register(dispatcherBus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
 	// 接收拧紧结果
-	s.DispatcherBus.Register(dispatcherBus.DISPATCH_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	s.DispatcherBus.Register(dispatcherBus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+
+	// 接收外部服务状态推送
+	s.DispatcherBus.Register(dispatcherBus.DISPATCHER_SERVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onServiceStatus))
 
 	var r httpd.Route
 
@@ -122,7 +125,7 @@ func (s *Service) wsTest(ctx iris.Context) {
 	}
 
 	payload, _ := json.Marshal(ws)
-	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_WS_NOTIFY, &wsnotify.DispatcherNotifyPackage{
+	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_NOTIFY, &wsnotify.DispatcherNotifyPackage{
 		C:    nil,
 		Data: payload,
 	})
@@ -182,7 +185,7 @@ func (s *Service) onTighteningResult(data interface{}) {
 		return
 	}
 
-	tighteningResult := data.(*tightening_device.TighteningResult)
+	tighteningResult := data.(tightening_device.TighteningResult)
 
 	// 拧紧结果推送HMI
 	s.wsSendTighteningResult([]tightening_device.BaseResult{tighteningResult.BaseResult})
@@ -215,64 +218,20 @@ func (s *Service) onIOContactData(data interface{}) {
 	s.wsSendIOContact(&ioContact)
 }
 
-// TODO: 外部系统状态推送
-// 收到Aiis连接状态变化
-//func (s *Service) OnAiisStatus(data interface{}) {
-//	if data == nil {
-//		return
-//	}
-//
-//	status := data.(string)
-//
-//	// Aiis状态推送给HMI
-//	payload, _ := json.Marshal(&wsnotify.WSMsg{
-//		Type: WS_AIIS_STATUS,
-//		Data: &aiis.SystemStatus{
-//			Name:   "AIIS",
-//			Status: status,
-//		},
-//	})
-//
-//	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_AIIS, string(payload))
-//	s.diag.Debug(fmt.Sprintf("Aiis连接状态推送HMI: %s", string(payload)))
-//}
-//
-//// 收到Odoo连接状态变化
-//func (s *Service) OnOdooStatus(data interface{}) {
-//	if data == nil {
-//		return
-//	}
-//	status := data.(string)
-//
-//	// Odoo状态推送给HMI
-//	payload, _ := json.Marshal(&wsnotify.WSMsg{
-//		Type: WS_ODOO_STATUS,
-//		Data: &aiis.SystemStatus{
-//			Name:   "ODOO",
-//			Status: status,
-//		},
-//	})
-//
-//	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ODOO, string(payload))
-//	s.diag.Debug(fmt.Sprintf("ODOO连接状态推送HMI: %s", string(payload)))
-//}
-//
-//// 收到第三方系统状态变化
-//func (s *Service) OnExSysStatus(data interface{}) {
-//	if data == nil {
-//		return
-//	}
-//	status := data.(*aiis.SystemStatus)
-//
-//	// 第三方系统状态推送给HMI
-//	payload, _ := json.Marshal(&wsnotify.WSMsg{
-//		Type: WS_EXSYS_STATUS,
-//		Data: status,
-//	})
-//
-//	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_EXSYS, string(payload))
-//	s.diag.Debug(fmt.Sprintf("第三方系统连接状态推送HMI: %s", string(payload)))
-//}
+// 收到外部系统连接状态变化
+func (s *Service) onServiceStatus(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	status := data.(aiis.ServiceStatus)
+
+	// 外部服务状态推送HMI
+	s.wsSendServiceStatus(&status)
+
+	body, _ := json.Marshal(status)
+	s.diag.Info(fmt.Sprintf("外部服务状态推送HMI: %s", string(body)))
+}
 
 // 收到读卡器数据
 func (s *Service) onReaderData(data interface{}) {
@@ -348,4 +307,14 @@ func (s *Service) wsSendTighteningResult(results []tightening_device.BaseResult)
 	})
 
 	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_RESULT, string(data))
+}
+
+// websocket发送外部系统状态
+func (s *Service) wsSendServiceStatus(status *aiis.ServiceStatus) {
+	data, _ := json.Marshal(wsnotify.WSMsg{
+		Type: wsnotify.WS_READER_UID,
+		Data: status,
+	})
+
+	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_SERVICE, string(data))
 }

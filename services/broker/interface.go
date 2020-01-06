@@ -8,4 +8,5 @@ type Dispatcher interface {
 	Dispatch(name string, data interface{}) error
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 	Release(name string, handler string) error
+	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }

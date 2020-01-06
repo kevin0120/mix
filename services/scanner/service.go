@@ -222,5 +222,5 @@ func (s *Service) OnRecv(id string, data string) {
 	}
 
 	// 分发条码数据
-	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, &barcodeData)
+	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, barcodeData)
 }

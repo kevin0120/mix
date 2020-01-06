@@ -323,6 +323,10 @@ func (h *MinioHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
+func (h *MinioHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 // hmi handler
 type HmiHandler struct {
 	l Logger

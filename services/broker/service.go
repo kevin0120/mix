@@ -48,7 +48,7 @@ func (s *Service) Config() Config {
 
 func (s *Service) initGblDispatcher() {
 	s.BrokerDispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -58,20 +58,15 @@ func (s *Service) Open() error {
 		return nil
 	}
 
+	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.BrokerDispatcherMap)
 	s.doConnect(false) // 初始化所有连接状态为未连接
-	if c.Enable {
-		s.DispatcherBus.LaunchDispatchersByHandlerMap(s.BrokerDispatcherMap)
-		go s.connectProc()
-	}
+	go s.connectProc()
 	return nil
 }
 
 func (s *Service) Close() error {
 	s.closing <- struct{}{}
-	//fixme: release
-	for _, h := range s.BrokerDispatcherMap {
-		s.DispatcherBus.Release(dispatcherbus.DISPATCH_BROKER_STATUS, h.ID)
-	}
+	s.DispatcherBus.ReleaseDispatchersByHandlerMap(s.BrokerDispatcherMap)
 	if s.Provider != nil {
 		return s.Provider.Close()
 	}
@@ -85,7 +80,7 @@ func (s *Service) doConnect(opened bool) {
 	if opened {
 		status = utils.STATUS_ONLINE
 	}
-	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_BROKER_STATUS, status)
+	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
 }
 
 func (s *Service) connectProc() {

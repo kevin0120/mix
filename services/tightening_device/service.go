@@ -68,7 +68,7 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Disp
 	}
 
 	//todo: dispatcher现在并未使用无需注册相关内容
-	//s.initGlobalDispatchers()
+	s.initGlobalDispatchers()
 	s.initWSRequestHandlers()
 
 	s.configValue.Store(c)
@@ -96,9 +96,9 @@ func (s *Service) getProtocol(protocolName string) (ITighteningProtocol, error) 
 
 func (s *Service) initGlobalDispatchers() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCH_RESULT:   utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCH_CURVE:    utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCH_NEW_TOOL: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_RESULT:   utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_CURVE:    utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_NEW_TOOL: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -125,21 +125,19 @@ func (s *Service) Open() error {
 	controllers := s.GetControllers()
 	for _, c := range controllers {
 		for toolSN, _ := range c.Children() {
-			s.doDispatch(dispatcherbus.DISPATCH_NEW_TOOL, toolSN)
+			s.doDispatch(dispatcherbus.DISPATCHER_NEW_TOOL, toolSN)
 		}
 	}
 
 	// 注册websocket请求
-	s.DispatcherBus.Register(dispatcherbus.DISPATCH_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
 	return nil
 }
 
 func (s *Service) Close() error {
 
-	for name, v := range s.dispatcherMap {
-		s.DispatcherBus.Release(name, v.ID)
-	}
+	s.DispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
 
 	// 关闭所有控制器
 	s.shutdownControllers()

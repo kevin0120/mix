@@ -4,6 +4,7 @@ import (
 	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/utils"
 )
 
 type Diagnostic interface {
@@ -19,6 +20,8 @@ type Dispatcher interface {
 	Dispatch(name string, data interface{}) error
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 	Release(name string, handler string) error
+	Register(name string, handler *utils.DispatchHandlerStruct)
+	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }
 
 type IStorageService interface {

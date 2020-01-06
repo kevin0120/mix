@@ -79,18 +79,10 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 		opened:            false,
 	}
 
-	s.initGblDispatch()
-
 	s.methods.service = s
 	s.configValue.Store(c)
 
 	return s
-}
-
-func (s *Service) initGblDispatch() {
-	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_SERVICE_STATUS: utils.CreateDispatchHandlerStruct(s.OnStatus),
-	}
 }
 
 func (s *Service) UpdateStatus(status string) {
@@ -207,8 +199,6 @@ func (s *Service) Open() error {
 		HandlerFunc: s.methods.deleteAllRoutingOpertions,
 	}
 	handler.AddRoute(r)
-
-	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
 	for i := 0; i < s.Config().Workers; i++ {
 		s.wg.Add(1)

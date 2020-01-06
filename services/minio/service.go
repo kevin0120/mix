@@ -13,6 +13,7 @@ import (
 type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
+	Info(msg string)
 }
 
 type Service struct {
@@ -156,6 +157,7 @@ func (s *Service) TaskReupload() {
 				} else {
 					v.HasUpload = true
 					s.DB.UpdateCurve(&v)
+					s.diag.Info(fmt.Sprintf("上传曲线成功 工具:%s 对应拧紧ID:%s", v.ToolSN, v.TighteningID))
 				}
 			}
 		}

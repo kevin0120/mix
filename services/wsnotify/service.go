@@ -30,6 +30,7 @@ const (
 	WS_EVENT_DEVICE            = "device"
 	WS_EVENT_ORDER             = "order"
 	WS_EVENT_MES               = "mes"
+	WS_EVENT_SERVICE           = "service"
 )
 
 type Diagnostic interface {
@@ -61,14 +62,14 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) GetWorkCenter() string  {
+func (s *Service) GetWorkCenter() string {
 	c := s.Config()
 	return c.Workcenter
 }
 
 func (s *Service) NewWebSocketRecvHandler(handler func(interface{})) {
 	fn := utils.CreateDispatchHandlerStruct(handler)
-	s.dispatcherBus.Register(dispatcherbus.DISPATCH_WS_NOTIFY, fn)
+	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, fn)
 }
 
 func (s *Service) onConnect(c websocket.Connection) {
@@ -154,15 +155,15 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 }
 
 func (s *Service) createAndStartWebSocketNotifyDispatcher() error {
-	if err := s.dispatcherBus.Create(dispatcherbus.DISPATCH_WS_NOTIFY, utils.DefaultDispatcherBufLen); err != nil {
+	if err := s.dispatcherBus.Create(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.DefaultDispatcherBufLen); err != nil {
 		return err
 	} else {
-		return s.dispatcherBus.Start(dispatcherbus.DISPATCH_WS_NOTIFY)
+		return s.dispatcherBus.Start(dispatcherbus.DISPATCHER_WS_NOTIFY)
 	}
 }
 
 func (s *Service) postNotify(msg *DispatcherNotifyPackage) {
-	if err := s.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_WS_NOTIFY, msg); err != nil {
+	if err := s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_WS_NOTIFY, msg); err != nil {
 		s.diag.Error("notify", err)
 	}
 }

@@ -69,14 +69,8 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IB
 func (s *Service) initGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DISPATCHER_SERVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
-		//dispatcherBus.DISPATCH_ODOO_STATUS:   utils.CreateDispatchHandlerStruct(nil),
-		//dispatcherBus.DISPATCH_AIIS_STATUS:   utils.CreateDispatchHandlerStruct(nil),
-		//dispatcherbus.DISPATCH_NEW_TOOL:      utils.CreateDispatchHandlerStruct(s.onNewTool),
-		//dispatcherbus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(s.onBrokerStatus),
-		//dispatcherbus.DISPATCH_RESULT:        utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
+		dispatcherbus.DISPATCHER_RPC_RECV:       utils.CreateDispatchHandlerStruct(nil),
 	}
-	//s.rpc.AppendRPCGlbDispatch(dispatcherbus.DISPATCH_RPC_STATUS, utils.CreateDispatchHandlerStruct(s.OnRPCStatus))
-	//s.rpc.AppendRPCGlbDispatch(dispatcherbus.DISPATCH_RPC_RECV, utils.CreateDispatchHandlerStruct(s.OnRPCRecv))
 }
 
 func (s *Service) AddToQueue(id int64) error {
@@ -161,6 +155,12 @@ func (s *Service) Open() error {
 	go s.ResultUploadManager()
 
 	s.rpc.Start()
+
+	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_NEW_TOOL, utils.CreateDispatchHandlerStruct(s.onNewTool))
+	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_BROKER_STATUS, utils.CreateDispatchHandlerStruct(s.onBrokerStatus))
+	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_RPC_RECV, utils.CreateDispatchHandlerStruct(s.onRPCRecv))
+
 	s.opened = true
 	return nil
 }
@@ -169,27 +169,13 @@ func (s *Service) Close() error {
 	if !s.opened {
 		return nil
 	}
-	for name, v := range s.dispatcherMap {
-		s.DispatcherBus.Release(name, v.ID)
-	}
+
+	s.DispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
 	s.closing <- struct{}{}
 	return s.rpc.Stop()
 }
 
-func (s *Service) OnRPCStatus(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	status := data.(string)
-	// 如果RPC连接断开， 认为ODOO连接也断开
-	if status == RPC_OFFLINE {
-		//s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_ODOO_STATUS, utils.STATUS_OFFLINE)
-	}
-	//s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_AIIS_STATUS, status)
-}
-
-func (s *Service) OnRPCRecv(data interface{}) {
+func (s *Service) onRPCRecv(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -197,35 +183,26 @@ func (s *Service) OnRPCRecv(data interface{}) {
 	payload := data.(string)
 	rpcPayload := RPCPayload{}
 	if err := json.Unmarshal([]byte(payload), &rpcPayload); err != nil {
-		s.diag.Error("OnRPCRecv", err)
+		s.diag.Error("onRPCRecv", err)
 	}
 	strData, _ := json.Marshal(rpcPayload.Data)
 
 	switch rpcPayload.Type {
-	//case TYPE_RESULT:
-	//	rp := ResultPatch{}
-	//	json.Unmarshal(strData, &rp)
-	//	err := s.StorageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
-	//	if err == nil {
-	//		s.RemoveFromQueue(rp.ID)
-	//		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
-	//	} else {
-	//		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
-	//	}
-	//	break
-
-	case TYPE_ODOO_STATUS:
-		status := ServiceStatus{}
-		json.Unmarshal(strData, &status)
-		s.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status)
+	case TYPE_RESULT:
+		rp := ResultPatch{}
+		json.Unmarshal(strData, &rp)
+		err := s.StorageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+		if err == nil {
+			s.RemoveFromQueue(rp.ID)
+			s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
+		} else {
+			s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
+		}
 		break
 
-	case TYPE_MES_STATUS:
-		// TODO: 收到mes状态更新, 通知HMI------doing
-		//s.NotifyService.WSNotifyAll(wsnotify.WS_EVENT_MES,"MES在线")
-		body, _ := json.Marshal(wsnotify.GenerateWSMsg(0, "", payload))
-		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_MES, string(body))
-		s.diag.Debug(fmt.Sprintf("收到mes状态并推送HMI: %s", payload))
+	case TYPE_SERVICE_STATUS:
+		s.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, rpcPayload.Data)
+		break
 
 		//case TYPE_ORDER_START:
 		//	// TODO: 开工响应------doing
@@ -239,33 +216,7 @@ func (s *Service) OnRPCRecv(data interface{}) {
 	}
 }
 
-//func (s *Service) PutResult(msg *WSMsg) error {
-//
-//}
-
 func (s *Service) PutResult(resultId int64, body *AIISResult) error {
-
-	//var err error
-	//for _, endpoint := range s.endpoints {
-	//	err = s.putResult(body, fmt.Sprintf(endpoint.url, resultId), endpoint.method)
-	//	if err == nil {
-	//		// 如果第一次就成功，推出循环
-	//		return nil
-	//	}
-	//}
-
-	//ws_msg := WSMsg{
-	//	Type: WS_RESULT,
-	//	Data: WSOpResult{
-	//		ResultID: resultId,
-	//		Result:   body.(AIISResult),
-	//		Port:     s.remotePort,
-	//	},
-	//}
-	//
-	//str, _ := json.Marshal(ws_msg)
-	//s.ws.WriteMessage(websocket.TextMessage, str)
-	//s.ws.SendText(string(str))
 
 	result := WSOpResult{
 		ResultID: resultId,
@@ -388,21 +339,6 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"
 
-	//gun, err := s.StorageService.GetTool(result.ToolSN)
-	//if err != nil {
-	//	gid, err := s.SyncGun(result.ToolSN)
-	//	if err == nil {
-	//		gun.GunID = gid
-	//		gun.Serial = result.ToolSN
-	//		s.StorageService.Store(gun)
-	//	} else {
-	//		gun.GunID = 0
-	//	}
-	//}
-
-	//aiisResult.GunID = gun.GunID
-	//aiisResult.WorkcenterID = dbWorkorder.WorkcenterID
-	//aiisResult.ProductID = dbWorkorder.ProductID
 	aiisResult.NutID = result.ConsuProductID
 
 	aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
@@ -413,30 +349,30 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.Stage = result.Stage
 
 	if result.Result == storage.RESULT_OK {
-		aiisResult.Final_pass = ODOO_RESULT_PASS
+		aiisResult.Final_pass = tightening_device.RESULT_PASS
 		if result.Count == 1 {
-			aiisResult.One_time_pass = ODOO_RESULT_PASS
+			aiisResult.One_time_pass = tightening_device.RESULT_PASS
 		} else {
-			aiisResult.One_time_pass = ODOO_RESULT_FAIL
+			aiisResult.One_time_pass = tightening_device.RESULT_FAIL
 		}
 
 		if s.Config().Recheck {
 			if (resultValue.Mi >= result.ToleranceMin && resultValue.Mi <= result.ToleranceMax) &&
 				(resultValue.Wi >= result.ToleranceMinDegree && resultValue.Wi <= result.ToleranceMaxDegree) {
-				aiisResult.QualityState = QUALITY_STATE_PASS
+				aiisResult.QualityState = tightening_device.RESULT_PASS
 				aiisResult.ExceptionReason = ""
 			} else {
-				aiisResult.QualityState = QUALITY_STATE_EX
-				aiisResult.ExceptionReason = QUALITY_STATE_EX
+				aiisResult.QualityState = tightening_device.RESULT_EXCEPTION
+				aiisResult.ExceptionReason = tightening_device.RESULT_EXCEPTION
 			}
 		} else {
-			aiisResult.QualityState = QUALITY_STATE_PASS
+			aiisResult.QualityState = tightening_device.RESULT_PASS
 			aiisResult.ExceptionReason = ""
 		}
 
 	} else {
-		aiisResult.Final_pass = ODOO_RESULT_FAIL
-		aiisResult.One_time_pass = ODOO_RESULT_FAIL
+		aiisResult.Final_pass = tightening_device.RESULT_FAIL
+		aiisResult.One_time_pass = tightening_device.RESULT_FAIL
 	}
 
 	return aiisResult, nil
@@ -460,12 +396,12 @@ func (s *Service) ResultUploadManager() error {
 }
 
 // 收到控制器结果
-func (s *Service) OnTighteningResult(data interface{}) {
+func (s *Service) onTighteningResult(data interface{}) {
 	if data == nil {
 		return
 	}
 
-	tighteningResult := data.(*tightening_device.TighteningResult)
+	tighteningResult := data.(tightening_device.TighteningResult)
 	dbResult, err := s.StorageService.GetResultByID(tighteningResult.ID)
 	if err != nil {
 		s.diag.Error("Get Result Failed", err)

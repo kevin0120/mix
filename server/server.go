@@ -138,7 +138,9 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendHMIService()
 
 	s.AppendScannerService()
+
 	s.AppendIOService()
+
 	s.AppendReaderService()
 
 	s.appendHTTPDService()
@@ -367,6 +369,7 @@ func (s *Server) AppendBrokerService() error {
 	d := s.DiagService.NewBrokerHandler()
 
 	srv := broker.NewService(c, d)
+	srv.DispatcherBus = s.DispatcherBusService
 
 	s.BrokerService = srv
 	if c.Enable {

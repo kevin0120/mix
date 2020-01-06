@@ -24,6 +24,7 @@ type Service struct {
 	mtxDevices     sync.Mutex
 	WS             *wsnotify.Service
 	DispatcherBus  Dispatcher
+	dispatcherMap  dispatcherbus.DispatcherMap
 
 	// websocket请求处理器
 	wsnotify.WSRequestHandlers
@@ -43,6 +44,7 @@ func NewService(c Config, d Diagnostic) (*Service, error) {
 		Diag: s.diag,
 	}
 
+	s.initGlobalDispatchers()
 	s.initWSRequestHandlers()
 
 	return s, nil
@@ -53,18 +55,29 @@ func (s *Service) Open() error {
 		return nil
 	}
 
+	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 	// 注册websocket请求
-	s.DispatcherBus.Register(dispatcherbus.DISPATCH_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
 	return nil
 }
 
 func (s *Service) Close() error {
+	s.DispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
 	return nil
 }
 
 func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
+}
+
+func (s *Service) initGlobalDispatchers() {
+	s.dispatcherMap = dispatcherbus.DispatcherMap{
+		dispatcherbus.DISPATCHER_DEVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_READER_DATA:   utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_SCANNER_DATA:  utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_IO:            utils.CreateDispatchHandlerStruct(nil),
+	}
 }
 
 func (s *Service) initWSRequestHandlers() {

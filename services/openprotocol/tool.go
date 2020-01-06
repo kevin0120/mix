@@ -293,7 +293,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 		return
 	}
 
-	tighteningResult := result.(*tightening_device.TighteningResult)
+	tighteningResult := result.(tightening_device.TighteningResult)
 	dbTool, err := s.controller.ProtocolService.DB.GetTool(s.cfg.SN)
 	if err == nil && dbTool.CurrentWorkorderID != 0 {
 		if s.Mode() == tightening_device.MODE_JOB {
@@ -332,7 +332,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 
 	// 分发结果
 	tighteningResult.ID = dbResult.Id
-	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_RESULT, tighteningResult)
+	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_RESULT, tighteningResult)
 }
 
 // 处理曲线
@@ -352,7 +352,7 @@ func (s *TighteningTool) OnCurve(curve interface{}) {
 	}
 
 	// 分发曲线
-	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_CURVE, tighteningCurve)
+	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_CURVE, tighteningCurve)
 	s.diag.Info(fmt.Sprintf("缓存曲线成功 工具:%s 对应拧紧ID:%s", dbCurves.ToolSN, dbCurves.TighteningID))
 }
 

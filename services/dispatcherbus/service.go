@@ -138,3 +138,9 @@ func (s *Service) LaunchDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
 		s.Start(name)
 	}
 }
+
+func (s *Service) ReleaseDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
+	for name, handler := range dispatcherMap {
+		s.Release(name, handler.ID)
+	}
+}

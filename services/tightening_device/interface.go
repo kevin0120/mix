@@ -25,6 +25,7 @@ type Dispatcher interface {
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 	Release(name string, handler string) error
 	Register(name string, handler *utils.DispatchHandlerStruct)
+	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }
 
 type ITighteningDevice interface {

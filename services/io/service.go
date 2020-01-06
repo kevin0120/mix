@@ -69,7 +69,7 @@ func (s *Service) Open() error {
 	}
 
 	// 注册websocket请求
-	s.DispatcherBus.Register(dispatcherbus.DISPATCH_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
 	return nil
 }
@@ -238,5 +238,5 @@ func (s *Service) OnChangeIOStatus(sn string, t string, status string) {
 	}
 
 	// IO数据输出状态分发
-	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_IO, ioContact)
+	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_IO, ioContact)
 }

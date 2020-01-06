@@ -217,7 +217,7 @@ type TighteningCurve struct {
 	TighteningCurveContent
 }
 
-func NewTighteningCurve() *TighteningCurve  {
+func NewTighteningCurve() *TighteningCurve {
 	return &TighteningCurve{}
 }
 
@@ -274,23 +274,3 @@ type JobStep struct {
 	BatchSize int    `json:"batch_size"`
 	Socket    int    `json:"socket"`
 }
-
-//type TighteningControllerStatus struct {
-//	ControllerSN string `json:"controller_sn"`
-//	Status       string `json:"status"`
-//}
-//
-//type TighteningToolStatus struct {
-//	ToolSN string `json:"tool_sn"`
-//	Status string `json:"status"`
-//}
-
-//type TighteningControllerInput struct {
-//	ControllerSN string `json:"controller_sn"`
-//	Inputs       string `json:"inputs"`
-//}
-//
-//type TighteningBarcode struct {
-//	ControllerSN string `json:"controller_sn"`
-//	Barcode      string `json:"barcode"`
-//}
