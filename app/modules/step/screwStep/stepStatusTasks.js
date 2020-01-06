@@ -305,11 +305,11 @@ function* failState(config) {
       ];
       if (isNormal) {
         buttons = buttons.concat([
-          {
-            label: 'Order.Retry',
-            color: 'info',
-            action: orderActions.stepStatus(this, STEP_STATUS.READY)
-          },
+          // {
+          //   label: 'Order.Retry',
+          //   color: 'info',
+          //   action: orderActions.stepStatus(this, STEP_STATUS.READY)
+          // },
           {
             label: 'Order.Next',
             color: 'warning',
