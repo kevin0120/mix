@@ -3,6 +3,7 @@ package broker
 import (
 	"fmt"
 	"github.com/masami10/rush/toml"
+	"github.com/masami10/rush/utils"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
@@ -22,6 +23,7 @@ type Nats struct {
 	loadBalancers map[string][]string
 	respSubject   string
 	workGroups    map[string][]string
+	handler       StatusHandler
 }
 
 func NewNats(d Diagnostic, c Config) *Nats {
@@ -66,6 +68,10 @@ func (s *Nats) Address() string {
 	return strings.Join(s.addrs, ",")
 }
 
+func (s *Nats) SetStatusHandler(handler StatusHandler) {
+	s.handler = handler
+}
+
 func setAddrs(addrs []string) []string {
 	var cAddrs []string
 	for _, addr := range addrs {
@@ -83,7 +89,17 @@ func setAddrs(addrs []string) []string {
 	return cAddrs
 }
 
+func (s *Nats) handleStatus(status nats.Status) {
+	switch status {
+	case nats.CONNECTED:
+		s.handler(utils.STATUS_ONLINE)
+	case nats.DISCONNECTED:
+		s.handler(utils.STATUS_OFFLINE)
+	}
+}
+
 func (s *Nats) statusHandler(conn *nats.Conn) {
+	s.handleStatus(conn.Status())
 	if cid, err := conn.GetClientID(); err == nil {
 		s.diag.Debug(fmt.Sprintf("Client %d is %s ", cid, STATUS_BROKER[conn.Status()]))
 	} else {
@@ -92,6 +108,7 @@ func (s *Nats) statusHandler(conn *nats.Conn) {
 }
 
 func (s *Nats) statusErrHandler(conn *nats.Conn, err error) {
+	s.handleStatus(conn.Status())
 	if cid, err := conn.GetClientID(); err == nil {
 		s.diag.Error(fmt.Sprintf("Client %d is %s ", cid, STATUS_BROKER[conn.Status()]), err)
 	} else {

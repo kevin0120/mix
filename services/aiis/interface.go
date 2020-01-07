@@ -34,6 +34,7 @@ type IStorageService interface {
 type IBrokerService interface {
 	Publish(subject string, data []byte) error
 	Subscribe(subject string, handler broker.SubscribeHandler) error
+	Status() string
 }
 
 type INotifyService interface {

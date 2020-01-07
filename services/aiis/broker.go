@@ -46,8 +46,7 @@ func (s *BrokerClient) Stop() error {
 }
 
 func (s *BrokerClient) Status() string {
-	// TODO: get broker conn status
-	return TRANSPORT_STATUS_OFFLINE
+	return s.broker.Status()
 }
 
 // 订阅工具结果

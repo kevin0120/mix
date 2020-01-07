@@ -356,8 +356,7 @@ func (s *Server) AppendBrokerService() error {
 	c := s.config.Broker
 	d := s.DiagService.NewBrokerHandler()
 
-	srv := broker.NewService(c, d)
-	srv.DispatcherBus = s.DispatcherBusService
+	srv := broker.NewService(c, d, s.DispatcherBusService)
 
 	s.BrokerService = srv
 	if c.Enable {

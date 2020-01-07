@@ -40,7 +40,7 @@ func (c Config) Validate() error {
 			}
 		}
 		if c.Provider != "nats" {
-			return errors.Errorf("broker Provider: %s Is Not Support", c.Provider)
+			return errors.Errorf("broker provider: %s Is Not Support", c.Provider)
 		}
 	}
 	return nil
