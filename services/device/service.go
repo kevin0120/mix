@@ -1,11 +1,8 @@
 package device
 
 import (
-	"encoding/json"
-	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
-	"reflect"
 	"sync"
 	"sync/atomic"
 
@@ -22,20 +19,20 @@ type Service struct {
 	configValue    atomic.Value
 	runningDevices map[string]IBaseDevice
 	mtxDevices     sync.Mutex
-	WS             *wsnotify.Service
-	DispatcherBus  Dispatcher
+	dispatcherBus  Dispatcher
 	dispatcherMap  dispatcherbus.DispatcherMap
 
 	// websocket请求处理器
 	wsnotify.WSRequestHandlers
 }
 
-func NewService(c Config, d Diagnostic) (*Service, error) {
+func NewService(c Config, d Diagnostic, dp Dispatcher) (*Service, error) {
 
 	s := &Service{
 		diag:           d,
 		runningDevices: map[string]IBaseDevice{},
 		mtxDevices:     sync.Mutex{},
+		dispatcherBus:  dp,
 	}
 
 	s.configValue.Store(c)
@@ -55,15 +52,16 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+
 	// 注册websocket请求
-	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
 	return nil
 }
 
 func (s *Service) Close() error {
-	s.DispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
+	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
 	return nil
 }
 
@@ -104,19 +102,11 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 
 	var devices []DeviceStatus
 	for k, v := range s.runningDevices {
-
-		var children []string
-		if v.Children() != nil {
-			for _, child := range reflect.ValueOf(v.Children()).MapKeys() {
-				children = append(children, child.String())
-			}
-		}
-
 		devices = append(devices, DeviceStatus{
 			SN:       k,
 			Type:     v.DeviceType(),
 			Status:   v.Status(),
-			Children: children,
+			Children: v.Children(),
 			Config:   v.Config(),
 			Data:     v.Data(),
 		})
@@ -133,22 +123,4 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 	}
 
 	return devices
-}
-
-func (s *Service) OnWSDeviceStatus(c websocket.Connection, msg *wsnotify.WSMsg) {
-	devices := s.fetchAllDevices()
-	body, _ := json.Marshal(wsnotify.GenerateWSMsg(msg.SN, msg.Type, devices))
-
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_DEVICE, string(body))
-}
-
-func (s *Service) SendDeviceStatus(deviceStatus DeviceStatus) {
-	body, _ := json.Marshal(wsnotify.WSMsg{
-		Type: wsnotify.WS_DEVICE_STATUS,
-		Data: []DeviceStatus{
-			deviceStatus,
-		},
-	})
-
-	s.WS.NotifyAll(wsnotify.WS_EVENT_DEVICE, string(body))
 }

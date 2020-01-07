@@ -249,13 +249,10 @@ func (s *Server) appendMinioService() error {
 func (s *Server) appendDeviceService() error {
 	c := s.config.Device
 	d := s.DiagService.NewDeviceHandler()
-	srv, err := device.NewService(c, d)
+	srv, err := device.NewService(c, d, s.DispatcherBusService)
 	if err != nil {
 		return errors.Wrap(err, "append device service fail")
 	}
-
-	srv.DispatcherBus = s.DispatcherBusService
-	srv.WS = s.WSNotifyService
 
 	s.DeviceService = srv
 	s.AppendService("device", srv)
