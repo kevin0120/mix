@@ -37,8 +37,8 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) (*Service, error) {
 
 	s.configValue.Store(c)
 
-	s.initGlobalDispatchers()
-	s.initWSRequestHandlers()
+	s.setupGlobalDispatchers()
+	s.setupWSRequestHandlers()
 
 	return s, nil
 }
@@ -48,10 +48,8 @@ func (s *Service) Open() error {
 		return nil
 	}
 
+	s.initDispatcherRegisters()
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-
-	// 注册websocket请求
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
 	return nil
 }
@@ -65,7 +63,12 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) initGlobalDispatchers() {
+func (s *Service) initDispatcherRegisters() {
+	// 注册websocket请求
+	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+}
+
+func (s *Service) setupGlobalDispatchers() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DISPATCHER_DEVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
 		dispatcherbus.DISPATCHER_READER_DATA:   utils.CreateDispatchHandlerStruct(nil),
@@ -74,7 +77,7 @@ func (s *Service) initGlobalDispatchers() {
 	}
 }
 
-func (s *Service) initWSRequestHandlers() {
+func (s *Service) setupWSRequestHandlers() {
 	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
 		Diag: s.diag,
 	}

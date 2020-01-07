@@ -371,8 +371,6 @@ func (s *Server) AppendIOService() error {
 	d := s.DiagService.NewIOHandler()
 
 	srv := io.NewService(c, d, s.DispatcherBusService, s.DeviceService)
-	srv.WS = s.WSNotifyService
-	srv.DeviceService = s.DeviceService
 
 	s.IOService = srv
 	s.AppendService("io", srv)

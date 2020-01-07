@@ -41,15 +41,15 @@ func NewService(d Diagnostic, dp Dispatcher, ns INotifyService, httpd *httpd.Ser
 		storageService: storage,
 	}
 
-	s.initWSRequestHandlers()
+	s.setupWSRequestHandlers()
+	s.setupTestInterface()
 
 	return s
 }
 
 func (s *Service) Open() error {
 
-	s.initRegisters()
-	s.setupTestInterface()
+	s.initDispatcherRegisters()
 
 	return nil
 }
@@ -77,7 +77,7 @@ func (s *Service) wsTest(ctx iris.Context) {
 	})
 }
 
-func (s *Service) initRegisters() {
+func (s *Service) initDispatcherRegisters() {
 
 	// 接收设备状态变化
 	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_DEVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onDeviceStatus))
@@ -113,7 +113,7 @@ func (s *Service) setupTestInterface() {
 	s.httpd.Handler[0].AddRoute(r)
 }
 
-func (s *Service) initWSRequestHandlers() {
+func (s *Service) setupWSRequestHandlers() {
 	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
 		Diag: s.diag,
 	}

@@ -119,7 +119,7 @@ scanner:
   enable: false
 #  entity_label: 3118:2305
 io:
-  enable: false
+  enable: true
   flash_inteval: 1s
   ios:
     - sn: 1
