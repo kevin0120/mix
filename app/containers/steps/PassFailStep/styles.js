@@ -8,8 +8,14 @@ export default {
     alignItems: 'center',
     padding: '20px'
   },
-  text: {
-    marginBottom: '70px',
+  textContainer: {
+    marginBottom: '50px',
+    maxHeight: '50%',
+    overflow: 'auto',
+    padding:5
+  },
+  status: {
+    marginBottom: '50px',
     display: 'flex',
     flexDirection: 'row'
   },

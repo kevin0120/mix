@@ -150,14 +150,14 @@ function MeasureStep({
     {/*    </table>*/}
     {/*  </CardBody>*/}
     {/*</Card>*/}
-    <span className={classes.desc}>
     {text || desc ? (
-      <Typography variant="h4">
-        {text || desc}
-      </Typography>
+      <dev className={classes.desc}>
+        <Typography variant="h4">
+          {text || desc}
+        </Typography>
+      </dev>
     ) : null}
-    </span>
-    <span
+    <div
       className={classNames({
         [classes.inputContainer]: true,
         [classes.inputContainerDisabled]: !isCurrent
@@ -181,7 +181,7 @@ function MeasureStep({
     ><Typography variant="h4" className={classNames({
       [classes.inputText]: !!value && isCurrent,
       [classes.inputTextDisabled]: !value || !isCurrent
-    })}>{value || '请输入测量值'}</Typography></span>
+    })}>{value || '请输入测量值'}</Typography></div>
   </div>;
 }
 

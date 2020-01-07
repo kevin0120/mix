@@ -213,7 +213,12 @@ const stepPageContainer = {
     flex: 1
   },
   descriptionContainer: {
-    flex: 1
+    flex: 1,
+    height: '33%',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   Paper: {
     width: '100%',
@@ -221,16 +226,28 @@ const stepPageContainer = {
     padding: 'auto 6px'
   },
   Description: {
+    maxHeight: '100%',
+    maxWidth: '100%',
+    height: 'fit-content',
+    width: 'fit-content',
+    overflow: 'auto',
+    padding: 4,
+    wordBreak: 'break-word'
+  },
+  descriptionPaper: {
+    maxHeight: '100%',
+    maxWidth: '100%',
+    padding: 8,
+    overflow: 'auto',
+    wordBreak: 'break-word',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-    overflow:'auto',
-    wordBreak:'break-word'
+    alignItems: 'center'
   },
   result: {
-    flex: 2
+    flex: 2,
+    height: '66%'
   }
 };
 

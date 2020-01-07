@@ -2,13 +2,13 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles, Typography } from '@material-ui/core';
+import { Check, Close } from '@material-ui/icons';
 import stepActions from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/typeDef';
 import styles from './styles';
 import { stepData, viewingStep } from '../../../modules/order/selector';
-import { Check, Close } from '@material-ui/icons';
 
 type tOP = {|
   ...tStepProps
@@ -62,16 +62,18 @@ function PassFailStep({ bindAction, step, isCurrent, submit, passFailInput, valu
   return (
     <div className={classes.root}>
       {text ? (
-        <Typography variant="h4" className={classes.text}>
-          {text}
-        </Typography>
+        <div className={classes.textContainer}>
+          <Typography variant="h4">
+            {text}
+          </Typography>
+        </div>
       ) : null}
-      <span className={classes.text}>
+      <div className={classes.status}>
         {value ? <Check style={{ fontSize: 40 }} color="primary"/> : <Close style={{ fontSize: 40 }} color="error"/>}
         <Typography variant="h4">
         {value ? 'Pass' : 'Fail'}
         </Typography>
-      </span>
+      </div>
       <div className={classes.buttonsContainer}>
         <Button
           variant="contained"

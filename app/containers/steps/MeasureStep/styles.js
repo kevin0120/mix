@@ -29,7 +29,7 @@ const styles = (theme) => ({
     minWidth: '180px',
     height: '100%',
     paddingTop: 5,
-    paddingBottom: 5,
+    paddingBottom: 5
   },
   row: {
     height: 60,
@@ -47,11 +47,11 @@ const styles = (theme) => ({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent:'center'
+    justifyContent: 'center'
   },
   inputContainerDisabled: {
     border: 'dashed 1px',
-    borderColor: theme.palette.gray[500],
+    borderColor: theme.palette.gray[500]
   },
   inputText: {
     color: theme.palette.gray[900]
@@ -62,10 +62,11 @@ const styles = (theme) => ({
   rowText: {
     color: theme.palette.gray[900]
   },
-  desc:{
+  desc: {
     marginBottom: '50px',
-    display: 'flex',
-    flexDirection: 'row'
+    maxHeight: '50%',
+    overflow: 'auto',
+    padding:5
   }
 });
 

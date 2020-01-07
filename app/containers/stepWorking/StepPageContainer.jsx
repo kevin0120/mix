@@ -51,14 +51,14 @@ const mapDispatch: tDP = Object.freeze({});
 
 // 工步展示内容
 const StepPageContainer = ({
-                             step,
-                             workingStep,
-                             bindParentAction,
-                             timeLine,
-                             description,
-                             bindParentDescription,
-                             workingOrder
-                           }: Props) => {
+  step,
+  workingStep,
+  bindParentAction,
+  timeLine,
+  description,
+  bindParentDescription,
+  workingOrder
+}: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (step && stepTypes && stepTypes[step.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
@@ -88,10 +88,12 @@ const StepPageContainer = ({
           direction="column"
         >
           <Grid item className={classes.descriptionContainer}>
-            <Paper square className={clsx(classes.Paper, classes.Description)}>
-              {description || (
-                <Typography variant="h5">{step.desc}</Typography>
-              )}
+            <Paper square className={clsx(classes.Paper,classes.descriptionPaper)}>
+              <div className={classes.Description}>
+                {description || (
+                  <Typography variant="h5">{step.desc}</Typography>
+                )}
+              </div>
             </Paper>
           </Grid>
           <Grid item className={classes.result}>
