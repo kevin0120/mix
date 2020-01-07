@@ -240,17 +240,17 @@ func (s *Service) OnRPCRecv(data interface{}) {
 	str_data, _ := json.Marshal(rpcPayload.Data)
 
 	switch rpcPayload.Type {
-	//case TYPE_RESULT:
-	//	rp := ResultPatch{}
-	//	json.Unmarshal(str_data, &rp)
-	//	err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
-	//	if err == nil {
-	//		s.RemoveFromQueue(rp.ID)
-	//		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
-	//	} else {
-	//		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
-	//	}
-	//	break
+	case TYPE_RESULT:
+		rp := ResultPatch{}
+		json.Unmarshal(str_data, &rp)
+		err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+		if err == nil {
+			s.RemoveFromQueue(rp.ID)
+			s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
+		} else {
+			s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
+		}
+		break
 
 	case TYPE_ODOO_STATUS:
 		status := ODOOStatus{}
@@ -317,14 +317,19 @@ func (s *Service) PutResult(resultId int64, body *AIISResult) error {
 		return nil
 	}
 
-	str, _ := json.Marshal(result)
-	return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, body.ToolSN), str)
-	//err = s.rpc.RPCSend(string(str))
-	//if err != nil {
-	//	s.diag.Error("grpc err", err)
-	//}
-	//
-	//return err
+	ws_msg := wsnotify.WSMsg{
+		Type: TYPE_RESULT,
+		Data: result,
+	}
+
+	str, _ := json.Marshal(ws_msg)
+	//return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, body.ToolSN), str)
+	err = s.rpc.RPCSend(string(str))
+	if err != nil {
+		s.diag.Error("grpc err", err)
+	}
+
+	return err
 }
 
 func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req interface{}, ch <-chan int) (interface{}, error) {
