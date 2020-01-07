@@ -45,7 +45,7 @@ export default model('io', {
         []
       );
       // TODO set init io status
-      yield put(this.setIOOutput({ group: ioOutputGroups.ready, status: true }));
+      yield call(this.setIOOutput,{ group: ioOutputGroups.ready, status: true });
       yield write(this, (s) => ({
         ...s,
         ioModule: defaultIOModule
