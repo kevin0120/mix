@@ -56,7 +56,7 @@ type PSetDefine struct {
 	Ma       float64 `json:"MA"`
 	Wp       float64 `json:"W+"`
 	Wm       float64 `json:"W-"`
-	Wa       float64 `json:"NotifyService"`
+	Wa       float64 `json:"notifyService"`
 }
 
 type ResultValue struct {

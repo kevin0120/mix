@@ -22,8 +22,7 @@ type Service struct {
 	opened              bool
 	DispatcherBus       Dispatcher
 	BrokerDispatcherMap dispatcherbus.DispatcherMap
-	//BrokerStatusDisptcher *utils.Dispatcher
-	closing chan struct{}
+	closing             chan struct{}
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -75,7 +74,7 @@ func (s *Service) Close() error {
 
 func (s *Service) doConnect(opened bool) {
 	s.opened = true
-	s.diag.Debug(fmt.Sprintf("Broker Service Is Opened: %v", opened))
+	s.diag.Debug(fmt.Sprintf("broker Service Is Opened: %v", opened))
 	status := utils.STATUS_OFFLINE
 	if opened {
 		status = utils.STATUS_ONLINE
@@ -114,7 +113,7 @@ func (s *Service) newBroker(provider string) (ret IBrokerProvider) {
 func (s *Service) Subscribe(subject string, handler SubscribeHandler) error {
 	p := s.Provider
 	if p == nil {
-		return errors.New("Can Not Create Broker Subscribe, Cause Provider Is Empty")
+		return errors.New("Can Not Create broker Subscribe, Cause Provider Is Empty")
 	}
 
 	return p.Subscribe(subject, handler)
@@ -123,7 +122,7 @@ func (s *Service) Subscribe(subject string, handler SubscribeHandler) error {
 func (s *Service) Publish(subject string, data []byte) error {
 	p := s.Provider
 	if p == nil {
-		return errors.New("Can Not Create Broker Publish, Cause Provider Is Empty")
+		return errors.New("Can Not Create broker Publish, Cause Provider Is Empty")
 	}
 
 	return p.Publish(subject, data)
@@ -132,7 +131,7 @@ func (s *Service) Publish(subject string, data []byte) error {
 func (s *Service) Request(subject string, data []byte, timeOut time.Duration) ([]byte, error) {
 	p := s.Provider
 	if p == nil {
-		return nil, errors.New("Can Not Create Broker Publish, Cause Provider Is Empty")
+		return nil, errors.New("Can Not Create broker Publish, Cause Provider Is Empty")
 	}
 
 	return p.DoRequest(subject, data, timeOut)

@@ -2,13 +2,11 @@ package aiis
 
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
-	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 	"time"
 
 	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
@@ -19,57 +17,60 @@ import (
 	"sync"
 )
 
-type OnOdooStatus func(status string)
-
-type SyncGun func(string) (int64, error)
-
 type Service struct {
 	configValue    atomic.Value
 	diag           Diagnostic
-	endpoints      []*Endpoint
 	httpClient     *resty.Client
-	StorageService IStorageService
-	ws             utils.RecConn
-	DispatcherBus  Dispatcher
-	NotifyService  INotifyService
+	storageService IStorageService
+	dispatcherBus  Dispatcher
+	notifyService  INotifyService
 	updateQueue    map[int64]time.Time
 	mtx            sync.Mutex
 	dispatcherMap  dispatcherbus.DispatcherMap
-	SerialNumber   string
-	rpc            *GRPCClient
+	transport      ITransport
 
-	//TighteningService *tightening_device.Service
-	Broker        IBrokerService
-	opened        bool
-	toolCollector chan string
-	closing       chan struct{}
+	opened  bool
+	closing chan struct{}
 }
 
 func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IBrokerService, ns INotifyService) *Service {
-	e, _ := c.index()
 	s := &Service{
 		diag:           d,
-		endpoints:      e,
-		rpc:            NewGRPCClient(d, dp),
-		DispatcherBus:  dp,
+		dispatcherBus:  dp,
 		updateQueue:    map[int64]time.Time{},
 		opened:         false,
-		toolCollector:  make(chan string, 16),
 		closing:        make(chan struct{}, 1),
-		StorageService: ss,
-		Broker:         bs,
-		NotifyService:  ns,
+		storageService: ss,
+		notifyService:  ns,
 	}
-	s.rpc.srv = s
 	s.configValue.Store(c)
 	s.initGlbDispatcher()
+	s.initTransport(bs, dp)
+
 	return s
+}
+
+func (s *Service) initTransport(bs IBrokerService, dispatcherBus Dispatcher) error {
+	switch s.Config().TransportType {
+	case TRANSPORT_TYPE_GRPC:
+		s.transport = NewGRPCClient(s.diag, s.Config())
+
+	case TRANSPORT_TYPE_BROKER:
+		s.transport = NewBrokerClient(s.diag, bs, dispatcherBus)
+
+	default:
+		s.transport = NewGRPCClient(s.diag, s.Config())
+	}
+
+	s.transport.SetResultPatchHandler(s.onResultPatch)
+	s.transport.SetServiceStatusHandler(s.onServiceStatus)
+	s.transport.SetStatusHandler(s.onTransportStatus)
+	return nil
 }
 
 func (s *Service) initGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DISPATCHER_SERVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCHER_RPC_RECV:       utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -101,7 +102,7 @@ func (s *Service) RemoveFromQueue(id int64) error {
 	return nil
 }
 
-func (s *Service) timeoutCheck() {
+func (s *Service) uploadQueueTimeoutCheck() {
 	defer s.mtx.Unlock()
 	s.mtx.Lock()
 
@@ -114,14 +115,6 @@ func (s *Service) timeoutCheck() {
 
 	for _, id := range wait4Delete {
 		delete(s.updateQueue, id)
-	}
-}
-
-func (s *Service) taskUpdateTimeoutCheck() {
-	for {
-		s.timeoutCheck()
-
-		time.Sleep(time.Duration(s.Config().Timeout))
 	}
 }
 
@@ -150,16 +143,13 @@ func (s *Service) ensureHttpClient() *resty.Client {
 
 func (s *Service) Open() error {
 	s.ensureHttpClient()
-	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-	go s.taskUpdateTimeoutCheck()
-	go s.ResultUploadManager()
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
-	s.rpc.Start()
+	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
 
-	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_NEW_TOOL, utils.CreateDispatchHandlerStruct(s.onNewTool))
-	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_BROKER_STATUS, utils.CreateDispatchHandlerStruct(s.onBrokerStatus))
-	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
-	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_RPC_RECV, utils.CreateDispatchHandlerStruct(s.onRPCRecv))
+	go s.manage()
+
+	s.transport.Start()
 
 	s.opened = true
 	return nil
@@ -170,72 +160,26 @@ func (s *Service) Close() error {
 		return nil
 	}
 
-	s.DispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
+	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
+	s.transport.Stop()
 	s.closing <- struct{}{}
-	return s.rpc.Stop()
+	return s.transport.Stop()
 }
 
-func (s *Service) onRPCRecv(data interface{}) {
-	if data == nil {
+func (s *Service) PutResult(body *AIISResult) {
+
+	err := s.AddToQueue(body.ID)
+	if err != nil {
 		return
 	}
 
-	payload := data.(string)
-	rpcPayload := RPCPayload{}
-	if err := json.Unmarshal([]byte(payload), &rpcPayload); err != nil {
-		s.diag.Error("onRPCRecv", err)
-	}
-	strData, _ := json.Marshal(rpcPayload.Data)
-
-	switch rpcPayload.Type {
-	case TYPE_RESULT:
-		rp := ResultPatch{}
-		json.Unmarshal(strData, &rp)
-		err := s.StorageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
-		if err == nil {
-			s.RemoveFromQueue(rp.ID)
-			s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
-		} else {
-			s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
-		}
-		break
-
-	case TYPE_SERVICE_STATUS:
-		s.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, rpcPayload.Data)
-		break
-
-		//case TYPE_ORDER_START:
-		//	// TODO: 开工响应------doing
-		//	//s.NotifyService.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
-		//	break
-		//
-		//case TYPE_ORDER_FINISH:
-		//	// TODO: 完工响应------doing
-		//	//s.NotifyService.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
-		//	break
-	}
-}
-
-func (s *Service) PutResult(resultId int64, body *AIISResult) error {
-
-	result := WSOpResult{
-		ResultID: resultId,
-		Result:   body,
-	}
-
-	err := s.AddToQueue(result.ResultID)
+	err = s.transport.SendResult(body)
 	if err != nil {
-		return nil
-	}
-
-	if data, err := json.Marshal(result); err == nil {
-		return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, body.ToolSN), data)
-	} else {
-		return err
+		s.diag.Error("Publish Tool Result Failed", err)
 	}
 }
 
-func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req interface{}, ch <-chan int) (interface{}, error) {
+func (s *Service) PutMesOpenRequest(code string, req interface{}) (interface{}, error) {
 	urlString := s.Config().MesOpenWorkUrl
 	url := fmt.Sprintf(urlString, code)
 	resp, err := s.httpClient.R().
@@ -243,50 +187,23 @@ func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req i
 		Put(url)
 
 	if err != nil {
-		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
-		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
-		<-ch
 		return nil, err
 	}
-	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SerialNumber, msg.Type, 0, resp.(string)))
-	body, _ := json.Marshal(wsnotify.GenerateWSMsg(sn, wsType, resp.Body()))
-	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
-	<-ch
+
 	return resp.Body(), nil
 }
 
-func (s *Service) PutMesFinishRequest(sn uint64, wsType string, code string, req interface{}, ch <-chan int) (interface{}, error) {
+func (s *Service) PutMesFinishRequest(code string, req interface{}) (interface{}, error) {
 	url := fmt.Sprintf(s.Config().MesFinishWorkUrl, code)
 	resp, err := s.httpClient.R().
 		SetBody(req).
-		// or SetError(Error{}).
 		Put(url)
 
 	if err != nil {
-		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
-		s.NotifyService.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
-		<-ch
 		return nil, err
 	}
-	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SerialNumber, msg.Type, 0, ""))
-	body, _ := json.Marshal(wsnotify.GenerateWSMsg(sn, wsType, resp.Body()))
-	s.NotifyService.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
-	<-ch
+
 	return resp.Body(), nil
-}
-
-func (s *Service) PutOrderRequest(reqType string, body interface{}) error {
-	msg, _ := json.Marshal(RPCPayload{
-		Type: reqType,
-		Data: body,
-	})
-
-	err := s.rpc.RPCSend(string(msg))
-	if err != nil {
-		s.diag.Error("Grpc Err", err)
-	}
-
-	return err
 }
 
 func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {
@@ -297,7 +214,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	psetDefine := tightening_device.PSetDefine{}
 	json.Unmarshal([]byte(result.PSetDefine), &psetDefine)
 
-	dbWorkorder, err := s.StorageService.GetWorkOrder(result.WorkorderID, true)
+	dbWorkorder, err := s.storageService.GetWorkOrder(result.WorkorderID, true)
 	if err == nil {
 		aiisResult.Payload = dbWorkorder.Payload
 	}
@@ -378,23 +295,6 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	return aiisResult, nil
 }
 
-func (s *Service) ResultUploadManager() error {
-	for {
-
-		results, err := s.StorageService.ListUnUploadResults()
-		if err == nil {
-			for _, v := range results {
-				aiisResult, err := s.ResultToAiisResult(&v)
-				if err == nil {
-					s.PutResult(v.Id, &aiisResult)
-				}
-			}
-		}
-
-		time.Sleep(time.Duration(s.Config().ResultUploadInteval))
-	}
-}
-
 // 收到控制器结果
 func (s *Service) onTighteningResult(data interface{}) {
 	if data == nil {
@@ -402,22 +302,54 @@ func (s *Service) onTighteningResult(data interface{}) {
 	}
 
 	tighteningResult := data.(tightening_device.TighteningResult)
-	dbResult, err := s.StorageService.GetResultByID(tighteningResult.ID)
+	dbResult, err := s.storageService.GetResultByID(tighteningResult.ID)
 	if err != nil {
 		s.diag.Error("Get Result Failed", err)
 	}
 
 	aiisResult, err := s.ResultToAiisResult(dbResult)
 	if err == nil {
-		s.PutResult(dbResult.Id, &aiisResult)
+		s.PutResult(&aiisResult)
 	}
 }
 
-func (s *Service) collectTools() {
+func (s *Service) patchResult(rp *ResultPatch) {
+	err := s.storageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+	if err == nil {
+		s.RemoveFromQueue(rp.ID)
+		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
+	} else {
+		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
+	}
+}
+
+func (s *Service) reuploadResult() error {
+	results, err := s.storageService.ListUnUploadResults()
+	if err != nil {
+		return err
+	}
+
+	for _, v := range results {
+		aiisResult, err := s.ResultToAiisResult(&v)
+		if err == nil {
+			s.PutResult(&aiisResult)
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) manage() {
 	for {
 		select {
-		case toolSN := <-s.toolCollector:
-			s.Broker.Subscribe(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), s.onResultResp)
+		case <-time.After(time.Duration(s.Config().ResultUploadInteval)):
+			err := s.reuploadResult()
+			if err != nil {
+				s.diag.Error("Reupload Result Failed", err)
+			}
+
+		case <-time.After(time.Duration(s.Config().Timeout)):
+			s.uploadQueueTimeoutCheck()
 
 		case <-s.closing:
 			return
@@ -425,46 +357,20 @@ func (s *Service) collectTools() {
 	}
 }
 
-func (s *Service) onBrokerStatus(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	brokerStatus := data.(bool)
-	if !brokerStatus {
-		return
-	}
-
-	go s.collectTools()
+// 服务状态变化
+func (s *Service) onServiceStatus(status ServiceStatus) {
+	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status)
 }
 
-// 检测到新工具
-func (s *Service) onNewTool(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	toolSN := data.(string)
-	s.toolCollector <- toolSN
+// 传输连接状态变化
+func (s *Service) onTransportStatus(status string) {
+	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, ServiceStatus{
+		Name:   SERVICE_AIIS,
+		Status: status,
+	})
 }
 
-func (s *Service) onResultResp(message *broker.BrokerMessage) ([]byte, error) {
-	if message == nil {
-		return nil, nil
-	}
-
-	rpcPayload := RPCPayload{}
-	json.Unmarshal(message.Body, &rpcPayload)
-	str_data, _ := json.Marshal(rpcPayload.Data)
-	rp := ResultPatch{}
-	json.Unmarshal(str_data, &rp)
-	err := s.StorageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
-	if err == nil {
-		s.RemoveFromQueue(rp.ID)
-		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
-	} else {
-		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
-	}
-
-	return nil, nil
+// 收到结果上传反馈
+func (s *Service) onResultPatch(rp ResultPatch) {
+	s.patchResult(&rp)
 }

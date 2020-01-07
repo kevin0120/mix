@@ -277,7 +277,7 @@ func (c *clientContext) Connect() {
 	for {
 		err := c.sockClient.Connect(DAIL_TIMEOUT)
 		if err != nil {
-			c.diag.Error("Connect", err)
+			c.diag.Error("connect", err)
 		} else {
 			break
 		}

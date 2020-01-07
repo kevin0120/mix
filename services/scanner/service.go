@@ -72,7 +72,7 @@ func (s *Service) Open() error {
 
 func (s *Service) dispatchRecvData(data string) {
 	if s.dispatcher == nil {
-		err := errors.New("Please Inject DispatcherBus Service First")
+		err := errors.New("Please Inject dispatcherBus Service First")
 		s.diag.Error("dispatchRecvData", err)
 		return
 	}
@@ -85,7 +85,7 @@ func (s *Service) dispatchRecvData(data string) {
 
 func (s *Service) createAndStartScannerDispatcher() error {
 	if s.dispatcher == nil {
-		err := errors.New("Please Inject DispatcherBus Service First")
+		err := errors.New("Please Inject dispatcherBus Service First")
 		s.diag.Error("createAndStartScannerDispatcher", err)
 		return err
 	}

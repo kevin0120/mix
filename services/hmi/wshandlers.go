@@ -105,8 +105,15 @@ func (s *Service) OnWSOrderStart(c websocket.Connection, msg *wsnotify.WSMsg) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
-	s.ChStart <- 1
-	go s.Aiis.PutMesOpenRequest(msg.SN, msg.Type, orderReq.Code, byteData, s.ChStart)
+
+	resp, err := s.Aiis.PutMesOpenRequest(orderReq.Code, byteData)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
+	body, _ := json.Marshal(wsnotify.GenerateWSMsg(msg.SN, msg.Type, resp))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, body)
 }
 
 // 完工请求
@@ -120,9 +127,14 @@ func (s *Service) OnWSOrderFinish(c websocket.Connection, msg *wsnotify.WSMsg) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
-	s.ChFinish <- 1
-	go s.Aiis.PutMesFinishRequest(msg.SN, msg.Type, orderReq.Code, byteData, s.ChFinish)
+	resp, err := s.Aiis.PutMesFinishRequest(orderReq.Code, byteData)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
 
+	body, _ := json.Marshal(wsnotify.GenerateWSMsg(msg.SN, msg.Type, resp))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, body)
 }
 
 // 更新工步数据
@@ -201,6 +213,5 @@ func (s *Service) OnWSOrderDetailByCode(c websocket.Connection, msg *wsnotify.WS
 	}
 
 	body, _ := json.Marshal(wsnotify.GenerateWSMsg(msg.SN, msg.Type, w))
-	//fmt.Println(string(body))
 	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_ORDER, string(body))
 }

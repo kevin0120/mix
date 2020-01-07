@@ -164,7 +164,7 @@ func (s *Server) appendDispatcherBus() error {
 	srv, err := dispatcherbus.NewService(c, d)
 
 	if err != nil {
-		return errors.Wrap(err, "Append DispatcherBus Service Fail")
+		return errors.Wrap(err, "Append dispatcherBus Service Fail")
 	}
 
 	s.DispatcherBusService = srv
@@ -273,7 +273,7 @@ func (s *Server) appendTighteningDeviceService() error {
 		return errors.Wrap(err, "append tightening_device service fail")
 	}
 
-	//srv.NotifyService = s.WSNotifyService
+	//srv.notifyService = s.WSNotifyService
 	srv.StorageService = s.StorageServie
 
 	s.TighteningDeviceService = srv
@@ -286,8 +286,6 @@ func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
 	srv := aiis.NewService(c, d, s.DispatcherBusService, s.StorageServie, s.BrokerService, s.WSNotifyService)
-
-	srv.SerialNumber = s.config.SN
 
 	s.AiisService = srv
 	s.AppendService("aiis", srv)

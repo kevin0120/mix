@@ -31,8 +31,6 @@ type Service struct {
 	Httpd         *httpd.Service
 	ODOO          *odoo.Service
 	Aiis          *aiis.Service
-	ChStart       chan int
-	ChFinish      chan int
 	ChWorkorder   chan int
 	SN            string
 	NotifyService INotifyService
@@ -48,8 +46,6 @@ func NewService(d Diagnostic, dp Dispatcher, ns INotifyService) *Service {
 	s := &Service{
 		diag:          d,
 		DispatcherBus: dp,
-		ChStart:       make(chan int, CH_LENGTH),
-		ChFinish:      make(chan int, CH_LENGTH),
 		ChWorkorder:   make(chan int, CH_LENGTH),
 		NotifyService: ns,
 	}
@@ -73,7 +69,7 @@ func (s *Service) SendScannerInfo(identification string) error {
 
 func (s *Service) Open() error {
 	//fixme: 嵌套那么深
-	//s.ControllerService.NotifyService.OnNewClient = s.OnNewHmiConnect
+	//s.ControllerService.notifyService.OnNewClient = s.OnNewHmiConnect
 
 	// 接收设备状态变化
 	s.DispatcherBus.Register(dispatcherBus.DISPATCHER_DEVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onDeviceStatus))

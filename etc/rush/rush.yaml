@@ -49,6 +49,7 @@ aiis:
   recheck: false
   mesopenworkurl: http://127.0.0.1:8080/workorders/%s/start
   mesfinishworkurl: http://127.0.0.1:8080/workorders/%s/finish
+  transport_type: grpc
 odoo:
   urls:
   - http://127.0.0.1:8069
@@ -177,7 +178,7 @@ tightening_device:
 
 
 broker:
-  enable: true
+  enable: false
   connect-urls:
     - nats://192.168.4.203:4222
     - nats://192.168.4.203:4223

@@ -32,15 +32,15 @@ func NewConfig() Config {
 func (c Config) Validate() error {
 	if c.Enable {
 		if c.Name == "" {
-			return errors.New("Broker Name Is Required! But Now Is Empty")
+			return errors.New("broker Name Is Required! But Now Is Empty")
 		}
 		for _, connect := range c.ConnectUrls {
 			if !strings.HasPrefix(connect, "nats://") {
-				return errors.Errorf("Broker connect Url Is Invalid, error: %s", connect)
+				return errors.Errorf("broker connect Url Is Invalid, error: %s", connect)
 			}
 		}
 		if c.Provider != "nats" {
-			return errors.Errorf("Broker Provider: %s Is Not Support", c.Provider)
+			return errors.Errorf("broker Provider: %s Is Not Support", c.Provider)
 		}
 	}
 	return nil

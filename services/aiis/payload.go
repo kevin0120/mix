@@ -1,12 +1,15 @@
 package aiis
 
 const (
-	SUBJECT_RESULTS      = "saturn.results.%s"
-	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
+	SERVICE_AIIS = "aiis"
 )
 
+type TransportPayload struct {
+	Method string      `json:"method"`
+	Data   interface{} `json:"data"`
+}
+
 type AIISResult struct {
-	// local_id
 	ID int64 `json:"id"`
 
 	// db
@@ -70,11 +73,6 @@ type AIISResult struct {
 type CURObject struct {
 	File string `json:"file"`
 	OP   int    `json:"op"`
-}
-
-type WSOpResult struct {
-	ResultID int64       `json:"result_id"`
-	Result   interface{} `json:"result"`
 }
 
 type ResultPatch struct {

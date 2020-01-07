@@ -31,8 +31,6 @@ const (
 	// 当检测到服务状态变化时(aiis, odoo, 外部系统等)，会通过此分发器进行状态分发
 	DISPATCHER_SERVICE_STATUS = "DISPATCHER_SERVICE_STATUS"
 
-	DISPATCHER_RPC_RECV = "DISPATCHER_RPC_RECV"
-
 	// ********************************BROKER***********************************
 	// 当Broker(MQ)服务状态变化时， 会通过此分发器进行状态分发
 	DISPATCHER_BROKER_STATUS = "DISPATCHER_BROKER_STATUS"
