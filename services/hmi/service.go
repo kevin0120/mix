@@ -99,6 +99,12 @@ func (s *Service) initDispatcherRegisters() {
 
 	// 接收外部服务状态推送
 	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_SERVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onServiceStatus))
+
+	// 接收新工单推送
+	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_ORDER_NEW, utils.CreateDispatchHandlerStruct(s.onNewOrder))
+
+	// 接收保养信息推送
+	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_MAINTENANCE_INFO, utils.CreateDispatchHandlerStruct(s.onNewOrder))
 }
 
 func (s *Service) setupTestInterface() {
@@ -219,6 +225,44 @@ func (s *Service) onScannerData(data interface{}) {
 
 	body, _ := json.Marshal(scannerData)
 	s.diag.Info(fmt.Sprintf("条码数据推送HMI:%s", string(body)))
+}
+
+// 收到新工单
+func (s *Service) onNewOrder(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	s.wsSendNewOrder(data)
+
+	body, _ := json.Marshal(data)
+	s.diag.Info(fmt.Sprintf("新工单推送HMI:%s", string(body)))
+}
+
+// 收到保养通知
+func (s *Service) onNewMaintenance(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	s.wsSendMaintenance(data)
+
+	body, _ := json.Marshal(data)
+	s.diag.Info(fmt.Sprintf("保养信息推送HMI:%s", string(body)))
+}
+
+// websocket发送新工单
+func (s *Service) wsSendNewOrder(order interface{}) {
+	var orders []interface{}
+	orders = append(orders, order)
+	body, _ := json.Marshal(wsnotify.GenerateWSMsg(0, wsnotify.WS_ORDER_NEW, orders))
+	s.notifyService.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
+}
+
+// websocket发送保养通知
+func (s *Service) wsSendMaintenance(info interface{}) {
+	body, _ := json.Marshal(wsnotify.GenerateWSMsg(0, wsnotify.WS_MAINTENANCE, info))
+	s.notifyService.NotifyAll(wsnotify.WS_EVENT_MAINTENANCE, string(body))
 }
 
 // websocket发送读卡器信息

@@ -292,13 +292,9 @@ func (s *Server) appendAiisService() error {
 func (s *Server) appendOdooService() error {
 	c := s.config.Odoo
 	d := s.DiagService.NewOdooHandler()
-	srv := odoo.NewService(c, d, s.DispatcherBusService)
+	srv := odoo.NewService(c, d, s.DispatcherBusService, s.StorageServie, s.HTTPDService)
 
 	s.OdooService = srv
-	srv.DB = s.StorageServie
-	srv.HTTPDService = s.HTTPDService
-	srv.WS = s.WSNotifyService
-
 	s.AppendService("odoo", srv)
 
 	return nil

@@ -45,4 +45,10 @@ const (
 
 	// 当收到HMI发来的完工请求时，会向此分发器发送数据。可以根据具体需求订阅并处理
 	DISPATCHER_ORDER_FINISH = "DISPATCHER_ORDER_FINISH"
+
+	// 当收到下发的新工单时，会将新工单数据发到此分发器
+	DISPATCHER_ORDER_NEW = "DISPATCHER_ORDER_NEW"
+
+	// 当收到工具保养通知时，会将保养信息发送到此分发器
+	DISPATCHER_MAINTENANCE_INFO = "DISPATCHER_MAINTENANCE_INFO"
 )
