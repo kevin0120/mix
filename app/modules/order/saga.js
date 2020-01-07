@@ -20,8 +20,8 @@ import { push } from 'connected-react-router';
 import { orderActions } from './action';
 import { doable, orderSteps, viewingOrder, workingOrder } from './selector';
 import dialogActions from '../dialog/action';
-import i18n, { tNS } from '../../i18n';
-import Table from '../../components/Table/Table';
+import i18n from '../../i18n';
+import OrderInfoTable from '../../components/OrderInfoTable';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
 import { orderDetailByCodeApi, orderListApi, orderReportFinishApi } from '../../api/order';
@@ -34,7 +34,6 @@ import notifierActions from '../Notifier/action';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
 import { sGetWorkCenterMode } from '../workCenterMode/selector';
 import type { tWorkCenterMode } from '../workCenterMode/interface/typeDef';
-import { stepWorkingNS } from '../../containers/stepWorking/local';
 import ClsScanner from '../device/scanner/ClsScanner';
 import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
@@ -251,7 +250,7 @@ function* getOrderList() {
   } catch (e) {
     yield put(notifierActions.enqueueSnackbar(
       'Error', `获取工单列表失败（${e.message}）`, {
-        at: 'getOrderList',
+        at: 'getOrderList'
       }
     ));
   }
@@ -312,16 +311,6 @@ function* viewOrder({ order }: { order: IOrder }) {
       orderSteps(viewingOrder(state.order))
     );
 
-    const data =
-      (vOrderSteps &&
-        vOrderSteps.map((s: IWorkStep, idx) => [
-          idx + 1,
-          s.code,
-          tNS(`${s.type}`, stepWorkingNS),
-          s.desc
-        ])) ||
-      [];
-
     const { workCenterMode } = yield select();
     const isRework = workCenterMode === workModes.reworkWorkCenterMode;
     const oList = yield select(s => s.order.list);
@@ -346,19 +335,7 @@ function* viewOrder({ order }: { order: IOrder }) {
           }
         ],
         title: i18n.t('Order.Overview'),
-        content: (
-          <Table
-            tableHeaderColor="info"
-            tableHead={[
-              i18n.t('Common.Idx'),
-              i18n.t('Order.Step.name'),
-              i18n.t('Order.Step.type'),
-              i18n.t('Order.Step.desc')
-            ]}
-            tableData={data}
-            colorsColls={['info']}
-          />
-        )
+        content: <OrderInfoTable steps={vOrderSteps}/>
       })
     );
   } catch (e) {

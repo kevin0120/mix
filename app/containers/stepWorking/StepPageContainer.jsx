@@ -88,12 +88,12 @@ const StepPageContainer = ({
           direction="column"
         >
           <Grid item className={classes.descriptionContainer}>
-            <Paper square className={clsx(classes.Paper,classes.descriptionPaper)}>
-              <div className={classes.Description}>
-                {description || (
-                  <Typography variant="h5">{step.desc}</Typography>
-                )}
-              </div>
+            <Paper square className={clsx(classes.Paper, classes.descriptionPaper)}>
+              {description || (
+                <div className={classes.Description} >
+                  <Typography variant="h5" dangerouslySetInnerHTML={{ __html: step.desc || '' }} />
+                </div>
+              )}
             </Paper>
           </Grid>
           <Grid item className={classes.result}>

@@ -152,9 +152,7 @@ function MeasureStep({
     {/*</Card>*/}
     {text || desc ? (
       <dev className={classes.desc}>
-        <Typography variant="h4">
-          {text || desc}
-        </Typography>
+        <Typography variant="h4"  dangerouslySetInnerHTML={{ __html: text || desc || '' }} />
       </dev>
     ) : null}
     <div

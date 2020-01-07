@@ -53,9 +53,7 @@ function materialStep(props: Props) {
     <span className={classes.desc}>
 
     {desc ? (
-      <Typography variant="h4">
-        {desc}
-      </Typography>
+      <Typography variant="h4"  dangerouslySetInnerHTML={{ __html: desc || '' }} />
     ) : null}
       </span>
 
