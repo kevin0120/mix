@@ -4,11 +4,8 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/minio"
-	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"strconv"
-	"strings"
 )
 
 // header
@@ -260,58 +257,59 @@ func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
 	return fmt.Sprintf("%s%s", headerStr, xmlpacket), header.MID
 }
 
-func XML2Curve(result *CVI3Result, cur_result *minio.ControllerCurve) {
-	cur_result.CurveContent = minio.ControllerCurveFile{}
-	cur_result.CurveContent.Result = result.PRC_SST.PAR.Result
-	if cur_result.CurveContent.Result == "IO" {
-		cur_result.CurveContent.Result = storage.RESULT_OK
-	} else if cur_result.CurveContent.Result == "NIO" {
-		cur_result.CurveContent.Result = storage.RESULT_NOK
-	}
-
-	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
-
-	for _, blc := range blcs {
-		if blc.CUR.CNT == 0 {
-			continue
-		}
-
-		cur_ms := strings.Split(blc.CUR.SMP.CUR_M, " ")
-		//cur_result.CurveContent.CUR_M = make([]float64, blc.CUR.CNT)
-		for _, v := range cur_ms {
-			m, _ := strconv.ParseFloat(v, 64)
-			cur_result.CurveContent.CUR_M = append(cur_result.CurveContent.CUR_M, m)
-		}
-
-		cur_ws := strings.Split(blc.CUR.SMP.CUR_W, " ")
-		//cur_result.CurveContent.CUR_W = make([]float64, blc.CUR.CNT)
-		for _, v := range cur_ws {
-			w, _ := strconv.ParseFloat(v, 64)
-			cur_result.CurveContent.CUR_W = append(cur_result.CurveContent.CUR_W, w)
-		}
-
-		stp := blc.CUR.STP
-		stv := blc.CUR.STV
-		if blc.CUR.SMP.CUR_T == "" {
-			for i := 0; i < blc.CUR.CNT; i++ {
-				x := float64(i)*stp + stv
-				//t,_ := big.NewFloat(x).SetPrec(5).Float64()
-				t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
-				cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, t)
-			}
-		} else {
-			cur_ts := strings.Split(blc.CUR.SMP.CUR_T, " ")
-			//cur_result.CurveContent.CUR_T = make([]float64, blc.CUR.CNT)
-			for _, v := range cur_ts {
-				w, _ := strconv.ParseFloat(v, 64)
-				cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, w)
-			}
-		}
-
-		if blc.CUR.SMP.CUR_W == "" {
-			cur_result.CurveContent.CUR_W = cur_result.CurveContent.CUR_T
-		}
-	}
+// TODO: imp
+func XML2Curve(result *CVI3Result, curve *tightening_device.TighteningCurve) {
+	//curve.CurveContent = minio.ControllerCurveFile{}
+	//curve.CurveContent.Result = result.PRC_SST.PAR.Result
+	//if curve.CurveContent.Result == "IO" {
+	//	curve.CurveContent.Result = storage.RESULT_OK
+	//} else if curve.CurveContent.Result == "NIO" {
+	//	curve.CurveContent.Result = storage.RESULT_NOK
+	//}
+	//
+	//blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
+	//
+	//for _, blc := range blcs {
+	//	if blc.CUR.CNT == 0 {
+	//		continue
+	//	}
+	//
+	//	cur_ms := strings.Split(blc.CUR.SMP.CUR_M, " ")
+	//	//curve.CurveContent.CUR_M = make([]float64, blc.CUR.CNT)
+	//	for _, v := range cur_ms {
+	//		m, _ := strconv.ParseFloat(v, 64)
+	//		curve.CurveContent.CUR_M = append(curve.CurveContent.CUR_M, m)
+	//	}
+	//
+	//	cur_ws := strings.Split(blc.CUR.SMP.CUR_W, " ")
+	//	//curve.CurveContent.CUR_W = make([]float64, blc.CUR.CNT)
+	//	for _, v := range cur_ws {
+	//		w, _ := strconv.ParseFloat(v, 64)
+	//		curve.CurveContent.CUR_W = append(curve.CurveContent.CUR_W, w)
+	//	}
+	//
+	//	stp := blc.CUR.STP
+	//	stv := blc.CUR.STV
+	//	if blc.CUR.SMP.CUR_T == "" {
+	//		for i := 0; i < blc.CUR.CNT; i++ {
+	//			x := float64(i)*stp + stv
+	//			//t,_ := big.NewFloat(x).SetPrec(5).Float64()
+	//			t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
+	//			curve.CurveContent.CUR_T = append(curve.CurveContent.CUR_T, t)
+	//		}
+	//	} else {
+	//		cur_ts := strings.Split(blc.CUR.SMP.CUR_T, " ")
+	//		//curve.CurveContent.CUR_T = make([]float64, blc.CUR.CNT)
+	//		for _, v := range cur_ts {
+	//			w, _ := strconv.ParseFloat(v, 64)
+	//			curve.CurveContent.CUR_T = append(curve.CurveContent.CUR_T, w)
+	//		}
+	//	}
+	//
+	//	if blc.CUR.SMP.CUR_W == "" {
+	//		curve.CurveContent.CUR_W = curve.CurveContent.CUR_T
+	//	}
+	//}
 
 }
 

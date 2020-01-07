@@ -309,7 +309,7 @@ func (p *Service) HandleProcess() {
 					if strings.Contains(msg, XML_CURVE_KEY) {
 
 						// 曲线数据
-						controllerCurve := minio.ControllerCurve{}
+						controllerCurve := tightening_device.TighteningCurve{}
 						XML2Curve(&cvi3Result, &controllerCurve)
 
 						//p.Parent.Handle(&controllerResult, &controllerCurve)
