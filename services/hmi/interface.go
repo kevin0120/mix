@@ -1,6 +1,7 @@
 package hmi
 
 import (
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/utils"
 )
 
@@ -24,4 +25,17 @@ type Dispatcher interface {
 type INotifyService interface {
 	GetWorkCenter() string
 	NotifyAll(evt string, payload string)
+}
+
+type IStorageService interface {
+	Workorders(par []byte) ([]storage.Workorders, error)
+	WorkorderOut(order string, workorderID int64) (interface{}, error)
+	UpdateWorkorder(workorder *storage.Workorders) (*storage.Workorders, error)
+	UpdateStep(step *storage.Steps) (*storage.Steps, error)
+	UpdateStepData(step *storage.Steps) (*storage.Steps, error)
+	UpdateOrderData(order *storage.Workorders) (*storage.Workorders, error)
+}
+
+type IBackendService interface {
+	GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error)
 }

@@ -50,7 +50,7 @@ func NewConfig() Config {
 
 func (c Config) Validate() error {
 	if len(c.Urls) == 0 {
-		return errors.New("ODOO service URLs is empty ")
+		return errors.New("backend service URLs is empty ")
 	}
 
 	for _, v := range c.Endpoints {

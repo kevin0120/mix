@@ -141,7 +141,7 @@ func (s *Service) Open() error {
 
 	handler, err := s.HTTPDService.GetHandlerByName(httpd.BasePath)
 	if err != nil {
-		return errors.Wrap(err, "Odoo server get Httpd default Handler fail")
+		return errors.Wrap(err, "Odoo server get httpd default Handler fail")
 	}
 
 	r := httpd.Route{
@@ -224,7 +224,8 @@ func (s *Service) Close() error {
 func (s *Service) HandleWorkorder(data []byte) {
 	s.workordersChannel <- data
 }
-func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string, ch <-chan int) ([]byte, error) {
+
+func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error) {
 
 	var err error
 	var body []byte
@@ -243,11 +244,10 @@ func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, 
 		if err == nil {
 			// 如果第一次就成功，推出循环
 			s.HandleWorkorder(body)
-			<-ch
 			return body, nil
 		}
 	}
-	<-ch
+
 	return nil, errors.Wrap(err, "Get workorder fail")
 }
 

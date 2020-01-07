@@ -38,4 +38,11 @@ const (
 	// ********************************WEBSOCKET***********************************
 	// 当收到WebSocket请求时， 会通过此分发器进行请求分发
 	DISPATCHER_WS_NOTIFY = "DISPATCHER_WS_NOTIFY"
+
+	// ********************************HMI***********************************
+	// 当收到HMI发来的开工请求时，会向此分发器发送数据。可以根据具体需求订阅并处理
+	DISPATCHER_ORDER_START = "DISPATCHER_ORDER_START"
+
+	// 当收到HMI发来的完工请求时，会向此分发器发送数据。可以根据具体需求订阅并处理
+	DISPATCHER_ORDER_FINISH = "DISPATCHER_ORDER_FINISH"
 )

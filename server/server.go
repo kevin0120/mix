@@ -320,14 +320,7 @@ func (s *Server) appendWebsocketService() error {
 
 func (s *Server) appendHMIService() error {
 	d := s.DiagService.NewHMIHandler()
-	srv := hmi.NewService(d, s.DispatcherBusService, s.WSNotifyService)
-
-	srv.ODOO = s.OdooService
-	srv.Httpd = s.HTTPDService //http 服务注入
-	srv.DB = s.StorageServie   // stroage 服务注入
-	srv.SN = s.config.SN
-	srv.Aiis = s.AiisService
-	srv.DispatcherBus = s.DispatcherBusService
+	srv := hmi.NewService(d, s.DispatcherBusService, s.WSNotifyService, s.HTTPDService, s.OdooService, s.StorageServie)
 	s.AppendService("hmi", srv)
 
 	return nil

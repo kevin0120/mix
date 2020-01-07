@@ -47,8 +47,6 @@ aiis:
   grpc_server: 127.0.0.1:9093
   keep_alive: 3s
   recheck: false
-  mesopenworkurl: http://127.0.0.1:8080/workorders/%s/start
-  mesfinishworkurl: http://127.0.0.1:8080/workorders/%s/finish
   transport_type: grpc
 odoo:
   urls:

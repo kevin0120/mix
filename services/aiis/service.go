@@ -179,33 +179,6 @@ func (s *Service) PutResult(body *AIISResult) {
 	}
 }
 
-func (s *Service) PutMesOpenRequest(code string, req interface{}) (interface{}, error) {
-	urlString := s.Config().MesOpenWorkUrl
-	url := fmt.Sprintf(urlString, code)
-	resp, err := s.httpClient.R().
-		SetBody(req).
-		Put(url)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resp.Body(), nil
-}
-
-func (s *Service) PutMesFinishRequest(code string, req interface{}) (interface{}, error) {
-	url := fmt.Sprintf(s.Config().MesFinishWorkUrl, code)
-	resp, err := s.httpClient.R().
-		SetBody(req).
-		Put(url)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resp.Body(), nil
-}
-
 func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {
 	aiisResult := AIISResult{}
 	resultValue := tightening_device.ResultValue{}

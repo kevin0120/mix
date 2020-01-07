@@ -37,10 +37,6 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) (*Service, error) {
 
 	s.configValue.Store(c)
 
-	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
-		Diag: s.diag,
-	}
-
 	s.initGlobalDispatchers()
 	s.initWSRequestHandlers()
 
@@ -79,6 +75,10 @@ func (s *Service) initGlobalDispatchers() {
 }
 
 func (s *Service) initWSRequestHandlers() {
+	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
+		Diag: s.diag,
+	}
+
 	s.SetupHandlers(wsnotify.WSRequestHandlerMap{
 		wsnotify.WS_DEVICE_STATUS: s.OnWSDeviceStatus,
 	})
