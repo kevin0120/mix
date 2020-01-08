@@ -2,12 +2,7 @@ package openprotocol
 
 import (
 	"fmt"
-	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/minio"
-	"github.com/masami10/rush/services/odoo"
-	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"sync/atomic"
 )
@@ -18,30 +13,28 @@ type Diagnostic interface {
 	Debug(msg string)
 }
 
-// TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
 	name        string
 
-	DB    *storage.Service
-	WS    *wsnotify.Service
-	Aiis  *aiis.Service
-	Minio *minio.Service
-	Odoo  *odoo.Service
+	storageService IStorageService
+	backendService IBackendService
 
 	devices []*TighteningController
 	tightening_device.ITighteningProtocol
 	vendors map[string]IOpenProtocolController
 }
 
-func NewService(c Config, d Diagnostic, vendors map[string]IOpenProtocolController) *Service {
+func NewService(c Config, d Diagnostic, vendors map[string]IOpenProtocolController, db IStorageService, backend IBackendService) *Service {
 
 	s := &Service{
-		name:    tightening_device.TIGHTENING_OPENPROTOCOL,
-		diag:    d,
-		devices: []*TighteningController{},
-		vendors: vendors,
+		name:           tightening_device.TIGHTENING_OPENPROTOCOL,
+		diag:           d,
+		devices:        []*TighteningController{},
+		vendors:        vendors,
+		storageService: db,
+		backendService: backend,
 	}
 
 	s.configValue.Store(c)
@@ -57,33 +50,15 @@ func (s *Service) Name() string {
 	return s.name
 }
 
-func (s *Service) SendIdentification(identification string) error {
-	if s.WS == nil {
-		return errors.New("Please Inject Notify Service First")
-	}
-	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, identification)
-	return nil
-}
-
-func (s *Service) Parse(msg string) ([]byte, error) {
-	return nil, nil
-}
-
-func (s *Service) Write(sn string, buf []byte) error {
-	return nil
-}
-
-func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
+func (s *Service) NewController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
 	return s.newController(cfg, s.diag, s, dp)
 }
 
 func (s *Service) Open() error {
-
 	return nil
 }
 
 func (s *Service) Close() error {
-
 	return nil
 }
 
@@ -106,15 +81,15 @@ func (s *Service) generateIDInfo(info string) string {
 }
 
 func (s *Service) TryCreateMaintenance(info ToolInfo) error {
-	return s.Odoo.TryCreateMaintenance(info)
+	return s.backendService.TryCreateMaintenance(info)
 }
 
 func (s *Service) OnStatus(string, string) {
-	return
+	s.diag.Error("OnStatus", errors.New("OpenProtocol Service Not Support OnStatus"))
 }
 
 func (s *Service) OnRecv(string, string) {
-	return
+	s.diag.Error("OnRecv", errors.New("OpenProtocol Service Not Support OnRecv"))
 }
 
 func (s *Service) newController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) (tightening_device.ITighteningController, error) {

@@ -12,6 +12,9 @@ import (
 
 const (
 	OP_TERMINAL = 0x00
+
+	OPENPROTOCOL_MODE_JOB  = "1"
+	OPENPROTOCOL_MODE_PSET = "0"
 )
 
 const (

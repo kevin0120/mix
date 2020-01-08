@@ -43,7 +43,7 @@ func (s *Service) loadTighteningController(c Config) {
 			s.diag.Error("loadTighteningController", err)
 			continue
 		}
-		c, err := p.CreateController(&c.Devices[k], s.DispatcherBus)
+		c, err := p.NewController(&c.Devices[k], s.DispatcherBus)
 		if err != nil {
 			s.diag.Error("Create Controller Failed", err)
 			continue

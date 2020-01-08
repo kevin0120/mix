@@ -2,6 +2,8 @@ package openprotocol
 
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 )
 
@@ -11,6 +13,21 @@ type Dispatcher interface {
 	Dispatch(name string, data interface{}) error
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 	Release(name string, handler string) error
+}
+
+type IStorageService interface {
+	FindTargetResultForJobManual(raw_workorder_id int64) (storage.Results, error)
+	UpdateTool(gun *storage.Tools) error
+	ClearToolResultAndCurve(toolSN string) error
+	GetTool(serial string) (storage.Tools, error)
+	GetStep(id int64) (storage.Steps, error)
+	UpdateIncompleteCurveAndSaveResult(result *storage.Results) error
+	UpdateIncompleteResultAndSaveCurve(curve *storage.Curves) error
+}
+
+type IBackendService interface {
+	TryCreateMaintenance(body interface{}) error
+	GetConsumeBySeqInStep(step *storage.Steps, seq int) (*odoo.StepComsume, error)
 }
 
 type IOpenProtocolController interface {

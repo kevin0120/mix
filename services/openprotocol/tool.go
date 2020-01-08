@@ -6,11 +6,10 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/utils"
 	"sync/atomic"
 )
 
-func CreateTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagnostic) *TighteningTool {
+func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagnostic) *TighteningTool {
 	tool := TighteningTool{
 		diag:       d,
 		cfg:        cfg,
@@ -287,14 +286,14 @@ func (s *TighteningTool) DeviceType() string {
 }
 
 // 处理结果
-func (s *TighteningTool) OnResult(result interface{}) {
+func (s *TighteningTool) onResult(result interface{}) {
 	if result == nil {
 		s.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", s.cfg.SN), errors.New("Result Is Nil"))
 		return
 	}
 
 	tighteningResult := result.(tightening_device.TighteningResult)
-	dbTool, err := s.controller.ProtocolService.DB.GetTool(s.cfg.SN)
+	dbTool, err := s.controller.ProtocolService.storageService.GetTool(s.cfg.SN)
 	if err == nil && dbTool.CurrentWorkorderID != 0 {
 		if s.Mode() == tightening_device.MODE_JOB {
 			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.CurrentWorkorderID)
@@ -307,13 +306,13 @@ func (s *TighteningTool) OnResult(result interface{}) {
 		tighteningResult.UserID = dbTool.UserID
 		tighteningResult.Batch = fmt.Sprintf("%d/%d", tighteningResult.Seq, dbTool.Total)
 
-		dbStep, err := s.controller.ProtocolService.DB.GetStep(dbTool.StepID)
+		dbStep, err := s.controller.ProtocolService.storageService.GetStep(dbTool.StepID)
 		if err != nil {
 			s.diag.Error("Get Step Failed", err)
 			return
 		}
 
-		consume, err := s.controller.ProtocolService.Odoo.GetConsumeBySeqInStep(&dbStep, tighteningResult.Seq)
+		consume, err := s.controller.ProtocolService.backendService.GetConsumeBySeqInStep(&dbStep, tighteningResult.Seq)
 		if err != nil {
 			s.diag.Error("Get Consume Failed", err)
 			return
@@ -325,7 +324,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 	dbResult := tighteningResult.ToDBResult()
 
 	// 尝试获取最近一条没有对应结果的曲线并更新, 同时缓存结果
-	err = s.controller.ProtocolService.DB.UpdateIncompleteCurveAndSaveResult(dbResult)
+	err = s.controller.ProtocolService.storageService.UpdateIncompleteCurveAndSaveResult(dbResult)
 	if err != nil {
 		s.diag.Error("Handle Result With Curve Failed", err)
 	}
@@ -336,7 +335,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 }
 
 // 处理曲线
-func (s *TighteningTool) OnCurve(curve interface{}) {
+func (s *TighteningTool) onCurve(curve interface{}) {
 	if curve == nil {
 		s.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", s.cfg.SN), errors.New("Curve Is Nil"))
 		return
@@ -346,7 +345,7 @@ func (s *TighteningTool) OnCurve(curve interface{}) {
 	dbCurves := tighteningCurve.ToDBCurve()
 
 	// 尝试获取最近一条没有对应曲线的结果并更新, 同时缓存曲线
-	err := s.controller.ProtocolService.DB.UpdateIncompleteResultAndSaveCurve(dbCurves)
+	err := s.controller.ProtocolService.storageService.UpdateIncompleteResultAndSaveCurve(dbCurves)
 	if err != nil {
 		s.diag.Error("Handle Curve With Result Failed", err)
 	}
@@ -354,8 +353,4 @@ func (s *TighteningTool) OnCurve(curve interface{}) {
 	// 分发曲线
 	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_CURVE, tighteningCurve)
 	s.diag.Info(fmt.Sprintf("缓存曲线成功 工具:%s 对应拧紧ID:%s", dbCurves.ToolSN, dbCurves.TighteningID))
-}
-
-func (s *TighteningTool) GetDispatch(name string) *utils.Dispatcher {
-	return nil
 }

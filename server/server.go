@@ -50,7 +50,6 @@ type Server struct {
 	hostname string
 
 	StorageServie *storage.Service
-	//ControllerService *controller.Service
 
 	HTTPDService        *httpd.Service
 	OdooService         *odoo.Service
@@ -113,10 +112,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	if err := s.initAudiVWDService(); err != nil {
 		return nil, errors.Wrap(err, "init Audi/VW service")
-	}
-
-	if err := s.initOpenProtocolService(); err != nil {
-		return nil, errors.Wrap(err, "init OpenProtocol service")
 	}
 
 	s.appendMinioService()
@@ -209,23 +204,13 @@ func (s *Server) appendAudiVWService() {
 	s.AppendService("audi/vw", s.AudiVWService)
 }
 
-func (s *Server) initOpenProtocolService() error {
-	c := s.config.OpenProtocol
-	d := s.DiagService.NewOpenProtocolHandler()
-	srv := openprotocol.NewService(c, d, vendors.OpenProtocolVendors)
-
-	s.OpenprotocolService = srv
-
-	return nil
-}
-
 func (s *Server) appendOpenProtocolService() {
 
-	s.OpenprotocolService.Minio = s.MinioService
-	s.OpenprotocolService.Aiis = s.AiisService
-	s.OpenprotocolService.WS = s.WSNotifyService
-	s.OpenprotocolService.DB = s.StorageServie
-	s.OpenprotocolService.Odoo = s.OdooService
+	c := s.config.OpenProtocol
+	d := s.DiagService.NewOpenProtocolHandler()
+	srv := openprotocol.NewService(c, d, vendors.OpenProtocolVendors, s.StorageServie, s.OdooService)
+
+	s.OpenprotocolService = srv
 
 	s.AppendService("openprotocol", s.OpenprotocolService)
 }
@@ -377,10 +362,7 @@ func (s *Server) AppendReaderService() error {
 	c := s.config.Reader
 	d := s.DiagService.NewReaderHandler()
 
-	srv := reader.NewService(c, d, s.DeviceService)
-	srv.WS = s.WSNotifyService
-	srv.DeviceService = s.DeviceService
-	srv.DispatcherBus = s.DispatcherBusService
+	srv := reader.NewService(c, d, s.DeviceService, s.DispatcherBusService)
 
 	s.ReaderService = srv
 	s.AppendService("reader", srv)

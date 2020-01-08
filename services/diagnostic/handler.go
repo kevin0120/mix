@@ -287,7 +287,7 @@ func (h *AiisHandler) PutResultDone() {
 	h.l.Debug("Put Result to AIIS successful")
 }
 
-// Odoo Handler
+// backendService Handler
 
 type OdooHandler struct {
 	l Logger

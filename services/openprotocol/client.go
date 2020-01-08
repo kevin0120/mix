@@ -59,12 +59,11 @@ type clientContext struct {
 func (c *clientContext) start() {
 	go c.manage()
 	go c.handleRecv()
-	go c.Connect()
+	go c.connect()
 }
 
-func (c *clientContext) stop() error {
+func (c *clientContext) stop() {
 	c.closing <- struct{}{}
-	return nil
 }
 
 func (c *clientContext) handlePackageOPPayload(src []byte, data []byte) error {
@@ -224,7 +223,7 @@ func (c *clientContext) handleStatus(status string) {
 		if status == device.BaseDeviceStatusOffline {
 
 			// 断线重连
-			go c.Connect()
+			go c.connect()
 		}
 	}
 }
@@ -263,7 +262,7 @@ func (c *clientContext) Write(buf []byte) {
 	c.buffer <- buf
 }
 
-func (c *clientContext) Connect() {
+func (c *clientContext) connect() {
 	c.UpdateStatus(device.BaseDeviceStatusOffline)
 	c.handlerBuf = make(chan handlerPkg, 1024)
 	c.writeOffset = 0

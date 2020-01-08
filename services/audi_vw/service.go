@@ -91,7 +91,7 @@ func (s *Service) Name() string {
 	return tightening_device.TIGHTENING_AUDIVW
 }
 
-func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
+func (s *Service) NewController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
 	return nil, nil
 }
 
@@ -486,5 +486,5 @@ func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 func (p *Service) TryCreateMaintenance(info toolInfoCNT) error {
 	return nil
 	//i := audiVW2OPToolInfo(ino)
-	//return p.Odoo.TryCreateMaintenance(info)
+	//return p.backendService.TryCreateMaintenance(info)
 }

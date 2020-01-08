@@ -5,7 +5,6 @@ import (
 	"github.com/ebfe/scard"
 	"github.com/masami10/rush/services/device"
 	dispatcherBus "github.com/masami10/rush/services/dispatcherbus"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/satori/go.uuid"
 	"sync/atomic"
@@ -22,16 +21,16 @@ type Service struct {
 	configValue   atomic.Value
 	diag          Diagnostic
 	ctx           *scard.Context
-	WS            *wsnotify.Service
-	DeviceService IDeviceService
-	DispatcherBus Dispatcher
+	deviceService IDeviceService
+	dispatcherBus Dispatcher
 }
 
-func NewService(c Config, d Diagnostic, ds IDeviceService) *Service {
+func NewService(c Config, d Diagnostic, ds IDeviceService, dp Dispatcher) *Service {
 
 	s := &Service{
 		diag:          d,
-		DeviceService: ds,
+		deviceService: ds,
+		dispatcherBus: dp,
 	}
 	s.SetSerialNumber(uuid.NewV4().String())
 	s.configValue.Store(c)
@@ -48,15 +47,15 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	s.DispatcherBus.Create(dispatcherBus.DISPATCHER_READER_DATA, utils.DefaultDispatcherBufLen)
-	err := s.DispatcherBus.Start(dispatcherBus.DISPATCHER_READER_DATA)
+	s.dispatcherBus.Create(dispatcherBus.DISPATCHER_READER_DATA, utils.DefaultDispatcherBufLen)
+	err := s.dispatcherBus.Start(dispatcherBus.DISPATCHER_READER_DATA)
 	if err != nil {
 		return err
 	}
 
 	go s.search()
 
-	s.DeviceService.AddDevice("reader", s)
+	s.deviceService.AddDevice("reader", s)
 
 	return nil
 }
@@ -115,7 +114,7 @@ func (s *Service) Data() interface{} {
 
 func (s *Service) notifyUID(uid string) {
 	// 分发读卡器数据
-	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_READER_DATA, uid)
+	s.dispatcherBus.Dispatch(dispatcherBus.DISPATCHER_READER_DATA, uid)
 }
 
 func (s *Service) search() {

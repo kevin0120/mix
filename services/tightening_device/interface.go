@@ -28,10 +28,17 @@ type Dispatcher interface {
 	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }
 
+type ITighteningProtocol interface {
+
+	// 协议名称
+	Name() string
+
+	// 创建控制器
+	NewController(cfg *TighteningDeviceConfig, dp Dispatcher) (ITighteningController, error)
+}
+
 type ITighteningDevice interface {
 	device.IBaseDevice
-
-	//GetDispatcher(string) *utils.Dispatcher
 }
 
 type ITighteningController interface {

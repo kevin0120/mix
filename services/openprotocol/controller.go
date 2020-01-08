@@ -18,8 +18,6 @@ const (
 
 	REPLY_TIMEOUT  = time.Duration(100 * time.Millisecond)
 	MAX_REPLY_TIME = time.Duration(2000 * time.Millisecond)
-
-	DEFAULT_TCP_KEEPALIVE = time.Duration(5 * time.Second)
 )
 
 type ControllerSubscribe func(string) error
@@ -31,21 +29,17 @@ type handlerPkg struct {
 }
 
 type TighteningController struct {
+	device.BaseDevice
+
 	sockClients          map[string]*clientContext
 	deviceConf           *tightening_device.TighteningDeviceConfig
 	ProtocolService      *Service
-	dbController         *storage.Controllers
-	closing              chan chan struct{}
 	inputs               string
 	diag                 Diagnostic
-	model                string
 	controllerSubscribes []ControllerSubscribe
 	dispatcherBus        Dispatcher
 	dispatcherMap        map[string]dispatcherbus.DispatcherMap
-	externalDispatches   map[string]*utils.Dispatcher
 	isGlobalConn         bool
-	vendorModel          map[string]interface{}
-	device.BaseDevice
 
 	instance IOpenProtocolController
 }
@@ -57,10 +51,10 @@ func (c *TighteningController) createToolsByConfig() error {
 		return errors.New("Device Config Is Empty")
 	}
 	for _, v := range conf.Tools {
-		tool := CreateTool(c, v, d)
+		tool := NewTool(c, v, d)
 		c.dispatcherMap[tool.SerialNumber()] = dispatcherbus.DispatcherMap{
-			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_RESULT): utils.CreateDispatchHandlerStruct(tool.OnResult),
-			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_CURVE):  utils.CreateDispatchHandlerStruct(tool.OnCurve),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_RESULT): utils.CreateDispatchHandlerStruct(tool.onResult),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_CURVE):  utils.CreateDispatchHandlerStruct(tool.onCurve),
 		}
 		c.AddChildren(v.SN, tool)
 	}
@@ -69,10 +63,7 @@ func (c *TighteningController) createToolsByConfig() error {
 
 func (c *TighteningController) initController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) {
 
-	//c.buffer = make(chan []byte, 1024)
-	c.closing = make(chan chan struct{})
 	c.dispatcherMap = map[string]dispatcherbus.DispatcherMap{}
-	//c.tempResultCurve = map[int]*tightening_device.TighteningCurve{}
 	c.sockClients = map[string]*clientContext{}
 	c.isGlobalConn = false
 	c.BaseDevice = device.CreateBaseDevice(deviceConfig.Model, d, service)
@@ -160,14 +151,6 @@ func (c *TighteningController) GetToolViaChannel(channel int) (tightening_device
 	}
 
 	return nil, errors.New("GetToolViaChannel Tool Not Found")
-}
-
-func (c *TighteningController) LoadController(controller *storage.Controllers) {
-	c.dbController = controller
-}
-
-func (c *TighteningController) Inputs() string {
-	return c.inputs
 }
 
 func (c *TighteningController) initSubscribeInfos() {
@@ -280,7 +263,7 @@ func (c *TighteningController) handleResult(result tightening_device.TighteningR
 
 // seq, count
 func (c *TighteningController) calBatch(workorderID int64) (int, int) {
-	result, err := c.ProtocolService.DB.FindTargetResultForJobManual(workorderID)
+	result, err := c.ProtocolService.storageService.FindTargetResultForJobManual(workorderID)
 	if err != nil {
 		return 1, 1
 	}
@@ -294,7 +277,7 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 
 func (c *TighteningController) Start() error {
 	for _, v := range c.deviceConf.Tools {
-		_ = c.ProtocolService.DB.UpdateTool(&storage.Tools{
+		_ = c.ProtocolService.storageService.UpdateTool(&storage.Tools{
 			Serial: v.SN,
 			Mode:   "pset",
 		})
@@ -387,25 +370,10 @@ func (c *TighteningController) Protocol() string {
 
 func (c *TighteningController) clearToolsResultAndCurve() {
 	for _, tool := range c.deviceConf.Tools {
-		err := c.ProtocolService.DB.ClearToolResultAndCurve(tool.SN)
+		err := c.ProtocolService.storageService.ClearToolResultAndCurve(tool.SN)
 		if err != nil {
 			c.diag.Error(fmt.Sprintf("Clear Tool: %s Result And Curve Failed", tool.SN), err)
 		}
-	}
-}
-
-func (c *TighteningController) CloseTransport() {
-	var isCloseTransportSymbols []string
-	for symbol, writer := range c.sockClients {
-		if err := writer.stop(); err != nil {
-			e := errors.Wrapf(err, "Close Transport For %s Error", symbol)
-			c.diag.Error("CloseTransport", e)
-		} else {
-			isCloseTransportSymbols = append(isCloseTransportSymbols, symbol)
-		}
-	}
-	for _, isCloseSymbol := range isCloseTransportSymbols {
-		delete(c.sockClients, isCloseSymbol)
 	}
 }
 
@@ -448,20 +416,6 @@ func (c *TighteningController) handleStatus(sn string, status string) {
 	}
 }
 
-func (c *TighteningController) Close() error {
-
-	for i := 0; i < 2; i++ {
-		//两个协程需要关闭
-		closed := make(chan struct{})
-		c.closing <- closed
-
-		<-closed
-	}
-	c.CloseTransport()
-
-	return nil
-}
-
 func (c *TighteningController) getDefaultTransportClient() *clientContext {
 	for _, sw := range c.sockClients {
 		return sw
@@ -477,15 +431,6 @@ func (c *TighteningController) getTransportClientBySymbol(symbol string) *client
 	} else {
 		return sw
 	}
-}
-
-func (c *TighteningController) getOldResult(sn string, last_id int64) (tightening_device.TighteningResult, error) {
-	reply, err := c.getClient(sn).ProcessRequest(MID_0064_OLD_SUBSCRIBE, "", "", "", fmt.Sprintf("%010d", last_id))
-	if err != nil {
-		return tightening_device.TighteningResult{}, err
-	}
-
-	return reply.(tightening_device.TighteningResult), nil
 }
 
 func (c *TighteningController) PSetSubscribe(sn string) error {
@@ -626,10 +571,6 @@ func (c *TighteningController) Model() string {
 
 func (c *TighteningController) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
-}
-
-func (c *TighteningController) GetDispatch(name string) *utils.Dispatcher {
-	return c.externalDispatches[name]
 }
 
 func (c *TighteningController) GetVendorModel() map[string]interface{} {
