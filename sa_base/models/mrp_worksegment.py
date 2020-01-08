@@ -40,7 +40,7 @@ class MrpWorkAssembly(models.Model):
     def name_get(self):
         res = []
         for line in self:
-            name = u"[{0}] {1}".format(line.code, line.name)
+            name = u"[{0}]{1}".format(line.code, line.name)
             res.append((line.id, name))
         return res
 
@@ -74,7 +74,7 @@ class MrpWorkSegment(models.Model):
     def name_get(self):
         res = []
         for segment in self:
-            name = u"[{0}] {1}".format(segment.code, segment.name)
+            name = u"[{0}]{1}".format(segment.code, segment.name)
             res.append((segment.id, name))
         return res
 
@@ -174,6 +174,15 @@ class MrpWorkCenter(models.Model):
     #                     "tool_id": tool.id,
     #                 }
     #                 self.env['mrp.workcenter.group.tool'].sudo().create(val)
+
+    @api.multi
+    @api.depends('name', 'code')
+    def name_get(self):
+        res = []
+        for segment in self:
+            name = u"[{0}]{1}".format(segment.code, segment.name)
+            res.append((segment.id, name))
+        return res
 
     @api.multi
     def write(self, vals):
