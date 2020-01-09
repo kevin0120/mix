@@ -19,7 +19,6 @@ type Service struct {
 	diag          Diagnostic
 	configValue   atomic.Value
 	provider      IBrokerProvider
-	opened        bool
 	dispatcherBus Dispatcher
 	dispatcherMap dispatcherbus.DispatcherMap
 	closing       chan struct{}
@@ -34,12 +33,13 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 		dispatcherBus: dp,
 	}
 	s.configValue.Store(c)
-	s.status.Store(utils.STATUS_OFFLINE)
 
 	p := s.newBroker(c.Provider)
 	s.provider = p
 
 	s.initGblDispatcher()
+
+	s.status.Store(utils.STATUS_OFFLINE)
 
 	return s
 }
@@ -75,14 +75,23 @@ func (s *Service) Close() error {
 	return nil
 }
 
+func (s *Service)dispatcherBrokerStatus(status string)  {
+	if s.dispatcherBus == nil {
+		s.diag.Error("dispatcherBrokerStatus Error", errors.New("dispatcherBus Is Empty"))
+	}
+	if err :=s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status); err != nil {
+		s.diag.Error("dispatcherBrokerStatus", err)
+	}
+
+}
+
 func (s *Service) doConnect(opened bool) {
-	s.opened = true
 	s.diag.Debug(fmt.Sprintf("broker Service Is Opened: %v", opened))
 	status := utils.STATUS_OFFLINE
 	if opened {
 		status = utils.STATUS_ONLINE
 	}
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
+	s.dispatcherBrokerStatus(status)
 }
 
 func (s *Service) connectProc() {
@@ -92,9 +101,8 @@ func (s *Service) connectProc() {
 			if err := s.provider.Connect(s.Config().ConnectUrls); err != nil {
 				continue
 			} else {
-				s.opened = true
-				s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, utils.STATUS_ONLINE)
-				s.diag.Debug(fmt.Sprintf("broker Service Is Opened: %v", s.opened))
+				s.dispatcherBrokerStatus(utils.STATUS_ONLINE)
+				s.diag.Debug(fmt.Sprintf("broker Service Is Opened"))
 				return
 			}
 
@@ -146,7 +154,7 @@ func (s *Service) Request(subject string, data []byte, timeOut time.Duration) ([
 
 func (s *Service) onStatus(status string) {
 	s.status.Store(status)
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
+	s.dispatcherBrokerStatus(status)
 }
 
 func (s *Service) Status() string {
