@@ -12,10 +12,9 @@ import (
 )
 
 const (
-	SEARCH_ITV = 1 * time.Second
+	SearchItv = 1 * time.Second
 )
 
-// TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
 	device.BaseDevice
 	configValue   atomic.Value
@@ -47,7 +46,11 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	s.dispatcherBus.Create(dispatcherBus.DispatcherReaderData, utils.DefaultDispatcherBufLen)
+	if err := s.dispatcherBus.Create(dispatcherBus.DispatcherReaderData, utils.DefaultDispatcherBufLen); err != nil {
+		s.diag.Error("Create DispatcherReaderData Failed", err)
+		return err
+	}
+
 	err := s.dispatcherBus.Start(dispatcherBus.DispatcherReaderData)
 	if err != nil {
 		return err
@@ -114,7 +117,7 @@ func (s *Service) Data() interface{} {
 
 func (s *Service) notifyUID(uid string) {
 	// 分发读卡器数据
-	s.dispatcherBus.Dispatch(dispatcherBus.DispatcherReaderData, uid)
+	s.doDispatch(dispatcherBus.DispatcherReaderData, uid)
 }
 
 func (s *Service) search() {
@@ -125,7 +128,7 @@ func (s *Service) search() {
 		if err == nil {
 			break
 		} else {
-			time.Sleep(SEARCH_ITV)
+			time.Sleep(SearchItv)
 		}
 	}
 
@@ -133,7 +136,7 @@ func (s *Service) search() {
 		// List available readers
 		ctx, err := scard.EstablishContext()
 		if err != nil {
-			time.Sleep(SEARCH_ITV)
+			time.Sleep(SearchItv)
 			continue
 		}
 
@@ -141,7 +144,7 @@ func (s *Service) search() {
 		if err != nil {
 			//s.diag.Debug("reader lost")
 			_ = ctx.Release()
-			time.Sleep(SEARCH_ITV)
+			time.Sleep(SearchItv)
 			continue
 		}
 
@@ -155,7 +158,7 @@ func (s *Service) search() {
 				// connect to card
 				card, err := ctx.Connect(readers[index], scard.ShareExclusive, scard.ProtocolAny)
 				if err != nil {
-					time.Sleep(SEARCH_ITV)
+					time.Sleep(SearchItv)
 					continue
 				}
 
@@ -184,9 +187,15 @@ func (s *Service) search() {
 
 					_ = card.Disconnect(scard.ResetCard)
 
-					time.Sleep(SEARCH_ITV)
+					time.Sleep(SearchItv)
 				}
 			}
 		}
+	}
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
 	}
 }
