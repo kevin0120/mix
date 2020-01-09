@@ -53,15 +53,11 @@ function materialStep(props: Props) {
     <span className={classes.desc}>
 
     {desc ? (
-      <Typography variant="h4"  dangerouslySetInnerHTML={{ __html: desc || '' }} />
+      <Typography variant="h4" dangerouslySetInnerHTML={{ __html: desc || '' }}/>
     ) : null}
       </span>
 
-    {[consumeProduct].map(i =>
-      <span>
-        <Typography key={i} variant="h5">{i}</Typography>
-      </span>
-    )}
+    {[consumeProduct].map(i => <Typography key={i} variant="h5">{i}</Typography>)}
 
   </div>;
 }
