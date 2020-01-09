@@ -359,7 +359,7 @@ func (p *Service) HandleProcess() {
 					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
 				}
 
-				//go p.TryCreateMaintenance(info)
+				//go p.CreateMaintenance(info)
 			}
 
 		case <-p.closing:
@@ -486,5 +486,5 @@ func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 func (p *Service) TryCreateMaintenance(info toolInfoCNT) error {
 	return nil
 	//i := audiVW2OPToolInfo(ino)
-	//return p.backendService.TryCreateMaintenance(info)
+	//return p.backendService.CreateMaintenance(info)
 }

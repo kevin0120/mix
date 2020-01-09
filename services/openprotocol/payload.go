@@ -11,22 +11,21 @@ import (
 )
 
 const (
-	OP_TERMINAL = 0x00
+	OpTerminal = 0x00
 
-	OPENPROTOCOL_MODE_JOB  = "1"
-	OPENPROTOCOL_MODE_PSET = "0"
+	OpenprotocolModeJob  = "1"
+	OpenprotocolModePset = "0"
 )
 
 const (
-	JOB_INFO_NOT_COMPLETED = 0
-	JOB_ACTION_ABORT       = "abort"
-	MAX_IDS_NUM            = 4
+	JobInfoNotCompleted = 0
+	MaxIdsNum           = 4
 )
 
 const (
-	EVT_CONTROLLER_NO_ERR          = "E000"
-	EVT_CONTROLLER_TOOL_DISCONNECT = "I003"
-	EVT_CONTROLLER_TOOL_CONNECT    = "I002"
+	EvtControllerNoErr          = "E000"
+	EvtControllerToolDisconnect = "I003"
+	EvtControllerToolConnect    = "I002"
 )
 
 type IOStatus struct {
@@ -35,10 +34,10 @@ type IOStatus struct {
 }
 
 const (
-	LEN_HEADER         = 20
-	DEFAULT_REV        = "000"
-	LEN_SINGLE_SPINDLE = 18
-	IO_MODEL           = "IO_MODEL"
+	LenHeader        = 20
+	DefaultRev       = "000"
+	LenSingleSpindle = 18
+	IoModel          = "IO_MODEL"
 
 	MID_0001_START                   = "0001"
 	MID_0002_START_ACK               = "0002"
@@ -187,12 +186,12 @@ func (h *OpenProtocolHeader) Serialize() string {
 }
 
 func (h *OpenProtocolHeader) Deserialize(str string) {
-	if len(str) != LEN_HEADER {
+	if len(str) != LenHeader {
 		return
 	}
 
 	n, _ := strconv.ParseInt(str[0:4], 10, 32)
-	h.LEN = int(n) - LEN_HEADER
+	h.LEN = int(n) - LenHeader
 	h.MID = str[4:8]
 	h.Revision = str[8:10]
 	h.NoAck = str[10:11]
@@ -204,7 +203,7 @@ func (h *OpenProtocolHeader) Deserialize(str string) {
 func GeneratePackage(mid string, rev string, noack string, station string, spindle string, data string) string {
 	h := OpenProtocolHeader{
 		MID:      mid,
-		LEN:      LEN_HEADER + len(data),
+		LEN:      LenHeader + len(data),
 		Revision: rev,
 		NoAck:    noack,
 		Station:  station,
@@ -212,7 +211,7 @@ func GeneratePackage(mid string, rev string, noack string, station string, spind
 		Spare:    "",
 	}
 
-	return h.Serialize() + data + string(OP_TERMINAL)
+	return h.Serialize() + data + string(OpTerminal)
 }
 
 type IOMonitor struct {
@@ -659,8 +658,8 @@ func DeserializeJobDetail(str string) (*tightening_device.JobDetail, error) {
 		p.OrderStrategy = "free and forced"
 	}
 
-	count_type := str[51:52]
-	switch count_type {
+	countType := str[51:52]
+	switch countType {
 	case "0":
 		p.CountType = "only the OK tightenings are counted"
 
@@ -702,19 +701,19 @@ func DeserializeJobDetail(str string) (*tightening_device.JobDetail, error) {
 		p.LooseningStrategy = "enable only on NOK tightening"
 	}
 
-	step_str := str[75 : len(str)-1]
-	steps := strings.Split(step_str, ";")
-	job_step := tightening_device.JobStep{}
+	stepStr := str[75 : len(str)-1]
+	steps := strings.Split(stepStr, ";")
+	jobStep := tightening_device.JobStep{}
 	for _, v := range steps {
 		values := strings.Split(v, ":")
 
-		job_step.ChannelID, _ = strconv.Atoi(values[0])
-		job_step.PSetID, _ = strconv.Atoi(values[1])
-		job_step.BatchSize, _ = strconv.Atoi(values[3])
-		job_step.Socket, _ = strconv.Atoi(values[4])
-		job_step.StepName = strings.TrimSpace(values[5])
+		jobStep.ChannelID, _ = strconv.Atoi(values[0])
+		jobStep.PSetID, _ = strconv.Atoi(values[1])
+		jobStep.BatchSize, _ = strconv.Atoi(values[3])
+		jobStep.Socket, _ = strconv.Atoi(values[4])
+		jobStep.StepName = strings.TrimSpace(values[5])
 
-		p.Steps = append(p.Steps, job_step)
+		p.Steps = append(p.Steps, jobStep)
 	}
 
 	return &p, nil
@@ -766,7 +765,7 @@ type JobInfo struct {
 }
 
 func DeserializeIDS(str string) []string {
-	rt := []string{}
+	var rt []string
 
 	vin := strings.TrimSpace(str[2:27])
 	rt = append(rt, vin)
@@ -811,23 +810,23 @@ type MultiSpindleResult struct {
 
 func (msr *MultiSpindleResult) Deserialize(str string) {
 
-	sps := str[154:len(str)]
+	sps := str[154:]
 
-	sp_num := len(sps) / LEN_SINGLE_SPINDLE
+	spNum := len(sps) / LenSingleSpindle
 	sp := SingleSpindleResult{}
-	for i := 0; i < sp_num; i++ {
-		target_sp := sps[i*LEN_SINGLE_SPINDLE : i*LEN_SINGLE_SPINDLE+LEN_SINGLE_SPINDLE]
-		sp.SpindleNo, _ = strconv.Atoi(target_sp[0:2])
-		if target_sp[4:5] == "0" {
+	for i := 0; i < spNum; i++ {
+		targetSp := sps[i*LenSingleSpindle : i*LenSingleSpindle+LenSingleSpindle]
+		sp.SpindleNo, _ = strconv.Atoi(targetSp[0:2])
+		if targetSp[4:5] == "0" {
 			sp.Result = "NOK"
 		} else {
 			sp.Result = "OK"
 		}
 
-		sp.Torque, _ = strconv.ParseFloat(target_sp[6:12], 64)
+		sp.Torque, _ = strconv.ParseFloat(targetSp[6:12], 64)
 		sp.Torque = sp.Torque / 100
 
-		sp.Angle, _ = strconv.ParseFloat(target_sp[13:LEN_SINGLE_SPINDLE], 64)
+		sp.Angle, _ = strconv.ParseFloat(targetSp[13:LenSingleSpindle], 64)
 
 		msr.Spindles = append(msr.Spindles, sp)
 	}

@@ -13,10 +13,11 @@ type Dispatcher interface {
 	Dispatch(name string, data interface{}) error
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 	Release(name string, handler string) error
+	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }
 
 type IStorageService interface {
-	FindTargetResultForJobManual(raw_workorder_id int64) (storage.Results, error)
+	FindTargetResultForJobManual(workorderID int64) (storage.Results, error)
 	UpdateTool(gun *storage.Tools) error
 	ClearToolResultAndCurve(toolSN string) error
 	GetTool(serial string) (storage.Tools, error)

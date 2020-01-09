@@ -268,11 +268,11 @@ func (s *Service) TryCreateMaintenance(body interface{}) error {
 		case "POST":
 			resp, err = r.Post(url)
 			if err != nil {
-				return fmt.Errorf("TryCreateMaintenance: %s", err.Error())
+				return fmt.Errorf("CreateMaintenance: %s", err.Error())
 			} else {
 				status := resp.StatusCode()
 				if status > 400 {
-					return fmt.Errorf("TryCreateMaintenance return status code: %d", status)
+					return fmt.Errorf("CreateMaintenance return status code: %d", status)
 				} else if status == http.StatusCreated {
 					s.diag.Info("create Maintenance")
 					return nil
@@ -281,7 +281,7 @@ func (s *Service) TryCreateMaintenance(body interface{}) error {
 				}
 			}
 		default:
-			return errors.New("TryCreateMaintenance :the Method is wrong")
+			return errors.New("CreateMaintenance :the Method is wrong")
 		}
 
 	}

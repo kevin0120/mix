@@ -69,24 +69,22 @@ func (c *clientContext) stop() {
 func (c *clientContext) handlePackageOPPayload(src []byte, data []byte) error {
 	msg := append(src, data...)
 
-	//c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.deviceConf.SerialNumber, string(msg)))
-
 	lenMsg := len(msg)
 
 	// 如果头的长度不够
-	if lenMsg < LEN_HEADER {
-		return errors.New("Head Is Error")
+	if lenMsg < LenHeader {
+		return errors.New("Head Is Error ")
 	}
 
 	header := OpenProtocolHeader{}
-	header.Deserialize(string(msg[0:LEN_HEADER]))
+	header.Deserialize(string(msg[0:LenHeader]))
 
 	// 如果body的长度匹配
-	if header.LEN == lenMsg-LEN_HEADER {
+	if header.LEN == lenMsg-LenHeader {
 		pkg := handlerPkg{
 			SN:     c.sn,
 			Header: header,
-			Body:   string(msg[LEN_HEADER : LEN_HEADER+header.LEN]),
+			Body:   string(msg[LenHeader : LenHeader+header.LEN]),
 		}
 
 		c.handlerBuf <- pkg
@@ -112,7 +110,7 @@ func (c *clientContext) handleRecv() {
 				if readOffset >= len(buf) {
 					break
 				}
-				index := bytes.IndexByte(buf[readOffset:], OP_TERMINAL)
+				index := bytes.IndexByte(buf[readOffset:], OpTerminal)
 				if index == -1 {
 					// 没有结束字符,放入缓冲等待后续处理
 					restBuf := buf[readOffset:]
@@ -185,17 +183,21 @@ func (c *clientContext) manage() {
 func (c *clientContext) Read(conn net.Conn) {
 	defer func() {
 		if err := conn.Close(); err != nil {
-			c.diag.Error("Controller Close Error", err)
+			c.diag.Error("Controller Close Error ", err)
 		}
 	}()
 
 	buffer := make([]byte, 65535)
 
 	for {
-		conn.SetReadDeadline(time.Now().Add(time.Duration(OpenProtocolDefaultKeepAlivePeriod) * MAX_KEEP_ALIVE_CHECK).Add(1 * time.Second))
+		if err := conn.SetReadDeadline(time.Now().Add(time.Duration(OpenProtocolDefaultKeepAlivePeriod) * MaxKeepAliveCheck).Add(1 * time.Second)); err != nil {
+			c.diag.Error("SetReadDeadline Failed ", err)
+			break
+		}
+
 		n, err := conn.Read(buffer)
 		if err != nil {
-			c.diag.Error("read failed", err)
+			c.diag.Error("Read Failed ", err)
 			c.handleStatus(device.BaseDeviceStatusOffline)
 			c.clientHandler.handleStatus(c.sn, device.BaseDeviceStatusOffline)
 			break
@@ -253,7 +255,7 @@ func (c *clientContext) sendKeepalive() {
 		return
 	}
 
-	keepAlive := GeneratePackage(MID_9999_ALIVE, DEFAULT_REV, "1", "", "", "")
+	keepAlive := GeneratePackage(MID_9999_ALIVE, DefaultRev, "1", "", "", "")
 	c.Write([]byte(keepAlive))
 }
 
@@ -274,7 +276,7 @@ func (c *clientContext) connect() {
 	}
 
 	for {
-		err := c.sockClient.Connect(DAIL_TIMEOUT)
+		err := c.sockClient.Connect(DailTimeout)
 		if err != nil {
 			c.diag.Error("connect", err)
 		} else {
@@ -305,7 +307,7 @@ func (c *clientContext) ProcessRequest(mid string, noack string, station string,
 	c.Response.Add(seq, nil)
 
 	c.Write([]byte(pkg))
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
+	ctx, _ := context.WithTimeout(context.Background(), MaxReplyTime)
 	reply := c.Response.Get(seq, ctx)
 
 	if reply == nil {

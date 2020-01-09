@@ -13,11 +13,10 @@ import (
 )
 
 const (
-	DAIL_TIMEOUT         = time.Duration(5 * time.Second)
-	MAX_KEEP_ALIVE_CHECK = 3
-
-	REPLY_TIMEOUT  = time.Duration(100 * time.Millisecond)
-	MAX_REPLY_TIME = time.Duration(2000 * time.Millisecond)
+	DailTimeout       = 5 * time.Second
+	MaxKeepAliveCheck = 3
+	ReplyTimeout      = 100 * time.Millisecond
+	MaxReplyTime      = 2000 * time.Millisecond
 )
 
 type ControllerSubscribe func(string) error
@@ -72,7 +71,7 @@ func (c *TighteningController) initController(deviceConfig *tightening_device.Ti
 	c.ProtocolService = service
 	c.dispatcherBus = dp
 
-	c.BaseDevice.Cfg = c.getInstance().GetVendorModel()[IO_MODEL]
+	c.BaseDevice.Cfg = c.getInstance().GetVendorModel()[IoModel]
 
 	c.initSubscribeInfos()
 
@@ -127,7 +126,7 @@ func (c *TighteningController) UpdateToolStatus(status string) {
 		})
 	}
 
-	c.dispatcherBus.Dispatch(dispatcherbus.DispatcherDeviceStatus, ss)
+	c.doDispatch(dispatcherbus.DispatcherDeviceStatus, ss)
 }
 
 func (c *TighteningController) GetToolViaSerialNumber(toolSN string) (tightening_device.ITighteningTool, error) {
@@ -256,7 +255,7 @@ func (c *TighteningController) handleResult(result tightening_device.TighteningR
 	result.ToolSN = toolSerialNumber
 
 	// 分发结果到工具进行处理
-	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherResult), result)
+	c.doDispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherResult), result)
 
 	return nil
 }
@@ -311,9 +310,7 @@ func (c *TighteningController) Stop() error {
 	c.shutdownClients()
 
 	for _, dd := range c.dispatcherMap {
-		for name, v := range dd {
-			c.dispatcherBus.Release(name, v.ID)
-		}
+		c.dispatcherBus.ReleaseDispatchersByHandlerMap(dd)
 	}
 
 	return nil
@@ -395,25 +392,29 @@ func (c *TighteningController) startComm(sn string) error {
 }
 
 func (c *TighteningController) handleStatus(sn string, status string) {
-
-	if status != c.Status() {
-		c.diag.Info(fmt.Sprintf("OpenProtocol handleStatus Model:%s SN:%s %s\n", c.Model(), sn, status))
-		c.UpdateStatus(status)
-		if status == device.BaseDeviceStatusOnline {
-			c.startComm(sn)
-		}
-
-		ss := []device.Status{
-			{
-				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
-				SN:     c.deviceConf.SN,
-				Status: status,
-				Config: c.Config(),
-			},
-		}
-		// 分发控制器状态 -> tightening device
-		c.dispatcherBus.Dispatch(dispatcherbus.DispatcherDeviceStatus, ss)
+	if status == c.Status() {
+		return
 	}
+
+	c.diag.Info(fmt.Sprintf("OpenProtocol handleStatus Model:%s SN:%s %s\n", c.Model(), sn, status))
+	c.UpdateStatus(status)
+	if status == device.BaseDeviceStatusOnline {
+		if err := c.startComm(sn); err != nil {
+			c.diag.Error("Start Comm Failed ", err)
+		}
+	}
+
+	ss := []device.Status{
+		{
+			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
+			SN:     c.deviceConf.SN,
+			Status: status,
+			Config: c.Config(),
+		},
+	}
+
+	// 分发控制器状态
+	c.doDispatch(dispatcherbus.DispatcherDeviceStatus, ss)
 }
 
 func (c *TighteningController) getDefaultTransportClient() *clientContext {
@@ -600,4 +601,10 @@ func (c *TighteningController) getInstance() IOpenProtocolController {
 
 func (c *TighteningController) SetInstance(instance IOpenProtocolController) {
 	c.instance = instance
+}
+
+func (c *TighteningController) doDispatch(name string, data interface{}) {
+	if err := c.dispatcherBus.Dispatch(name, data); err != nil {
+		c.diag.Error("Dispatch Failed", err)
+	}
 }

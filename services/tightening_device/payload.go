@@ -11,9 +11,9 @@ const (
 	TIGHTENING_AUDIVW       = "Audi/VW"
 )
 const (
-	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported"
-	TIGHTENING_ERR_UNKNOWN       = "Error Unknown"
-	TIGHTENING_ERR_TIMEOUT       = "Timeout"
+	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported "
+	TIGHTENING_ERR_UNKNOWN       = "Error Unknown "
+	TIGHTENING_ERR_TIMEOUT       = "Timeout "
 )
 
 const (

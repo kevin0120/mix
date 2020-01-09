@@ -33,7 +33,7 @@ func (c *WrenchController) GetVendorModel() map[string]interface{} {
 
 		openprotocol.MID_7408_LAST_CURVE_SUBSCRIBE: "001",
 
-		openprotocol.IO_MODEL: io.IoConfig{
+		openprotocol.IoModel: io.IoConfig{
 			InputNum:  0,
 			OutputNum: 0,
 		},
