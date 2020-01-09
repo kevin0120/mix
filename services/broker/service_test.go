@@ -24,7 +24,7 @@ func (td *TestDiag) Error(msg string, err error) {
 func newTestService() *Service {
 	diag := &TestDiag{}
 	c := newTestConfig()
-	d := NewService(c, diag)
+	d := NewService(c, diag, nil)
 	return d
 }
 
@@ -33,7 +33,7 @@ func TestNewService(t *testing.T) {
 	assert.NotNil(t, s)
 }
 
-func testHandler(message *BrokerMessage) ([]byte, error) {
+func testHandler(message *Message) ([]byte, error) {
 	fmt.Println(fmt.Sprintf("Msg: %v", message))
 	return nil, nil
 }

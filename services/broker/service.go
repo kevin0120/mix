@@ -82,7 +82,7 @@ func (s *Service) doConnect(opened bool) {
 	if opened {
 		status = utils.STATUS_ONLINE
 	}
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
+	s.doDispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
 }
 
 func (s *Service) connectProc() {
@@ -145,9 +145,15 @@ func (s *Service) Request(subject string, data []byte, timeOut time.Duration) ([
 
 func (s *Service) onStatus(status string) {
 	s.status.Store(status)
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
+	s.doDispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
 }
 
 func (s *Service) Status() string {
 	return s.status.Load().(string)
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
+	}
 }

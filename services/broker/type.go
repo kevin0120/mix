@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	HEADER_SUBJECT = "subject"
-	HEADER_REPLY   = "reply"
+	HeaderSubject = "subject"
+	HeaderReply   = "reply"
 )
 
-var STATUS_BROKER = map[nats.Status]string{
+var StatusBroker = map[nats.Status]string{
 	nats.DISCONNECTED:  "DISCONNECTED",
 	nats.CONNECTED:     "CONNECTED",
 	nats.CLOSED:        "CLOSED",
@@ -35,16 +35,16 @@ type IBrokerProvider interface {
 	SetStatusHandler(handler StatusHandler)
 }
 
-type SubscribeHandler func(*BrokerMessage) ([]byte, error)
+type SubscribeHandler func(*Message) ([]byte, error)
 
 type brokerOptions struct {
-	Addrs     []string
+	Addresses []string
 	Secure    bool
 	TLSConfig *tls.Config
 	Context   context.Context
 }
 
-type BrokerMessage struct {
+type Message struct {
 	Header map[string]string
 	Body   []byte
 }

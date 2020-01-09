@@ -101,16 +101,18 @@ func (s *Nats) handleStatus(status nats.Status) {
 func (s *Nats) statusHandler(conn *nats.Conn) {
 	s.handleStatus(conn.Status())
 	if cid, err := conn.GetClientID(); err == nil {
-		s.diag.Debug(fmt.Sprintf("Client %d is %s ", cid, STATUS_BROKER[conn.Status()]))
+		s.diag.Debug(fmt.Sprintf("Client %d is %s ", cid, StatusBroker[conn.Status()]))
 	} else {
 		s.diag.Error("statusHandler", err)
 	}
 }
 
-func (s *Nats) statusErrHandler(conn *nats.Conn, err error) {
+func (s *Nats) statusErrHandler(conn *nats.Conn, e error) {
+	s.diag.Error("statusErrHandler Error Occurs", e)
+
 	s.handleStatus(conn.Status())
 	if cid, err := conn.GetClientID(); err == nil {
-		s.diag.Error(fmt.Sprintf("Client %d is %s ", cid, STATUS_BROKER[conn.Status()]), err)
+		s.diag.Error(fmt.Sprintf("Client %d is %s ", cid, StatusBroker[conn.Status()]), err)
 	} else {
 		s.diag.Error("statusErrHandler", err)
 	}
@@ -237,9 +239,9 @@ func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (regis
 	}
 
 	fn := func(msg *nats.Msg) {
-		d := &BrokerMessage{
+		d := &Message{
 			Body:   msg.Data,
-			Header: map[string]string{HEADER_SUBJECT: msg.Subject, HEADER_REPLY: msg.Reply},
+			Header: map[string]string{HeaderSubject: msg.Subject, HeaderReply: msg.Reply},
 		}
 		if resp, err := handler(d); err != nil {
 			s.diag.Error("Subscribe Handler Error", err)

@@ -93,7 +93,7 @@ func (s *BrokerClient) onNewTool(data interface{}) {
 }
 
 // 收到上传结果反馈
-func (s *BrokerClient) onResultResp(message *broker.BrokerMessage) ([]byte, error) {
+func (s *BrokerClient) onResultResp(message *broker.Message) ([]byte, error) {
 	if message == nil {
 		return nil, nil
 	}
