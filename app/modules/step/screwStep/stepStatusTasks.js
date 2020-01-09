@@ -343,19 +343,25 @@ export const screwStepStatusTasksMixin = (superTasks) => ({
 export function* onLeave() {
   try {
     yield call(stepDataApi, this.id, this._data);
-    this._pointsManager.stop();
-    yield all(
-      this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
-      })))
-    );
-    this._tools.forEach(t => {
-      this._listeners.forEach(l => {
-        t.removeListener(l);
+    if (this._pointsManager) {
+      this._pointsManager.stop();
+    }
+    if (this._tools) {
+      yield all(
+        this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
+        })))
+      );
+    }
+    if(this._tools && this._listeners) {
+      this._tools.forEach(t => {
+        this._listeners.forEach(l => {
+          t.removeListener(l);
+        });
       });
-    });
+      this._tools = [];
+      this._listeners = [];
+    }
 
-    this._tools = [];
-    this._listeners = [];
     CommonLog.Info('tools cleared', {
       at: `screwStep(${String((this: IWorkable)._code)})._onLeave`
     });
