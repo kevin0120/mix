@@ -66,7 +66,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, storage IStorageService, 
 
 	s.configValue.Store(c)
 
-	s.initGlbDispatcher()
+	s.setupGlbDispatcher()
 	s.ensureHttpClient()
 	s.setupHttpHandlers()
 
@@ -108,7 +108,7 @@ func (s *Service) ensureHttpClient() *resty.Client {
 	return client
 }
 
-func (s *Service) initGlbDispatcher() {
+func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DISPATCHER_MAINTENANCE_INFO: utils.CreateDispatchHandlerStruct(nil),
 		dispatcherbus.DISPATCHER_ORDER_NEW:        utils.CreateDispatchHandlerStruct(nil),

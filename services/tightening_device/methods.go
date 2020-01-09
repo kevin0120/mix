@@ -5,12 +5,6 @@ import (
 	"github.com/masami10/rush/services/storage"
 )
 
-// api接口
-type Reply struct {
-	Result int    `json:"result"`
-	Msg    string `json:"msg"`
-}
-
 type JobSet struct {
 	ControllerSN string `json:"controller_sn"`
 	ToolSN       string `json:"tool_sn"`
@@ -92,11 +86,7 @@ func (s *ToolModeSelect) Validate() error {
 	return nil
 }
 
-type Api struct {
-	*Service
-}
-
-func (s *Api) ToolControl(req *ToolControl) error {
+func (s *Service) ToolControl(req *ToolControl) error {
 	if req == nil {
 		return errors.New("Req Is Nil")
 	}
@@ -114,7 +104,7 @@ func (s *Api) ToolControl(req *ToolControl) error {
 	return tool.ToolControl(req.Enable)
 }
 
-func (s *Api) ToolJobSet(req *JobSet) error {
+func (s *Service) ToolJobSet(req *JobSet) error {
 	if req == nil {
 		return errors.New("Req Is Nil")
 	}
@@ -133,7 +123,7 @@ func (s *Api) ToolJobSet(req *JobSet) error {
 		req.UserID = 1
 	}
 
-	_ = s.StorageService.UpdateTool(&storage.Tools{
+	_ = s.storageService.UpdateTool(&storage.Tools{
 		Serial:             req.ToolSN,
 		CurrentWorkorderID: req.WorkorderID,
 		Total:              req.Total,
@@ -143,7 +133,7 @@ func (s *Api) ToolJobSet(req *JobSet) error {
 	return tool.SetJob(req.Job)
 }
 
-func (s *Api) ToolPSetBatchSet(req *PSetBatchSet) error {
+func (s *Service) ToolPSetBatchSet(req *PSetBatchSet) error {
 	if req == nil {
 		return errors.New("Req Is Nil")
 	}
@@ -156,7 +146,7 @@ func (s *Api) ToolPSetBatchSet(req *PSetBatchSet) error {
 	return tool.SetPSetBatch(req.PSet, req.Batch)
 }
 
-func (s *Api) ToolPSetSet(req *PSetSet) error {
+func (s *Service) ToolPSetSet(req *PSetSet) error {
 	if req == nil {
 		return errors.New("Req Is Nil")
 	}
@@ -175,7 +165,7 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 		req.UserID = 1
 	}
 
-	_ = s.StorageService.UpdateTool(&storage.Tools{
+	_ = s.storageService.UpdateTool(&storage.Tools{
 		Serial:             req.ToolSN,
 		CurrentWorkorderID: req.WorkorderID,
 		Seq:                int(req.Sequence),
@@ -188,7 +178,7 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 	return tool.SetPSet(req.PSet)
 }
 
-func (s *Api) ToolModeSelect(req *ToolModeSelect) error {
+func (s *Service) ToolModeSelect(req *ToolModeSelect) error {
 	if req == nil {
 		return errors.New("Req Is Nil")
 	}

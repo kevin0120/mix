@@ -5,7 +5,6 @@ import (
 	"github.com/google/gousb"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/tarm/serial"
 	"runtime"
@@ -34,7 +33,6 @@ type Service struct {
 	diag Diagnostic
 	Notify
 	dispatcher    Dispatcher
-	WS            *wsnotify.Service
 	DeviceService IDeviceService
 }
 
@@ -185,10 +183,6 @@ func (s *Service) removeScanner(id string) {
 			delete(s.scanners, id)
 		}
 	}
-}
-
-func (s *Service) sendScannerInfo(msg string) {
-	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, msg)
 }
 
 func (s *Service) OnStatus(id string, status string) {

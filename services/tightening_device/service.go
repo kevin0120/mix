@@ -1,9 +1,7 @@
 package tightening_device
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
@@ -18,7 +16,6 @@ const (
 	ModelDesoutterDeltaWrench = "ModelDesoutterDeltaWrench"
 )
 
-// TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
 	diag               Diagnostic
 	configValue        atomic.Value
@@ -26,11 +23,10 @@ type Service struct {
 	mtxDevices         sync.Mutex
 	protocols          map[string]ITighteningProtocol
 
-	StorageService IStorageService
-	DispatcherBus  Dispatcher
-	DeviceService  IDeviceService
+	storageService IStorageService
+	dispatcherBus  Dispatcher
+	deviceService  IDeviceService
 	dispatcherMap  dispatcherbus.DispatcherMap
-	Api            *Api
 
 	// websocket请求处理器
 	wsnotify.WSRequestHandlers
@@ -43,12 +39,12 @@ func (s *Service) loadTighteningController(c Config) {
 			s.diag.Error("loadTighteningController", err)
 			continue
 		}
-		c, err := p.NewController(&c.Devices[k], s.DispatcherBus)
+		c, err := p.NewController(&c.Devices[k], s.dispatcherBus)
 		if err != nil {
 			s.diag.Error("Create Controller Failed", err)
 			continue
 		}
-		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
+
 		s.addController(deviceConfig.SN, c)
 	}
 }
@@ -57,24 +53,16 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Disp
 
 	s := &Service{
 		diag:               d,
-		DispatcherBus:      dp,
+		dispatcherBus:      dp,
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
-		DeviceService:      ds,
+		deviceService:      ds,
 	}
 
-	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
-		Diag: s.diag,
-	}
-
-	//todo: dispatcher现在并未使用无需注册相关内容
-	s.initGlobalDispatchers()
-	s.initWSRequestHandlers()
+	s.setupGlobalDispatchers()
+	s.setupWSRequestHandlers()
 
 	s.configValue.Store(c)
-	s.Api = &Api{
-		s,
-	}
 
 	// 载入支持的协议
 	for _, protocol := range protocols {
@@ -94,7 +82,7 @@ func (s *Service) getProtocol(protocolName string) (ITighteningProtocol, error) 
 	}
 }
 
-func (s *Service) initGlobalDispatchers() {
+func (s *Service) setupGlobalDispatchers() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DISPATCHER_RESULT:   utils.CreateDispatchHandlerStruct(nil),
 		dispatcherbus.DISPATCHER_CURVE:    utils.CreateDispatchHandlerStruct(nil),
@@ -102,7 +90,11 @@ func (s *Service) initGlobalDispatchers() {
 	}
 }
 
-func (s *Service) initWSRequestHandlers() {
+func (s *Service) setupWSRequestHandlers() {
+	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
+		Diag: s.diag,
+	}
+
 	s.SetupHandlers(wsnotify.WSRequestHandlerMap{
 		wsnotify.WS_TOOL_MODE_SELECT: s.OnWS_TOOL_MODE_SELECT,
 		wsnotify.WS_TOOL_ENABLE:      s.OnWS_TOOL_ENABLE,
@@ -117,27 +109,26 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
-	// 启动所有拧紧控制器
-	s.startupControllers()
-
-	controllers := s.GetControllers()
+	controllers := s.getControllers()
 	for _, c := range controllers {
 		for toolSN, _ := range c.Children() {
 			s.doDispatch(dispatcherbus.DISPATCHER_NEW_TOOL, toolSN)
 		}
 	}
 
-	// 注册websocket请求
-	s.DispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.initDispatcherRegisters()
+
+	// 启动所有拧紧控制器
+	s.startupControllers()
 
 	return nil
 }
 
 func (s *Service) Close() error {
 
-	s.DispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
+	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
 
 	// 关闭所有控制器
 	s.shutdownControllers()
@@ -149,87 +140,19 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) OnWS_TOOL_MODE_SELECT(c websocket.Connection, msg *wsnotify.WSMsg) {
-	byteData, _ := json.Marshal(msg.Data)
-
-	req := ToolModeSelect{}
-	_ = json.Unmarshal(byteData, &req)
-	err := s.Api.ToolModeSelect(&req)
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-		return
-	}
-
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-}
-
-func (s *Service) OnWS_TOOL_ENABLE(c websocket.Connection, msg *wsnotify.WSMsg) {
-	byteData, _ := json.Marshal(msg.Data)
-
-	req := ToolControl{}
-	_ = json.Unmarshal(byteData, &req)
-	err := s.Api.ToolControl(&req)
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-		return
-	}
-
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-}
-
-func (s *Service) OnWS_TOOL_JOB(c websocket.Connection, msg *wsnotify.WSMsg) {
-	byteData, _ := json.Marshal(msg.Data)
-
-	var req JobSet
-	_ = json.Unmarshal(byteData, &req)
-	err := s.Api.ToolJobSet(&req)
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-		return
-	}
-
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
-}
-
-func (s *Service) OnWS_TOOL_PSET(c websocket.Connection, msg *wsnotify.WSMsg) {
-	byteData, _ := json.Marshal(msg.Data)
-
-	var req PSetSet
-	_ = json.Unmarshal(byteData, &req)
-
-	err := s.Api.ToolPSetSet(&req)
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-		return
-	}
-
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-}
-
-func (s *Service) OnWS_TOOL_PSET_BATCH(c websocket.Connection, msg *wsnotify.WSMsg) {
-	byteData, _ := json.Marshal(msg.Data)
-
-	var req PSetBatchSet
-	_ = json.Unmarshal(byteData, &req)
-
-	err := s.Api.ToolPSetBatchSet(&req)
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-		return
-	}
-
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+func (s *Service) initDispatcherRegisters() {
+	// 注册websocket请求
+	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 }
 
 func (s *Service) doDispatch(name string, data interface{}) {
-	if err := s.DispatcherBus.Dispatch(name, data); err != nil {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
 		s.diag.Error(fmt.Sprintf("doDispatch: %s", name), err)
 	}
 	return
 }
 
-func (s *Service) GetControllers() map[string]ITighteningController {
+func (s *Service) getControllers() map[string]ITighteningController {
 	s.mtxDevices.Lock()
 	defer s.mtxDevices.Unlock()
 
@@ -254,7 +177,7 @@ func (s *Service) getController(controllerSN string) (ITighteningController, err
 
 	td, exist := s.runningControllers[controllerSN]
 	if !exist {
-		return nil, errors.New(fmt.Sprintf("Controller %s Not Fount", controllerSN))
+		return nil, errors.New(fmt.Sprintf("Controller %s Not Found", controllerSN))
 	}
 
 	return td, nil
@@ -284,7 +207,7 @@ func (s *Service) startupControllers() {
 			s.diag.Error("Startup Controller Failed", err)
 		}
 
-		s.DeviceService.AddDevice(sn, c)
+		s.deviceService.AddDevice(sn, c)
 	}
 }
 

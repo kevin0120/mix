@@ -44,13 +44,13 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IB
 		notifyService:  ns,
 	}
 	s.configValue.Store(c)
-	s.initGlbDispatcher()
-	s.initTransport(bs, dp)
+	s.setupGlbDispatcher()
+	s.setupTransport(bs, dp)
 
 	return s
 }
 
-func (s *Service) initTransport(bs IBrokerService, dispatcherBus Dispatcher) error {
+func (s *Service) setupTransport(bs IBrokerService, dispatcherBus Dispatcher) error {
 	switch s.Config().TransportType {
 	case TRANSPORT_TYPE_GRPC:
 		s.transport = NewGRPCClient(s.diag, s.Config())
@@ -68,7 +68,7 @@ func (s *Service) initTransport(bs IBrokerService, dispatcherBus Dispatcher) err
 	return nil
 }
 
-func (s *Service) initGlbDispatcher() {
+func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DISPATCHER_SERVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
 	}
@@ -161,7 +161,6 @@ func (s *Service) Close() error {
 	}
 
 	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
-	s.transport.Stop()
 	s.closing <- struct{}{}
 	return s.transport.Stop()
 }

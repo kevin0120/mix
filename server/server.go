@@ -254,9 +254,6 @@ func (s *Server) appendTighteningDeviceService() error {
 		return errors.Wrap(err, "append tightening_device service fail")
 	}
 
-	//srv.notifyService = s.WSNotifyService
-	srv.StorageService = s.StorageServie
-
 	s.TighteningDeviceService = srv
 	s.AppendService("tightening_device", srv)
 
@@ -323,8 +320,6 @@ func (s *Server) AppendScannerService() error {
 	d := s.DiagService.NewScannerHandler()
 
 	srv := scanner.NewService(c, d, s.DispatcherBusService, s.DeviceService)
-	srv.WS = s.WSNotifyService
-	srv.DeviceService = s.DeviceService
 
 	s.ScannerService = srv
 	s.AppendService("scanner", srv)

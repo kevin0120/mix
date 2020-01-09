@@ -39,7 +39,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 	p := s.newBroker(c.Provider)
 	s.provider = p
 
-	s.initGblDispatcher()
+	s.setupGblDispatcher()
 
 	return s
 }
@@ -48,7 +48,7 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) initGblDispatcher() {
+func (s *Service) setupGblDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DISPATCHER_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
 	}
