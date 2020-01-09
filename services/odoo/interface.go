@@ -2,6 +2,7 @@ package odoo
 
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 )
 
@@ -25,4 +26,8 @@ type IStorageService interface {
 	GetRoutingOperations(name string, model string) (storage.RoutingOperations, error)
 	Store(data interface{}) error
 	UpdateRoutingOperations(ro *storage.RoutingOperations) error
+}
+
+type HTTPService interface {
+	AddNewHttpHandler(r httpd.Route)
 }

@@ -168,7 +168,7 @@ func (s *Service) OnWSOrderDetailByCode(c websocket.Connection, msg *wsnotify.WS
 
 	w, err := s.storageService.WorkorderOut(orderReq.Code, 0)
 	if w == nil && err == nil {
-		_, _ = s.backendService.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
+		_, _ = s.backendService.GetWorkorder("", orderReq.Workcenter, orderReq.Code)
 	}
 
 	if err != nil {

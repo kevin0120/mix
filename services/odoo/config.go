@@ -49,7 +49,7 @@ func (c Config) Validate() error {
 
 	for _, v := range c.Endpoints {
 		if v.Path[0] != '/' {
-			return fmt.Errorf("route patterns must begin with a '/' %s", v.Path[0])
+			return fmt.Errorf("route patterns must begin with a '/' %s", v.Path)
 		}
 	}
 
@@ -57,8 +57,7 @@ func (c Config) Validate() error {
 }
 
 func (c Config) endpoints() ([]*Endpoint, error) {
-	m := []*Endpoint{}
-
+	var m []*Endpoint
 	for _, v := range c.Endpoints {
 		for _, url := range c.Urls {
 			m = append(m, NewEndpoint(url+v.Path, v.Headers, v.Method, v.Name))

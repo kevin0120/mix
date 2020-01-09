@@ -16,7 +16,7 @@ func (s *Service) postWorkorders(ctx iris.Context) {
 	if err != nil {
 		// 传输结构错误
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
+		_, _ = ctx.WriteString(err.Error())
 		return
 	}
 	for _, v1 := range workorders {
@@ -29,18 +29,21 @@ func (s *Service) postWorkorders(ctx iris.Context) {
 }
 
 func (s *Service) deleteRoutingOpertions(ctx iris.Context) {
-	rds := []storage.RoutingOperationDelete{}
+	var rds []storage.RoutingOperationDelete
 	e := ctx.ReadJSON(&rds)
 	if e != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(e.Error())
+		_, _ = ctx.WriteString(e.Error())
 		return
 	}
 
-	rds_str, _ := json.Marshal(rds)
-	s.diag.Debug(fmt.Sprintf("remove local operations:%s", rds_str))
+	rdsStr, _ := json.Marshal(rds)
+	s.diag.Debug(fmt.Sprintf("remove local operations:%s", rdsStr))
 
-	s.storageService.DeleteRoutingOperations(rds)
+	if err := s.storageService.DeleteRoutingOperations(rds); err != nil {
+		s.diag.Error("Delete Routing Operations Failed ", err)
+		return
+	}
 
 	ctx.StatusCode(iris.StatusNoContent)
 }
@@ -50,7 +53,7 @@ func (s *Service) deleteAllRoutingOpertions(ctx iris.Context) {
 
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
+		_, _ = ctx.WriteString(err.Error())
 		return
 	}
 	ctx.StatusCode(iris.StatusOK)
@@ -62,34 +65,42 @@ func (s *Service) putSyncRoutingOpertions(ctx iris.Context) {
 	e := ctx.ReadJSON(&ro)
 	if e != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(e.Error())
+		_, _ = ctx.WriteString(e.Error())
 		return
 	}
 
 	points, _ := json.Marshal(ro.Points)
 
-	db_ro, err := s.storageService.GetRoutingOperations(ro.Name, ro.ProductType)
+	dbRo, err := s.storageService.GetRoutingOperations(ro.Name, ro.ProductType)
+	if err != nil {
+		dbRo = storage.RoutingOperations{
+			OperationID: ro.OperationID,
+		}
+	}
 
-	db_ro.Points = string(points)
-	db_ro.VehicleTypeImg = ro.VehicleTypeImg
-	db_ro.WorkcenterCode = ro.WorkcenterCode
-	db_ro.ProductType = ro.ProductType
-	db_ro.ProductId = ro.ProductId
-	db_ro.Img = ro.Img
-	db_ro.Name = ro.Name
-	db_ro.MaxOpTime = ro.MaxOpTime
-	db_ro.Job = ro.Job
-	db_ro.WorkcenterID = ro.WorkcenterID
-	db_ro.TighteningStepRef = ro.Tigntening_step_ref
-	db_ro.ProductTypeImage = ro.ProductTypeImage
+	dbRo.Points = string(points)
+	dbRo.VehicleTypeImg = ro.VehicleTypeImg
+	dbRo.WorkcenterCode = ro.WorkcenterCode
+	dbRo.ProductType = ro.ProductType
+	dbRo.ProductId = ro.ProductId
+	dbRo.Img = ro.Img
+	dbRo.Name = ro.Name
+	dbRo.MaxOpTime = ro.MaxOpTime
+	dbRo.Job = ro.Job
+	dbRo.WorkcenterID = ro.WorkcenterID
+	dbRo.TighteningStepRef = ro.TignteningStepRef
+	dbRo.ProductTypeImage = ro.ProductTypeImage
 
 	if err != nil {
 		// 新增
-		db_ro.OperationID = ro.OperationID
-		s.storageService.Store(db_ro)
+		if err := s.storageService.Store(dbRo); err != nil {
+			s.diag.Error("Create Routing Operation Failed ", err)
+		}
 	} else {
 		// 更新
-		s.storageService.UpdateRoutingOperations(&db_ro)
+		if err := s.storageService.UpdateRoutingOperations(&dbRo); err != nil {
+			s.diag.Error("Update Routing Operation Failed ", err)
+		}
 	}
 }
 
@@ -99,9 +110,9 @@ func (s *Service) postMaintenance(ctx iris.Context) {
 	err := ctx.ReadJSON(&maintanence)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
+		_, _ = ctx.WriteString(err.Error())
 		return
 	}
 
-	s.dispatcherBus.Dispatch(dispatcherbus.DispatcherMaintenanceInfo, maintanence)
+	s.doDispatch(dispatcherbus.DispatcherMaintenanceInfo, maintanence)
 }

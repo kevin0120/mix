@@ -37,7 +37,7 @@ type IStorageService interface {
 }
 
 type IBackendService interface {
-	GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error)
+	GetWorkorder(hmiSn string, workcenterCode, code string) ([]byte, error)
 }
 
 type HTTPService interface {
