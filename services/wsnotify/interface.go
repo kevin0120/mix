@@ -6,7 +6,7 @@ import (
 )
 
 type HTTPService interface {
-	GetHandlerByName(version string) (*httpd.Handler, error)
+	AddNewHttpHandler(r httpd.Route)
 }
 
 type Dispatcher interface {

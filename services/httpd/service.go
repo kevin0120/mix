@@ -244,3 +244,14 @@ func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *di
 
 	return nil
 }
+
+func (s *Service) AddNewHttpHandler(r Route) {
+	h, err := s.GetHandlerByName(BasePath)
+	if err != nil {
+		return
+	}
+	err = h.AddRoute(r)
+	if err != nil {
+		return
+	}
+}

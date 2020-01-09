@@ -20,7 +20,7 @@ import (
 type Service struct {
 	diag           Diagnostic
 	storageService IStorageService
-	httpd          *httpd.Service
+	httpd          HTTPService
 	backendService IBackendService
 	notifyService  INotifyService
 
@@ -30,7 +30,7 @@ type Service struct {
 	wsnotify.WSRequestHandlers
 }
 
-func NewService(d Diagnostic, dp Dispatcher, ns INotifyService, httpd *httpd.Service, backend IBackendService, storage IStorageService) *Service {
+func NewService(d Diagnostic, dp Dispatcher, ns INotifyService, httpd HTTPService, backend IBackendService, storage IStorageService) *Service {
 
 	s := &Service{
 		diag:           d,
@@ -71,7 +71,7 @@ func (s *Service) wsTest(ctx iris.Context) {
 	}
 
 	payload, _ := json.Marshal(ws)
-	s.dispatcherBus.Dispatch(dispatcherbus.DispatcherWsNotify, &wsnotify.DispatcherNotifyPackage{
+	s.doDispatch(dispatcherbus.DispatcherWsNotify, &wsnotify.DispatcherNotifyPackage{
 		C:    nil,
 		Data: payload,
 	})
@@ -104,7 +104,7 @@ func (s *Service) initDispatcherRegisters() {
 	s.dispatcherBus.Register(dispatcherbus.DispatcherOrderNew, utils.CreateDispatchHandlerStruct(s.onNewOrder))
 
 	// 接收保养信息推送
-	s.dispatcherBus.Register(dispatcherbus.DispatcherMaintenanceInfo, utils.CreateDispatchHandlerStruct(s.onNewOrder))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherMaintenanceInfo, utils.CreateDispatchHandlerStruct(s.onNewMaintenance))
 }
 
 func (s *Service) setupTestInterface() {
@@ -116,7 +116,7 @@ func (s *Service) setupTestInterface() {
 		Pattern:     "/ws-test",
 		HandlerFunc: s.wsTest,
 	}
-	s.httpd.Handler[0].AddRoute(r)
+	s.httpd.AddNewHttpHandler(r)
 }
 
 func (s *Service) setupWSRequestHandlers() {
@@ -325,4 +325,10 @@ func (s *Service) wsSendServiceStatus(status *aiis.ServiceStatus) {
 	})
 
 	s.notifyService.NotifyAll(wsnotify.WS_EVENT_SERVICE, string(data))
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
+	}
 }

@@ -144,20 +144,6 @@ func (s *Service) postNotify(msg *DispatcherNotifyPackage) {
 	}
 }
 
-func (s *Service) addNewHttpHandler(r httpd.Route) {
-	if s.httpd == nil {
-		return
-	}
-	h, err := s.httpd.GetHandlerByName(httpd.BasePath)
-	if err != nil {
-		return
-	}
-	err = h.AddRoute(r)
-	if err != nil {
-		return
-	}
-}
-
 func (s *Service) Open() error {
 
 	c := s.Config()
@@ -170,7 +156,7 @@ func (s *Service) Open() error {
 		Pattern:     c.Route,
 		HandlerFunc: s.ws.Handler(),
 	}
-	s.addNewHttpHandler(r)
+	s.httpd.AddNewHttpHandler(r)
 
 	if err := s.createAndStartWebSocketNotifyDispatcher(); err != nil {
 		s.diag.Error("createAndStartWebSocketNotifyDispatcher Error", err)
