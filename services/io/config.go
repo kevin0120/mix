@@ -25,7 +25,7 @@ func NewConfig() Config {
 		IOS: []ConfigIO{
 			{
 				SN:      "1",
-				Model:   MODEL_MOXA_E1212,
+				Model:   ModelMoxaE1212,
 				Address: "modbustcp://127.0.0.1:502",
 			},
 		},
@@ -35,7 +35,7 @@ func NewConfig() Config {
 func (c Config) Validate() error {
 
 	for _, io := range c.IOS {
-		_, exist := VENDOR_MODELS[io.Model]
+		_, exist := VendorModels[io.Model]
 		if !exist {
 			return errors.New("Vendor Not Found")
 		}

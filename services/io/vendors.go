@@ -1,20 +1,20 @@
 package io
 
 const (
-	MODEL_MOXA_E1212 = "MOXA_E1212" // 8进8出
-	MODEL_MOXA_E1242 = "MOXA_E1242" // 4进4出
+	ModelMoxaE1212 = "MOXA_E1212" // 8进8出
+	ModelMoxaE1242 = "MOXA_E1242" // 4进4出
 )
 
 const (
-	READ_TYPE_DISCRETES         = "READ_TYPE_DISCRETES"
-	READ_TYPE_COILS             = "READ_TYPE_COILS"
-	READ_TEYP_HOLDING_REGISTERS = "READ_TEYP_HOLDING_REGISTERS"
-	READ_TEYP_INPUT_REGISTERS   = "READ_TEYP_INPUT_REGISTERS"
+	ReadTypeDiscretes = "READ_TYPE_DISCRETES"
+	ReadTypeCoils     = "READ_TYPE_COILS"
+	//ReadTeypHoldingRegisters = "READ_TEYP_HOLDING_REGISTERS"
+	//ReadTeypInputRegisters   = "READ_TEYP_INPUT_REGISTERS"
 
-	WRITE_TYPE_SINGLE_COIL     = "WRITE_TYPE_SINGLE_COIL"
-	WRITE_TYPE_MULTI_COIL      = "WRITE_TYPE_MULTI_COIL"
-	WRITE_TYPE_SINGLE_REGISTER = "WRITE_TYPE_SINGLE_REGISTER"
-	WRITE_TYPE_MULTI_REGISTER  = "WRITE_TYPE_MULTI_REGISTER"
+	WriteTypeSingleCoil = "WRITE_TYPE_SINGLE_COIL"
+	//WriteTypeMultiCoil      = "WRITE_TYPE_MULTI_COIL"
+	//WriteTypeSingleRegister = "WRITE_TYPE_SINGLE_REGISTER"
+	//WriteTypeMultiRegister  = "WRITE_TYPE_MULTI_REGISTER"
 )
 
 type VendorCfg struct {
@@ -34,9 +34,9 @@ type Vendor interface {
 	Cfg() VendorCfg
 }
 
-var VENDOR_MODELS = map[string]Vendor{
-	MODEL_MOXA_E1212: &MOXA{model: MODEL_MOXA_E1212},
-	MODEL_MOXA_E1242: &MOXA{model: MODEL_MOXA_E1242},
+var VendorModels = map[string]Vendor{
+	ModelMoxaE1212: &MOXA{model: ModelMoxaE1212},
+	ModelMoxaE1242: &MOXA{model: ModelMoxaE1242},
 }
 
 type MOXA struct {
@@ -45,39 +45,39 @@ type MOXA struct {
 
 func (s *MOXA) Type() string {
 	switch s.model {
-	case MODEL_MOXA_E1212:
-		return IO_MODBUSTCP
+	case ModelMoxaE1212:
+		return IoModbustcp
 
-	case MODEL_MOXA_E1242:
-		return IO_MODBUSTCP
+	case ModelMoxaE1242:
+		return IoModbustcp
 	}
 
-	return IO_MODBUSTCP
+	return IoModbustcp
 }
 
 // inputNum, outputNum
 func (s *MOXA) Cfg() VendorCfg {
 	switch s.model {
-	case MODEL_MOXA_E1212:
+	case ModelMoxaE1212:
 		return VendorCfg{
 			InputNum:       8,
 			InputAddress:   0,
-			InputReadType:  READ_TYPE_DISCRETES,
+			InputReadType:  ReadTypeDiscretes,
 			OutputNum:      8,
 			OutputAddress:  0,
-			OutputReadType: READ_TYPE_COILS,
-			WriteType:      WRITE_TYPE_SINGLE_COIL,
+			OutputReadType: ReadTypeCoils,
+			WriteType:      WriteTypeSingleCoil,
 		}
 
-	case MODEL_MOXA_E1242:
+	case ModelMoxaE1242:
 		return VendorCfg{
 			InputNum:       4,
 			InputAddress:   0,
-			InputReadType:  READ_TYPE_DISCRETES,
+			InputReadType:  ReadTypeDiscretes,
 			OutputNum:      4,
 			OutputAddress:  0,
-			OutputReadType: READ_TYPE_COILS,
-			WriteType:      WRITE_TYPE_SINGLE_COIL,
+			OutputReadType: ReadTypeCoils,
+			WriteType:      WriteTypeSingleCoil,
 		}
 	}
 

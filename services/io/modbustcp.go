@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	TIMEOUT  = 3 * time.Second
-	READ_ITV = 300 * time.Millisecond
+	TIMEOUT = 3 * time.Second
+	ReadItv = 300 * time.Millisecond
 )
 
 type ModbusTcp struct {
@@ -30,7 +30,7 @@ type ModbusTcp struct {
 }
 
 func (s *ModbusTcp) Start() error {
-	s.status.Store(IO_STATUS_OFFLINE)
+	s.status.Store(IoStatusOffline)
 	s.inputs.Store("")
 	s.outputs.Store("")
 
@@ -70,8 +70,8 @@ func (s *ModbusTcp) connect() {
 			continue
 		} else {
 			// online
-			s.status.Store(IO_STATUS_ONLINE)
-			s.notify.OnStatus(s.cfg.SN, IO_STATUS_ONLINE)
+			s.status.Store(IoStatusOnline)
+			s.notify.OnStatus(s.cfg.SN, IoStatusOnline)
 			s.client = modbus.NewClient(s.handler)
 			s.read()
 		}
@@ -83,13 +83,13 @@ func (s *ModbusTcp) read() {
 		_, _, err := s.Read()
 		if err != nil {
 			// offline
-			s.status.Store(IO_STATUS_OFFLINE)
-			s.notify.OnStatus(s.cfg.SN, IO_STATUS_OFFLINE)
+			s.status.Store(IoStatusOffline)
+			s.notify.OnStatus(s.cfg.SN, IoStatusOffline)
 			s.createHandler()
 			return
 		}
 
-		time.Sleep(READ_ITV)
+		time.Sleep(ReadItv)
 	}
 }
 
@@ -121,7 +121,7 @@ func (s *ModbusTcp) Read() (string, string, error) {
 
 	// input status
 	switch s.vendor.Cfg().InputReadType {
-	case READ_TYPE_DISCRETES:
+	case ReadTypeDiscretes:
 		result, err = client.ReadDiscreteInputs(s.vendor.Cfg().InputAddress, s.vendor.Cfg().InputNum)
 	}
 
@@ -133,7 +133,7 @@ func (s *ModbusTcp) Read() (string, string, error) {
 
 	// output status
 	switch s.vendor.Cfg().OutputReadType {
-	case READ_TYPE_COILS:
+	case ReadTypeCoils:
 		result, err = client.ReadCoils(s.vendor.Cfg().OutputAddress, s.vendor.Cfg().OutputNum)
 	}
 
@@ -145,20 +145,20 @@ func (s *ModbusTcp) Read() (string, string, error) {
 
 	if s.inputs.Load().(string) != inputs {
 		s.inputs.Store(inputs)
-		s.notify.OnChangeIOStatus(s.cfg.SN, IO_TYPE_INPUT, inputs)
+		s.notify.OnChangeIOStatus(s.cfg.SN, IoTypeInput, inputs)
 	}
 
 	if s.outputs.Load().(string) != outputs {
 		s.outputs.Store(outputs)
-		s.notify.OnChangeIOStatus(s.cfg.SN, IO_TYPE_OUTPUT, outputs)
+		s.notify.OnChangeIOStatus(s.cfg.SN, IoTypeOutput, outputs)
 	}
 
 	return inputs, outputs, nil
 }
 
 func (s *ModbusTcp) Write(index uint16, status uint16) error {
-	if s.Status() == IO_STATUS_OFFLINE {
-		return errors.New(IO_STATUS_OFFLINE)
+	if s.Status() == IoStatusOffline {
+		return errors.New(IoStatusOffline)
 	}
 
 	if index > (s.vendor.Cfg().OutputNum - 1) {
@@ -173,7 +173,7 @@ func (s *ModbusTcp) Write(index uint16, status uint16) error {
 	}
 
 	switch s.vendor.Cfg().WriteType {
-	case WRITE_TYPE_SINGLE_COIL:
+	case WriteTypeSingleCoil:
 		_, err = client.WriteSingleCoil(index, status)
 	}
 

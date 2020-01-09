@@ -1,9 +1,9 @@
 package io
 
 const (
-	OUTPUT_STATUS_OFF   = 0
-	OUTPUT_STATUS_ON    = 1
-	OUTPUT_STATUS_FLASH = 2
+	OutputStatusOff   = 0
+	OutputStatusOn    = 1
+	OutputStatusFlash = 2
 )
 
 type IoSet struct {

@@ -35,9 +35,9 @@ func NewIOModule(flashInterval time.Duration, conf ConfigIO, d Diagnostic, servi
 	return s
 }
 
-func (io *IOModule) SetSerialNumber(sn string) {
-	io.BaseDevice.SetSerialNumber(sn)
-	io.config.SN = sn
+func (s *IOModule) SetSerialNumber(sn string) {
+	s.BaseDevice.SetSerialNumber(sn)
+	s.config.SN = sn
 }
 
 func (s *IOModule) getIONotifyService() IONotify {
@@ -45,11 +45,11 @@ func (s *IOModule) getIONotifyService() IONotify {
 }
 
 func (s *IOModule) WillStart() error {
-	if vendor, ok := VENDOR_MODELS[s.config.Model]; !ok {
+	if vendor, ok := VendorModels[s.config.Model]; !ok {
 		return errors.Errorf("Model: %s Is Not Support", s.config.Model)
 	} else {
 		switch vendor.Type() {
-		case IO_MODBUSTCP:
+		case IoModbustcp:
 			s.client = &ModbusTcp{
 				cfg:    s.config,
 				notify: s.getIONotifyService(),
@@ -97,10 +97,10 @@ func (s *IOModule) Read() (string, string, error) {
 
 func (s *IOModule) Write(index uint16, status uint16) error {
 	switch status {
-	case OUTPUT_STATUS_OFF:
+	case OutputStatusOff:
 		// 从flash列表删除
 		s.removeFlash(index)
-	case OUTPUT_STATUS_FLASH:
+	case OutputStatusFlash:
 		// 加入flash列表
 		s.addFlash(index)
 		return nil
@@ -130,7 +130,7 @@ func (s *IOModule) Data() interface{} {
 }
 
 func (s *IOModule) Config() interface{} {
-	vendor := VENDOR_MODELS[s.config.Model]
+	vendor := VendorModels[s.config.Model]
 
 	return IoConfig{
 		InputNum:  vendor.Cfg().InputNum,
@@ -161,7 +161,7 @@ func (s *IOModule) getFlashes() map[uint16]uint16 {
 
 func (s *IOModule) flashProc() {
 
-	status := OUTPUT_STATUS_OFF
+	status := OutputStatusOff
 	flag := -1
 	for {
 		select {

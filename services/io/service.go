@@ -57,7 +57,9 @@ func (s *Service) Open() error {
 func (s *Service) Close() error {
 
 	for _, dev := range s.ios {
-		dev.Stop()
+		if err := dev.Stop(); err != nil {
+			s.diag.Error("Stop IO Module Failed ", err)
+		}
 	}
 
 	return nil
@@ -134,7 +136,7 @@ func (s *Service) OnStatus(sn string, status string) {
 		},
 	}
 
-	s.dispatcherBus.Dispatch(dispatcherbus.DispatcherDeviceStatus, ioStatus)
+	s.doDispatch(dispatcherbus.DispatcherDeviceStatus, ioStatus)
 }
 
 func (s *Service) OnRecv(string, string) {
@@ -150,12 +152,18 @@ func (s *Service) OnChangeIOStatus(sn string, t string, status string) {
 		SN:  sn,
 	}
 
-	if t == IO_TYPE_INPUT {
+	if t == IoTypeInput {
 		ioContact.Inputs = status
 	} else {
 		ioContact.Outputs = status
 	}
 
 	// IO数据输出状态分发
-	s.dispatcherBus.Dispatch(dispatcherbus.DispatcherIO, ioContact)
+	s.doDispatch(dispatcherbus.DispatcherIO, ioContact)
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
+	}
 }
