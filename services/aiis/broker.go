@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	SUBJECT_RESULTS      = "saturn.results.%s"
-	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
+	SubjectResults     = "saturn.results.%s"
+	SubjectResultsResp = "saturn.results.%s.response"
 )
 
 func NewBrokerClient(d Diagnostic, bs IBrokerService, dp Dispatcher) *BrokerClient {
@@ -54,7 +54,7 @@ func (s *BrokerClient) collectTools() {
 	for {
 		select {
 		case toolSN := <-s.toolCollector:
-			err := s.broker.Subscribe(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), s.onResultResp)
+			err := s.broker.Subscribe(fmt.Sprintf(SubjectResultsResp, toolSN), s.onResultResp)
 			if err != nil {
 				s.diag.Error("Subscribe Failed", err)
 			}
@@ -99,20 +99,25 @@ func (s *BrokerClient) onResultResp(message *broker.BrokerMessage) ([]byte, erro
 	}
 
 	payload := TransportPayload{}
-	json.Unmarshal(message.Body, &payload)
+	if err := json.Unmarshal(message.Body, &payload); err != nil {
+		return nil, err
+	}
+
 	strData, _ := json.Marshal(payload.Data)
 	rp := ResultPatch{}
-	json.Unmarshal(strData, &rp)
-	s.handlerResultPatch(rp)
+	if err := json.Unmarshal(strData, &rp); err != nil {
+		return nil, err
+	}
 
+	s.handlerResultPatch(rp)
 	return nil, nil
 }
 
-func (c *BrokerClient) SendResult(result *AIISResult) error {
+func (s *BrokerClient) SendResult(result *PublishResult) error {
 	str, _ := json.Marshal(TransportPayload{
-		Method: TRANSPORT_METHOD_RESULT,
+		Method: TransportMethodResult,
 		Data:   result,
 	})
 
-	return c.broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, result.ToolSN), str)
+	return s.broker.Publish(fmt.Sprintf(SubjectResults, result.ToolSN), str)
 }

@@ -33,11 +33,11 @@ func NewConfig() Config {
 		MaxRetry:            3,
 		Headers:             map[string]string{"Content-Type": "application/json"},
 		WSResultRoute:       "ws://127.0.0.1/aiis/v1/ws/results",
-		ResultUploadInteval: toml.Duration(time.Duration(1 * time.Hour)),
+		ResultUploadInteval: toml.Duration(1 * time.Hour),
 		GRPCServer:          "127.0.0.1:9093",
 		KeepAlive:           toml.Duration(time.Second * 3),
 		Recheck:             true,
-		TransportType:       TRANSPORT_TYPE_GRPC,
+		TransportType:       TransportTypeGrpc,
 	}
 
 	return c
