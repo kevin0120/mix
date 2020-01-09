@@ -206,7 +206,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
                   onNext: this._onNextStep.bind(this),
                   onPrevious: this._onPreviousStep.bind(this)
                 },
-                STEP_STATUS.READY
+                (wStep.status && wStep.status !== STEP_STATUS.FINISHED) ? STEP_STATUS.READY : wStep.status
               );
 
             } else if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
