@@ -3,7 +3,7 @@ package wsnotify
 import "fmt"
 
 const (
-	WS_ROUTE = "/rush/v1/ws"
+	WsRoute = "/rush/v1/ws"
 )
 
 type Config struct {
@@ -14,7 +14,7 @@ type Config struct {
 
 func NewConfig() Config {
 	c := Config{
-		Route:           WS_ROUTE,
+		Route:           WsRoute,
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}

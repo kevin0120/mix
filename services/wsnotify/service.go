@@ -59,7 +59,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 			return
 		}
 
-		if msg.Type == WS_REG {
+		if msg.Type == WsReg {
 			s.handleRegister(&msg, c)
 		} else {
 			s.postNotify(&DispatcherNotifyPackage{
@@ -91,8 +91,10 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, httpd HTTPService) *Servi
 			MaxMessageSize:  int64(c.WriteBufferSize),
 			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
 		}),
-		clientManager: &WSClientManager{},
-		httpd:         httpd,
+		clientManager: &WSClientManager{
+			diag: d,
+		},
+		httpd: httpd,
 	}
 
 	s.clientManager.Init()
