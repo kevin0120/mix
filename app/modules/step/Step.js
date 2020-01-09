@@ -166,6 +166,10 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
         });
       }
     }
+
+    * clearData() {
+      yield call(this.updateData, () => ({}));
+    }
   };
 
 export default StepMixin;

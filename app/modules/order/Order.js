@@ -109,9 +109,18 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       return this._productCode;
     }
 
-    _onPreviousStep() {
-      if (this._workingIndex - 1 >= 0) {
-        this._workingIndex -= 1;
+    * _onPreviousStep() {
+      try {
+        const wStep = this.workingStep;
+        yield call([wStep, wStep.clearData]);
+        if (this._workingIndex - 1 >= 0) {
+          this._workingIndex -= 1;
+          const nextStep = this.workingStep;
+          yield call([nextStep, nextStep.clearData]);
+          return STEP_STATUS.READY;
+        }
+      } catch (e) {
+        CommonLog.lError(e);
       }
     }
 
@@ -192,23 +201,22 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             yield call([this, redoOrder], step, point);
             return;
           }
-
+          let status = null;
           while (true) {
             CommonLog.Info(
               `Doing Order (${this.code}),at ${this.workingIndex} step (${this.workingStep?.code}) `
             );
             const wStep = this.workingStep;
             if (wStep) {
-              yield call(
+              status = yield call(
                 [this, this.runSubStep],
                 wStep,
                 {
                   onNext: this._onNextStep.bind(this),
                   onPrevious: this._onPreviousStep.bind(this)
                 },
-                (wStep.status && wStep.status !== STEP_STATUS.FINISHED) ? STEP_STATUS.READY : wStep.status
+                status || (wStep.status === STEP_STATUS.FINISHED ? null : STEP_STATUS.READY)
               );
-
             } else if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
               yield put(orderActions.stepStatus(this, ORDER_STATUS.FAIL));
             } else {
