@@ -108,7 +108,7 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 		//defer delete(client.tempResultCurve, curve.ToolNumber)
 		client.tempResultCurve.ToolSN = sn
 		client.tempResultCurve.UpdateTime = time.Now()
-		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_CURVE), client.tempResultCurve)
+		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherCurve), client.tempResultCurve)
 		// dispatch完后创建新的缓存拧紧曲线
 		client.tempResultCurve = tightening_device.NewTighteningCurve()
 	}
@@ -284,7 +284,7 @@ func handleMID_0211_INPUT_MONITOR(c *TighteningController, pkg *handlerPkg) erro
 	c.inputs = inputs.Inputs
 
 	// 分发控制器输入状态
-	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_IO, inputs.ToIOInput())
+	c.dispatcherBus.Dispatch(dispatcherbus.DispatcherIO, inputs.ToIOInput())
 
 	return nil
 }
@@ -330,7 +330,7 @@ func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
 		SN:      c.deviceConf.SN,
 		Barcode: bc,
 	}
-	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, ss)
+	c.dispatcherBus.Dispatch(dispatcherbus.DispatcherScannerData, ss)
 
 	return nil
 }

@@ -46,7 +46,7 @@ func (s *Service) Config() Config {
 
 func (s *Service) NewWebSocketRecvHandler(handler func(interface{})) {
 	fn := utils.CreateDispatchHandlerStruct(handler)
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, fn)
+	s.dispatcherBus.Register(dispatcherbus.DispatcherWsNotify, fn)
 }
 
 func (s *Service) onConnect(c websocket.Connection) {
@@ -131,15 +131,15 @@ func (s *Service) handleRegister(msg *WSMsg, c websocket.Connection) {
 }
 
 func (s *Service) createAndStartWebSocketNotifyDispatcher() error {
-	if err := s.dispatcherBus.Create(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.DefaultDispatcherBufLen); err != nil {
+	if err := s.dispatcherBus.Create(dispatcherbus.DispatcherWsNotify, utils.DefaultDispatcherBufLen); err != nil {
 		return err
 	} else {
-		return s.dispatcherBus.Start(dispatcherbus.DISPATCHER_WS_NOTIFY)
+		return s.dispatcherBus.Start(dispatcherbus.DispatcherWsNotify)
 	}
 }
 
 func (s *Service) postNotify(msg *DispatcherNotifyPackage) {
-	if err := s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_WS_NOTIFY, msg); err != nil {
+	if err := s.dispatcherBus.Dispatch(dispatcherbus.DispatcherWsNotify, msg); err != nil {
 		s.diag.Error("notify", err)
 	}
 }

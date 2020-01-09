@@ -331,7 +331,7 @@ func (s *TighteningTool) onResult(result interface{}) {
 
 	// 分发结果
 	tighteningResult.ID = dbResult.Id
-	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_RESULT, tighteningResult)
+	s.controller.dispatcherBus.Dispatch(dispatcherbus.DispatcherResult, tighteningResult)
 }
 
 // 处理曲线
@@ -351,6 +351,6 @@ func (s *TighteningTool) onCurve(curve interface{}) {
 	}
 
 	// 分发曲线
-	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_CURVE, tighteningCurve)
+	s.controller.dispatcherBus.Dispatch(dispatcherbus.DispatcherCurve, tighteningCurve)
 	s.diag.Info(fmt.Sprintf("缓存曲线成功 工具:%s 对应拧紧ID:%s", dbCurves.ToolSN, dbCurves.TighteningID))
 }

@@ -23,7 +23,7 @@ const (
 	ServiceSearchItv = 2000 * time.Millisecond
 )
 
-const ScannerDispatcherKey = dispatcherbus.DISPATCHER_SCANNER_DATA
+const ScannerDispatcherKey = dispatcherbus.DispatcherScannerData
 
 type Service struct {
 	configValue atomic.Value
@@ -200,7 +200,7 @@ func (s *Service) OnStatus(id string, status string) {
 	}
 
 	// 分发扫码枪状态
-	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, scannerStatus)
+	s.dispatcher.Dispatch(dispatcherbus.DispatcherDeviceStatus, scannerStatus)
 }
 
 func (s *Service) OnRecv(id string, data string) {
@@ -216,5 +216,5 @@ func (s *Service) OnRecv(id string, data string) {
 	}
 
 	// 分发条码数据
-	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, barcodeData)
+	s.dispatcher.Dispatch(dispatcherbus.DispatcherScannerData, barcodeData)
 }

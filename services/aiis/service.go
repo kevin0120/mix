@@ -67,7 +67,7 @@ func (s *Service) setupTransport(bs IBrokerService, dispatcherBus Dispatcher) {
 
 func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_SERVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherServiceStatus: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -138,7 +138,7 @@ func (s *Service) Open() error {
 	s.ensureHttpClient()
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
 
 	go s.manage()
 
@@ -331,12 +331,12 @@ func (s *Service) manage() {
 
 // 服务状态变化
 func (s *Service) onServiceStatus(status ServiceStatus) {
-	s.doDispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status)
+	s.doDispatch(dispatcherbus.DispatcherServiceStatus, status)
 }
 
 // 传输连接状态变化
 func (s *Service) onTransportStatus(status string) {
-	s.doDispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, ServiceStatus{
+	s.doDispatch(dispatcherbus.DispatcherServiceStatus, ServiceStatus{
 		Name:   ServiceAiis,
 		Status: status,
 	})

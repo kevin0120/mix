@@ -65,7 +65,7 @@ func (s *Service) Close() error {
 
 func (s *Service) initDispatcherRegisters() {
 	// 注册websocket请求
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherWsNotify, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 }
 
 func (s *Service) setupWSRequestHandlers() {
@@ -134,7 +134,7 @@ func (s *Service) OnStatus(sn string, status string) {
 		},
 	}
 
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ioStatus)
+	s.dispatcherBus.Dispatch(dispatcherbus.DispatcherDeviceStatus, ioStatus)
 }
 
 func (s *Service) OnRecv(string, string) {
@@ -157,5 +157,5 @@ func (s *Service) OnChangeIOStatus(sn string, t string, status string) {
 	}
 
 	// IO数据输出状态分发
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_IO, ioContact)
+	s.dispatcherBus.Dispatch(dispatcherbus.DispatcherIO, ioContact)
 }

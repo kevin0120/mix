@@ -103,5 +103,5 @@ func (s *Service) postMaintenance(ctx iris.Context) {
 		return
 	}
 
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_MAINTENANCE_INFO, maintanence)
+	s.dispatcherBus.Dispatch(dispatcherbus.DispatcherMaintenanceInfo, maintanence)
 }

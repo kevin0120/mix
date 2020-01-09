@@ -47,8 +47,8 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	s.dispatcherBus.Create(dispatcherBus.DISPATCHER_READER_DATA, utils.DefaultDispatcherBufLen)
-	err := s.dispatcherBus.Start(dispatcherBus.DISPATCHER_READER_DATA)
+	s.dispatcherBus.Create(dispatcherBus.DispatcherReaderData, utils.DefaultDispatcherBufLen)
+	err := s.dispatcherBus.Start(dispatcherBus.DispatcherReaderData)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (s *Service) Data() interface{} {
 
 func (s *Service) notifyUID(uid string) {
 	// 分发读卡器数据
-	s.dispatcherBus.Dispatch(dispatcherBus.DISPATCHER_READER_DATA, uid)
+	s.dispatcherBus.Dispatch(dispatcherBus.DispatcherReaderData, uid)
 }
 
 func (s *Service) search() {

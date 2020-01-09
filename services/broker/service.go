@@ -50,7 +50,7 @@ func (s *Service) Config() Config {
 
 func (s *Service) setupGblDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherBrokerStatus: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -82,7 +82,7 @@ func (s *Service) doConnect(opened bool) {
 	if opened {
 		status = utils.STATUS_ONLINE
 	}
-	s.doDispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
+	s.doDispatch(dispatcherbus.DispatcherBrokerStatus, status)
 }
 
 func (s *Service) connectProc() {
@@ -145,7 +145,7 @@ func (s *Service) Request(subject string, data []byte, timeOut time.Duration) ([
 
 func (s *Service) onStatus(status string) {
 	s.status.Store(status)
-	s.doDispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status)
+	s.doDispatch(dispatcherbus.DispatcherBrokerStatus, status)
 }
 
 func (s *Service) Status() string {

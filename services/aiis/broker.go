@@ -36,8 +36,8 @@ type BrokerClient struct {
 
 func (s *BrokerClient) Start() error {
 
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_NEW_TOOL, utils.CreateDispatchHandlerStruct(s.onNewTool))
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_BROKER_STATUS, utils.CreateDispatchHandlerStruct(s.onBrokerStatus))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherNewTool, utils.CreateDispatchHandlerStruct(s.onNewTool))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherBrokerStatus, utils.CreateDispatchHandlerStruct(s.onBrokerStatus))
 	return nil
 }
 

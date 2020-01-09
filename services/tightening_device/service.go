@@ -84,9 +84,9 @@ func (s *Service) getProtocol(protocolName string) (ITighteningProtocol, error) 
 
 func (s *Service) setupGlobalDispatchers() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_RESULT:   utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCHER_CURVE:    utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCHER_NEW_TOOL: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherResult:  utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherCurve:   utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherNewTool: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -114,7 +114,7 @@ func (s *Service) Open() error {
 	controllers := s.getControllers()
 	for _, c := range controllers {
 		for toolSN, _ := range c.Children() {
-			s.doDispatch(dispatcherbus.DISPATCHER_NEW_TOOL, toolSN)
+			s.doDispatch(dispatcherbus.DispatcherNewTool, toolSN)
 		}
 	}
 
@@ -142,7 +142,7 @@ func (s *Service) config() Config {
 
 func (s *Service) initDispatcherRegisters() {
 	// 注册websocket请求
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherWsNotify, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 }
 
 func (s *Service) doDispatch(name string, data interface{}) {

@@ -110,8 +110,8 @@ func (s *Service) ensureHttpClient() *resty.Client {
 
 func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_MAINTENANCE_INFO: utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCHER_ORDER_NEW:        utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherMaintenanceInfo: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherOrderNew:        utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -239,7 +239,7 @@ func (s *Service) taskSaveWorkorders() {
 				break
 			}
 
-			s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_ORDER_NEW, orderOut)
+			s.dispatcherBus.Dispatch(dispatcherbus.DispatcherOrderNew, orderOut)
 
 		case <-s.closing:
 			s.diag.Info("taskSaveWorkorders closed")

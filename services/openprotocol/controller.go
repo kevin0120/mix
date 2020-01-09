@@ -53,8 +53,8 @@ func (c *TighteningController) createToolsByConfig() error {
 	for _, v := range conf.Tools {
 		tool := NewTool(c, v, d)
 		c.dispatcherMap[tool.SerialNumber()] = dispatcherbus.DispatcherMap{
-			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_RESULT): utils.CreateDispatchHandlerStruct(tool.onResult),
-			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_CURVE):  utils.CreateDispatchHandlerStruct(tool.onCurve),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherResult): utils.CreateDispatchHandlerStruct(tool.onResult),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherCurve):  utils.CreateDispatchHandlerStruct(tool.onCurve),
 		}
 		c.AddChildren(v.SN, tool)
 	}
@@ -127,7 +127,7 @@ func (c *TighteningController) UpdateToolStatus(status string) {
 		})
 	}
 
-	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ss)
+	c.dispatcherBus.Dispatch(dispatcherbus.DispatcherDeviceStatus, ss)
 }
 
 func (c *TighteningController) GetToolViaSerialNumber(toolSN string) (tightening_device.ITighteningTool, error) {
@@ -256,7 +256,7 @@ func (c *TighteningController) handleResult(result tightening_device.TighteningR
 	result.ToolSN = toolSerialNumber
 
 	// 分发结果到工具进行处理
-	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_RESULT), result)
+	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherResult), result)
 
 	return nil
 }
@@ -412,7 +412,7 @@ func (c *TighteningController) handleStatus(sn string, status string) {
 			},
 		}
 		// 分发控制器状态 -> tightening device
-		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ss)
+		c.dispatcherBus.Dispatch(dispatcherbus.DispatcherDeviceStatus, ss)
 	}
 }
 

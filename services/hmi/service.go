@@ -71,7 +71,7 @@ func (s *Service) wsTest(ctx iris.Context) {
 	}
 
 	payload, _ := json.Marshal(ws)
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_WS_NOTIFY, &wsnotify.DispatcherNotifyPackage{
+	s.dispatcherBus.Dispatch(dispatcherbus.DispatcherWsNotify, &wsnotify.DispatcherNotifyPackage{
 		C:    nil,
 		Data: payload,
 	})
@@ -80,31 +80,31 @@ func (s *Service) wsTest(ctx iris.Context) {
 func (s *Service) initDispatcherRegisters() {
 
 	// 接收设备状态变化
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_DEVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onDeviceStatus))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherDeviceStatus, utils.CreateDispatchHandlerStruct(s.onDeviceStatus))
 
 	// 接收读卡器数据
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_READER_DATA, utils.CreateDispatchHandlerStruct(s.onReaderData))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherReaderData, utils.CreateDispatchHandlerStruct(s.onReaderData))
 
 	// 接收条码数据
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_SCANNER_DATA, utils.CreateDispatchHandlerStruct(s.onScannerData))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherScannerData, utils.CreateDispatchHandlerStruct(s.onScannerData))
 
 	// 接收IO输入输出状态变化
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_IO, utils.CreateDispatchHandlerStruct(s.onIOContactData))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherIO, utils.CreateDispatchHandlerStruct(s.onIOContactData))
 
 	// 注册websocket请求
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherWsNotify, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
 	// 接收拧紧结果
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
 
 	// 接收外部服务状态推送
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_SERVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onServiceStatus))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherServiceStatus, utils.CreateDispatchHandlerStruct(s.onServiceStatus))
 
 	// 接收新工单推送
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_ORDER_NEW, utils.CreateDispatchHandlerStruct(s.onNewOrder))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherOrderNew, utils.CreateDispatchHandlerStruct(s.onNewOrder))
 
 	// 接收保养信息推送
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_MAINTENANCE_INFO, utils.CreateDispatchHandlerStruct(s.onNewOrder))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherMaintenanceInfo, utils.CreateDispatchHandlerStruct(s.onNewOrder))
 }
 
 func (s *Service) setupTestInterface() {
