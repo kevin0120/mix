@@ -23,7 +23,6 @@ type Dispatcher interface {
 }
 
 type INotifyService interface {
-	GetWorkCenter() string
 	NotifyAll(evt string, payload string)
 }
 

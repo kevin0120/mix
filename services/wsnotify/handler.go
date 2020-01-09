@@ -28,7 +28,7 @@ func (h *WSRequestHandlers) SetupHandlers(handlers WSRequestHandlerMap) {
 	h.handlers = handlers
 }
 
-func (h *WSRequestHandlers) GetHandler(name string) (WSRequestHandler, error) {
+func (h *WSRequestHandlers) getHandler(name string) (WSRequestHandler, error) {
 	handler, exist := h.handlers[name]
 	if !exist {
 		return nil, errors.New("WSRequest Handler Not Found")
@@ -52,7 +52,7 @@ func (h *WSRequestHandlers) HandleWSRequest(data interface{}) {
 		return
 	}
 
-	handler, err := h.GetHandler(msg.Type)
+	handler, err := h.getHandler(msg.Type)
 	if err != nil {
 		h.Diag.Error(fmt.Sprintf("HandleWSRequest Error: Handler Not Found: %s", msg.Type), err)
 		return

@@ -310,11 +310,11 @@ func (s *Service) wsSendDeviceStatus(deviceStatus []device.DeviceStatus) {
 // websocket发送拧紧结果
 func (s *Service) wsSendTighteningResult(results []tightening_device.BaseResult) {
 	data, _ := json.Marshal(wsnotify.WSMsg{
-		Type: wsnotify.WS_TIGHTENING_RESULT,
+		Type: wsnotify.WS_TOOL_RESULT,
 		Data: results,
 	})
 
-	s.notifyService.NotifyAll(wsnotify.WS_EVENT_RESULT, string(data))
+	s.notifyService.NotifyAll(wsnotify.WS_EVENT_TIGHTENING, string(data))
 }
 
 // websocket发送外部系统状态

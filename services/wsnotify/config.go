@@ -10,7 +10,6 @@ type Config struct {
 	Route           string `yaml:"route"`
 	ReadBufferSize  int    `yaml:"read_buf_size"`
 	WriteBufferSize int    `yaml:"write_buf_size"`
-	Workcenter      string `yaml:"workcenter"`
 }
 
 func NewConfig() Config {
@@ -18,7 +17,6 @@ func NewConfig() Config {
 		Route:           WS_ROUTE,
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
-		Workcenter:      "TA3-01L",
 	}
 
 	return c

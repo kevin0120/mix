@@ -285,9 +285,7 @@ func (s *Server) appendOdooService() error {
 func (s *Server) appendWebsocketService() error {
 	c := s.config.WSNotify
 	d := s.DiagService.NewWebsocketHandler()
-	srv := wsnotify.NewService(c, d, s.DispatcherBusService)
-
-	srv.Httpd = s.HTTPDService //http 服务注入
+	srv := wsnotify.NewService(c, d, s.DispatcherBusService, s.HTTPDService)
 
 	s.WSNotifyService = srv
 	s.AppendService("websocket", srv)
