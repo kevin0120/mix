@@ -13,25 +13,20 @@ import (
 )
 
 const (
-	SCANNER_OPEN_ITV       = 500 * time.Millisecond
-	SCANNER_BUF_LEN        = 256
-	SCANNER_STATUS_ONLINE  = "online"
-	SCANNER_STATUS_OFFLINE = "offline"
+	ScannerOpenItv       = 500 * time.Millisecond
+	ScannerBufLen        = 256
+	ScannerStatusOnline  = "online"
+	ScannerStatusOffline = "offline"
 )
 
 type DeviceService interface {
 	Parse([]byte) (string, error)
-	//
-	//isOpen() bool
-	//
-	//// vendorID, productID
+
 	NewReader(d USBDevice) error
 
 	Read([]byte) (int, error)
 
 	Close() error
-
-	//Debounce() (time.Duration, time.Duration)
 }
 
 type DeviceInfo struct {
@@ -167,13 +162,13 @@ func (s *Scanner) close() error {
 
 func (s *Scanner) manage() {
 	for {
-		if s.Status() == SCANNER_STATUS_OFFLINE {
+		if s.Status() == ScannerStatusOffline {
 			_ = s.connect()
 		}
-		if s.Status() == SCANNER_STATUS_ONLINE {
+		if s.Status() == ScannerStatusOnline {
 			s._recv()
 		}
-		time.Sleep(SCANNER_OPEN_ITV)
+		time.Sleep(ScannerOpenItv)
 	}
 }
 
@@ -224,7 +219,7 @@ func (s *Scanner) triggerDebounce() {
 }
 
 func (s *Scanner) _recv() {
-	buf := make([]byte, SCANNER_BUF_LEN)
+	buf := make([]byte, ScannerBufLen)
 	di := s.devInfo
 	if di == nil {
 		return
@@ -255,7 +250,9 @@ func (s *Scanner) _recv() {
 
 			s.debounced(func() {
 				if strRecv != "" {
-					s.BaseDevice.OnDeviceRecv(strRecv)
+					if err := s.BaseDevice.OnDeviceRecv(strRecv); err != nil {
+						s.diag.Error("OnDeviceRecv Error", err)
+					}
 					s.resetDebounce()
 					strRecv = ""
 				}

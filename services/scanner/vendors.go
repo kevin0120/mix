@@ -15,9 +15,9 @@ const (
 )
 
 const (
-	KEY_SHIFT    = 2
-	INDEX_TARGET = 2
-	INDEX_SHIFT  = 0
+	KeyShift    = 2
+	IndexTarget = 2
+	IndexShift  = 0
 )
 
 var keymap = map[byte][]string{
@@ -67,22 +67,6 @@ var keymap = map[byte][]string{
 	54: {",", "<"},
 	55: {".", ">"},
 	56: {"/", "?"},
-}
-
-type vendor struct {
-	VendorID  ID
-	ProductID ID
-}
-
-var vendors = []vendor{
-	{
-		VendorID:  VendorHoneyWell,
-		ProductID: ProductHoneyWell,
-	},
-	{
-		VendorID:  VendorDataLogic,
-		ProductID: ProductDataLogic,
-	},
 }
 
 type commonHoneywellScanner struct {
@@ -172,13 +156,13 @@ func (v *commonHoneywellScanner) Close() error {
 }
 
 func commonParse(buf []byte) (string, error) {
-	v := buf[INDEX_TARGET]
+	v := buf[IndexTarget]
 	if v == 0 || keymap[v] == nil {
 		return "", errors.New("invalid byte")
 	}
 
 	str := keymap[v][0]
-	if buf[INDEX_SHIFT] == KEY_SHIFT {
+	if buf[IndexShift] == KeyShift {
 		str = keymap[v][1]
 	}
 

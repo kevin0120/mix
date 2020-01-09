@@ -130,7 +130,7 @@ func (s *Service) search() {
 				break
 			}
 		}
-		if scanner != nil && scanner.Status() == SCANNER_STATUS_ONLINE {
+		if scanner != nil && scanner.Status() == ScannerStatusOnline {
 			time.Sleep(ServiceSearchItv)
 			continue
 		}
@@ -187,7 +187,7 @@ func (s *Service) removeScanner(id string) {
 
 func (s *Service) OnStatus(id string, status string) {
 	s.diag.Debug(fmt.Sprintf("Scanner %s Status: %s\n", id, status))
-	if status == SCANNER_STATUS_OFFLINE {
+	if status == ScannerStatusOffline {
 		s.removeScanner(id)
 	}
 
