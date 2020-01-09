@@ -113,7 +113,7 @@ func (s *Service) Open() error {
 
 	controllers := s.getControllers()
 	for _, c := range controllers {
-		for toolSN, _ := range c.Children() {
+		for toolSN := range c.Children() {
 			s.doDispatch(dispatcherbus.DispatcherNewTool, toolSN)
 		}
 	}
