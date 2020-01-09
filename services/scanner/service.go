@@ -7,11 +7,11 @@ import (
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/pkg/errors"
 	"github.com/tarm/serial"
+	"go.uber.org/atomic"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 

@@ -3,8 +3,8 @@ package minio
 import (
 	"fmt"
 	"github.com/minio/minio-go"
+	"go.uber.org/atomic"
 	"strings"
-	"sync/atomic"
 	"time"
 )
 

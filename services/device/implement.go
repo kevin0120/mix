@@ -3,8 +3,8 @@ package device
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"go.uber.org/atomic"
 	"sync"
-	"sync/atomic"
 )
 
 type BaseDeviceDiagnostic interface {

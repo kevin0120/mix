@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/goburrow/modbus"
 	"github.com/masami10/rush/utils"
+	"go.uber.org/atomic"
 	"strconv"
-	"sync/atomic"
 	"time"
 )
 

@@ -7,8 +7,8 @@ github.com/Shopify/goreferrer
 # github.com/aymerick/raymond v2.0.2+incompatible
 github.com/aymerick/raymond
 github.com/aymerick/raymond/ast
-github.com/aymerick/raymond/parser
 github.com/aymerick/raymond/lexer
+github.com/aymerick/raymond/parser
 # github.com/bep/debounce v1.2.0
 github.com/bep/debounce
 # github.com/davecgh/go-spew v1.1.1
@@ -64,37 +64,37 @@ github.com/juju/errors
 # github.com/kataras/golog v0.0.0-20190624001437-99c81de45f40
 github.com/kataras/golog
 # github.com/kataras/iris v11.1.1+incompatible
-github.com/kataras/iris/core/errors
-github.com/kataras/iris/websocket
 github.com/kataras/iris
-github.com/kataras/iris/context
 github.com/kataras/iris/cache
-github.com/kataras/iris/core/handlerconv
-github.com/kataras/iris/core/host
-github.com/kataras/iris/core/netutil
-github.com/kataras/iris/core/router
-github.com/kataras/iris/middleware/logger
-github.com/kataras/iris/middleware/recover
-github.com/kataras/iris/view
-github.com/kataras/iris/core/memstore
-github.com/kataras/iris/macro
-github.com/kataras/iris/cache/client
-github.com/kataras/iris/macro/handler
-github.com/kataras/iris/macro/interpreter/ast
-github.com/kataras/iris/macro/interpreter/lexer
-github.com/kataras/iris/macro/interpreter/parser
 github.com/kataras/iris/cache/cfg
+github.com/kataras/iris/cache/client
 github.com/kataras/iris/cache/client/rule
 github.com/kataras/iris/cache/entry
 github.com/kataras/iris/cache/ruleset
 github.com/kataras/iris/cache/uri
+github.com/kataras/iris/context
+github.com/kataras/iris/core/errors
+github.com/kataras/iris/core/handlerconv
+github.com/kataras/iris/core/host
+github.com/kataras/iris/core/memstore
+github.com/kataras/iris/core/netutil
+github.com/kataras/iris/core/router
+github.com/kataras/iris/macro
+github.com/kataras/iris/macro/handler
+github.com/kataras/iris/macro/interpreter/ast
+github.com/kataras/iris/macro/interpreter/lexer
+github.com/kataras/iris/macro/interpreter/parser
 github.com/kataras/iris/macro/interpreter/token
+github.com/kataras/iris/middleware/logger
+github.com/kataras/iris/middleware/recover
+github.com/kataras/iris/view
+github.com/kataras/iris/websocket
 # github.com/kataras/pio v0.0.0-20190103105442-ea782b38602d
 github.com/kataras/pio
 github.com/kataras/pio/terminal
 # github.com/klauspost/compress v1.7.5
-github.com/klauspost/compress/gzip
 github.com/klauspost/compress/flate
+github.com/klauspost/compress/gzip
 # github.com/klauspost/cpuid v1.2.1
 github.com/klauspost/cpuid
 # github.com/leodido/go-urn v1.2.0
@@ -149,41 +149,53 @@ github.com/stretchr/testify/assert
 github.com/tarm/serial
 # github.com/valyala/bytebufferpool v1.0.0
 github.com/valyala/bytebufferpool
+# go.uber.org/atomic v1.5.1
+go.uber.org/atomic
 # golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
-golang.org/x/crypto/ed25519
+golang.org/x/crypto/acme
 golang.org/x/crypto/acme/autocert
 golang.org/x/crypto/argon2
-golang.org/x/crypto/ed25519/internal/edwards25519
-golang.org/x/crypto/acme
 golang.org/x/crypto/blake2b
+golang.org/x/crypto/ed25519
+golang.org/x/crypto/ed25519/internal/edwards25519
+# golang.org/x/lint v0.0.0-20190930215403-16217165b5de
+golang.org/x/lint
+golang.org/x/lint/golint
 # golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
 golang.org/x/net/context
-golang.org/x/net/trace
-golang.org/x/net/publicsuffix
+golang.org/x/net/html
+golang.org/x/net/html/atom
 golang.org/x/net/http/httpguts
-golang.org/x/net/internal/timeseries
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
-golang.org/x/net/html
 golang.org/x/net/idna
-golang.org/x/net/html/atom
+golang.org/x/net/internal/timeseries
+golang.org/x/net/publicsuffix
+golang.org/x/net/trace
 # golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e
-golang.org/x/sys/unix
 golang.org/x/sys/cpu
+golang.org/x/sys/unix
 # golang.org/x/text v0.3.2
 golang.org/x/text/secure/bidirule
+golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-golang.org/x/text/transform
+# golang.org/x/tools v0.0.0-20191029041327-9cc4af7d6b2c
+golang.org/x/tools/go/ast/astutil
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/internal/gcimporter
 # google.golang.org/genproto v0.0.0-20190404172233-64821d5d2107
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.22.1
 google.golang.org/grpc
 google.golang.org/grpc/balancer
+google.golang.org/grpc/balancer/base
 google.golang.org/grpc/balancer/roundrobin
+google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/codes
 google.golang.org/grpc/connectivity
 google.golang.org/grpc/credentials
+google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
@@ -195,6 +207,7 @@ google.golang.org/grpc/internal/channelz
 google.golang.org/grpc/internal/envconfig
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/grpcsync
+google.golang.org/grpc/internal/syscall
 google.golang.org/grpc/internal/transport
 google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
@@ -207,10 +220,6 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-google.golang.org/grpc/balancer/base
-google.golang.org/grpc/credentials/internal
-google.golang.org/grpc/binarylog/grpc_binarylog_v1
-google.golang.org/grpc/internal/syscall
 # gopkg.in/resty.v1 v1.12.0
 gopkg.in/resty.v1
 # gopkg.in/yaml.v2 v2.2.2

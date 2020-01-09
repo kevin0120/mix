@@ -5,10 +5,10 @@ import (
 	"github.com/google/gousb"
 	"github.com/masami10/rush/services/device"
 	"github.com/pkg/errors"
+	"go.uber.org/atomic"
 	"runtime"
 	"strconv"
 	"strings"
-	"sync/atomic"
 	"time"
 )
 

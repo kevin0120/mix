@@ -3,8 +3,8 @@ package device
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
+	"go.uber.org/atomic"
 	"sync"
-	"sync/atomic"
 
 	"github.com/masami10/rush/services/wsnotify"
 )

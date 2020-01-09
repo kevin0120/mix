@@ -7,7 +7,7 @@ import (
 	dispatcherBus "github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
 	"github.com/satori/go.uuid"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"time"
 )
 

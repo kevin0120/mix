@@ -8,9 +8,9 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
+	"go.uber.org/atomic"
 	"gopkg.in/resty.v1"
 	"net/http"
-	"sync/atomic"
 	"time"
 )
 

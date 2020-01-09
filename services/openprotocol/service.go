@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/pkg/errors"
-	"sync/atomic"
+	"go.uber.org/atomic"
 )
 
 type Diagnostic interface {

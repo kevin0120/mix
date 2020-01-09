@@ -2,7 +2,7 @@ package aiis
 
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"time"
 
 	"encoding/json"

@@ -8,7 +8,7 @@ import (
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/utils"
-	"sync/atomic"
+	"go.uber.org/atomic"
 )
 
 const (

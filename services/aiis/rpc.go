@@ -3,9 +3,9 @@ package aiis
 import (
 	"encoding/json"
 	"github.com/pkg/errors"
+	"go.uber.org/atomic"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"sync/atomic"
 	"time"
 )
 
@@ -34,7 +34,7 @@ type GRPCClient struct {
 	rpcClient         RPCAiisClient
 	diag              Diagnostic
 	status            atomic.Value
-	keepAliveCount    int32
+	keepAliveCount    atomic.Int32
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
 	recvBuf           chan string
@@ -73,15 +73,15 @@ func (c *GRPCClient) Status() string {
 }
 
 func (c *GRPCClient) KeepAliveCount() int32 {
-	return atomic.LoadInt32(&c.keepAliveCount)
+	return c.keepAliveCount.Load()
 }
 
 func (c *GRPCClient) updateKeepAliveCount(i int32) {
-	atomic.SwapInt32(&c.keepAliveCount, i)
+	c.keepAliveCount.Swap(i)
 }
 
 func (c *GRPCClient) addKeepAliveCount() {
-	atomic.AddInt32(&c.keepAliveCount, 1)
+	c.keepAliveCount.Inc()
 }
 
 func (c *GRPCClient) updateKeepAliveDeadLine() {

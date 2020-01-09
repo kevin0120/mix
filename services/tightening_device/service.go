@@ -6,8 +6,8 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
+	"go.uber.org/atomic"
 	"sync"
-	"sync/atomic"
 )
 
 const (

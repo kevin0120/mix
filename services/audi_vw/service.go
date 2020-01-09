@@ -3,10 +3,10 @@ package audi_vw
 import (
 	"fmt"
 	"github.com/masami10/rush/services/tightening_device"
+	"go.uber.org/atomic"
 	"net"
 	"strings"
 	"sync"
-	"sync/atomic"
 
 	"github.com/masami10/rush/socket_listener"
 	"github.com/pkg/errors"

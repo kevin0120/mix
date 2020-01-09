@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"time"
 )
 

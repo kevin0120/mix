@@ -6,7 +6,7 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/tightening_device"
-	"sync/atomic"
+	"go.uber.org/atomic"
 )
 
 func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagnostic) *TighteningTool {

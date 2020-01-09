@@ -9,9 +9,9 @@ import (
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/socket_writer"
 	"github.com/masami10/rush/utils"
+	"go.uber.org/atomic"
 	"net"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -39,7 +39,7 @@ type clientContext struct {
 	sn                string
 	status            atomic.Value
 	sockClient        *socket_writer.SocketWriter
-	keepAliveCount    int32
+	keepAliveCount    atomic.Int32
 	keepaliveDeadLine atomic.Value
 	buffer            chan []byte
 	handlerBuf        chan handlerPkg
@@ -229,15 +229,15 @@ func (c *clientContext) handleStatus(status string) {
 }
 
 func (c *clientContext) KeepAliveCount() int32 {
-	return atomic.LoadInt32(&c.keepAliveCount)
+	return c.keepAliveCount.Load()
 }
 
 func (c *clientContext) updateKeepAliveCount(i int32) {
-	atomic.SwapInt32(&c.keepAliveCount, i)
+	c.keepAliveCount.Swap(i)
 }
 
 func (c *clientContext) addKeepAliveCount() {
-	atomic.AddInt32(&c.keepAliveCount, 1)
+	c.keepAliveCount.Inc()
 }
 
 func (c *clientContext) updateKeepAliveDeadLine() {

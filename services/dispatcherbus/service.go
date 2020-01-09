@@ -4,8 +4,8 @@ import (
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
+	"go.uber.org/atomic"
 	"sync"
-	"sync/atomic"
 )
 
 // name: handlerName
