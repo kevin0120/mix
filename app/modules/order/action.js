@@ -125,19 +125,9 @@ export const orderActions = Object.freeze({
     order
   }),
   reportFinish: (
-    code: string,
-    trackCode: string,
-    workCenterCode: string,
-    productCode: string,
-    dateComplete: Date,
-    operation: {}
+    order: IOrder,
   ) => ({
     type: ORDER.REPORT_FINISH,
-    code,
-    trackCode,
-    productCode,
-    workCenterCode,
-    dateComplete,
-    operation
+    order
   })
 });

@@ -339,21 +339,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
               stepStatus(s.status)
             ]);
             if (reportFinish && (this.status === ORDER_STATUS.FAIL || this.status === ORDER_STATUS.DONE)) {
-              const code = (this: IWorkable)._code;
-              const trackCode = '';
-              const workCenterCode = yield select(s => s.systemInfo.workcenter);
-              const productCode = '';
-              const dateComplete = new Date();
-              const { operation } = this.payload || {};
               closeAction = [
-                orderActions.reportFinish(
-                  code,
-                  trackCode,
-                  productCode,
-                  workCenterCode,
-                  dateComplete,
-                  operation
-                ),
+                orderActions.reportFinish(this),
                 push('/app')
               ];
               confirm = {

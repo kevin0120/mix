@@ -104,15 +104,16 @@ function onNewScanner({ scanner }) {
 }
 
 function* reportFinish({
-  code,
-  trackCode,
-  productCode,
-  workCenterCode,
-  dateComplete,
-  operation
+  order
 }) {
   try {
-    yield call(
+    const code = (order: IWorkable)._code;
+    const { trackCode } = order;
+    const workCenterCode = yield select(s => s.systemInfo.workcenter);
+    const { productCode } = order;
+    const dateComplete = new Date();
+    const { operation } = order.payload || {};
+    const resp = yield call(
       orderReportFinishApi,
       code,
       trackCode,
@@ -121,6 +122,9 @@ function* reportFinish({
       dateComplete,
       operation
     );
+    if (resp) {
+      // TODO:  on resp
+    }
   } catch (e) {
     CommonLog.lError(e, { at: 'reportFinish' });
   }
