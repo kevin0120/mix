@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"gopkg.in/resty.v1"

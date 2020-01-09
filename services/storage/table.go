@@ -64,7 +64,7 @@ type Workorders struct {
 
 type Steps struct {
 	//Id             int64       `xorm:"pk autoincr notnull 'id'" json:"id"`
-	////WorkorderID    int64     `xorm:"bigint 'workorder_id'" json:"-"`
+	////CurrentWorkorderID    int64     `xorm:"bigint 'workorder_id'" json:"-"`
 	//Name           string      `xorm:"varchar(64) 'name'" json:"name"`
 	//Desc           string      `xorm:"varchar(64) 'desc'" json:"desc"`
 	//Type           string      `xorm:"varchar(64) 'type'" json:"type"`
@@ -75,7 +75,7 @@ type Steps struct {
 	//MarshalPayload interface{} `xorm:"-" json:"payload"`
 
 	Id int64 `xorm:"pk autoincr notnull 'id'" json:"id"`
-	//WorkorderID    int64       `xorm:"bigint 'workorder_id'" json:"-"`
+	//CurrentWorkorderID    int64       `xorm:"bigint 'workorder_id'" json:"-"`
 	Name string `xorm:"varchar(64) 'name'" json:"-"`
 
 	Type string `xorm:"varchar(64) 'type'" json:"-"`
@@ -162,27 +162,27 @@ type Controllers struct {
 	TriggerStop  time.Time `xorm:"datetime 'trigger_stop'"`
 }
 
-type Guns struct {
-	Id          int64  `xorm:"pk autoincr notnull 'id'"`
-	GunID       int64  `xorm:"bigint 'gun_id'"`
-	Serial      string `xorm:"varchar(128) 'serial'"`
-	WorkorderID int64  `xorm:"bigint 'workorder_id'"`
-	Seq         int    `xorm:"bigint 'sequence'"`
-	Count       int    `xorm:"int 'count'"`
-	Total       int    `xorm:"int 'total'"`
-	Mode        string `xorm:"varchar(128) 'mode'"`
-	UserID      int64  `xorm:"bigint 'user_id'"`
-	StepID      int64  `xorm:"bigint 'step_id'"`
+type Tools struct {
+	Id                 int64  `xorm:"pk autoincr notnull 'id'"`
+	GunID              int64  `xorm:"bigint 'gun_id'"`
+	Serial             string `xorm:"varchar(128) 'serial'"`
+	CurrentWorkorderID int64  `xorm:"bigint 'workorder_id'"` //当前正在进行的工单
+	Seq                int    `xorm:"bigint 'sequence'"`
+	Count              int    `xorm:"int 'count'"`
+	Total              int    `xorm:"int 'total'"`
+	Mode               string `xorm:"varchar(128) 'mode'"`
+	UserID             int64  `xorm:"bigint 'user_id'"`
+	StepID             int64  `xorm:"bigint 'step_id'"`
 }
 
 type RoutingOperations struct {
-	Id                  int64  `xorm:"pk autoincr notnull 'id'"`
-	OperationID         int64  `xorm:"bigint 'operation_id'"`
-	Job                 int    `xorm:"bigint 'job'"`
-	MaxOpTime           int    `xorm:"int 'max_op_time'"`
-	Name                string `xorm:"varchar(256) 'name'"`
-	Img                 string `xorm:"text 'img'"`
-	Tigntening_step_ref string `xorm:"varchar(256) 'tightening_step_ref'"`
+	Id                int64  `xorm:"pk autoincr notnull 'id'"`
+	OperationID       int64  `xorm:"bigint 'operation_id'"`
+	Job               int    `xorm:"bigint 'job'"`
+	MaxOpTime         int    `xorm:"int 'max_op_time'"`
+	Name              string `xorm:"varchar(256) 'name'"`
+	Img               string `xorm:"text 'img'"`
+	TighteningStepRef string `xorm:"varchar(256) 'tightening_step_ref'"`
 
 	ProductId    int64 `xorm:"bigint 'product_id'"`
 	WorkcenterID int64 `xorm:"bigint 'workcenter_id'"`

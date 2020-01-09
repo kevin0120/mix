@@ -128,7 +128,7 @@ func (rc *RecConn) WriteJSON(v interface{}) error {
 // The URL url specifies the host and request URI. Use requestHeader to specify
 // the origin (Origin), subprotocols (Sec-WebSocket-Protocol) and cookies
 // (Cookie). Use GetHTTPResponse() method for the response.Header to get
-// the selected subprotocol (Sec-WebSocket-Protocol) and cookies (Set-Cookie).
+// the selected subprotocol (Sec-WebSocket-Protocol) and cookies (SetupHandlers-Cookie).
 func (rc *RecConn) Dial(urlStr string, reqHeader http.Header) {
 	if urlStr == "" {
 		log.Fatal("Dial: Url cannot be empty")

@@ -161,7 +161,7 @@ func (cvi3_client *CVI3Client) manage() {
 			fmt.Printf("控制器 %s 发送失败:%s\n", err.Error())
 		}
 
-		//fmt.Printf("控制器:%s 发送:%s\n", cvi3_client.SN, string(v))
+		//fmt.Printf("控制器:%s 发送:%s\n", cvi3_client.SerialNumber, string(v))
 
 		<-time.After(time.Duration(300 * time.Millisecond)) //300毫秒发送一次信号
 	}

@@ -36,3 +36,5 @@ func (s *DefaultBroker) Publish(subject string, data []byte) error {
 func (s *DefaultBroker) DoRequest(subject string, data []byte, timeOut time.Duration) (resp []byte, err error) {
 	return
 }
+
+func (s *DefaultBroker) SetStatusHandler(handler StatusHandler) {}

@@ -1,20 +1,14 @@
 package openprotocol
 
 import (
-	"bytes"
-	"context"
 	"encoding/binary"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/socket_writer"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"net"
-	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -24,137 +18,116 @@ const (
 
 	REPLY_TIMEOUT  = time.Duration(100 * time.Millisecond)
 	MAX_REPLY_TIME = time.Duration(2000 * time.Millisecond)
-
-	DEFAULT_TCP_KEEPALIVE = time.Duration(5 * time.Second)
 )
 
-type ToolDispatch struct {
-	resultDispatch *utils.Dispatcher
-	curveDispatch  *utils.Dispatcher
-}
-
-type ControllerSubscribe func() error
+type ControllerSubscribe func(string) error
 
 type handlerPkg struct {
+	SN     string
 	Header OpenProtocolHeader
 	Body   string
 }
 
 type TighteningController struct {
-	sockClients          map[string]*socket_writer.SocketWriter
+	device.BaseDevice
+
+	sockClients          map[string]*clientContext
 	deviceConf           *tightening_device.TighteningDeviceConfig
-	keepAliveCount       int32
-	keepPeriod           time.Duration
-	reqTimeout           time.Duration
-	getToolInfoPeriod    time.Duration
-	Response             ResponseQueue
 	ProtocolService      *Service
-	dbController         *storage.Controllers
-	buffer               chan []byte
-	closing              chan chan struct{}
-	handlerBuf           chan handlerPkg
-	keepaliveDeadLine    atomic.Value
-	protocol             string
 	inputs               string
 	diag                 Diagnostic
-	tempResultCurve      map[int]*tightening_device.TighteningCurve
-	mtxResult            sync.Mutex
-	model                string
-	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
+	dispatcherBus        Dispatcher
+	dispatcherMap        map[string]dispatcherbus.DispatcherMap
+	isGlobalConn         bool
 
-	toolDispatches     map[string]*ToolDispatch
-	externalDispatches map[string]*utils.Dispatcher
-
-	requestChannel chan uint32
-	sequence       *utils.Sequence
-
-	handleRecvBuf []byte
-	writeOffset   int
-
-	device.BaseDevice
+	instance IOpenProtocolController
 }
 
-func (c *TighteningController)SerialNumber() string {
-	return c.BaseDevice.SerialNumber
-}
-
-func defaultControllerGet() *TighteningController {
-	return &TighteningController{
-		buffer:            make(chan []byte, 1024),
-		closing:           make(chan chan struct{}),
-		keepPeriod:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
-		reqTimeout:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
-		getToolInfoPeriod: time.Duration(OpenProtocolDefaultGetTollInfoPeriod),
-		protocol:          controller.OPENPROTOCOL,
-		BaseDevice:        device.CreateBaseDevice(),
-		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
-		toolDispatches:    map[string]*ToolDispatch{},
-	}
-}
-
-func (c *TighteningController) CreateToolsByConfig() error {
+func (c *TighteningController) createToolsByConfig() error {
 	conf := c.deviceConf
 	d := c.diag
-	ps := c.ProtocolService
 	if conf == nil {
 		return errors.New("Device Config Is Empty")
 	}
 	for _, v := range conf.Tools {
-		tool := CreateTool(c, v, d)
-		tool.SetMode(ps.GetDefaultMode())
-		c.toolDispatches[v.SN] = &ToolDispatch{
-			resultDispatch: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-			curveDispatch:  utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		tool := NewTool(c, v, d)
+		c.dispatcherMap[tool.SerialNumber()] = dispatcherbus.DispatcherMap{
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_RESULT): utils.CreateDispatchHandlerStruct(tool.onResult),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_CURVE):  utils.CreateDispatchHandlerStruct(tool.onCurve),
 		}
-		c.toolDispatches[v.SN].resultDispatch.Register(tool.OnResult)
-		c.toolDispatches[v.SN].curveDispatch.Register(tool.OnCurve)
-
 		c.AddChildren(v.SN, tool)
 	}
 	return nil
 }
 
-// TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
-func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service) *TighteningController {
+func (c *TighteningController) initController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) {
 
-	c := defaultControllerGet()
+	c.dispatcherMap = map[string]dispatcherbus.DispatcherMap{}
+	c.sockClients = map[string]*clientContext{}
+	c.isGlobalConn = false
+	c.BaseDevice = device.CreateBaseDevice(deviceConfig.Model, d, service)
 	c.diag = d
 	c.deviceConf = deviceConfig
 	c.ProtocolService = service
+	c.dispatcherBus = dp
 
-	c.BaseDevice.Cfg = VendorModels[c.deviceConf.Model][IO_CONFIG]
+	c.BaseDevice.Cfg = c.getInstance().GetVendorModel()[IO_MODEL]
 
 	c.initSubscribeInfos()
 
-	if err := c.CreateToolsByConfig(); err != nil {
-		d.Error("NewController CreateToolsByConfig Error", err)
+	if err := c.createToolsByConfig(); err != nil {
+		d.Error("newController createToolsByConfig Error", err)
 	}
 
-	c.externalDispatches = map[string]*utils.Dispatcher{
-		tightening_device.DISPATCH_RESULT:            utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		tightening_device.DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		tightening_device.DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		tightening_device.DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		tightening_device.DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+	c.initClients(deviceConfig, d)
+}
+
+func (c *TighteningController) initClients(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic) {
+
+	for _, v := range deviceConfig.Tools {
+		endpoint := v.Endpoint
+		sn := v.SN
+		if deviceConfig.Endpoint != "" {
+			// 全局链接
+			c.isGlobalConn = true
+			endpoint = deviceConfig.Endpoint
+			sn = deviceConfig.SN
+		} else {
+			// 每个工具独立链接
+			c.isGlobalConn = false
+		}
+
+		client := createClientContext(endpoint, d, c, sn)
+		c.sockClients[sn] = client
+
+		if c.isGlobalConn {
+			break
+		}
+	}
+}
+
+func (c *TighteningController) getClient(sn string) *clientContext {
+	if c.isGlobalConn {
+		return c.getDefaultTransportClient()
 	}
 
-	return c
+	return c.getTransportClientBySymbol(sn)
 }
 
 func (c *TighteningController) UpdateToolStatus(status string) {
+	var ss []device.DeviceStatus
 	for sn, v := range c.Children() {
 		tool := v.(*TighteningTool)
 		tool.UpdateStatus(status)
-
-		c.GetDispatch(tightening_device.DISPATCH_TOOL_STATUS).Dispatch(&[]device.DeviceStatus{
-			{
-				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
-				SN:     sn,
-				Status: status,
-			},
+		ss = append(ss, device.DeviceStatus{
+			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
+			SN:     sn,
+			Status: status,
 		})
 	}
+
+	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ss)
 }
 
 func (c *TighteningController) GetToolViaSerialNumber(toolSN string) (tightening_device.ITighteningTool, error) {
@@ -180,14 +153,6 @@ func (c *TighteningController) GetToolViaChannel(channel int) (tightening_device
 	return nil, errors.New("GetToolViaChannel Tool Not Found")
 }
 
-func (c *TighteningController) LoadController(controller *storage.Controllers) {
-	c.dbController = controller
-}
-
-func (c *TighteningController) Inputs() string {
-	return c.inputs
-}
-
 func (c *TighteningController) initSubscribeInfos() {
 	c.controllerSubscribes = []ControllerSubscribe{
 		//c.PSetSubscribe,
@@ -202,43 +167,16 @@ func (c *TighteningController) initSubscribeInfos() {
 	}
 }
 
-func (c *TighteningController) ProcessSubscribeControllerInfo() {
+func (c *TighteningController) ProcessSubscribeControllerInfo(sn string) {
 	for _, subscribe := range c.controllerSubscribes {
-		err := subscribe()
+		err := subscribe(sn)
 		if err != nil {
 			c.diag.Debug(fmt.Sprintf("OpenProtocol SubscribeControllerInfo Failed: %s", err.Error()))
 		}
 	}
 }
 
-func (c *TighteningController) ProcessRequest(mid string, noack string, station string, spindle string, data string) (interface{}, error) {
-	rev, err := GetVendorMid(c.Model(), mid)
-	if err != nil {
-		return nil, err
-	}
-
-	if c.Status() == device.STATUS_OFFLINE {
-		return nil, errors.New(device.STATUS_OFFLINE)
-	}
-
-	pkg := GeneratePackage(mid, rev, noack, station, spindle, data)
-
-	seq := c.sequence.GetSequence()
-	c.requestChannel <- seq
-	c.Response.Add(seq, nil)
-
-	c.Write([]byte(pkg))
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	reply := c.Response.Get(seq, ctx)
-
-	if reply == nil {
-		return nil, errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	return reply, nil
-}
-
-func CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
+func (c *TighteningController) CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
 	lenO := len(original)
 	data := make([]byte, lenO, lenO) // 最大只会这些数据
 	writeOffset := 0
@@ -267,13 +205,13 @@ func CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoeffici
 			writeOffset += 1
 			step = 2 //跳过这个字节
 		default:
-			e := errors.New("Desoutter Protocol Curve Raw Data 0xff不能单独出现")
+			e := errors.New("Desoutter IProtocol Curve Raw Data 0xff不能单独出现")
 			d.Error("CurveDataDecoding", e)
 			// do nothing
 		}
 	}
 	if writeOffset%6 != 0 {
-		e := errors.New("Desoutter Protocol Curve Raw Data Convert Fail")
+		e := errors.New("Desoutter IProtocol Curve Raw Data Convert Fail")
 		d.Error("CurveDataDecoding Fail", e)
 		return
 	}
@@ -295,8 +233,8 @@ func CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoeffici
 	return
 }
 
-func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
-	c.ProtocolService.diag.Debug(fmt.Sprintf("OpenProtocol Recv %s: %s%s\n", c.deviceConf.SN, pkg.Header.Serialize(), pkg.Body))
+func (c *TighteningController) handleMsg(pkg *handlerPkg) error {
+	c.ProtocolService.diag.Debug(fmt.Sprintf("OpenProtocol Recv %s: %s%s\n", pkg.SN, pkg.Header.Serialize(), pkg.Body))
 
 	handler, err := GetMidHandler(pkg.Header.MID)
 	if err != nil {
@@ -306,9 +244,9 @@ func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
 	return handler(c, pkg)
 }
 
-func (c *TighteningController) handleResult(result *tightening_device.TighteningResult) error {
+func (c *TighteningController) handleResult(result tightening_device.TighteningResult) error {
 	result.ControllerSN = c.deviceConf.SN
-	tool, err := c.GetToolViaChannel(result.ChannelID)
+	tool, err := c.getInstance().GetToolViaChannel(result.ChannelID)
 	if err != nil {
 		return err
 	}
@@ -318,14 +256,14 @@ func (c *TighteningController) handleResult(result *tightening_device.Tightening
 	result.ToolSN = toolSerialNumber
 
 	// 分发结果到工具进行处理
-	c.toolDispatches[toolSerialNumber].resultDispatch.Dispatch(result)
+	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_RESULT), result)
 
 	return nil
 }
 
 // seq, count
 func (c *TighteningController) calBatch(workorderID int64) (int, int) {
-	result, err := c.ProtocolService.DB.FindTargetResultForJobManual(workorderID)
+	result, err := c.ProtocolService.storageService.FindTargetResultForJobManual(workorderID)
 	if err != nil {
 		return 1, 1
 	}
@@ -339,34 +277,43 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 
 func (c *TighteningController) Start() error {
 	for _, v := range c.deviceConf.Tools {
-		_ = c.ProtocolService.DB.UpdateTool(&storage.Guns{
+		_ = c.ProtocolService.storageService.UpdateTool(&storage.Tools{
 			Serial: v.SN,
 			Mode:   "pset",
 		})
 	}
-
-	for _, dispatch := range c.toolDispatches {
-		dispatch.resultDispatch.Start()
-		dispatch.curveDispatch.Start()
+	for _, dd := range c.dispatcherMap {
+		c.dispatcherBus.LaunchDispatchersByHandlerMap(dd)
 	}
 
-	for _, dispatch := range c.externalDispatches {
-		dispatch.Start()
-	}
+	c.clearToolsResultAndCurve()
 
-	// 启动处理
-	go c.manage()
-	go c.handleRecv()
-
-	go c.Connect()
+	// 启动客户端
+	c.startupClients()
 
 	return nil
 }
 
+func (c *TighteningController) startupClients() {
+	for _, v := range c.sockClients {
+		go v.start()
+	}
+}
+
+func (c *TighteningController) shutdownClients() {
+	for _, v := range c.sockClients {
+		go v.stop()
+	}
+}
+
 func (c *TighteningController) Stop() error {
-	for _, dispatch := range c.toolDispatches {
-		dispatch.resultDispatch.Release()
-		dispatch.curveDispatch.Release()
+	// 停止客户端
+	c.shutdownClients()
+
+	for _, dd := range c.dispatcherMap {
+		for name, v := range dd {
+			c.dispatcherBus.Release(name, v.ID)
+		}
 	}
 
 	return nil
@@ -405,7 +352,7 @@ func (c *TighteningController) SetOutput(outputs []tightening_device.ControllerO
 		}
 	}
 
-	reply, err := c.ProcessRequest(MID_0200_CONTROLLER_RELAYS, "", "", "", strIo)
+	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0200_CONTROLLER_RELAYS, "", "", "", strIo)
 	if err != nil {
 		return err
 	}
@@ -418,204 +365,24 @@ func (c *TighteningController) SetOutput(outputs []tightening_device.ControllerO
 }
 
 func (c *TighteningController) Protocol() string {
-	return c.protocol
+	return tightening_device.TIGHTENING_OPENPROTOCOL
 }
 
 func (c *TighteningController) clearToolsResultAndCurve() {
 	for _, tool := range c.deviceConf.Tools {
-		err := c.ProtocolService.DB.ClearToolResultAndCurve(tool.SN)
+		err := c.ProtocolService.storageService.ClearToolResultAndCurve(tool.SN)
 		if err != nil {
 			c.diag.Error(fmt.Sprintf("Clear Tool: %s Result And Curve Failed", tool.SN), err)
 		}
 	}
 }
 
-func (c *TighteningController) initToolConnection() {
-	for _, tool := range c.deviceConf.Tools {
-		c.sockClients[tool.SN] = socket_writer.NewSocketWriter(c.deviceConf.Endpoint, c)
-	}
-}
-
-func (c *TighteningController) CreateTransports() {
-	for _, child := range c.Children() {
-		if child == nil {
-			continue
-		}
-		if writer := socket_writer.NewSocketWriter(c.deviceConf.Endpoint, c); writer != nil {
-			c.sockClients[child.SerialNumber()] = writer
-		}
-	}
-}
-
-func (c *TighteningController) doConnect(doConnectToolSymbol string, forceCreate bool) error {
-	if forceCreate {
-		//重新创建transport
-		if writer := socket_writer.NewSocketWriter(c.deviceConf.Endpoint, c); writer != nil {
-			c.sockClients[doConnectToolSymbol] = writer
-		} else {
-			err := errors.Errorf("Create Transport For %s Fail", doConnectToolSymbol)
-			c.diag.Error("doConnect", err)
-			return err
-		}
-	}
-	if writer, ok := c.sockClients[doConnectToolSymbol]; !ok {
-		err := errors.Errorf("Can Not Found Transport For %s", doConnectToolSymbol)
-		c.diag.Error("doConnect", err)
-		return err
-	} else {
-		for {
-			err := writer.Connect(DAIL_TIMEOUT)
-			if err != nil {
-				e := errors.Wrapf(err, "Connect To Tool %s", doConnectToolSymbol)
-				c.diag.Error("doConnect", e)
-			} else {
-				c.diag.Debug(fmt.Sprintf("doConnect Connect To %s Success", doConnectToolSymbol))
-				break
-			}
-
-			time.Sleep(time.Duration(c.reqTimeout))
-		}
-	}
-	return nil
-}
-
-//todo: 连接创建后做一下系统必要操作
-func (c *TighteningController) doConnectPart2(doConnectToolSymbol string) error {
-	// 处理不完整的结果和曲线
-	c.clearToolsResultAndCurve()
-
-	c.handleStatus(device.STATUS_ONLINE)
-
-	return c.startComm()
-}
-
-func (c *TighteningController) CloseTransport() {
-	var isCloseTransportSymbols []string
-	for symbol, writer := range c.sockClients {
-		if err := writer.Close(); err != nil {
-			e := errors.Wrapf(err, "Close Transport For %s Error", symbol)
-			c.diag.Error("CloseTransport", e)
-		}else {
-			isCloseTransportSymbols = append(isCloseTransportSymbols, symbol)
-		}
-	}
-	for _, isCloseSymbol := range isCloseTransportSymbols {
-		delete(c.sockClients, isCloseSymbol)
-	}
-}
-
-func (c *TighteningController) Connect() error {
-	c.UpdateStatus(device.STATUS_OFFLINE)
-	c.handlerBuf = make(chan handlerPkg, 1024)
-	c.writeOffset = 0
-	c.requestChannel = make(chan uint32, 1024)
-	c.sequence = utils.CreateSequence()
-	c.Response = ResponseQueue{
-		Results: map[interface{}]interface{}{},
-		mtx:     sync.Mutex{},
-	}
-
-	c.CreateTransports() // always success
-
-	for _, tool := range c.Children() {
-		sn := tool.SerialNumber()
-		if err := c.doConnect(sn, false); err == nil {
-			c.doConnectPart2(sn)
-		}
-	}
-
-	return nil
-}
-
-func (c *TighteningController) getTighteningCount() {
-	for {
-		select {
-		case <-time.After(c.getToolInfoPeriod):
-			rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
-			if err == nil {
-				continue
-			}
-
-			if c.Status() == device.STATUS_OFFLINE {
-				continue
-			}
-			req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
-			c.Write([]byte(req))
-		case stopDone := <-c.closing:
-			close(stopDone)
-			return
-		}
-	}
-}
-
-func (c *TighteningController) ToolInfoReq() error {
-	rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
-	if err != nil {
-		return err
-	}
-
-	req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
-	c.Write([]byte(req))
-
-	//var reply interface{} = nil
-
-	//for i := 0; i < MAX_REPLY_COUNT; i++ {
-	//	reply = c.Response.get(MID_0040_TOOL_INFO_REQUEST)
-	//	if reply != nil {
-	//		break
-	//	}
-	//
-	//	time.Sleep(REPLY_TIMEOUT)
-	//}
-	//
-	//if reply != nil {
-	//	ti := reply.(ToolInfo)
-	//
-	//	c.tighteningDevice.AddDevice(ti.ControllerSN, c)
-	//	c.tighteningDevice.AddDevice(ti.ToolSN, c)
-	//	c.handleStatus(controller.STATUS_ONLINE)
-	//} else {
-	//	c.handleStatus(controller.STATUS_OFFLINE)
-	//}
-
-	return nil
-}
-
 func (c *TighteningController) handlerOldResults() error {
 	return nil
 }
 
-func (c *TighteningController) KeepAliveCount() int32 {
-	return atomic.LoadInt32(&c.keepAliveCount)
-}
-
-func (c *TighteningController) updateKeepAliveCount(i int32) {
-	atomic.SwapInt32(&c.keepAliveCount, i)
-}
-
-func (c *TighteningController) addKeepAliveCount() {
-	atomic.AddInt32(&c.keepAliveCount, 1)
-}
-
-func (c *TighteningController) updateKeepAliveDeadLine() {
-	c.keepaliveDeadLine.Store(time.Now().Add(c.keepPeriod))
-}
-
-func (c *TighteningController) KeepAliveDeadLine() time.Time {
-	return c.keepaliveDeadLine.Load().(time.Time)
-}
-
-func (c *TighteningController) sendKeepalive() {
-	if c.Status() == device.STATUS_OFFLINE {
-		return
-	}
-
-	keepAlive := GeneratePackage(MID_9999_ALIVE, DEFAULT_REV, "1", "", "", "")
-	c.Write([]byte(keepAlive))
-}
-
-func (c *TighteningController) startComm() error {
-	reply, err := c.ProcessRequest(MID_0001_START, "", "", "", "")
+func (c *TighteningController) startComm(sn string) error {
+	reply, err := c.getClient(sn).ProcessRequest(MID_0001_START, "", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -627,236 +394,48 @@ func (c *TighteningController) startComm() error {
 	return nil
 }
 
-func (c *TighteningController) Write(buf []byte) {
-	c.diag.Debug(fmt.Sprintf("OpenProtocol Send %s: %s", c.deviceConf.SN, string(buf)))
-	c.buffer <- buf
-}
-
-func (c *TighteningController) handleStatus(status string) {
+func (c *TighteningController) handleStatus(sn string, status string) {
 
 	if status != c.Status() {
-		c.diag.Debug(fmt.Sprintf("OpenProtocol handleStatus %s:%s %s\n", c.Model(), c.deviceConf.SN, status))
-
+		c.diag.Info(fmt.Sprintf("OpenProtocol handleStatus Model:%s SN:%s %s\n", c.Model(), sn, status))
 		c.UpdateStatus(status)
-
-		if status == device.STATUS_OFFLINE {
-
-			// 断线重连
-			go c.Connect()
+		if status == device.BaseDeviceStatusOnline {
+			c.startComm(sn)
 		}
 
-		// 分发控制器状态
-		c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_STATUS).Dispatch(&[]device.DeviceStatus{
+		ss := []device.DeviceStatus{
 			{
 				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
 				SN:     c.deviceConf.SN,
 				Status: status,
 				Config: c.Config(),
 			},
-		})
-	}
-}
-
-func (c *TighteningController) Read(conn net.Conn) {
-	defer conn.Close()
-
-	buffer := make([]byte, c.ProtocolService.config().ReadBufferSize)
-
-	for {
-		conn.SetReadDeadline(time.Now().Add(c.keepPeriod * MAX_KEEP_ALIVE_CHECK).Add(1 * time.Second))
-		n, err := conn.Read(buffer)
-		if err != nil {
-			c.ProtocolService.diag.Error("read failed", err)
-			c.handleStatus(device.STATUS_OFFLINE)
-			break
 		}
-
-		c.updateKeepAliveCount(0)
-		c.receiveBuf <- buffer[0:n]
+		// 分发控制器状态 -> tightening device
+		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ss)
 	}
 }
 
-func (c *TighteningController) Parse(msg string) {
-	header := msg[0:LEN_HEADER]
-	headerObj := OpenProtocolHeader{}
-	headerObj.Deserialize(header)
-	body := msg[LEN_HEADER:]
-
-	pkg := handlerPkg{
-		Header: headerObj,
-		Body:   body,
-	}
-
-	c.handlerBuf <- pkg
-}
-
-func (c *TighteningController) Close() error {
-
-	for i := 0; i < 2; i++ {
-		//两个协程需要关闭
-		closed := make(chan struct{})
-		c.closing <- closed
-
-		<-closed
-	}
-	c.CloseTransport()
-
-	return nil
-}
-
-func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) error {
-	msg := append(src, data...)
-
-	//c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.deviceConf.SN, string(msg)))
-
-	lenMsg := len(msg)
-
-	// 如果头的长度不够
-	if lenMsg < LEN_HEADER {
-		return errors.New("Head Is Error")
-	}
-
-	header := OpenProtocolHeader{}
-	header.Deserialize(string(msg[0:LEN_HEADER]))
-
-	// 如果body的长度匹配
-	if header.LEN == lenMsg-LEN_HEADER {
-		pkg := handlerPkg{
-			Header: header,
-			Body:   string(msg[LEN_HEADER : LEN_HEADER+header.LEN]),
-		}
-
-		c.handlerBuf <- pkg
-	} else {
-		return errors.New(fmt.Sprintf("Body Len Err: %s", string(msg)))
-	}
-
-	return nil
-}
-
-func (c *TighteningController)getDefaultTransportClient() *socket_writer.SocketWriter {
+func (c *TighteningController) getDefaultTransportClient() *clientContext {
 	for _, sw := range c.sockClients {
 		return sw
 	}
 	return nil
 }
 
-
-func (c *TighteningController)getTransportClientBySymbol(symbol string) *socket_writer.SocketWriter {
+func (c *TighteningController) getTransportClientBySymbol(symbol string) *clientContext {
 	if sw, ok := c.sockClients[symbol]; !ok {
 		err := errors.Errorf("Can Not Found Transport For %s", symbol)
 		c.diag.Error("getTransportClientBySymbol", err)
 		return nil
-	}else {
+	} else {
 		return sw
 	}
 }
 
-func (c *TighteningController) handleRecv() {
-	c.handleRecvBuf = make([]byte, c.ProtocolService.config().ReadBufferSize)
-	c.receiveBuf = make(chan []byte, 65535)
-	lenBuf := len(c.handleRecvBuf)
+func (c *TighteningController) PSetSubscribe(sn string) error {
 
-	for {
-		select {
-		case buf := <-c.receiveBuf:
-			// 处理接收缓冲
-			var readOffset = 0
-
-			for {
-				if readOffset >= len(buf) {
-					break
-				}
-				index := bytes.IndexByte(buf[readOffset:], OP_TERMINAL)
-				if index == -1 {
-					// 没有结束字符,放入缓冲等待后续处理
-					restBuf := buf[readOffset:]
-					if c.writeOffset+len(restBuf) > lenBuf {
-						c.diag.Error("full", errors.New("full"))
-						break
-					}
-
-					copy(c.handleRecvBuf[c.writeOffset:c.writeOffset+len(restBuf)], restBuf)
-					c.writeOffset += len(restBuf)
-					break
-				} else {
-					// 找到结束字符，结合缓冲进行处理
-					err := c.handlePackageOPPayload(c.handleRecvBuf[0:c.writeOffset], buf[readOffset:readOffset+index])
-					if err != nil {
-						//数据需要丢弃
-						c.diag.Error("msg", err)
-					}
-
-					c.writeOffset = 0
-					readOffset += index + 1
-				}
-			}
-		}
-	}
-}
-
-func (c *TighteningController) manage() {
-
-	nextWriteThreshold := time.Now()
-	for {
-		select {
-		case <-time.After(c.keepPeriod):
-			if c.Status() == device.STATUS_OFFLINE {
-				continue
-			}
-
-			if c.KeepAliveDeadLine().Before(time.Now()) {
-				//到达了deadline
-				c.sendKeepalive()
-				c.updateKeepAliveDeadLine() //更新keepalivedeadline
-				c.addKeepAliveCount()
-			}
-		case v := <-c.buffer:
-			for nextWriteThreshold.After(time.Now()) {
-				time.Sleep(time.Microsecond * 100)
-			}
-
-			//fixme 获取默认的transport，未来要根据发送的结构体获取真实的transport
-			sw := c.getDefaultTransportClient()
-
-			if sw == nil {
-				continue
-			}
-
-			err := sw.Write([]byte(v))
-			if err != nil {
-				c.ProtocolService.diag.Error("Write Data Fail", err)
-			} else {
-				c.updateKeepAliveDeadLine()
-			}
-			nextWriteThreshold = time.Now().Add(c.reqTimeout)
-
-		case stopDone := <-c.closing:
-			c.diag.Debug("manage exit")
-			close(stopDone)
-			return //退出manage协程
-
-		case pkg := <-c.handlerBuf:
-			err := c.HandleMsg(&pkg)
-			if err != nil {
-				c.diag.Error("Open Protocol HandleMsg Fail", err)
-			}
-		}
-	}
-}
-
-func (c *TighteningController) getOldResult(last_id int64) (*tightening_device.TighteningResult, error) {
-	reply, err := c.ProcessRequest(MID_0064_OLD_SUBSCRIBE, "", "", "", fmt.Sprintf("%010d", last_id))
-	if err != nil {
-		return nil, err
-	}
-
-	return reply.(*tightening_device.TighteningResult), nil
-}
-
-func (c *TighteningController) PSetSubscribe() error {
-
-	reply, err := c.ProcessRequest(MID_0014_PSET_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0014_PSET_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -868,8 +447,8 @@ func (c *TighteningController) PSetSubscribe() error {
 	return nil
 }
 
-func (c *TighteningController) SelectorSubscribe() error {
-	reply, err := c.ProcessRequest(MID_0250_SELECTOR_SUBSCRIBE, "1", "", "", "")
+func (c *TighteningController) SelectorSubscribe(sn string) error {
+	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0250_SELECTOR_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -881,9 +460,9 @@ func (c *TighteningController) SelectorSubscribe() error {
 	return nil
 }
 
-func (c *TighteningController) JobInfoSubscribe() error {
+func (c *TighteningController) JobInfoSubscribe(sn string) error {
 
-	reply, err := c.ProcessRequest(MID_0034_JOB_INFO_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0034_JOB_INFO_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -895,8 +474,8 @@ func (c *TighteningController) JobInfoSubscribe() error {
 	return nil
 }
 
-func (c *TighteningController) IOInputSubscribe() error {
-	reply, err := c.ProcessRequest(MID_0210_INPUT_SUBSCRIBE, "1", "", "", "")
+func (c *TighteningController) IOInputSubscribe(sn string) error {
+	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0210_INPUT_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -908,9 +487,9 @@ func (c *TighteningController) IOInputSubscribe() error {
 	return nil
 }
 
-func (c *TighteningController) MultiSpindleResultSubscribe() error {
+func (c *TighteningController) MultiSpindleResultSubscribe(sn string) error {
 
-	reply, err := c.ProcessRequest(MID_0100_MULTI_SPINDLE_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0100_MULTI_SPINDLE_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -922,8 +501,8 @@ func (c *TighteningController) MultiSpindleResultSubscribe() error {
 	return nil
 }
 
-func (c *TighteningController) VinSubscribe() error {
-	reply, err := c.ProcessRequest(MID_0051_VIN_SUBSCRIBE, "1", "", "", "")
+func (c *TighteningController) VinSubscribe(sn string) error {
+	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0051_VIN_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -935,9 +514,9 @@ func (c *TighteningController) VinSubscribe() error {
 	return nil
 }
 
-func (c *TighteningController) ResultSubcribe() error {
+func (c *TighteningController) ResultSubcribe(sn string) error {
 
-	reply, err := c.ProcessRequest(MID_0060_LAST_RESULT_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0060_LAST_RESULT_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -949,9 +528,9 @@ func (c *TighteningController) ResultSubcribe() error {
 	return nil
 }
 
-func (c *TighteningController) AlarmSubcribe() error {
+func (c *TighteningController) AlarmSubcribe(sn string) error {
 
-	reply, err := c.ProcessRequest(MID_0070_ALARM_SUBSCRIBE, "1", "", "", "")
+	reply, err := c.getClient(sn).ProcessRequest(MID_0070_ALARM_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -963,8 +542,8 @@ func (c *TighteningController) AlarmSubcribe() error {
 	return nil
 }
 
-func (c *TighteningController) CurveSubscribe() error {
-	reply, err := c.ProcessRequest(MID_7408_LAST_CURVE_SUBSCRIBE, "1", "", "", "")
+func (c *TighteningController) CurveSubscribe(sn string) error {
+	reply, err := c.getClient(sn).ProcessRequest(MID_7408_LAST_CURVE_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -994,6 +573,31 @@ func (c *TighteningController) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
 }
 
-func (c *TighteningController) GetDispatch(name string) *utils.Dispatcher {
-	return c.externalDispatches[name]
+func (c *TighteningController) GetVendorModel() map[string]interface{} {
+	return nil
+}
+
+func (c *TighteningController) GetVendorMid(mid string) (string, error) {
+	rev, exist := c.getInstance().GetVendorModel()[mid]
+	if !exist {
+		return "", errors.New(fmt.Sprintf("MID %s Not Supported", mid))
+	}
+
+	return rev.(string), nil
+}
+
+func (c *TighteningController) New() IOpenProtocolController {
+	return &TighteningController{}
+}
+
+func (c *TighteningController) getInstance() IOpenProtocolController {
+	if c.instance == nil {
+		panic("Controller Instance Is Nil")
+	}
+
+	return c.instance
+}
+
+func (c *TighteningController) SetInstance(instance IOpenProtocolController) {
+	c.instance = instance
 }

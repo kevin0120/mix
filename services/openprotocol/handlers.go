@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils/ascii"
 	"strconv"
 	"strings"
@@ -51,10 +51,11 @@ func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
-	seq := <-c.requestChannel
-	c.Response.update(seq, request_errors["00"])
+	client := c.getClient(pkg.SN)
+	seq := <-client.requestChannel
+	client.Response.update(seq, request_errors["00"])
 
-	go c.ProcessSubscribeControllerInfo()
+	go c.ProcessSubscribeControllerInfo(pkg.SN)
 	//go c.SolveOldResults()
 	//go c.getTighteningCount()
 
@@ -63,6 +64,7 @@ func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
 
 // 处理曲线
 func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
 	//讲收到的曲线先做反序列化处理
 	var curve = CurveBody{}
 	err := ascii.Unmarshal(pkg.Body, &curve)
@@ -77,36 +79,38 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 
 	//_, ok := c.tempResultCurve[curve.ToolNumber]
 	//结果曲线 判断本toolNumber是否收到过数据
-	if _, ok := c.tempResultCurve[curve.ToolNumber]; !ok {
-		c.tempResultCurve[curve.ToolNumber] = &tightening_device.TighteningCurve{}
-	}
+	//if _, ok := client.tempResultCurve; !ok {
+	//	client.tempResultCurve = &tightening_device.TighteningCurve{}
+	//}
 	//收到的数据进行解析并将结果加到临时的切片中，等待整条曲线接收完毕。
 	torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.TorqueString), 64)
 	angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.AngleString), 64)
-	Torque, Angle := CurveDataDecoding([]byte(curve.Data), torqueCoefficient, angleCoefficient, c.diag)
+	Torque, Angle := c.CurveDataDecoding([]byte(curve.Data), torqueCoefficient, angleCoefficient, c.diag)
 
-	c.tempResultCurve[curve.ToolNumber].CUR_M = append(c.tempResultCurve[curve.ToolNumber].CUR_M, Torque...)
-	c.tempResultCurve[curve.ToolNumber].CUR_W = append(c.tempResultCurve[curve.ToolNumber].CUR_W, Angle...)
+	client.tempResultCurve.CUR_M = append(client.tempResultCurve.CUR_M, Torque...)
+	client.tempResultCurve.CUR_W = append(client.tempResultCurve.CUR_W, Angle...)
 	//当本次数据为本次拧紧曲线的最后一次数据时
 	if curve.Num == curve.Id {
 		//若取到的点的数量大于协议解析出来该曲线的点数，多出的部分删掉，否则有多少发多少.
-		if curve.MeasurePoints < len(c.tempResultCurve[curve.ToolNumber].CUR_M) {
-			c.tempResultCurve[curve.ToolNumber].CUR_M = c.tempResultCurve[curve.ToolNumber].CUR_M[0:curve.MeasurePoints]
-			c.tempResultCurve[curve.ToolNumber].CUR_W = c.tempResultCurve[curve.ToolNumber].CUR_W[0:curve.MeasurePoints]
+		if curve.MeasurePoints < len(client.tempResultCurve.CUR_M) {
+			client.tempResultCurve.CUR_M = client.tempResultCurve.CUR_M[0:curve.MeasurePoints]
+			client.tempResultCurve.CUR_W = client.tempResultCurve.CUR_W[0:curve.MeasurePoints]
 		}
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
-		tool, err := c.GetToolViaChannel(curve.ToolNumber)
+		tool, err := c.getInstance().GetToolViaChannel(curve.ToolNumber)
 		if err != nil {
 			return err
 		}
 
 		sn := tool.SerialNumber()
 
-		defer delete(c.tempResultCurve, curve.ToolNumber)
-		c.tempResultCurve[curve.ToolNumber].ToolSN = sn
-		c.tempResultCurve[curve.ToolNumber].UpdateTime = time.Now()
-		c.toolDispatches[sn].curveDispatch.Dispatch(c.tempResultCurve[curve.ToolNumber])
+		//defer delete(client.tempResultCurve, curve.ToolNumber)
+		client.tempResultCurve.ToolSN = sn
+		client.tempResultCurve.UpdateTime = time.Now()
+		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_CURVE), client.tempResultCurve)
+		// dispatch完后创建新的缓存拧紧曲线
+		client.tempResultCurve = tightening_device.NewTighteningCurve()
 	}
 	return nil
 }
@@ -125,14 +129,15 @@ func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error 
 
 // 处理历史结果
 func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
 	result_data := ResultDataOld{}
 	err := ascii.Unmarshal(pkg.Body, &result_data)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, result_data.ToTighteningResult())
+	seq := <-client.requestChannel
+	client.Response.update(seq, result_data.ToTighteningResult())
 
 	//flag := c.Response.get(MID_0064_OLD_SUBSCRIBE)
 
@@ -160,72 +165,78 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 
 // pset详情
 func handleMID_0013_PSET_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
 	pset_detail, err := DeserializePSetDetail(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, pset_detail)
+	seq := <-client.requestChannel
+	client.Response.update(seq, pset_detail)
 
 	return nil
 }
 
 // pset列表
 func handleMID_0011_PSET_LIST_REPLY(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
 	pset_list := PSetList{}
 	err := pset_list.Deserialize(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, pset_list)
+	seq := <-client.requestChannel
+	client.Response.update(seq, pset_list)
 
 	return nil
 }
 
 // job列表
 func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
 	job_list := JobList{}
 	err := job_list.Deserialize(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, job_list)
+	seq := <-client.requestChannel
+	client.Response.update(seq, job_list)
 
 	return nil
 }
 
 // job详情
 func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
 	jobDetaill, err := DeserializeJobDetail(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, jobDetaill)
+	seq := <-client.requestChannel
+	client.Response.update(seq, jobDetaill)
 
 	return nil
 }
 
 // 请求错误
 func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
 	errCode := pkg.Body[4:6]
 
-	seq := <-c.requestChannel
-	c.Response.update(seq, request_errors[errCode])
+	seq := <-client.requestChannel
+	client.Response.update(seq, request_errors[errCode])
 
 	return nil
 }
 
 // 请求成功
 func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
-	seq := <-c.requestChannel
-	c.Response.update(seq, request_errors["00"])
+	client := c.getClient(pkg.SN)
+	seq := <-client.requestChannel
+	client.Response.update(seq, request_errors["00"])
 
 	return nil
 }
@@ -246,13 +257,14 @@ func handleMID_0035_JOB_INFO(c *TighteningController, pkg *handlerPkg) error {
 		job_info.JobTighteningStatus == 0 {
 		// 推送job选择信息
 
-		job_select := wsnotify.WSJobSelect{
-			JobID: job_info.JobID,
+		job_select := tightening_device.JobInfo{
+			Job: job_info.JobID,
 		}
 
 		ws_str, _ := json.Marshal(job_select)
 		c.ProtocolService.diag.Debug(fmt.Sprintf("push job to hmi: %s", string(ws_str)))
-		c.ProtocolService.WS.WSSendJob(string(ws_str))
+		//c.ProtocolService.notifyService.WSSendJob(string(ws_str))
+		// TODO: 推送控制器job
 	}
 
 	return nil
@@ -272,7 +284,7 @@ func handleMID_0211_INPUT_MONITOR(c *TighteningController, pkg *handlerPkg) erro
 	c.inputs = inputs.Inputs
 
 	// 分发控制器输入状态
-	c.GetDispatch(tightening_device.DISPATCH_IO).Dispatch(inputs.ToTighteningControllerInput())
+	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_IO, inputs.ToIOInput())
 
 	return nil
 }
@@ -282,21 +294,23 @@ func handleMID_0101_MULTI_SPINDLE_RESULT(c *TighteningController, pkg *handlerPk
 	ms := MultiSpindleResult{}
 	ms.Deserialize(pkg.Body)
 
-	wsResults := make([]wsnotify.WSResult, len(ms.Spindles), len(ms.Spindles))
-	//wsResult := wsnotify.WSResult{}
-	for idx, v := range ms.Spindles {
-		wsResults[idx].Result = v.Result
-		wsResults[idx].MI = v.Torque
-		wsResults[idx].WI = v.Angle
-		//wsResults = append(wsResults, wsResult)
-	}
+	//wsResults := make([]wsnotify.WSResult, len(ms.Spindles), len(ms.Spindles))
+	////wsResult := wsnotify.WSResult{}
+	//for idx, v := range ms.Spindles {
+	//	wsResults[idx].Result = v.Result
+	//	wsResults[idx].MI = v.Torque
+	//	wsResults[idx].WI = v.Angle
+	//	//wsResults = append(wsResults, wsResult)
+	//}
 
-	wsStrs, err := json.Marshal(wsResults)
-	if err == nil {
-		c.ProtocolService.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(wsStrs))
-	}
+	//wsStrs, err := json.Marshal(wsResults)
+	//if err == nil {
+	//	c.ProtocolService.notifyService.NotifyAll(wsnotify.WS_EVENT_RESULT, string(wsStrs))
+	//}
 
-	return err
+	//return err
+
+	return nil
 }
 
 // 收到条码推送
@@ -311,12 +325,12 @@ func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
 
 		bc += ids[v]
 	}
-
-	c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_ID).Dispatch(&scanner.ScannerRead{
+	ss := scanner.ScannerRead{
 		Src:     tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
 		SN:      c.deviceConf.SN,
 		Barcode: bc,
-	})
+	}
+	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, ss)
 
 	return nil
 }
@@ -337,10 +351,10 @@ func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
 
 	switch ai.ErrorCode {
 	case EVT_CONTROLLER_TOOL_CONNECT:
-		c.UpdateToolStatus(device.STATUS_ONLINE)
+		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOnline)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.UpdateToolStatus(device.STATUS_OFFLINE)
+		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOffline)
 	}
 
 	return nil
@@ -356,10 +370,10 @@ func handleMID_0076_ALARM_STATUS(c *TighteningController, pkg *handlerPkg) error
 
 	switch as.ErrorCode {
 	case EVT_CONTROLLER_NO_ERR:
-		c.UpdateToolStatus(device.STATUS_ONLINE)
+		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOnline)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.UpdateToolStatus(device.STATUS_OFFLINE)
+		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOffline)
 	}
 
 	return nil

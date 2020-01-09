@@ -3,22 +3,15 @@ package odoo
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
-	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
-	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
-)
-
-const (
-	ODOO_STATUS_ONLINE  = "online"
-	ODOO_STATUS_OFFLINE = "offline"
 )
 
 type Diagnostic interface {
@@ -45,56 +38,39 @@ func NewEndpoint(url string, headers map[string]string, method string, name stri
 }
 
 type Service struct {
-	diag         Diagnostic
-	methods      Methods
-	DB           *storage.Service
-	HTTPDService interface {
-		GetHandlerByName(version string) (*httpd.Handler, error)
-	}
+	diag              Diagnostic
+	dispatcherBus     Dispatcher
+	dispatcherMap     dispatcherbus.DispatcherMap
+	storageService    IStorageService
+	httpd             *httpd.Service
 	httpClient        *resty.Client
 	endpoints         []*Endpoint
 	configValue       atomic.Value
 	status            string
-	WS                *wsnotify.Service
-	Aiis              *aiis.Service
 	workordersChannel chan interface{}
-	opened            bool
-	wg                sync.WaitGroup
 	closing           chan struct{}
 }
 
-func NewService(c Config, d Diagnostic) *Service {
-	e, _ := c.index()
+func NewService(c Config, d Diagnostic, dp Dispatcher, storage IStorageService, httpd *httpd.Service) *Service {
+	e, _ := c.endpoints()
 	s := &Service{
 		diag:              d,
-		methods:           Methods{},
 		endpoints:         e,
-		status:            ODOO_STATUS_OFFLINE,
+		status:            utils.STATUS_OFFLINE,
 		workordersChannel: make(chan interface{}, c.Workers),
-		closing:           make(chan struct{}),
-		opened:            false,
+		closing:           make(chan struct{}, 1),
+		dispatcherBus:     dp,
+		storageService:    storage,
+		httpd:             httpd,
 	}
 
-	s.methods.service = s
 	s.configValue.Store(c)
 
+	s.initGlbDispatcher()
+	s.ensureHttpClient()
+	s.setupHttpHandlers()
+
 	return s
-}
-
-func (s *Service) UpdateStatus(status string) {
-	if s.status != status {
-		s.status = status
-		s.PushStatus()
-	}
-}
-
-func (s *Service) PushStatus() {
-	odooStatus := wsnotify.WSOdooStatus{
-		Status: s.status,
-	}
-
-	str, _ := json.Marshal(odooStatus)
-	s.WS.WSSend(wsnotify.WS_EVENT_ODOO, string(str))
 }
 
 func (s *Service) GetEndpoints(name string) []Endpoint {
@@ -132,35 +108,34 @@ func (s *Service) ensureHttpClient() *resty.Client {
 	return client
 }
 
-func (s *Service) Open() error {
-	s.ensureHttpClient()
-
-	handler, err := s.HTTPDService.GetHandlerByName(httpd.BasePath)
-	if err != nil {
-		return errors.Wrap(err, "Odoo server get Httpd default Handler fail")
+func (s *Service) initGlbDispatcher() {
+	s.dispatcherMap = dispatcherbus.DispatcherMap{
+		dispatcherbus.DISPATCHER_MAINTENANCE_INFO: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_ORDER_NEW:        utils.CreateDispatchHandlerStruct(nil),
 	}
+}
+
+func (s *Service) Open() error {
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+	go s.taskSaveWorkorders()
+	return nil
+}
+
+func (s *Service) Close() error {
+	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
+	s.closing <- struct{}{}
+	return nil
+}
+
+func (s *Service) setupHttpHandlers() {
+
+	handler, _ := s.httpd.GetHandlerByName(httpd.BasePath)
 
 	r := httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/results",
-		HandlerFunc: s.methods.getResults,
-	}
-	handler.AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PATCH",
-		Pattern:     "/results/{id:int}",
-		HandlerFunc: s.methods.patchResult,
-	}
-	handler.AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "POST",
 		Pattern:     "/workorders",
-		HandlerFunc: s.methods.postWorkorders,
+		HandlerFunc: s.postWorkorders,
 	}
 	handler.AddRoute(r)
 
@@ -168,7 +143,7 @@ func (s *Service) Open() error {
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
 		Pattern:     "/mrp.routing.workcenter",
-		HandlerFunc: s.methods.putSyncRoutingOpertions,
+		HandlerFunc: s.putSyncRoutingOpertions,
 	}
 	handler.AddRoute(r)
 
@@ -176,7 +151,7 @@ func (s *Service) Open() error {
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
 		Pattern:     "/mrp.routing.workcenter.delete",
-		HandlerFunc: s.methods.deleteRoutingOpertions,
+		HandlerFunc: s.deleteRoutingOpertions,
 	}
 	handler.AddRoute(r)
 
@@ -184,7 +159,7 @@ func (s *Service) Open() error {
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "POST",
 		Pattern:     "/maintenance",
-		HandlerFunc: s.methods.postMaintenance,
+		HandlerFunc: s.postMaintenance,
 	}
 	handler.AddRoute(r)
 
@@ -192,38 +167,16 @@ func (s *Service) Open() error {
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "DELETE",
 		Pattern:     "/mrp.routing.workcenter/all",
-		HandlerFunc: s.methods.deleteAllRoutingOpertions,
+		HandlerFunc: s.deleteAllRoutingOpertions,
 	}
 	handler.AddRoute(r)
-
-	s.Aiis.OdooStatusDispatcher.Register(s.OnStatus)
-	s.Aiis.SyncGun = s.GetGunID
-
-	for i := 0; i < s.Config().Workers; i++ {
-		s.wg.Add(1)
-		go s.taskSaveWorkorders()
-	}
-	s.opened = true
-	return nil
 }
 
-func (s *Service) Close() error {
-	if !s.opened {
-		return nil
-	}
-	for i := 0; i < s.Config().Workers; i++ {
-		s.closing <- struct{}{}
-	}
-
-	s.wg.Wait()
-
-	return nil
-}
-
-func (s *Service) HandleWorkorder(data []byte) {
+func (s *Service) handleWorkorder(data []byte) {
 	s.workordersChannel <- data
 }
-func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string, ch <-chan int) ([]byte, error) {
+
+func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error) {
 
 	var err error
 	var body []byte
@@ -241,12 +194,11 @@ func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, 
 		body, err = s.getWorkorder(url, endpoint.method)
 		if err == nil {
 			// 如果第一次就成功，推出循环
-			s.HandleWorkorder(body)
-			<-ch
+			s.handleWorkorder(body)
 			return body, nil
 		}
 	}
-	<-ch
+
 	return nil, errors.Wrap(err, "Get workorder fail")
 }
 
@@ -276,235 +228,35 @@ func (s *Service) getWorkorder(url string, method string) ([]byte, error) {
 	return nil, nil
 }
 
-func (s *Service) GetGun(serial string) (ODOOGun, error) {
-
-	var err error
-	var gun ODOOGun
-	endpoints := s.GetEndpoints("getGun")
-	for _, endpoint := range endpoints {
-		body, err := s.getGun(fmt.Sprintf(endpoint.url, serial), endpoint.method)
-		if err == nil {
-			// 如果第一次就成功，推出循环
-			var guns []ODOOGun
-			err = json.Unmarshal(body, &guns)
-			if err != nil || len(guns) == 0 {
-				return gun, errors.Wrap(err, "Get gun fail")
-			}
-
-			return guns[0], nil
-		}
-	}
-
-	return gun, errors.Wrap(err, "Get gun fail")
-}
-
-func (s *Service) GetGunID(serial string) (int64, error) {
-
-	var err error
-	//var gun ODOOGun
-	endpoints := s.GetEndpoints("getGun")
-	for _, endpoint := range endpoints {
-		body, err := s.getGun(fmt.Sprintf(endpoint.url, serial), endpoint.method)
-		if err == nil {
-			// 如果第一次就成功，推出循环
-			var guns []ODOOGun
-			err = json.Unmarshal(body, &guns)
-			if err != nil || len(guns) == 0 {
-				return 0, errors.Wrap(err, "Get gun fail")
-			}
-
-			return guns[0].ID, nil
-		}
-	}
-
-	return 0, errors.Wrap(err, "Get gun fail")
-}
-
-func (s *Service) getGun(url string, method string) ([]byte, error) {
-	r := s.httpClient.R()
-	var resp *resty.Response
-	var err error
-
-	switch method {
-	case "GET":
-		resp, err = r.Get(url)
-		if err != nil {
-			return nil, fmt.Errorf("Get gun fail: %s", err.Error())
-		} else {
-			status := resp.StatusCode()
-			if status != http.StatusOK {
-				return nil, fmt.Errorf("Get gun fail: %d", status)
-			} else {
-				return resp.Body(), nil
-			}
-		}
-	default:
-		return nil, errors.New("Get gun :the Method is wrong")
-
-	}
-
-	return nil, nil
-}
-
-func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workorders, error) {
-
-	var finalErr error = nil
-	dbWorkorders := make([]storage.Workorders, len(workorders))
-
-	for i, v := range workorders {
-
-		o := storage.Workorders{}
-
-		if len(v.Consumes) == 0 {
-			// 忽略没有消耗品的工单
-			continue
-		}
-
-		exist, _ := s.DB.WorkorderExists(v.ID)
-		if exist {
-			// 忽略已存在的工单
-			o, err := s.DB.GetWorkorder(v.ID, false)
-			if err != nil {
-				continue
-			}
-			dbWorkorders[i] = o
-		} else {
-			o.Status = "ready"
-			o.WorkorderID = v.ID
-			o.HMISN = v.HMI.UUID
-			o.WorkcenterCode = v.Workcenter.Code
-			o.Knr = v.KNR
-			o.LongPin = v.LongPin
-			o.Vin = v.VIN
-			o.MaxOpTime = v.Max_op_time
-			//o.WorkSheet = v.Worksheet
-			o.UserID = 1
-			o.ImageOPID = v.ImageOPID
-			o.VehicleTypeImg = v.VehicleTypeImg
-			o.UpdateTime = time.Now()
-			o.JobID, _ = strconv.Atoi(v.Job)
-
-			o.MO_Year = v.MO_Year
-			o.MO_Pin_check_code = v.MO_Pin_check_code
-			o.MO_Pin = v.MO_Pin
-			o.MO_FactoryName = v.MO_FactoryName
-			o.MO_AssemblyLine = v.MO_AssemblyLine
-			o.MO_EquipemntName = v.MO_EquipemntName
-			o.MO_Lnr = v.MO_Lnr
-			o.MO_Model = v.MO_Model
-			sConsumes, _ := json.Marshal(v.Consumes)
-			o.Consumes = string(sConsumes)
-
-			//results := []storage.Results{}
-			//result_count := 0
-			//ignore := false
-			//for k, consu := range v.Consumes {
-			//	if len(consu.ResultIDs) == 0 {
-			//		// 忽略没有结果的消耗品
-			//		continue
-			//	}
-			//
-			//	r := storage.Results{}
-			//	r.ControllerSN = consu.ControllerSN
-			//	r.ToolSN = consu.ToolSN
-			//	r.PSet, _ = strconv.Atoi(consu.PSet)
-			//	r.ToleranceMax = consu.ToleranceMax
-			//	r.ToleranceMin = consu.ToleranceMin
-			//	r.ToleranceMaxDegree = consu.ToleranceMaxDegree
-			//	r.ToleranceMinDegree = consu.ToleranceMinDegree
-			//	r.NutNo = consu.NutNo
-			//	r.Batch = fmt.Sprintf("%d/%d", k+1, len(v.Consumes))
-			//
-			//	//r.WorkorderID = o.WorkorderID
-			//	r.Result = storage.RESULT_NONE
-			//	r.HasUpload = false
-			//	r.Stage = storage.RESULT_STAGE_INIT
-			//	r.UpdateTime = time.Now()
-			//	r.PSetDefine = ""
-			//	r.ResultValue = ""
-			//	r.Count = 1
-			//	r.UserID = 1
-			//
-			//	if len(consu.ResultIDs) == 0 {
-			//		ignore = true
-			//		break
-			//	}
-			//
-			//	for _, result_id := range consu.ResultIDs {
-			//		result_count++
-			//
-			//		r.OffsetX = consu.X
-			//		r.OffsetY = consu.Y
-			//
-			//		r.Seq = result_count
-			//		r.ResultId = result_id
-			//		r.MaxRedoTimes = consu.Max_redo_times
-			//		results = append(results, r)
-			//	}
-			//}
-
-			//o.LastResultID = results[len(results)-1].Id
-
-			e := s.DB.InsertWorkorder(&o, nil, true, false, true)
-			if e != nil {
-				finalErr = e
-			}
-			dbWorkorders[i] = o
-		}
-
-	}
-
-	return dbWorkorders, finalErr
-}
-
-func (s *Service) OnStatus(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	status := data.(string)
-	s.UpdateStatus(status)
-}
-
-func (s *Service) Status() string {
-	return s.status
-}
-
 func (s *Service) taskSaveWorkorders() {
 	for {
 		select {
 		case payload := <-s.workordersChannel:
-			//s.handleSaveWorkorders(payload)
-			code, err := s.DB.WorkorderIn(payload.([]byte))
+
+			orderOut, err := s.handleSaveWorkorders(payload)
 			if err != nil {
-				s.diag.Error("收到下发工单本地化存储时出错", err)
+				s.diag.Error("Save Workorder Failed", err)
 				break
 			}
-			orderOut, _ := s.DB.WorkorderOut(code, 0)
-			out, _ := json.Marshal(orderOut)
-			s.diag.Debug(fmt.Sprintf("收到工单處理後: %s", string(out)))
-			var orderHmi []interface{}
-			orderHmi = append(orderHmi, orderOut)
-			//fmt.Println(string(orderOut))
-			//fmt.Println(orderHmi)
-			body, _ := json.Marshal(wsnotify.GenerateResult(0, WS_ORDER_NEW_ORDER, orderHmi))
 
-			s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
-			s.diag.Debug(fmt.Sprintf("收到工单并推送HMI: %s", string(body)))
+			s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_ORDER_NEW, orderOut)
 
 		case <-s.closing:
 			s.diag.Info("taskSaveWorkorders closed")
-			s.wg.Done()
 			return
 		}
 	}
 }
 
-func (s *Service) handleSaveWorkorders(payload interface{}) {
-	//defer debug.FreeOSMemory() //快速释放不必要的内存
+func (s *Service) handleSaveWorkorders(payload interface{}) (interface{}, error) {
 
-	workorders := payload.(*[]ODOOWorkorder)
-	s.CreateWorkorders(*workorders)
+	code, err := s.storageService.WorkorderIn(payload.([]byte))
+	if err != nil {
+		return nil, err
+	}
+
+	orderOut, _ := s.storageService.WorkorderOut(code, 0)
+	return orderOut, nil
 }
 
 func (s *Service) TryCreateMaintenance(body interface{}) error {
@@ -538,26 +290,6 @@ func (s *Service) TryCreateMaintenance(body interface{}) error {
 
 	}
 	return err
-}
-
-func (s *Service) GetConsumeBySeq(workorder *storage.Workorders, seq int) (*ODOOConsume, error) {
-	if workorder == nil {
-		return nil, errors.New("Workorder Is Nil")
-	}
-
-	consumes := []ODOOConsume{}
-	json.Unmarshal([]byte(workorder.Consumes), &consumes)
-	if len(consumes) == 0 {
-		return nil, errors.New("Consumes Is Empty")
-	}
-
-	for k, v := range consumes {
-		if v.Seq == seq {
-			return &consumes[k], nil
-		}
-	}
-
-	return nil, errors.New("Consume Not Found")
 }
 
 func (s *Service) GetConsumeBySeqInStep(step *storage.Steps, seq int) (*StepComsume, error) {

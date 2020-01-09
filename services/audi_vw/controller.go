@@ -1,15 +1,12 @@
 package audi_vw
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"net"
 	"sync"
@@ -26,6 +23,7 @@ const (
 )
 
 type TighteningController struct {
+	device.BaseDevice
 	w           *socket_writer.SocketWriter
 	Srv         *Service
 	StatusValue atomic.Value
@@ -35,14 +33,14 @@ type TighteningController struct {
 	sequence          uint32 // 1~9999
 	buffer            chan []byte
 	Response          ResponseQueue
-	mux_seq           sync.Mutex
-	keep_period       time.Duration
-	toolInfo_period   time.Duration
-	req_timeout       time.Duration
-	recv_flag         bool
+	muxSequence       sync.Mutex
+	keepPeriod        time.Duration
+	toolInfoPeriod    time.Duration
+	writeTimeout      time.Duration
+	recvFlag          bool
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
-	cfg               controller.ControllerConfig
+	cfg               tightening_device.TighteningDeviceConfig
 	protocol          string
 }
 
@@ -64,8 +62,8 @@ func (c *TighteningController) addKeepAliveCount() {
 
 func (c *TighteningController) Sequence() uint32 {
 
-	c.mux_seq.Lock()
-	defer c.mux_seq.Unlock()
+	c.muxSequence.Lock()
+	defer c.muxSequence.Unlock()
 
 	seq := c.sequence
 
@@ -79,8 +77,8 @@ func (c *TighteningController) Sequence() uint32 {
 }
 
 func (c *TighteningController) setSequence(i uint32) {
-	c.mux_seq.Lock()
-	defer c.mux_seq.Unlock()
+	c.muxSequence.Lock()
+	defer c.muxSequence.Unlock()
 	if i >= MAXSEQUENCE {
 		c.sequence = MINSEQUENCE
 	} else {
@@ -102,7 +100,7 @@ func (c *TighteningController) updateStatus(status string) {
 
 		c.StatusValue.Store(status)
 
-		if status == controller.STATUS_OFFLINE {
+		if status == device.BaseDeviceStatusOffline {
 			c.Close()
 
 			// 断线重连
@@ -110,13 +108,13 @@ func (c *TighteningController) updateStatus(status string) {
 		}
 
 		// 将最新状态推送给hmi
-		s := wsnotify.WSStatus{
-			SN:     c.cfg.SN,
-			Status: string(status),
-		}
+		//s := wsnotify.WSStatus{
+		//	SN:     c.cfg.SN,
+		//	Status: string(status),
+		//}
 
-		msg, _ := json.Marshal(s)
-		c.Srv.WS.WSSendControllerStatus(string(msg))
+		//msg, _ := json.Marshal(s)
+		//c.Srv.notifyService.WSSendControllerStatus(string(msg))
 
 		c.Srv.diag.Debug(fmt.Sprintf("CVI3:%s %s\n", c.cfg.SN, status))
 
@@ -126,18 +124,18 @@ func (c *TighteningController) updateStatus(status string) {
 func NewController(c Config) TighteningController {
 
 	cont := TighteningController{
-		buffer:          make(chan []byte, 1024),
-		response:        make(chan string),
-		closing:         make(chan chan struct{}),
-		sequence:        MINSEQUENCE,
-		mux_seq:         sync.Mutex{},
-		keep_period:     time.Duration(c.KeepAlivePeriod),
-		toolInfo_period: time.Duration(c.GetToolInfoPeriod),
-		req_timeout:     time.Duration(c.ReqTimeout),
-		protocol:        controller.AUDIPROTOCOL,
+		buffer:         make(chan []byte, 1024),
+		response:       make(chan string),
+		closing:        make(chan chan struct{}),
+		sequence:       MINSEQUENCE,
+		muxSequence:    sync.Mutex{},
+		keepPeriod:     time.Duration(c.KeepAlivePeriod),
+		toolInfoPeriod: time.Duration(c.GetToolInfoPeriod),
+		writeTimeout:   time.Duration(c.ReqTimeout),
+		protocol:       tightening_device.TIGHTENING_AUDIVW,
 	}
 
-	cont.StatusValue.Store(controller.STATUS_OFFLINE)
+	cont.StatusValue.Store(device.BaseDeviceStatusOffline)
 
 	return cont
 }
@@ -154,7 +152,7 @@ func (c *TighteningController) Start() error {
 
 	c.Srv.DB.ResetTightning(c.cfg.SN)
 
-	c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
+	//c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
 
 	// 启动心跳检测
 	//go c.keep_alive_check()
@@ -170,12 +168,12 @@ func (c *TighteningController) manage() {
 	nextWriteThreshold := time.Now()
 	for {
 		select {
-		case <-time.After(c.keep_period):
-			if c.Status() == controller.STATUS_OFFLINE {
+		case <-time.After(c.keepPeriod):
+			if c.Status() == device.BaseDeviceStatusOffline {
 				continue
 			}
 			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				go c.updateStatus(controller.STATUS_OFFLINE)
+				go c.updateStatus(device.BaseDeviceStatusOffline)
 				c.updateKeepAliveCount(0)
 				continue
 			}
@@ -185,8 +183,8 @@ func (c *TighteningController) manage() {
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
 				c.addKeepAliveCount()
 			}
-		case <-time.After(c.toolInfo_period):
-			if c.Status() == controller.STATUS_OFFLINE {
+		case <-time.After(c.toolInfoPeriod):
+			if c.Status() == device.BaseDeviceStatusOffline {
 				continue
 			}
 			c.getToolInfo()
@@ -201,7 +199,7 @@ func (c *TighteningController) manage() {
 			} else {
 				c.updateKeepAliveDeadLine()
 			}
-			nextWriteThreshold = time.Now().Add(c.req_timeout)
+			nextWriteThreshold = time.Now().Add(c.writeTimeout)
 		case stopDone := <-c.closing:
 			close(stopDone)
 			return //退出manage协程
@@ -217,7 +215,7 @@ func (c *TighteningController) getToolInfo() {
 }
 
 func (c *TighteningController) sendKeepalive() {
-	if c.Status() == controller.STATUS_OFFLINE {
+	if c.Status() == device.BaseDeviceStatusOffline {
 		return
 	}
 
@@ -231,19 +229,19 @@ func (c *TighteningController) sendKeepalive() {
 //func (c *TighteningController) keep_alive_check() {
 //
 //	for i := 0; i < MAX_KEEP_ALIVE_CHECK; i++ {
-//		if c.recv_flag == true {
-//			c.updateStatus(STATUS_ONLINE)
-//			c.recv_flag = false
-//			time.Sleep(c.keep_period)
+//		if c.recvFlag == true {
+//			c.updateStatus(BaseDeviceStatusOnline)
+//			c.recvFlag = false
+//			time.Sleep(c.keepPeriod)
 //
 //			break
 //		} else {
 //			if i == (MAX_KEEP_ALIVE_CHECK - 1) {
-//				c.updateStatus(STATUS_OFFLINE)
+//				c.updateStatus(BaseDeviceStatusOffline)
 //			}
 //		}
 //
-//		time.Sleep(c.keep_period)
+//		time.Sleep(c.keepPeriod)
 //	}
 //
 //}
@@ -273,12 +271,12 @@ func (c *TighteningController) Write(buf []byte, seq uint32) {
 //			break
 //		}
 //
-//		<-time.After(time.Duration(c.req_timeout)) //300毫秒发送一次信号
+//		<-time.After(time.Duration(c.writeTimeout)) //300毫秒发送一次信号
 //	}
 //}
 
 func (c *TighteningController) Connect() error {
-	c.StatusValue.Store(controller.STATUS_OFFLINE)
+	c.StatusValue.Store(device.BaseDeviceStatusOffline)
 	c.setSequence(MINSEQUENCE)
 
 	c.Response = ResponseQueue{
@@ -301,7 +299,7 @@ func (c *TighteningController) Connect() error {
 		time.Sleep(time.Duration(c.Srv.config().KeepAlivePeriod * 3))
 	}
 
-	c.updateStatus(controller.STATUS_ONLINE)
+	c.updateStatus(device.BaseDeviceStatusOnline)
 
 	// 启动发送
 	go c.manage()
@@ -310,7 +308,7 @@ func (c *TighteningController) Connect() error {
 }
 
 func (c *TighteningController) updateKeepAliveDeadLine() {
-	c.keepaliveDeadLine.Store(time.Now().Add(c.keep_period))
+	c.keepaliveDeadLine.Store(time.Now().Add(c.keepPeriod))
 }
 
 func (c *TighteningController) KeepAliveDeadLine() time.Time {
@@ -363,7 +361,7 @@ func (c *TighteningController) Read(conn net.Conn) {
 // 拧紧抢使能
 func (c *TighteningController) ToolControl(enable bool, channel int) error {
 	tool_channel := ""
-	if channel != controller.DEFAULT_TOOL_CHANNEL {
+	if channel != 1 {
 		tool_channel = fmt.Sprintf("<KNR>%d</KNR>", channel)
 	}
 
@@ -389,7 +387,7 @@ func (c *TighteningController) ToolControl(enable bool, channel int) error {
 		if header_str != "" {
 			break
 		}
-		time.Sleep(time.Duration(c.req_timeout))
+		time.Sleep(time.Duration(c.writeTimeout))
 	}
 
 	if header_str == "" {
@@ -415,7 +413,7 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 	//sdate, stime := utils.GetDateTime()
 
 	tool_channel := ""
-	if channel != controller.DEFAULT_TOOL_CHANNEL {
+	if channel != 1 {
 		tool_channel = fmt.Sprintf("<KNR>%d</KNR>", channel)
 	}
 
@@ -437,7 +435,7 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 		if header_str != "" {
 			break
 		}
-		time.Sleep(time.Duration(c.req_timeout))
+		time.Sleep(time.Duration(c.writeTimeout))
 	}
 
 	if header_str == "" {
@@ -460,22 +458,22 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 func (c *TighteningController) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
 	var info openprotocol.ToolInfo
 
-	var t controller.ToolConfig
+	//var t tightening_device.ToolConfig
 
 	var toolExist = false
 
-	for _, t = range c.cfg.Tools {
-		if t.ToolChannel == int(ti.MSL_MSG.KNR) {
-			toolExist = true
-			break
-		}
-	}
+	//for _, t = range c.cfg.Tools {
+	//	//if t.ToolChannel == int(ti.MSL_MSG.KNR) {
+	//	//	toolExist = true
+	//	//	break
+	//	//}
+	//}
 
 	if !toolExist {
-		c.Srv.diag.Error("audiVW2OPToolInfo", errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
+		//c.Srv.diag.Error("audiVW2OPToolInfo", errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
 	}
 
-	info.ToolSN = t.SerialNO
+	//info.ToolSN = t.SerialNO
 	info.CountSinLastService = int(ti.MSL_MSG.CSR)
 	info.TotalTighteningCount = int(ti.MSL_MSG.CLT)
 

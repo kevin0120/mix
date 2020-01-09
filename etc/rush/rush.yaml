@@ -47,8 +47,7 @@ aiis:
   grpc_server: 127.0.0.1:9093
   keep_alive: 3s
   recheck: false
-  mesopenworkurl: http://127.0.0.1:8080/workorders/%s/start
-  mesfinishworkurl: http://127.0.0.1:8080/workorders/%s/finish
+  transport_type: grpc
 odoo:
   urls:
   - http://127.0.0.1:8069
@@ -58,18 +57,9 @@ odoo:
   workers: 8
   endpoints:
   - name: getWorkorder
-#    path: /api/v1/mrp.workorders?code=%s&limit=1&order=production_date
     path: /ts002/workorders?code=%s&limit=1&order=production_date
     headers:
     method: GET
-  - name: getGun
-    path: /api/v1/guns?serial=%s
-    headers:
-    method: GET
-  - name: createMO
-    path: /api/v1/mrp.productions
-    headers:
-    method: POST
   - name: tryCreateMaintenance
     path: /api/v1/maintenance/requests/try
     headers:
@@ -77,15 +67,15 @@ odoo:
 
 websocket:
   route: /rush/v1/ws
-  read_buf_size: 10000000
-  write_buf_size: 10000000
+  read_buf_size: 4096
+  write_buf_size: 4096
   workcenter: TA-01L
 
 storage:
   db_url: 127.0.0.1:5432
   db_name: rush_dev
-  db_user: odoo
-  db_pwd: odoo
+  db_user: admin
+  db_pwd: admin
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -117,7 +107,7 @@ openprotocol:
   default_mode: pset
 
 scanner:
-  enable: true
+  enable: false
 #  entity_label: 3118:2305
 io:
   enable: true
@@ -134,7 +124,7 @@ io:
 #      address: 192.168.127.203:502
 
 reader:
-  enable: true
+  enable: false
 
 device:
   enable: true
@@ -144,22 +134,27 @@ device:
 tightening_device:
   enable: true
   devices:
-    - model: ModelDesoutterDeltaWrench
-      protocol: OpenProtocol
-      endpoint: tcp://192.168.5.186:4545
-      sn: c1
-      tools:
-        - sn: xx0011
-          channel: 1
-        - sn: xx0011
-          channel: 0
-
-#    - model: MODEL_DESOUTTER_CVI3
+#    - model: ModelDesoutterDeltaWrench
 #      protocol: OpenProtocol
-#      endpoint: tcp://192.168.127.109:4545
-#      sn: 0002
+#      endpoint: tcp://192.168.5.187:4545
+#      sn: c1
 #      tools:
-#        - sn: 1234
+#        - sn: xx0011
+#          channel: 1
+#        - sn: xx0011
+#          channel: 0
+
+    - model: ModelDesoutterCvi3
+      protocol: OpenProtocol
+      endpoint: tcp://192.168.3.23:4545
+      sn: 0002
+      tools:
+        - sn: 1234
+          channel: 51
+          endpoint: tcp://192.168.3.23:4545
+#        - sn: 5678
+#          channel: 1
+#          endpoint: tcp://192.168.3.23:4546
 #
 #    - model: MODEL_DESOUTTER_CVI3
 #      protocol: Audi/VW
@@ -171,7 +166,6 @@ tightening_device:
 #      sn: 0001
 
 
-# 协议类型: Audi/VW, OpenProtocol
 broker:
   enable: false
   connect-urls:
@@ -182,22 +176,3 @@ broker:
     name: Dummy Server
     token: Dummy Token
   provider: nats
-controller_service:
-  enable: false
-  workers: 1
-  controllers:
-#    - serial_no: 0001
-#      protocol: OpenProtocol
-#      remote_ip: 192.168.1.101
-#      port: 4546
-#      channel: 51
-#
-#    - serial_no: 27231800455
-#      protocol: Audi/VW
-#      remote_ip: 192.168.5.212
-#      port: 4700
-#      tools:
-#      - gun_serial: 15C92257 5.7.1
-#        channel: 1
-#      - gun_serial: 18G53917 5.8.2
-#        channel: 2

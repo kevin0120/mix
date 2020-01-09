@@ -55,7 +55,7 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 			if i > 0 {
 				rValue.Field(i).SetString("hhhhhhhh")
 			} else {
-				rValue.Field(i).Set(reflect.ValueOf(500))
+				rValue.Field(i).SetupHandlers(reflect.ValueOf(500))
 			}
 		*/
 		switch rValue.Field(i).Kind() {
@@ -83,7 +83,7 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 		case reflect.Int64:
 			n, _ := strconv.ParseInt(strings.TrimSpace(str[start-1:end]), 10, 64)
 			rValue.Field(i).SetInt(n)
-			//rValue.Field(i).Set(reflect.ValueOf(n))
+			//rValue.Field(i).SetupHandlers(reflect.ValueOf(n))
 		case reflect.Float32:
 			fallthrough
 		case reflect.Float64:

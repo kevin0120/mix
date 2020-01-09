@@ -68,7 +68,10 @@ require (
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
+	go.uber.org/atomic v1.5.1
+	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
+	golang.org/x/tools v0.0.0-20200108203644-89082a384178 // indirect
 	google.golang.org/grpc v1.22.1
 	gopkg.in/ini.v1 v1.46.0 // indirect
 	gopkg.in/resty.v1 v1.12.0

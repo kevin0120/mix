@@ -1,20 +1,5 @@
 package device
 
-const (
-	STATUS_ONLINE  = "online"
-	STATUS_OFFLINE = "offline"
-)
-
-const (
-	WS_DEVICE_STATUS = "WS_DEVICE_STATUS"
-)
-
-const (
-	DEVICE_TYPE_IO      = "io"
-	DEVICE_TYPE_READER  = "reader"
-	DEVICE_TYPE_SCANNER = "scanner"
-)
-
 type DeviceStatus struct {
 	SN       string      `json:"sn"`
 	Type     string      `json:"type"`

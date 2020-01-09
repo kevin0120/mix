@@ -4,11 +4,8 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
-	"github.com/masami10/rush/services/minio"
-	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"strconv"
-	"strings"
 )
 
 // header
@@ -260,120 +257,121 @@ func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
 	return fmt.Sprintf("%s%s", headerStr, xmlpacket), header.MID
 }
 
-func XML2Curve(result *CVI3Result, cur_result *minio.ControllerCurve) {
-	cur_result.CurveContent = minio.ControllerCurveFile{}
-	cur_result.CurveContent.Result = result.PRC_SST.PAR.Result
-	if cur_result.CurveContent.Result == "IO" {
-		cur_result.CurveContent.Result = storage.RESULT_OK
-	} else if cur_result.CurveContent.Result == "NIO" {
-		cur_result.CurveContent.Result = storage.RESULT_NOK
-	}
-
-	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
-
-	for _, blc := range blcs {
-		if blc.CUR.CNT == 0 {
-			continue
-		}
-
-		cur_ms := strings.Split(blc.CUR.SMP.CUR_M, " ")
-		//cur_result.CurveContent.CUR_M = make([]float64, blc.CUR.CNT)
-		for _, v := range cur_ms {
-			m, _ := strconv.ParseFloat(v, 64)
-			cur_result.CurveContent.CUR_M = append(cur_result.CurveContent.CUR_M, m)
-		}
-
-		cur_ws := strings.Split(blc.CUR.SMP.CUR_W, " ")
-		//cur_result.CurveContent.CUR_W = make([]float64, blc.CUR.CNT)
-		for _, v := range cur_ws {
-			w, _ := strconv.ParseFloat(v, 64)
-			cur_result.CurveContent.CUR_W = append(cur_result.CurveContent.CUR_W, w)
-		}
-
-		stp := blc.CUR.STP
-		stv := blc.CUR.STV
-		if blc.CUR.SMP.CUR_T == "" {
-			for i := 0; i < blc.CUR.CNT; i++ {
-				x := float64(i)*stp + stv
-				//t,_ := big.NewFloat(x).SetPrec(5).Float64()
-				t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
-				cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, t)
-			}
-		} else {
-			cur_ts := strings.Split(blc.CUR.SMP.CUR_T, " ")
-			//cur_result.CurveContent.CUR_T = make([]float64, blc.CUR.CNT)
-			for _, v := range cur_ts {
-				w, _ := strconv.ParseFloat(v, 64)
-				cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, w)
-			}
-		}
-
-		if blc.CUR.SMP.CUR_W == "" {
-			cur_result.CurveContent.CUR_W = cur_result.CurveContent.CUR_T
-		}
-	}
+// TODO: imp
+func XML2Curve(result *CVI3Result, curve *tightening_device.TighteningCurve) {
+	//curve.CurveContent = minio.ControllerCurveFile{}
+	//curve.CurveContent.Result = result.PRC_SST.PAR.Result
+	//if curve.CurveContent.Result == "IO" {
+	//	curve.CurveContent.Result = storage.RESULT_OK
+	//} else if curve.CurveContent.Result == "NIO" {
+	//	curve.CurveContent.Result = storage.RESULT_NOK
+	//}
+	//
+	//blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
+	//
+	//for _, blc := range blcs {
+	//	if blc.CUR.CNT == 0 {
+	//		continue
+	//	}
+	//
+	//	cur_ms := strings.Split(blc.CUR.SMP.CUR_M, " ")
+	//	//curve.CurveContent.CUR_M = make([]float64, blc.CUR.CNT)
+	//	for _, v := range cur_ms {
+	//		m, _ := strconv.ParseFloat(v, 64)
+	//		curve.CurveContent.CUR_M = append(curve.CurveContent.CUR_M, m)
+	//	}
+	//
+	//	cur_ws := strings.Split(blc.CUR.SMP.CUR_W, " ")
+	//	//curve.CurveContent.CUR_W = make([]float64, blc.CUR.CNT)
+	//	for _, v := range cur_ws {
+	//		w, _ := strconv.ParseFloat(v, 64)
+	//		curve.CurveContent.CUR_W = append(curve.CurveContent.CUR_W, w)
+	//	}
+	//
+	//	stp := blc.CUR.STP
+	//	stv := blc.CUR.STV
+	//	if blc.CUR.SMP.CUR_T == "" {
+	//		for i := 0; i < blc.CUR.CNT; i++ {
+	//			x := float64(i)*stp + stv
+	//			//t,_ := big.NewFloat(x).SetPrec(5).Float64()
+	//			t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
+	//			curve.CurveContent.CUR_T = append(curve.CurveContent.CUR_T, t)
+	//		}
+	//	} else {
+	//		cur_ts := strings.Split(blc.CUR.SMP.CUR_T, " ")
+	//		//curve.CurveContent.CUR_T = make([]float64, blc.CUR.CNT)
+	//		for _, v := range cur_ts {
+	//			w, _ := strconv.ParseFloat(v, 64)
+	//			curve.CurveContent.CUR_T = append(curve.CurveContent.CUR_T, w)
+	//		}
+	//	}
+	//
+	//	if blc.CUR.SMP.CUR_W == "" {
+	//		curve.CurveContent.CUR_W = curve.CurveContent.CUR_T
+	//	}
+	//}
 
 }
 
-func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
+func XML2Result(result *CVI3Result, rr *tightening_device.TighteningResult) {
 
-	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
+	//blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
 
-	rr.TighteningID = result.PRC_SST.PAR.FAS.GRP.TIP.TID
-	rr.Controller_SN = result.PRC_SST.PAR.SN
-	rr.GunSN = result.PRC_SST.PAR.FAS.GRP.TIP.ToolSN
-	rr.Result = result.PRC_SST.PAR.Result
-	if rr.Result == "IO" {
-		rr.Result = storage.RESULT_OK
-	} else if rr.Result == "NIO" {
-		rr.Result = storage.RESULT_NOK
-	}
-
-	rr.PSet = result.PRC_SST.PAR.FAS.GRP.TIP.PSet
-	rr.Workorder_ID = result.PRC_SST.PAR.Workorder_id
-	rr.UserID = result.PRC_SST.PAR.FAS.UserID
-	rr.Dat = fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
+	//rr.TighteningID = result.PRC_SST.PAR.FAS.GRP.TIP.TID
+	//rr.Controller_SN = result.PRC_SST.PAR.SN
+	//rr.GunSN = result.PRC_SST.PAR.FAS.GRP.TIP.ToolSN
+	//rr.Result = result.PRC_SST.PAR.Result
+	//if rr.Result == "IO" {
+	//	rr.Result = storage.RESULT_OK
+	//} else if rr.Result == "NIO" {
+	//	rr.Result = storage.RESULT_NOK
+	//}
+	//
+	//rr.PSet = result.PRC_SST.PAR.FAS.GRP.TIP.PSet
+	//rr.Workorder_ID = result.PRC_SST.PAR.Workorder_id
+	//rr.UserID = result.PRC_SST.PAR.FAS.UserID
+	//rr.Dat = fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
 
 	seq, _ := strconv.Atoi(result.PRC_SST.PAR.Result_id)
 	rr.Seq = seq
 	//rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.ControllerSN, rr.Workorder_ID, result_id, utils.GenerateID())
 
-	if result.PRC_SST.PAR.FAS.GRP.TIP.STA == "LSN" {
-		rr.PSetDefine.Strategy = controller.STRATEGY_LN
-		rr.Result = "LSN"
-	} else {
-		rr.PSetDefine.Strategy = blcs[len(blcs)-1].PRO.Strategy
-	}
+	//if result.PRC_SST.PAR.FAS.GRP.TIP.STA == "LSN" {
+	//	rr.PSetDefine.Strategy = controller.STRATEGY_LN
+	//	rr.Result = "LSN"
+	//} else {
+	//	rr.PSetDefine.Strategy = blcs[len(blcs)-1].PRO.Strategy
+	//}
 
 	rr.Count = result.PRC_SST.PAR.Count
 
-	result_values := blcs[len(blcs)-1].PRO.Values
-	for i := range result_values {
-		switch result_values[i].Name {
-		case "M+":
-			rr.PSetDefine.Mp = result_values[i].Value
-		case "M-":
-			rr.PSetDefine.Mm = result_values[i].Value
-		case "MS":
-			rr.PSetDefine.Ms = result_values[i].Value
-		case "MA":
-			rr.PSetDefine.Ma = result_values[i].Value
-		case "W+":
-			rr.PSetDefine.Wp = result_values[i].Value
-		case "W-":
-			rr.PSetDefine.Wm = result_values[i].Value
-		case "WA":
-			rr.PSetDefine.Wa = result_values[i].Value
-		case "MI":
-			rr.ResultValue.Mi = result_values[i].Value
-		case "WI":
-			rr.ResultValue.Wi = result_values[i].Value
-		case "tI":
-			if result_values[i].Unit == "s" {
-				rr.ResultValue.Ti = result_values[i].Value * 1000
-			} else {
-				rr.ResultValue.Ti = result_values[i].Value
-			}
-		}
-	}
+	//result_values := blcs[len(blcs)-1].PRO.Values
+	//for i := range result_values {
+	//	switch result_values[i].Name {
+	//	case "M+":
+	//		rr.PSetDefine.Mp = result_values[i].Value
+	//	case "M-":
+	//		rr.PSetDefine.Mm = result_values[i].Value
+	//	case "MS":
+	//		rr.PSetDefine.Ms = result_values[i].Value
+	//	case "MA":
+	//		rr.PSetDefine.Ma = result_values[i].Value
+	//	case "W+":
+	//		rr.PSetDefine.Wp = result_values[i].Value
+	//	case "W-":
+	//		rr.PSetDefine.Wm = result_values[i].Value
+	//	case "WA":
+	//		rr.PSetDefine.Wa = result_values[i].Value
+	//	case "MI":
+	//		rr.ResultValue.Mi = result_values[i].Value
+	//	case "WI":
+	//		rr.ResultValue.Wi = result_values[i].Value
+	//	case "tI":
+	//		if result_values[i].Unit == "s" {
+	//			rr.ResultValue.Ti = result_values[i].Value * 1000
+	//		} else {
+	//			rr.ResultValue.Ti = result_values[i].Value
+	//		}
+	//	}
+	//}
 }

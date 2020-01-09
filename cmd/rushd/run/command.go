@@ -214,7 +214,7 @@ func (cmd *Command) ParseConfig(path string) (*server.Config, error) {
 var usage = `usage: run [flags]
 run starts the Rush server.
         -config <path>
-                          Set the path to the configuration file.
+                          SetupHandlers the path to the configuration file.
         -hostname <name>
                           Override the hostname, the 'hostname' configuration
                           option will be overridden.

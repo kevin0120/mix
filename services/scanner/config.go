@@ -36,8 +36,6 @@ func (c Config) Validate() error {
 			return errors.New("EntityLabel Is Empty")
 		}
 
-		fmt.Println(runtime.GOOS)
-
 		if runtime.GOOS == "windows" {
 			if !strings.HasPrefix(c.EntityLabel, "COM") {
 				return errors.New("Platform Windows EntityLabel Is COM Port")

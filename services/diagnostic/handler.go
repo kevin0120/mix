@@ -287,7 +287,7 @@ func (h *AiisHandler) PutResultDone() {
 	h.l.Debug("Put Result to AIIS successful")
 }
 
-// Odoo Handler
+// backendService Handler
 
 type OdooHandler struct {
 	l Logger
@@ -323,6 +323,10 @@ func (h *MinioHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
+func (h *MinioHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 // hmi handler
 type HmiHandler struct {
 	l Logger
@@ -334,6 +338,10 @@ func (h *HmiHandler) Error(msg string, err error) {
 
 func (h *HmiHandler) Debug(msg string) {
 	h.l.Debug(msg)
+}
+
+func (h *HmiHandler) Info(msg string) {
+	h.l.Info(msg)
 }
 
 func (h *HmiHandler) Close() {
@@ -487,6 +495,10 @@ func (h *BrokerHandler) Debug(msg string) {
 
 type IOHandler struct {
 	l Logger
+}
+
+func (h *IOHandler) Info(msg string) {
+	h.l.Info(msg)
 }
 
 func (h *IOHandler) Error(msg string, err error) {

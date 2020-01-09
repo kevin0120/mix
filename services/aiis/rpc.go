@@ -1,8 +1,8 @@
 package aiis
 
 import (
-	"github.com/kataras/iris/core/errors"
-	"github.com/masami10/rush/utils"
+	"encoding/json"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"sync/atomic"
@@ -10,57 +10,44 @@ import (
 )
 
 const (
-	TYPE_RESULT       = "result_patch"
-	TYPE_ODOO_STATUS  = "odoo_status"
-	TYPE_WORKORDER    = "workorder"
-	TYPE_MES_STATUS   = "mes_status"
-	TYPE_ORDER_START  = "order_start"
-	TYPE_ORDER_FINISH = "order_finish"
-
 	RPC_PING = "ping"
 	RPC_PONG = "pong"
 
 	PING_ITV         = 1 * time.Second
 	KEEP_ALIVE_CHECK = 3
-
-	RPC_OFFLINE = "offline"
-	RPC_ONLINE  = "online"
 )
 
-type RPCPayload struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
+func NewGRPCClient(d Diagnostic, cfg Config) *GRPCClient {
+	return &GRPCClient{
+		diag:          d,
+		cfg:           cfg,
+		BaseTransport: BaseTransport{},
+		recvBuf:       make(chan string, 1024),
+	}
 }
 
-//
-//type OnRPCRecv func(payload string)
-//type OnRPCStatus func(status string)
-
 type GRPCClient struct {
-	srv       *Service
-	conn      *grpc.ClientConn
-	stream    RPCAiis_RPCNodeClient
-	opts      []grpc.DialOption
-	rpcClient RPCAiisClient
-	//RPCRecv           OnRPCRecv
-	//OnRPCStatus       OnRPCStatus
-	RPCRecvDispatcher   *utils.Dispatcher
-	RPCStatusDispatcher *utils.Dispatcher
-	status              atomic.Value
-	keepAliveCount      int32
-	keepaliveDeadLine   atomic.Value
-	closing             chan chan struct{}
+	cfg               Config
+	conn              *grpc.ClientConn
+	stream            RPCAiis_RPCNodeClient
+	opts              []grpc.DialOption
+	rpcClient         RPCAiisClient
+	diag              Diagnostic
+	status            atomic.Value
+	keepAliveCount    int32
+	keepaliveDeadLine atomic.Value
+	closing           chan chan struct{}
+	recvBuf           chan string
+
+	BaseTransport
 }
 
 func (c *GRPCClient) Start() error {
-	c.status.Store(RPC_OFFLINE)
+	c.status.Store(TRANSPORT_STATUS_OFFLINE)
 	c.closing = make(chan chan struct{})
 	c.updateKeepAliveDeadLine()
 
-	c.RPCRecvDispatcher.Start()
-	c.RPCStatusDispatcher.Start()
-
-	go c.Connect()
+	go c.connect()
 	go c.manage()
 
 	return nil
@@ -73,12 +60,6 @@ func (c *GRPCClient) Stop() error {
 	if c.stream != nil {
 		c.stream.CloseSend()
 	}
-
-	c.RPCStatusDispatcher.Release()
-	c.RPCRecvDispatcher.Release()
-
-	c.RPCStatusDispatcher.Release()
-	c.RPCRecvDispatcher.Release()
 
 	closed := make(chan struct{})
 	c.closing <- closed
@@ -104,15 +85,15 @@ func (c *GRPCClient) addKeepAliveCount() {
 }
 
 func (c *GRPCClient) updateKeepAliveDeadLine() {
-	c.keepaliveDeadLine.Store(time.Now().Add(time.Duration(c.srv.Config().KeepAlive)))
+	c.keepaliveDeadLine.Store(time.Now().Add(time.Duration(c.cfg.KeepAlive)))
 }
 
-func (c *GRPCClient) KeepAliveDeadLine() time.Time {
+func (c *GRPCClient) keepAliveDeadLine() time.Time {
 	return c.keepaliveDeadLine.Load().(time.Time)
 }
 
 func (c *GRPCClient) sendPing() {
-	c.RPCSend(RPC_PING)
+	c.rpcSend(RPC_PING)
 }
 
 func (c *GRPCClient) updateStatus(status string) {
@@ -121,26 +102,17 @@ func (c *GRPCClient) updateStatus(status string) {
 
 		c.status.Store(status)
 
-		if status == RPC_OFFLINE {
-			c.srv.diag.Debug("grpc disconnected")
+		if status == TRANSPORT_STATUS_OFFLINE {
+			c.diag.Debug("grpc disconnected")
 
 			c.conn.Close()
 			c.stream.CloseSend()
 
 			// 断线重连
-			go c.Connect()
+			go c.connect()
 		}
 
-		c.RPCStatusDispatcher.Dispatch(status)
-
-		// 将最新状态推送给hmi
-		//s := wsnotify.WSStatus{
-		//	SN:     c.cfg.SN,
-		//	Status: string(status),
-		//}
-		//
-		//msg, _ := json.Marshal(s)
-		//c.ProtocolService.WS.WSSendControllerStatus(string(msg))
+		c.handlerStatus(status)
 	}
 }
 
@@ -148,21 +120,24 @@ func (c *GRPCClient) manage() {
 	//nextWriteThreshold := time.Now()
 	for {
 		select {
-		case <-time.After(time.Duration(c.srv.Config().KeepAlive)):
-			if c.Status() == RPC_OFFLINE {
+		case <-time.After(time.Duration(c.cfg.KeepAlive)):
+			if c.Status() == TRANSPORT_STATUS_OFFLINE {
 				continue
 			}
 			if c.KeepAliveCount() >= KEEP_ALIVE_CHECK {
-				go c.updateStatus(RPC_OFFLINE)
+				go c.updateStatus(TRANSPORT_STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
 			}
-			if c.KeepAliveDeadLine().Before(time.Now()) {
+			if c.keepAliveDeadLine().Before(time.Now()) {
 				//到达了deadline
 				c.sendPing()
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
 				c.addKeepAliveCount()
 			}
+
+		case buf := <-c.recvBuf:
+			c.handleRpcRecv(buf)
 
 		case stopDone := <-c.closing:
 			close(stopDone)
@@ -171,11 +146,11 @@ func (c *GRPCClient) manage() {
 	}
 }
 
-func (c *GRPCClient) Connect() {
+func (c *GRPCClient) connect() {
 	var err error = nil
 
 	for {
-		c.srv.diag.Debug("grpc connecting ...\n")
+		c.diag.Debug("grpc connecting ...\n")
 		var opts []grpc.DialOption
 		opts = append(opts, grpc.WithInsecure())
 		opts = append(opts, grpc.WithBlock())
@@ -183,10 +158,10 @@ func (c *GRPCClient) Connect() {
 			MaxDelay: 1 * time.Second,
 		}))
 
-		c.conn, err = grpc.Dial(c.srv.Config().GRPCServer, opts...)
+		c.conn, err = grpc.Dial(c.cfg.GRPCServer, opts...)
 		if err == nil {
-			c.srv.diag.Debug("grpc connected\n")
-			c.updateStatus(RPC_ONLINE)
+			c.diag.Debug("Grpc Connected\n")
+			c.updateStatus(TRANSPORT_STATUS_ONLINE)
 			break
 		}
 
@@ -196,10 +171,10 @@ func (c *GRPCClient) Connect() {
 	c.rpcClient = NewRPCAiisClient(c.conn)
 	c.stream, _ = c.rpcClient.RPCNode(context.Background())
 
-	go c.RecvProcess()
+	go c.recvProcess()
 }
 
-func (c *GRPCClient) RecvProcess() {
+func (c *GRPCClient) recvProcess() {
 	for {
 		if c.stream == nil {
 			continue
@@ -207,16 +182,49 @@ func (c *GRPCClient) RecvProcess() {
 
 		in, err := c.stream.Recv()
 		if err != nil {
-			c.srv.diag.Debug("rpc RecvProcess Exit")
+			c.diag.Debug("Rpc recvProcess Exit")
 			return
 		}
 
 		c.updateKeepAliveCount(0)
-		c.RPCRecvDispatcher.Dispatch(in.Payload)
+		c.recvBuf <- in.Payload
 	}
 }
 
-func (c *GRPCClient) RPCSend(payload string) error {
+func (s *GRPCClient) handleRpcRecv(payload string) {
+
+	rpcPayload := TransportPayload{}
+	if err := json.Unmarshal([]byte(payload), &rpcPayload); err != nil {
+		s.diag.Error("handleRpcRecv", err)
+	}
+	strData, _ := json.Marshal(rpcPayload.Data)
+
+	switch rpcPayload.Method {
+	case TRANSPORT_METHOD_RESULT_PATCH:
+		rp := ResultPatch{}
+		json.Unmarshal(strData, &rp)
+		s.handlerResultPatch(rp)
+		break
+
+	case TRANSPORT_METHOD_SERVICE_STATUS:
+		serviceStatus := ServiceStatus{}
+		json.Unmarshal(strData, &serviceStatus)
+		s.handlerServiceStatus(serviceStatus)
+		break
+
+		//case TYPE_ORDER_START:
+		//	// TODO: 开工响应
+		//	//s.notifyService.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
+		//	break
+		//
+		//case TYPE_ORDER_FINISH:
+		//	// TODO: 完工响应
+		//	//s.notifyService.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
+		//	break
+	}
+}
+
+func (c *GRPCClient) rpcSend(payload string) error {
 
 	if c.stream != nil {
 		return c.stream.Send(&Payload{
@@ -225,4 +233,13 @@ func (c *GRPCClient) RPCSend(payload string) error {
 	}
 
 	return errors.New("rpc not connected")
+}
+
+func (c *GRPCClient) SendResult(result *AIISResult) error {
+	str, _ := json.Marshal(TransportPayload{
+		Method: TRANSPORT_METHOD_RESULT,
+		Data:   result,
+	})
+
+	return c.rpcSend(string(str))
 }

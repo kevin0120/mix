@@ -23,7 +23,7 @@ type JobSet struct {
 
 func (s *JobSet) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
-		return errors.New("Controller SN or Tool SN is required")
+		return errors.New("Controller SerialNumber or Tool SerialNumber is required")
 	}
 
 	if s.Job <= 0 {
@@ -54,7 +54,7 @@ type PSetSet struct {
 
 func (s *PSetSet) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
-		return errors.New("Controller SN or Tool SN is required")
+		return errors.New("Controller SerialNumber or Tool SerialNumber is required")
 	}
 
 	if s.PSet <= 0 {
@@ -72,7 +72,7 @@ type ToolControl struct {
 
 func (s *ToolControl) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
-		return errors.New("Controller SN or Tool SN is required")
+		return errors.New("Controller SerialNumber or Tool SerialNumber is required")
 	}
 
 	return nil
@@ -86,7 +86,7 @@ type ToolModeSelect struct {
 
 func (s *ToolModeSelect) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
-		return errors.New("Controller SN or Tool SN is required")
+		return errors.New("Controller SerialNumber or Tool SerialNumber is required")
 	}
 
 	return nil
@@ -133,11 +133,11 @@ func (s *Api) ToolJobSet(req *JobSet) error {
 		req.UserID = 1
 	}
 
-	_ = s.StorageService.UpdateTool(&storage.Guns{
-		Serial:      req.ToolSN,
-		WorkorderID: req.WorkorderID,
-		Total:       req.Total,
-		UserID:      req.UserID,
+	_ = s.StorageService.UpdateTool(&storage.Tools{
+		Serial:             req.ToolSN,
+		CurrentWorkorderID: req.WorkorderID,
+		Total:              req.Total,
+		UserID:             req.UserID,
 	})
 
 	return tool.SetJob(req.Job)
@@ -175,14 +175,14 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 		req.UserID = 1
 	}
 
-	_ = s.StorageService.UpdateTool(&storage.Guns{
-		Serial:      req.ToolSN,
-		WorkorderID: req.WorkorderID,
-		Seq:         int(req.Sequence),
-		Count:       req.Count,
-		UserID:      req.UserID,
-		Total:       req.Total,
-		StepID:      req.StepID,
+	_ = s.StorageService.UpdateTool(&storage.Tools{
+		Serial:             req.ToolSN,
+		CurrentWorkorderID: req.WorkorderID,
+		Seq:                int(req.Sequence),
+		Count:              req.Count,
+		UserID:             req.UserID,
+		Total:              req.Total,
+		StepID:             req.StepID,
 	})
 
 	return tool.SetPSet(req.PSet)

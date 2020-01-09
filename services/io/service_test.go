@@ -10,7 +10,7 @@ import (
 func getSrv() *Service {
 	srv := NewService(NewConfig(), nil)
 	srv.WS = wsnotify.NewService(wsnotify.NewConfig(), nil)
-	srv.DeviceService, _ = device.NewService(device.NewConfig(), nil)
+	srv.deviceService, _ = device.NewService(device.NewConfig(), nil)
 
 	return srv
 }

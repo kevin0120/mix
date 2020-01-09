@@ -22,6 +22,8 @@ var STATUS_BROKER = map[nats.Status]string{
 	nats.DRAINING_PUBS: "DRAINING_PUBS",
 }
 
+type StatusHandler func(string)
+
 type IBrokerProvider interface {
 	Address() string
 	Connect(urls []string) error
@@ -30,6 +32,7 @@ type IBrokerProvider interface {
 	UnSubscribe(subject string) error
 	Publish(subject string, data []byte) error
 	DoRequest(subject string, data []byte, timeOut time.Duration) ([]byte, error)
+	SetStatusHandler(handler StatusHandler)
 }
 
 type SubscribeHandler func(*BrokerMessage) ([]byte, error)

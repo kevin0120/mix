@@ -1,12 +1,12 @@
 package reader
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/ebfe/scard"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/wsnotify"
-	uuid "github.com/satori/go.uuid"
+	dispatcherBus "github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/utils"
+	"github.com/satori/go.uuid"
 	"sync/atomic"
 	"time"
 )
@@ -15,32 +15,24 @@ const (
 	SEARCH_ITV = 1 * time.Second
 )
 
-type Diagnostic interface {
-	Error(msg string, err error)
-	Debug(msg string)
-}
-
+// TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
-	configValue atomic.Value
-	serialNumber string
+	device.BaseDevice
+	configValue   atomic.Value
 	diag          Diagnostic
 	ctx           *scard.Context
-	WS            *wsnotify.Service
-	DeviceService *device.Service
+	deviceService IDeviceService
+	dispatcherBus Dispatcher
 }
 
-//fixme: 现在默认创建服务时自动创建一个UUID作为序列号
-func (s *Service)SerialNumber() string  {
-	return s.serialNumber
-}
-
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, ds IDeviceService, dp Dispatcher) *Service {
 
 	s := &Service{
-		diag: d,
-		serialNumber: uuid.NewV4().String(),
+		diag:          d,
+		deviceService: ds,
+		dispatcherBus: dp,
 	}
-
+	s.SetSerialNumber(uuid.NewV4().String())
 	s.configValue.Store(c)
 
 	return s
@@ -55,9 +47,15 @@ func (s *Service) Open() error {
 		return nil
 	}
 
+	s.dispatcherBus.Create(dispatcherBus.DISPATCHER_READER_DATA, utils.DefaultDispatcherBufLen)
+	err := s.dispatcherBus.Start(dispatcherBus.DISPATCHER_READER_DATA)
+	if err != nil {
+		return err
+	}
+
 	go s.search()
 
-	s.DeviceService.AddDevice("reader", s)
+	s.deviceService.AddDevice("reader", s)
 
 	return nil
 }
@@ -115,14 +113,8 @@ func (s *Service) Data() interface{} {
 }
 
 func (s *Service) notifyUID(uid string) {
-	barcode, _ := json.Marshal(wsnotify.WSMsg{
-		Type: WS_READER_UID,
-		Data: ReaderUID{
-			UID: uid,
-		},
-	})
-
-	s.WS.WSSendReader(string(barcode))
+	// 分发读卡器数据
+	s.dispatcherBus.Dispatch(dispatcherBus.DISPATCHER_READER_DATA, uid)
 }
 
 func (s *Service) search() {

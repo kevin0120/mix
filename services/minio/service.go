@@ -1,9 +1,7 @@
 package minio
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/storage"
 	"github.com/minio/minio-go"
 	"strings"
 	"sync/atomic"
@@ -13,45 +11,41 @@ import (
 type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
+	Info(msg string)
 }
 
 type Service struct {
-	configValue atomic.Value
-	diag        Diagnostic
-	bucket      string
-
-	DB         *storage.Service
-	minio      *minio.Client
-	saveBuffer chan *ControllerCurve
-	closing    chan struct{}
+	configValue    atomic.Value
+	diag           Diagnostic
+	bucket         string
+	storageService IStorageService
+	minio          *minio.Client
+	closing        chan struct{}
 }
 
 func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, db IStorageService) *Service {
 	s := &Service{
-		diag:       d,
-		saveBuffer: make(chan *ControllerCurve, 1024),
-		closing:    make(chan struct{}, 1),
-		minio:      nil,
+		diag:           d,
+		closing:        make(chan struct{}, 1),
+		minio:          nil,
+		storageService: db,
 	}
 	s.configValue.Store(c)
+
 	s.bucket = c.Bucket
 	return s
 
 }
 
 func (s *Service) Open() error {
-	c := s.config()
-	client, err := minio.New(c.URL, c.Access, c.Secret, c.Secure)
+	err := s.initClient()
 	if err != nil {
-		return fmt.Errorf("create minio fail %s", err.Error())
+		return err
 	}
-	s.minio = client
-
-	go s.saveProcess()
 
 	// 启动重传服务
 	go s.TaskReupload()
@@ -60,106 +54,61 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
-	if s.minio != nil {
-		s.closing <- struct{}{}
-	}
+	s.closing <- struct{}{}
 	return nil
 }
 
-func (s *Service) Save(curve *ControllerCurve) {
-	s.saveBuffer <- curve
-}
-
-// 异步保存
-func (s *Service) saveProcess() {
-	for {
-		select {
-		case data := <-s.saveBuffer:
-			s.handleSave(data)
-
-		case <-s.closing:
-			return
-		}
-	}
-}
-
-// 处理保存
-func (s *Service) handleSave(curve *ControllerCurve) {
-	// 保存对象存储
-	content, _ := json.Marshal(curve.CurveContent)
-	str_content := string(content)
-	err := s.Upload(curve.CurveFile, str_content)
-
-	// 保存本地数据库
-	has_upload := true
+func (s *Service) initClient() error {
+	c := s.config()
+	client, err := minio.New(c.URL, c.Access, c.Secret, c.Secure)
 	if err != nil {
-		has_upload = false
-		s.diag.Error("上传曲线失败", err)
-	} else {
-		s.diag.Debug("上传曲线成功")
+		return fmt.Errorf("Create Minio Client Failed: %s ", err.Error())
 	}
 
-	loc, _ := time.LoadLocation("Local")
-	dt, _ := time.ParseInLocation("2006-01-02 15:04:05", curve.UpdateTime, loc)
+	s.minio = client
 
-	//utc, _ := time.LoadLocation("")
-
-	dbCurve := storage.Curves{
-		ResultID:   curve.ResultID,
-		Count:      curve.Count,
-		CurveFile:  curve.CurveFile,
-		CurveData:  str_content,
-		HasUpload:  has_upload,
-		UpdateTime: dt.UTC(),
-	}
-
-	err = s.DB.Store(dbCurve)
-	if err != nil {
-		s.diag.Error("缓存曲线失败", err)
-	} else {
-		s.diag.Debug("缓存曲线成功")
-	}
-
+	return nil
 }
 
-func (s *Service) Upload(obj string, data string) error {
+func (s *Service) upload(obj string, data string) error {
 	isExist, err := s.minio.BucketExists(s.bucket)
 	if err != nil || !isExist {
-		return fmt.Errorf("Bucket %s not exist err msg: %s ", s.bucket, err.Error())
+		return fmt.Errorf("Bucket %s Not Exist: %s ", s.bucket, err.Error())
 	}
 	reader := strings.NewReader(data)
 	_, e := s.minio.PutObject(s.bucket, obj, reader, reader.Size(), minio.PutObjectOptions{ContentType: "application/json"})
 	if e != nil {
-		return fmt.Errorf("Put Object %s fail ", obj)
+		return fmt.Errorf("Put Object %s Failed ", obj)
 	}
 	return nil
 }
 
-func (s *Service) GetLink(curve string, obj string) (string, error) {
-	url, err := s.minio.PresignedGetObject(curve, obj, time.Hour*74, nil)
+func (s *Service) doReupload() {
+	curves, err := s.storageService.ListUnuploadCurves()
 	if err != nil {
-		return "", err
+		s.diag.Debug(fmt.Sprintf("Get Curve Failed: %s", err.Error()))
 	}
 
-	return url.String(), nil
+	for _, v := range curves {
+		err = s.upload(v.CurveFile, v.CurveData)
+		if err != nil {
+			s.diag.Error(fmt.Sprintf("上传曲线失败 工具:%s 对应拧紧ID:%s", v.ToolSN, v.TighteningID), err)
+		} else {
+			v.HasUpload = true
+			s.storageService.UpdateCurve(&v)
+			s.diag.Info(fmt.Sprintf("上传曲线成功 工具:%s 对应拧紧ID:%s", v.ToolSN, v.TighteningID))
+		}
+	}
 }
 
 func (s *Service) TaskReupload() {
 	for {
+		select {
+		case <-time.After(time.Duration(s.config().ReuploadItv)):
+			s.doReupload()
 
-		curves, err := s.DB.ListUnuploadCurves()
-		if err == nil {
-			for _, v := range curves {
-				err = s.Upload(v.CurveFile, v.CurveData)
-				if err != nil {
-					s.diag.Error(fmt.Sprintf("curve reupload failed, curve_id:%d result_id:%d", v.Id, v.ResultID), err)
-				} else {
-					v.HasUpload = true
-					s.DB.UpdateCurve(&v)
-				}
-			}
+		case <-s.closing:
+			return
 		}
-
-		time.Sleep(time.Duration(s.config().ReuploadItv))
 	}
 }

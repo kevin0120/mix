@@ -1,35 +1,13 @@
 package device
 
 import (
-	"encoding/json"
-	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
-	"reflect"
 	"sync"
 	"sync/atomic"
+
+	"github.com/masami10/rush/services/wsnotify"
 )
-
-type IBaseDevice interface {
-
-	// 设备状态
-	Status() string
-
-	// 设备类型
-	DeviceType() string
-
-	// 子设备
-	Children() map[string]IBaseDevice
-
-	// 设备配置
-	Config() interface{}
-
-	// 设备运行数据
-	Data() interface{}
-
-	//设备序列号唯一追踪号
-	SerialNumber() string
-}
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -41,24 +19,28 @@ type Service struct {
 	configValue    atomic.Value
 	runningDevices map[string]IBaseDevice
 	mtxDevices     sync.Mutex
+	dispatcherBus  Dispatcher
+	dispatcherMap  dispatcherbus.DispatcherMap
 
-	WS *wsnotify.Service
-	wsnotify.WSNotify
-
-	requestDispatchers map[string]*utils.Dispatcher
+	// websocket请求处理器
+	wsnotify.WSRequestHandlers
 }
 
-func NewService(c Config, d Diagnostic) (*Service, error) {
+func NewService(c Config, d Diagnostic, dp Dispatcher) (*Service, error) {
 
-	srv := &Service{
+	s := &Service{
 		diag:           d,
 		runningDevices: map[string]IBaseDevice{},
 		mtxDevices:     sync.Mutex{},
+		dispatcherBus:  dp,
 	}
 
-	srv.configValue.Store(c)
+	s.configValue.Store(c)
 
-	return srv, nil
+	s.setupGlobalDispatchers()
+	s.setupWSRequestHandlers()
+
+	return s, nil
 }
 
 func (s *Service) Open() error {
@@ -66,17 +48,14 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	s.WS.AddNotify(s)
-	s.initRequestDispatchers()
+	s.initDispatcherRegisters()
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
 	return nil
 }
 
 func (s *Service) Close() error {
-	for _, v := range s.requestDispatchers {
-		v.Release()
-	}
-
+	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
 	return nil
 }
 
@@ -84,23 +63,28 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) initRequestDispatchers() {
-	s.requestDispatchers = map[string]*utils.Dispatcher{
-		WS_DEVICE_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-	}
+func (s *Service) initDispatcherRegisters() {
+	// 注册websocket请求
+	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+}
 
-	s.requestDispatchers[WS_DEVICE_STATUS].Register(s.OnWS_DEVICE_STATUS)
-
-	for _, v := range s.requestDispatchers {
-		v.Start()
+func (s *Service) setupGlobalDispatchers() {
+	s.dispatcherMap = dispatcherbus.DispatcherMap{
+		dispatcherbus.DISPATCHER_DEVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_READER_DATA:   utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_SCANNER_DATA:  utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCHER_IO:            utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
-func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
-	d, exist := s.requestDispatchers[req.WSMsg.Type]
-	if exist {
-		d.Dispatch(req)
+func (s *Service) setupWSRequestHandlers() {
+	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
+		Diag: s.diag,
 	}
+
+	s.SetupHandlers(wsnotify.WSRequestHandlerMap{
+		wsnotify.WS_DEVICE_STATUS: s.OnWSDeviceStatus,
+	})
 }
 
 func (s *Service) AddDevice(sn string, d IBaseDevice) {
@@ -121,19 +105,11 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 
 	var devices []DeviceStatus
 	for k, v := range s.runningDevices {
-
-		children := []string{}
-		if v.Children() != nil {
-			for _, child := range reflect.ValueOf(v.Children()).MapKeys() {
-				children = append(children, child.String())
-			}
-		}
-
 		devices = append(devices, DeviceStatus{
 			SN:       k,
 			Type:     v.DeviceType(),
 			Status:   v.Status(),
-			Children: children,
+			Children: v.Children(),
 			Config:   v.Config(),
 			Data:     v.Data(),
 		})
@@ -150,33 +126,4 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 	}
 
 	return devices
-}
-
-func (s *Service) OnWS_DEVICE_STATUS(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	wsRequest := data.(*wsnotify.WSRequest)
-	c := wsRequest.C
-	msg := wsRequest.WSMsg
-
-	devices := s.fetchAllDevices()
-	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, devices))
-
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_DEVICE, string(body))
-}
-
-func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
-	msg := wsnotify.WSMsg{}
-	err := json.Unmarshal(data, &msg)
-	if err != nil {
-		s.diag.Error(string(data), err)
-		return
-	}
-
-	s.dispatchRequest(&wsnotify.WSRequest{
-		C:     c,
-		WSMsg: &msg,
-	})
 }

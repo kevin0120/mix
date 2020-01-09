@@ -1,32 +1,15 @@
 package aiis
 
 const (
-	WS_REG    = "reg"
-	WS_RESULT = "result"
+	SERVICE_AIIS = "aiis"
 )
 
-const (
-	SUBJECT_RESULTS      = "saturn.results.%s"
-	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
-)
-
-const (
-	ODOO_RESULT_PASS = "pass"
-	ODOO_RESULT_FAIL = "fail"
-
-	QUALITY_STATE_PASS = "pass"
-	QUALITY_STATE_FAIL = "fail"
-	QUALITY_STATE_EX   = "exception"
-
-	HANDLER_TYPE_CURVE = "curve"
-	HANDLER_TYPE_AIIS  = "aiis"
-
-	ODOO_STATUS_ONLINE  = "online"
-	ODOO_STATUS_OFFLINE = "offline"
-)
+type TransportPayload struct {
+	Method string      `json:"method"`
+	Data   interface{} `json:"data"`
+}
 
 type AIISResult struct {
-	// local_id
 	ID int64 `json:"id"`
 
 	// db
@@ -92,23 +75,13 @@ type CURObject struct {
 	OP   int    `json:"op"`
 }
 
-type WSOpResult struct {
-	ResultID int64       `json:"result_id"`
-	Result   interface{} `json:"result"`
-	Port     string      `json:"port"`
-}
-
 type ResultPatch struct {
 	ID        int64 `json:"id"`
 	HasUpload bool  `json:"has_upload"`
 }
 
-type ODOOStatus struct {
-	Status string `json:"status"`
-}
-
-
-type SystemStatus struct {
+// 服务状态(aiis, odoo, 外部系统等)
+type ServiceStatus struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
 }
