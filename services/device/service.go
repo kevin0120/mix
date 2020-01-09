@@ -99,13 +99,13 @@ func (s *Service) AddDevice(sn string, d IBaseDevice) {
 	s.runningDevices[sn] = d
 }
 
-func (s *Service) fetchAllDevices() []DeviceStatus {
+func (s *Service) fetchAllDevices() []Status {
 	defer s.mtxDevices.Unlock()
 	s.mtxDevices.Lock()
 
-	var devices []DeviceStatus
+	var devices []Status
 	for k, v := range s.runningDevices {
-		devices = append(devices, DeviceStatus{
+		devices = append(devices, Status{
 			SN:       k,
 			Type:     v.DeviceType(),
 			Status:   v.Status(),
@@ -115,7 +115,7 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 		})
 
 		for cSN, c := range v.Children() {
-			devices = append(devices, DeviceStatus{
+			devices = append(devices, Status{
 				SN:     cSN,
 				Type:   c.DeviceType(),
 				Status: c.Status(),

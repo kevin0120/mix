@@ -158,7 +158,7 @@ func (s *Service) onDeviceStatus(data interface{}) {
 		return
 	}
 
-	deviceStatus := data.([]device.DeviceStatus)
+	deviceStatus := data.([]device.Status)
 
 	// 设备状态推送HMI
 	s.wsSendDeviceStatus(deviceStatus)
@@ -298,7 +298,7 @@ func (s *Service) wsSendIOContact(ioContact *io.IoContact) {
 }
 
 // websocket发送设备状态
-func (s *Service) wsSendDeviceStatus(deviceStatus []device.DeviceStatus) {
+func (s *Service) wsSendDeviceStatus(deviceStatus []device.Status) {
 	data, _ := json.Marshal(wsnotify.WSMsg{
 		Type: wsnotify.WS_DEVICE_STATUS,
 		Data: deviceStatus,

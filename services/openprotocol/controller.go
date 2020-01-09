@@ -116,11 +116,11 @@ func (c *TighteningController) getClient(sn string) *clientContext {
 }
 
 func (c *TighteningController) UpdateToolStatus(status string) {
-	var ss []device.DeviceStatus
+	var ss []device.Status
 	for sn, v := range c.Children() {
 		tool := v.(*TighteningTool)
 		tool.UpdateStatus(status)
-		ss = append(ss, device.DeviceStatus{
+		ss = append(ss, device.Status{
 			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
 			SN:     sn,
 			Status: status,
@@ -403,7 +403,7 @@ func (c *TighteningController) handleStatus(sn string, status string) {
 			c.startComm(sn)
 		}
 
-		ss := []device.DeviceStatus{
+		ss := []device.Status{
 			{
 				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
 				SN:     c.deviceConf.SN,

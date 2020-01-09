@@ -191,7 +191,7 @@ func (s *Service) OnStatus(id string, status string) {
 		s.removeScanner(id)
 	}
 
-	scannerStatus := []device.DeviceStatus{
+	scannerStatus := []device.Status{
 		{
 			SN:     id,
 			Type:   device.BaseDeviceTypeScanner,

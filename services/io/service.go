@@ -126,7 +126,7 @@ func (s *Service) getIO(sn string) (*IOModule, error) {
 func (s *Service) OnStatus(sn string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s status:%s", sn, status))
 
-	ioStatus := []device.DeviceStatus{
+	ioStatus := []device.Status{
 		{
 			SN:     sn,
 			Type:   device.BaseDeviceTypeIO,
