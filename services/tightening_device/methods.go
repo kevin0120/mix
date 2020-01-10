@@ -195,3 +195,70 @@ func (s *Service) ToolModeSelect(req *ToolModeSelect) error {
 
 	return tool.ModeSelect(req.Mode)
 }
+
+type ToolInfo struct {
+	ControllerSN string `json:"controller_sn"`
+	ToolSN       string `json:"tool_sn"`
+}
+
+type ToolPSet struct {
+	ToolInfo
+	PSet int `json:"pset"`
+}
+
+type ToolJob struct {
+	ToolInfo
+	Job int `json:"job"`
+}
+
+func (s *Service) GetToolPSetList(req *ToolInfo) ([]int, error) {
+	if req == nil {
+		return nil, errors.New("Req Is Nil")
+	}
+
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	if err != nil {
+		return nil, err
+	}
+
+	return tool.GetPSetList()
+}
+
+func (s *Service) GetToolPSetDetail(req *ToolPSet) (*PSetDetail, error) {
+	if req == nil {
+		return nil, errors.New("Req Is Nil")
+	}
+
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	if err != nil {
+		return nil, err
+	}
+
+	return tool.GetPSetDetail(req.PSet)
+}
+
+func (s *Service) GetToolJobList(req *ToolInfo) ([]int, error) {
+	if req == nil {
+		return nil, errors.New("Req Is Nil")
+	}
+
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	if err != nil {
+		return nil, err
+	}
+
+	return tool.GetJobList()
+}
+
+func (s *Service) GetToolJobDetail(req *ToolJob) (*JobDetail, error) {
+	if req == nil {
+		return nil, errors.New("Req Is Nil")
+	}
+
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	if err != nil {
+		return nil, err
+	}
+
+	return tool.GetJobDetail(req.Job)
+}

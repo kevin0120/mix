@@ -103,6 +103,10 @@ func (s *Service) setupWSRequestHandlers() {
 		wsnotify.WS_TOOL_JOB:         s.OnWS_TOOL_JOB,
 		wsnotify.WS_TOOL_PSET:        s.OnWS_TOOL_PSET,
 		wsnotify.WS_TOOL_PSET_BATCH:  s.OnWS_TOOL_PSET_BATCH,
+		wsnotify.WS_TOOL_PSET_LIST:   s.OnWS_TOOL_PSET_LIST,
+		wsnotify.WS_TOOL_PSET_DETAIL: s.OnWS_TOOL_PSET_DETAIL,
+		wsnotify.WS_TOOL_JOB_LIST:    s.OnWS_TOOL_JOB_LIST,
+		wsnotify.WS_TOOL_JOB_DETAIL:  s.OnWS_TOOL_JOB_DETAIL,
 	})
 }
 
