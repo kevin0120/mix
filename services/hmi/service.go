@@ -105,6 +105,9 @@ func (s *Service) initDispatcherRegisters() {
 
 	// 接收保养信息推送
 	s.dispatcherBus.Register(dispatcherbus.DispatcherMaintenanceInfo, utils.CreateDispatchHandlerStruct(s.onNewMaintenance))
+
+	// 接收控制器JOB推送
+	s.dispatcherBus.Register(dispatcherbus.DispatcherJob, utils.CreateDispatchHandlerStruct(s.onTighteningJob))
 }
 
 func (s *Service) setupTestInterface() {
@@ -150,6 +153,21 @@ func (s *Service) onTighteningResult(data interface{}) {
 
 	body, _ := json.Marshal(tighteningResult)
 	s.diag.Info(fmt.Sprintf("拧紧结果推送HMI:%s", string(body)))
+}
+
+// 收到推送的JOB
+func (s *Service) onTighteningJob(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	job := data.(tightening_device.JobInfo)
+
+	// JOB推送HMI
+	s.wsSendTighteningJob(&job)
+
+	body, _ := json.Marshal(job)
+	s.diag.Info(fmt.Sprintf("JOB推送HMI:%s", string(body)))
 }
 
 // 设备连接状态变化(根据设备类型,序列号来区分具体的设备)
@@ -312,6 +330,16 @@ func (s *Service) wsSendTighteningResult(results []tightening_device.BaseResult)
 	data, _ := json.Marshal(wsnotify.WSMsg{
 		Type: wsnotify.WS_TOOL_RESULT,
 		Data: results,
+	})
+
+	s.notifyService.NotifyAll(wsnotify.WS_EVENT_TIGHTENING, string(data))
+}
+
+// websocket发送JOB
+func (s *Service) wsSendTighteningJob(job *tightening_device.JobInfo) {
+	data, _ := json.Marshal(wsnotify.WSMsg{
+		Type: wsnotify.WS_TOOL_JOB,
+		Data: job,
 	})
 
 	s.notifyService.NotifyAll(wsnotify.WS_EVENT_TIGHTENING, string(data))

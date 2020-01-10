@@ -80,10 +80,6 @@ func (s *Service) generateIDInfo(info string) string {
 	return ids
 }
 
-func (s *Service) CreateMaintenance(info ToolInfo) error {
-	return s.backendService.TryCreateMaintenance(info)
-}
-
 func (s *Service) OnStatus(string, string) {
 	s.diag.Error("OnStatus", errors.New("OpenProtocol Service Not Support OnStatus"))
 }

@@ -27,6 +27,12 @@ const (
 	// 当检测到新工具时，会通过此分发器进行新工具分发
 	DispatcherNewTool = "DISPATCHER_NEW_TOOL"
 
+	// 当收到控制器推送的JOB时，会通过此分发器进行分发
+	DispatcherJob = "DISPATCHER_JOB"
+
+	// 当收到控制器推送的维护通知时，会通过此分发器进行分发
+	DispatcherToolMaintenance = "DISPATCHER_TOOL_MAINTENANCE"
+
 	// ********************************Service***********************************
 	// 当检测到服务状态变化时(aiis, odoo, 外部系统等)，会通过此分发器进行状态分发
 	DispatcherServiceStatus = "DISPATCHER_SERVICE_STATUS"
@@ -49,6 +55,6 @@ const (
 	// 当收到下发的新工单时，会将新工单数据发到此分发器
 	DispatcherOrderNew = "DISPATCHER_ORDER_NEW"
 
-	// 当收到工具保养通知时，会将保养信息发送到此分发器
+	// 当收到ODOO推送的工具保养通知时，会将保养信息发送到此分发器
 	DispatcherMaintenanceInfo = "DISPATCHER_MAINTENANCE_INFO"
 )

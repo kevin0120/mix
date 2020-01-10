@@ -4,6 +4,7 @@ import (
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/utils"
 )
 
 type Dispatcher interface {
@@ -13,6 +14,7 @@ type Dispatcher interface {
 	Release(name string, handler string) error
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
+	Register(name string, handler *utils.DispatchHandlerStruct)
 }
 
 type IStorageService interface {

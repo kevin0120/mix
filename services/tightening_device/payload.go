@@ -274,3 +274,10 @@ type JobStep struct {
 	BatchSize int    `json:"batch_size"`
 	Socket    int    `json:"socket"`
 }
+
+type ToolMaintenanceInfo struct {
+	ToolSN               string `json:"serial_no"`
+	ControllerSN         string `json:"controller_sn"`
+	TotalTighteningCount int    `json:"times"`
+	CountSinLastService  int    `json:"sin_last_service"`
+}

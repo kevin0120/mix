@@ -54,4 +54,4 @@ func (c *CVI3Controller) GetVendorModel() map[string]interface{} {
 	return vendorModels
 }
 
-// TODO: 可重写所有TighteningController中的方法
+// 可重写所有TighteningController中的方法

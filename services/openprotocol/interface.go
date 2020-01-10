@@ -27,7 +27,6 @@ type IStorageService interface {
 }
 
 type IBackendService interface {
-	TryCreateMaintenance(body interface{}) error
 	GetConsumeBySeqInStep(step *storage.Steps, seq int) (*odoo.StepComsume, error)
 }
 

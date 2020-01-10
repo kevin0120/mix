@@ -6,6 +6,7 @@ import (
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"go.uber.org/atomic"
@@ -108,6 +109,12 @@ func (s *Service) ensureHttpClient() *resty.Client {
 	return client
 }
 
+func (s *Service) initDispatcherRegisters() {
+
+	// 接收工具保养通知
+	s.dispatcherBus.Register(dispatcherbus.DispatcherToolMaintenance, utils.CreateDispatchHandlerStruct(s.onToolMaintenance))
+}
+
 func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DispatcherMaintenanceInfo: utils.CreateDispatchHandlerStruct(nil),
@@ -117,6 +124,7 @@ func (s *Service) setupGlbDispatcher() {
 
 func (s *Service) Open() error {
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+	s.initDispatcherRegisters()
 	go s.taskSaveWorkorders()
 	return nil
 }
@@ -314,5 +322,17 @@ func (s *Service) GetConsumeBySeqInStep(step *storage.Steps, seq int) (*StepComs
 func (s *Service) doDispatch(name string, data interface{}) {
 	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
 		s.diag.Error("Dispatch Failed", err)
+	}
+}
+
+// 收到工具保养通知
+func (s *Service) onToolMaintenance(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	ti := data.(tightening_device.ToolMaintenanceInfo)
+	if err := s.TryCreateMaintenance(ti); err != nil {
+		s.diag.Error("Create Maintenance Failed ", err)
 	}
 }

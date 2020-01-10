@@ -1,7 +1,6 @@
 package openprotocol
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/device"
@@ -69,7 +68,7 @@ func handleMid7410LastCurve(c *TighteningController, pkg *handlerPkg) error {
 	if err != nil {
 		c.diag.Error("ascii.Unmarshal", err)
 	}
-	if curve.ToolNumber == 0 {
+	if curve.ToolChannelNumber == 0 {
 		e := errors.New("收到的结果曲线数据不合法，未指定工具号")
 		c.diag.Error("handleMID_7410_LAST_CURVE", e)
 		return e
@@ -90,14 +89,14 @@ func handleMid7410LastCurve(c *TighteningController, pkg *handlerPkg) error {
 		}
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
-		tool, err := c.getInstance().GetToolViaChannel(curve.ToolNumber)
+		tool, err := c.getInstance().GetToolViaChannel(curve.ToolChannelNumber)
 		if err != nil {
 			return err
 		}
 
 		sn := tool.SerialNumber()
 
-		//defer delete(client.tempResultCurve, curve.ToolNumber)
+		//defer delete(client.tempResultCurve, curve.ToolChannelNumber)
 		client.tempResultCurve.ToolSN = sn
 		client.tempResultCurve.UpdateTime = time.Now()
 		c.doDispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherCurve), client.tempResultCurve)
@@ -232,9 +231,7 @@ func handleMid0035JobInfo(c *TighteningController, pkg *handlerPkg) error {
 			Job: jobInfo.JobID,
 		}
 
-		// TODO: 分发JOB信息
-		wsStr, _ := json.Marshal(jobSelect)
-		c.ProtocolService.diag.Debug(fmt.Sprintf("push job to hmi: %s", string(wsStr)))
+		c.doDispatch(dispatcherbus.DispatcherJob, jobSelect)
 	}
 
 	return nil
@@ -342,7 +339,6 @@ func handleMid0041ToolInfoReply(c *TighteningController, pkg *handlerPkg) error 
 		return err
 	}
 
-	// 将数据通过api传给odoo
 	if ti.ToolSN == "" {
 		return errors.New("Tool Serial Number Is Empty String ")
 	}
@@ -352,8 +348,6 @@ func handleMid0041ToolInfoReply(c *TighteningController, pkg *handlerPkg) error 
 		return nil
 	}
 
-	// TODO: 分发创建Maintenance请求
-	//go c.ProtocolService.CreateMaintenance(ti) // 协程处理
-
+	c.doDispatch(dispatcherbus.DispatcherToolMaintenance, ti.ToMaintenanceInfo())
 	return nil
 }
