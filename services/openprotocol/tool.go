@@ -359,6 +359,8 @@ func (s *TighteningTool) OnCurve(curve interface{}) {
 	err := s.controller.Srv.DB.UpdateIncompleteResultAndSaveCurve(dbCurves)
 	if err != nil {
 		s.diag.Error("Handle Curve With Result Failed", err)
+	} else {
+		s.diag.Info(fmt.Sprintf("缓存曲线成功 SN:%s", s.cfg.SN))
 	}
 }
 

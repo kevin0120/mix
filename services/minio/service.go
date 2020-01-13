@@ -13,6 +13,7 @@ import (
 type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
+	Info(msg string)
 }
 
 type Service struct {
@@ -154,8 +155,13 @@ func (s *Service) TaskReupload() {
 				if err != nil {
 					s.diag.Error(fmt.Sprintf("curve reupload failed, curve_id:%d result_id:%d", v.Id, v.ResultID), err)
 				} else {
+					s.diag.Info(fmt.Sprintf("曲线上传成功 FILE:%s", v.CurveFile))
 					v.HasUpload = true
-					s.DB.UpdateCurve(&v)
+					if _, err := s.DB.UpdateCurve(&v); err != nil {
+						s.diag.Error(fmt.Sprintf("更新曲线失败 FILE:%s", v.CurveFile), err)
+					} else {
+						s.diag.Info(fmt.Sprintf("曲线更新成功 FILE:%s", v.CurveFile))
+					}
 				}
 			}
 		}
