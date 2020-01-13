@@ -4,8 +4,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-
-
 type Service struct {
 	ITransportService
 	diag     Diagnostic

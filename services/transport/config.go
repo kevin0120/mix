@@ -5,10 +5,11 @@ import "github.com/pkg/errors"
 const (
 	GRPCTransport         = "grpc"
 	BrokerTransport       = "broker"
+	HttpTransport         = "http"
 	DefaultGRPCServerAddr = "127.0.0.1:9093"
 )
 
-var SupportProviders = []string{GRPCTransport, BrokerTransport}
+var SupportProviders = []string{GRPCTransport, BrokerTransport, HttpTransport}
 
 type Config struct {
 	Provider string   `yaml:"provider"`
@@ -17,7 +18,7 @@ type Config struct {
 
 func NewConfig() Config {
 	return Config{
-		Provider: GRPCTransport,
+		Provider: HttpTransport,
 		Address:  []string{DefaultGRPCServerAddr},
 	}
 }

@@ -148,7 +148,7 @@ func (s *Server) GetServiceByName(name string) Service {
 	if idx, ok := s.ServicesByName[name]; !ok {
 		// Should be unreachable code
 		return nil
-	}else {
+	} else {
 		return s.Services[idx]
 	}
 }

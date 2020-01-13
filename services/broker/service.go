@@ -21,6 +21,7 @@ type Service struct {
 	provider      IBrokerProvider
 	dispatcherBus Dispatcher
 	dispatcherMap dispatcherbus.DispatcherMap
+	opened        bool
 	closing       chan struct{}
 	status        atomic.String
 }
@@ -54,16 +55,32 @@ func (s *Service) initGblDispatcher() {
 	}
 }
 
+func (s *Service) doOpen() {
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+	s.doConnect(false) // 初始化所有连接状态为未连接
+	go s.connectProc()
+	s.opened = true
+}
+
 func (s *Service) Open() error {
 	c := s.Config()
 	if !c.Enable {
 		return nil
 	}
-
-	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-	s.doConnect(false) // 初始化所有连接状态为未连接
-	go s.connectProc()
+	s.doOpen()
 	return nil
+}
+
+func (s *Service) TransportForceOpen() {
+	if s.opened {
+		return
+	}
+	c := s.Config()
+	if err := c.Validate(); err != nil {
+		s.diag.Error("TransportForceOpen", err)
+		return
+	}
+	s.doOpen()
 }
 
 func (s *Service) Close() error {
@@ -75,11 +92,11 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service)dispatcherBrokerStatus(status string)  {
+func (s *Service) dispatcherBrokerStatus(status string) {
 	if s.dispatcherBus == nil {
 		s.diag.Error("dispatcherBrokerStatus Error", errors.New("dispatcherBus Is Empty"))
 	}
-	if err :=s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status); err != nil {
+	if err := s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status); err != nil {
 		s.diag.Error("dispatcherBrokerStatus", err)
 	}
 
