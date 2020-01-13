@@ -2,6 +2,7 @@ package transport
 
 import (
 	"github.com/micro/go-micro/transport"
+	"time"
 )
 
 type Diagnostic interface {
@@ -23,8 +24,11 @@ type IServer interface {
 
 type ITransportService interface {
 	GetServerAddress() []string //服务器地址，可能存在集群服务器如：etcd， nats等
-	TransportForceOpen()        //强制打开特定的transport服务
-	Transport
+	TransportForceOpen() error  //强制打开特定的transport服务
+	OnMessage(subject string, handler OnMsgHandler) error
+	SendMessage(subject string, data []byte) error
+	Request(subject string, data []byte, timeOut time.Duration) ([]byte, error)
+	Status() string
 }
 
 type Transport = transport.Transport
@@ -42,3 +46,5 @@ type Option func(*Options)
 type DialOption func(*DialOptions)
 
 type ListenOption func(*ListenOptions)
+
+type OnMsgHandler func(*Message) ([]byte, error)

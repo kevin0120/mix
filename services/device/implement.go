@@ -88,7 +88,7 @@ func (s *BaseDevice) DoOnDeviceStatus(symbol string, status string) error {
 
 func (s *BaseDevice) OnDeviceStatus(status string) {
 	if status != BaseDeviceStatusOnline && status != BaseDeviceStatusOffline {
-		s.diag.Error("OnStatus", errors.Errorf("Status: %s Is Not Support", status))
+		s.diag.Error("onStatus", errors.Errorf("Status: %s Is Not Support", status))
 	}
 	ss := s.Status()
 	if ss == status {
@@ -96,7 +96,7 @@ func (s *BaseDevice) OnDeviceStatus(status string) {
 	}
 	s.UpdateStatus(status)
 	if err := s.DoOnDeviceStatus(s.serialNumber, status); err != nil {
-		s.diag.Error("OnStatus DoOnDeviceStatus", err)
+		s.diag.Error("onStatus DoOnDeviceStatus", err)
 	}
 }
 

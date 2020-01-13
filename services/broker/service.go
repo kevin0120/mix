@@ -3,17 +3,12 @@ package broker
 import (
 	"fmt"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"go.uber.org/atomic"
 	"time"
 )
-
-type Diagnostic interface {
-	Info(msg string)
-	Error(msg string, err error)
-	Debug(msg string)
-}
 
 type Service struct {
 	diag          Diagnostic
@@ -142,7 +137,15 @@ func (s *Service) newBroker(provider string) (ret IBrokerProvider) {
 	return
 }
 
-func (s *Service) Subscribe(subject string, handler SubscribeHandler) error {
+func (s *Service) OnMessage(subject string, handler transport.OnMsgHandler) error {
+	return s.subscribe(subject, handler)
+}
+
+func (s *Service) SendMessage(subject string, data []byte) error {
+	return s.publish(subject, data)
+}
+
+func (s *Service) subscribe(subject string, handler transport.OnMsgHandler) error {
 	p := s.provider
 	if p == nil {
 		return errors.New("Can Not Create broker Subscribe, Cause provider Is Empty")
@@ -151,7 +154,7 @@ func (s *Service) Subscribe(subject string, handler SubscribeHandler) error {
 	return p.Subscribe(subject, handler)
 }
 
-func (s *Service) Publish(subject string, data []byte) error {
+func (s *Service) publish(subject string, data []byte) error {
 	p := s.provider
 	if p == nil {
 		return errors.New("Can Not Create broker Publish, Cause provider Is Empty")

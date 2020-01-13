@@ -1,6 +1,9 @@
 package broker
 
-import "time"
+import (
+	"github.com/masami10/rush/services/transport"
+	"time"
+)
 
 type DefaultBroker struct {
 }
@@ -21,7 +24,7 @@ func (s *DefaultBroker) Close() error {
 	return nil
 }
 
-func (s *DefaultBroker) Subscribe(subject string, handler SubscribeHandler) error {
+func (s *DefaultBroker) Subscribe(subject string, handler transport.OnMsgHandler) error {
 	return nil
 }
 

@@ -33,7 +33,7 @@ type Service struct {
 	closing chan struct{}
 }
 
-func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IBrokerService, ns INotifyService) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs ITransportService, ns INotifyService) *Service {
 	s := &Service{
 		diag:           d,
 		dispatcherBus:  dp,
@@ -50,7 +50,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IB
 	return s
 }
 
-func (s *Service) initTransport(bs IBrokerService, dispatcherBus Dispatcher) error {
+func (s *Service) initTransport(bs ITransportService, dispatcherBus Dispatcher) error {
 	switch s.Config().TransportType {
 	case TRANSPORT_TYPE_GRPC:
 		s.transport = NewGRPCClient(s.diag, s.Config())

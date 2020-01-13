@@ -1,16 +1,12 @@
 package broker
 
 import (
-	"context"
-	"crypto/tls"
+	"github.com/masami10/rush/services/transport"
 	"github.com/nats-io/nats.go"
 	"time"
 )
 
-const (
-	HEADER_SUBJECT = "subject"
-	HEADER_REPLY   = "reply"
-)
+
 
 var STATUS_BROKER = map[nats.Status]string{
 	nats.DISCONNECTED:  "DISCONNECTED",
@@ -28,23 +24,9 @@ type IBrokerProvider interface {
 	Address() string
 	Connect(urls []string) error
 	Close() error
-	Subscribe(subject string, handler SubscribeHandler) error
+	Subscribe(subject string, handler transport.OnMsgHandler) error
 	UnSubscribe(subject string) error
 	Publish(subject string, data []byte) error
 	DoRequest(subject string, data []byte, timeOut time.Duration) ([]byte, error)
 	SetStatusHandler(handler StatusHandler)
-}
-
-type SubscribeHandler func(*BrokerMessage) ([]byte, error)
-
-type brokerOptions struct {
-	Addrs     []string
-	Secure    bool
-	TLSConfig *tls.Config
-	Context   context.Context
-}
-
-type BrokerMessage struct {
-	Header map[string]string
-	Body   []byte
 }

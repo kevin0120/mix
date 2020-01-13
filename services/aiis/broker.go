@@ -3,8 +3,8 @@ package aiis
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/utils"
 )
 
@@ -13,7 +13,7 @@ const (
 	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
 )
 
-func NewBrokerClient(d Diagnostic, bs IBrokerService, dp Dispatcher) *BrokerClient {
+func NewBrokerClient(d Diagnostic, bs ITransportService, dp Dispatcher) *BrokerClient {
 	return &BrokerClient{
 		diag:          d,
 		BaseTransport: BaseTransport{},
@@ -27,7 +27,7 @@ type BrokerClient struct {
 	BaseTransport
 	diag Diagnostic
 
-	broker        IBrokerService
+	broker        ITransportService
 	dispatcherBus Dispatcher
 
 	toolCollector chan string
@@ -54,7 +54,7 @@ func (s *BrokerClient) collectTools() {
 	for {
 		select {
 		case toolSN := <-s.toolCollector:
-			err := s.broker.Subscribe(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), s.onResultResp)
+			err := s.broker.OnMessage(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), s.onResultResp)
 			if err != nil {
 				s.diag.Error("Subscribe Failed", err)
 			}
@@ -93,7 +93,7 @@ func (s *BrokerClient) onNewTool(data interface{}) {
 }
 
 // 收到上传结果反馈
-func (s *BrokerClient) onResultResp(message *broker.BrokerMessage) ([]byte, error) {
+func (s *BrokerClient) onResultResp(message *transport.Message) ([]byte, error) {
 	if message == nil {
 		return nil, nil
 	}
@@ -114,5 +114,5 @@ func (c *BrokerClient) SendResult(result *AIISResult) error {
 		Data:   result,
 	})
 
-	return c.broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, result.ToolSN), str)
+	return c.broker.SendMessage(fmt.Sprintf(SUBJECT_RESULTS, result.ToolSN), str)
 }
