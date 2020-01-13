@@ -52,7 +52,7 @@ func handleMid9999Alive(c *TighteningController, pkg *handlerPkg) error {
 func handleMid0002StartAck(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
 	seq := <-client.requestChannel
-	client.Response.update(seq, request_errors["00"])
+	client.response.update(seq, request_errors["00"])
 
 	go c.ProcessSubscribeControllerInfo(pkg.SN)
 
@@ -128,7 +128,7 @@ func handleMid0065OldData(c *TighteningController, pkg *handlerPkg) error {
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, resultData.ToTighteningResult())
+	client.response.update(seq, resultData.ToTighteningResult())
 
 	return nil
 }
@@ -142,7 +142,7 @@ func handleMid0013PsetDetailReply(c *TighteningController, pkg *handlerPkg) erro
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, psetDetail)
+	client.response.update(seq, psetDetail)
 
 	return nil
 }
@@ -157,7 +157,7 @@ func handleMid0011PsetListReply(c *TighteningController, pkg *handlerPkg) error 
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, psetList)
+	client.response.update(seq, psetList)
 
 	return nil
 }
@@ -172,7 +172,7 @@ func handleMid0031JobListReply(c *TighteningController, pkg *handlerPkg) error {
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, jobList)
+	client.response.update(seq, jobList)
 
 	return nil
 }
@@ -186,7 +186,7 @@ func handleMid0033JobDetailReply(c *TighteningController, pkg *handlerPkg) error
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, jobDetaill)
+	client.response.update(seq, jobDetaill)
 
 	return nil
 }
@@ -197,7 +197,7 @@ func handleMid0004CmdErr(c *TighteningController, pkg *handlerPkg) error {
 	errCode := pkg.Body[4:6]
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, request_errors[errCode])
+	client.response.update(seq, request_errors[errCode])
 
 	return nil
 }
@@ -206,7 +206,7 @@ func handleMid0004CmdErr(c *TighteningController, pkg *handlerPkg) error {
 func handleMid0005CmdOk(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
 	seq := <-client.requestChannel
-	client.Response.update(seq, request_errors["00"])
+	client.response.update(seq, request_errors["00"])
 
 	return nil
 }
@@ -302,10 +302,10 @@ func handleMid0071Alarm(c *TighteningController, pkg *handlerPkg) error {
 
 	switch ai.ErrorCode {
 	case EvtControllerToolConnect:
-		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOnline)
+		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOnline)
 
 	case EvtControllerToolDisconnect:
-		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOffline)
+		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOffline)
 	}
 
 	return nil
@@ -321,10 +321,10 @@ func handleMid0076AlarmStatus(c *TighteningController, pkg *handlerPkg) error {
 
 	switch as.ErrorCode {
 	case EvtControllerNoErr:
-		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOnline)
+		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOnline)
 
 	case EvtControllerToolDisconnect:
-		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOffline)
+		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOffline)
 	}
 
 	return nil

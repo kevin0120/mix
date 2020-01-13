@@ -15,20 +15,26 @@ import (
 	"time"
 )
 
+const (
+	DailTimeout = 5 * time.Second
+	BufferSize  = 65535
+)
+
 type IClientHandler interface {
 	handleMsg(pkg *handlerPkg) error
 	handleStatus(sn string, status string)
 	GetVendorMid(mid string) (string, error)
 }
 
-func createClientContext(endpoint string, diag Diagnostic, handler IClientHandler, sn string) *clientContext {
+func newClientContext(endpoint string, diag Diagnostic, handler IClientHandler, sn string, params *OpenProtocolParams) *clientContext {
 	ctx := clientContext{
-		buffer:          make(chan []byte, 1024),
+		sendBuffer:      make(chan []byte, BufferSize),
 		closing:         make(chan struct{}, 1),
 		diag:            diag,
 		clientHandler:   handler,
 		sn:              sn,
 		tempResultCurve: tightening_device.NewTighteningCurve(),
+		params:          params,
 	}
 
 	ctx.sockClient = socket_writer.NewSocketWriter(endpoint, &ctx)
@@ -37,13 +43,14 @@ func createClientContext(endpoint string, diag Diagnostic, handler IClientHandle
 
 type clientContext struct {
 	sn                string
+	params            *OpenProtocolParams
 	status            atomic.Value
 	sockClient        *socket_writer.SocketWriter
 	keepAliveCount    atomic.Int32
 	keepaliveDeadLine atomic.Value
-	buffer            chan []byte
+	sendBuffer        chan []byte
 	handlerBuf        chan handlerPkg
-	Response          ResponseQueue
+	response          ResponseQueue
 	receiveBuf        chan []byte
 	tempResultCurve   *tightening_device.TighteningCurve
 	requestChannel    chan uint32
@@ -57,8 +64,8 @@ type clientContext struct {
 }
 
 func (c *clientContext) start() {
-	go c.manage()
 	go c.handleRecv()
+	go c.manage()
 	go c.connect()
 }
 
@@ -96,8 +103,8 @@ func (c *clientContext) handlePackageOPPayload(src []byte, data []byte) error {
 }
 
 func (c *clientContext) handleRecv() {
-	c.handleRecvBuf = make([]byte, 65535)
-	c.receiveBuf = make(chan []byte, 65535)
+	c.handleRecvBuf = make([]byte, BufferSize)
+	c.receiveBuf = make(chan []byte, BufferSize)
 	lenBuf := len(c.handleRecvBuf)
 
 	for {
@@ -143,7 +150,7 @@ func (c *clientContext) manage() {
 	nextWriteThreshold := time.Now()
 	for {
 		select {
-		case <-time.After(time.Duration(OpenProtocolDefaultKeepAlivePeriod)):
+		case <-time.After(c.params.KeepAlivePeriod):
 			if c.Status() == device.BaseDeviceStatusOffline {
 				continue
 			}
@@ -154,7 +161,7 @@ func (c *clientContext) manage() {
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
 				c.addKeepAliveCount()
 			}
-		case v := <-c.buffer:
+		case v := <-c.sendBuffer:
 			for nextWriteThreshold.After(time.Now()) {
 				time.Sleep(time.Microsecond * 100)
 			}
@@ -187,15 +194,14 @@ func (c *clientContext) Read(conn net.Conn) {
 		}
 	}()
 
-	buffer := make([]byte, 65535)
-
+	buf := make([]byte, BufferSize)
 	for {
-		if err := conn.SetReadDeadline(time.Now().Add(time.Duration(OpenProtocolDefaultKeepAlivePeriod) * MaxKeepAliveCheck).Add(1 * time.Second)); err != nil {
-			c.diag.Error("SetReadDeadline Failed ", err)
-			break
-		}
+		//if err := conn.SetReadDeadline(time.Now().Add(c.params.KeepAlivePeriod * time.Duration(c.params.MaxKeepAliveCheck))); err != nil {
+		//	c.diag.Error("SetReadDeadline Failed ", err)
+		//	break
+		//}
 
-		n, err := conn.Read(buffer)
+		n, err := conn.Read(buf)
 		if err != nil {
 			c.diag.Error("Read Failed ", err)
 			c.handleStatus(device.BaseDeviceStatusOffline)
@@ -204,7 +210,7 @@ func (c *clientContext) Read(conn net.Conn) {
 		}
 
 		c.updateKeepAliveCount(0)
-		c.receiveBuf <- buffer[0:n]
+		c.receiveBuf <- buf[0:n]
 	}
 }
 
@@ -243,7 +249,7 @@ func (c *clientContext) addKeepAliveCount() {
 }
 
 func (c *clientContext) updateKeepAliveDeadLine() {
-	c.keepaliveDeadLine.Store(time.Now().Add(time.Duration(OpenProtocolDefaultKeepAlivePeriod)))
+	c.keepaliveDeadLine.Store(time.Now().Add(time.Duration(c.params.KeepAlivePeriod)))
 }
 
 func (c *clientContext) KeepAliveDeadLine() time.Time {
@@ -261,7 +267,7 @@ func (c *clientContext) sendKeepalive() {
 
 func (c *clientContext) Write(buf []byte) {
 	c.diag.Debug(fmt.Sprintf("OpenProtocol Send %s: %s", c.sn, string(buf)))
-	c.buffer <- buf
+	c.sendBuffer <- buf
 }
 
 func (c *clientContext) connect() {
@@ -270,7 +276,7 @@ func (c *clientContext) connect() {
 	c.writeOffset = 0
 	c.requestChannel = make(chan uint32, 1024)
 	c.sequence = utils.CreateSequence()
-	c.Response = ResponseQueue{
+	c.response = ResponseQueue{
 		Results: map[interface{}]interface{}{},
 		mtx:     sync.Mutex{},
 	}
@@ -283,11 +289,27 @@ func (c *clientContext) connect() {
 			break
 		}
 
-		time.Sleep(time.Duration(OpenProtocolDefaultRequestTimeOut))
+		time.Sleep(1 * time.Second)
 	}
 
 	c.handleStatus(device.BaseDeviceStatusOnline)
 	c.clientHandler.handleStatus(c.sn, device.BaseDeviceStatusOnline)
+	if err := c.startComm(); err != nil {
+		c.diag.Error(fmt.Sprintf("Start Comm Failed: %s", c.sn), err)
+	}
+}
+
+func (c *clientContext) startComm() error {
+	reply, err := c.ProcessRequest(MID_0001_START, "", "", "", "")
+	if err != nil {
+		return err
+	}
+
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
+	}
+
+	return nil
 }
 
 func (c *clientContext) ProcessRequest(mid string, noack string, station string, spindle string, data string) (interface{}, error) {
@@ -304,11 +326,11 @@ func (c *clientContext) ProcessRequest(mid string, noack string, station string,
 
 	seq := c.sequence.GetSequence()
 	c.requestChannel <- seq
-	c.Response.Add(seq, nil)
+	c.response.Add(seq, nil)
 
 	c.Write([]byte(pkg))
-	ctx, _ := context.WithTimeout(context.Background(), MaxReplyTime)
-	reply := c.Response.Get(seq, ctx)
+	ctx, _ := context.WithTimeout(context.Background(), c.params.MaxReplyTime)
+	reply := c.response.Get(seq, ctx)
 
 	if reply == nil {
 		return nil, errors.New(tightening_device.TIGHTENING_ERR_TIMEOUT)

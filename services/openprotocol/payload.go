@@ -28,6 +28,12 @@ const (
 	EvtControllerToolConnect    = "I002"
 )
 
+type OpenProtocolParams struct {
+	MaxKeepAliveCheck int
+	MaxReplyTime      time.Duration
+	KeepAlivePeriod   time.Duration
+}
+
 type IOStatus struct {
 	No     int    `json:"no"`
 	Status string `json:"status"`

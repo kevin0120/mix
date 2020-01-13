@@ -422,7 +422,7 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 	seq := c.Sequence()
 	psetPacket, seq := GeneratePacket(seq, Header_type_request_with_reply, xmlPset)
 
-	//c.Response.Add(seq, "")
+	//c.response.Add(seq, "")
 	c.Write([]byte(psetPacket), seq)
 
 	c.Response.Add(seq, "")

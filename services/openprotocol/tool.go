@@ -17,7 +17,7 @@ func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagno
 		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool, d, c.GetParentService()),
 	}
 	tool.SetSerialNumber(cfg.SN)
-	tool.UpdateStatus(device.BaseDeviceStatusOffline)
+	tool.BaseDevice.UpdateStatus(device.BaseDeviceStatusOffline)
 	tool.SetMode(c.ProtocolService.GetDefaultMode())
 	return &tool
 }
@@ -353,4 +353,19 @@ func (s *TighteningTool) onCurve(curve interface{}) {
 	// 分发曲线
 	s.controller.doDispatch(dispatcherbus.DispatcherCurve, tighteningCurve)
 	s.diag.Info(fmt.Sprintf("缓存曲线成功 工具:%s 对应拧紧ID:%s", dbCurves.ToolSN, dbCurves.TighteningID))
+}
+
+func (s *TighteningTool) UpdateStatus(status string) {
+	if status == s.Status() {
+		return
+	}
+
+	s.BaseDevice.UpdateStatus(status)
+	toolStatus := []device.Status{{
+		Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
+		SN:     s.SerialNumber(),
+		Status: status,
+	}}
+
+	s.controller.doDispatch(dispatcherbus.DispatcherDeviceStatus, toolStatus)
 }

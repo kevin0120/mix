@@ -1,8 +1,10 @@
 package desoutter
 
 import (
+	"errors"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/openprotocol"
+	"github.com/masami10/rush/services/tightening_device"
 )
 
 type WrenchController struct {
@@ -18,7 +20,7 @@ func (c *WrenchController) New() openprotocol.IOpenProtocolController {
 func (c *WrenchController) GetVendorModel() map[string]interface{} {
 	vendorModels := map[string]interface{}{
 		// *MID							*每个MID对应的REV版本
-		openprotocol.MID_0001_START:                 "003",
+		openprotocol.MID_0001_START:                 "004",
 		openprotocol.MID_0018_PSET:                  "001",
 		openprotocol.MID_0014_PSET_SUBSCRIBE:        "001",
 		openprotocol.MID_0060_LAST_RESULT_SUBSCRIBE: "006",
@@ -43,3 +45,10 @@ func (c *WrenchController) GetVendorModel() map[string]interface{} {
 }
 
 // 可重写所有TighteningController中的方法
+func (c *WrenchController) GetToolViaChannel(channel int) (tightening_device.ITighteningTool, error) {
+	for _, v := range c.Children() {
+		return v.(tightening_device.ITighteningTool), nil
+	}
+
+	return nil, errors.New("WrenchController.GetToolViaChannel: Tool Not Found")
+}

@@ -54,7 +54,6 @@ func (h *WSRequestHandlers) HandleWSRequest(data interface{}) {
 
 	handler, err := h.getHandler(msg.Type)
 	if err != nil {
-		h.Diag.Error(fmt.Sprintf("HandleWSRequest Error: Handler Not Found: %s", msg.Type), err)
 		return
 	}
 

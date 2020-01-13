@@ -149,9 +149,10 @@ func (s *Service) onTighteningResult(data interface{}) {
 	tighteningResult := data.(tightening_device.TighteningResult)
 
 	// 拧紧结果推送HMI
-	s.wsSendTighteningResult([]tightening_device.BaseResult{tighteningResult.BaseResult})
+	hmiTighteningResult := []tightening_device.BaseResult{tighteningResult.BaseResult}
+	s.wsSendTighteningResult(hmiTighteningResult)
 
-	body, _ := json.Marshal(tighteningResult)
+	body, _ := json.Marshal(hmiTighteningResult)
 	s.diag.Info(fmt.Sprintf("拧紧结果推送HMI:%s", string(body)))
 }
 

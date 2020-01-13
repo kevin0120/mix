@@ -248,7 +248,7 @@ func (s *Server) appendTighteningDeviceService() error {
 	c := s.config.TighteningDevice
 	d := s.DiagService.NewTighteningDeviceHandler()
 	srv, err := tightening_device.NewService(c, d,
-		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService)
+		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService, s.StorageServie)
 
 	if err != nil {
 		return errors.Wrap(err, "append tightening_device service fail")

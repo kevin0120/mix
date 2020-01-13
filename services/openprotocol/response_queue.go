@@ -58,7 +58,7 @@ func (q *ResponseQueue) Get(key interface{}, ctx context.Context) interface{} {
 				break
 			}
 
-			time.Sleep(ReplyTimeout)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 

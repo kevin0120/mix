@@ -161,6 +161,15 @@ func (s *Service) ToolPSetSet(req *PSetSet) error {
 		return err
 	}
 
+	if err := s.ToolPSetBatchSet(&PSetBatchSet{
+		ControllerSN: req.ControllerSN,
+		ToolSN:       req.ToolSN,
+		PSet:         req.PSet,
+		Batch:        1,
+	}); err != nil {
+		s.diag.Error("PSet Batch Set Failed", err)
+	}
+
 	if req.UserID == 0 {
 		req.UserID = 1
 	}

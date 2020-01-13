@@ -49,7 +49,7 @@ func (s *Service) loadTighteningController(c Config) {
 	}
 }
 
-func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Dispatcher, ds IDeviceService) (*Service, error) {
+func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Dispatcher, ds IDeviceService, db IStorageService) (*Service, error) {
 
 	s := &Service{
 		diag:               d,
@@ -57,6 +57,7 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Disp
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
 		deviceService:      ds,
+		storageService:     db,
 	}
 
 	s.setupGlobalDispatchers()

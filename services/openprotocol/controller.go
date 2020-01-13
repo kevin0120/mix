@@ -9,14 +9,9 @@ import (
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
+	"go.uber.org/atomic"
+	"sync"
 	"time"
-)
-
-const (
-	DailTimeout       = 5 * time.Second
-	MaxKeepAliveCheck = 3
-	ReplyTimeout      = 100 * time.Millisecond
-	MaxReplyTime      = 2000 * time.Millisecond
 )
 
 type ControllerSubscribe func(string) error
@@ -30,15 +25,19 @@ type handlerPkg struct {
 type TighteningController struct {
 	device.BaseDevice
 
-	sockClients          map[string]*clientContext
-	deviceConf           *tightening_device.TighteningDeviceConfig
-	ProtocolService      *Service
-	inputs               string
-	diag                 Diagnostic
-	controllerSubscribes []ControllerSubscribe
-	dispatcherBus        Dispatcher
-	dispatcherMap        map[string]dispatcherbus.DispatcherMap
-	isGlobalConn         bool
+	sockClients           map[string]*clientContext
+	deviceConf            *tightening_device.TighteningDeviceConfig
+	ProtocolService       *Service
+	inputs                string
+	diag                  Diagnostic
+	controllerSubscribes  []ControllerSubscribe
+	hasSubscribedSelector atomic.Bool
+	hasSubscribedVin      atomic.Bool
+	hasSubscribedIO       atomic.Bool
+	dispatcherBus         Dispatcher
+	dispatcherMap         map[string]dispatcherbus.DispatcherMap
+	isGlobalConn          bool
+	mtxStatus             sync.Mutex
 
 	instance IOpenProtocolController
 }
@@ -65,11 +64,15 @@ func (c *TighteningController) initController(deviceConfig *tightening_device.Ti
 	c.dispatcherMap = map[string]dispatcherbus.DispatcherMap{}
 	c.sockClients = map[string]*clientContext{}
 	c.isGlobalConn = false
+	c.hasSubscribedIO.Store(false)
+	c.hasSubscribedSelector.Store(false)
+	c.hasSubscribedVin.Store(false)
 	c.BaseDevice = device.CreateBaseDevice(deviceConfig.Model, d, service)
 	c.diag = d
 	c.deviceConf = deviceConfig
 	c.ProtocolService = service
 	c.dispatcherBus = dp
+	c.mtxStatus = sync.Mutex{}
 
 	c.BaseDevice.Cfg = c.getInstance().GetVendorModel()[IoModel]
 
@@ -97,7 +100,7 @@ func (c *TighteningController) initClients(deviceConfig *tightening_device.Tight
 			c.isGlobalConn = false
 		}
 
-		client := createClientContext(endpoint, d, c, sn)
+		client := newClientContext(endpoint, d, c, sn, c.getInstance().OpenProtocolParams())
 		c.sockClients[sn] = client
 
 		if c.isGlobalConn {
@@ -114,19 +117,13 @@ func (c *TighteningController) getClient(sn string) *clientContext {
 	return c.getTransportClientBySymbol(sn)
 }
 
-func (c *TighteningController) UpdateToolStatus(status string) {
-	var ss []device.Status
-	for sn, v := range c.Children() {
-		tool := v.(*TighteningTool)
-		tool.UpdateStatus(status)
-		ss = append(ss, device.Status{
-			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
-			SN:     sn,
-			Status: status,
-		})
+func (c *TighteningController) UpdateToolStatus(sn string, status string) {
+	tool, err := c.getToolViaSerialNumber(sn)
+	if err != nil {
+		return
 	}
 
-	c.doDispatch(dispatcherbus.DispatcherDeviceStatus, ss)
+	tool.(*TighteningTool).UpdateStatus(status)
 }
 
 func (c *TighteningController) GetToolViaSerialNumber(toolSN string) (tightening_device.ITighteningTool, error) {
@@ -154,12 +151,10 @@ func (c *TighteningController) GetToolViaChannel(channel int) (tightening_device
 
 func (c *TighteningController) initSubscribeInfos() {
 	c.controllerSubscribes = []ControllerSubscribe{
-		//c.PSetSubscribe,
 		c.ResultSubcribe,
 		c.SelectorSubscribe,
 		c.JobInfoSubscribe,
 		c.IOInputSubscribe,
-		//c.MultiSpindleResultSubscribe,
 		c.VinSubscribe,
 		c.AlarmSubcribe,
 		c.CurveSubscribe,
@@ -170,7 +165,7 @@ func (c *TighteningController) ProcessSubscribeControllerInfo(sn string) {
 	for _, subscribe := range c.controllerSubscribes {
 		err := subscribe(sn)
 		if err != nil {
-			c.diag.Debug(fmt.Sprintf("OpenProtocol SubscribeControllerInfo Failed: %s", err.Error()))
+			c.diag.Debug(fmt.Sprintf("SN: %s OpenProtocol SubscribeControllerInfo Failed: %s", sn, err.Error()))
 		}
 	}
 }
@@ -294,14 +289,16 @@ func (c *TighteningController) Start() error {
 }
 
 func (c *TighteningController) startupClients() {
+
 	for _, v := range c.sockClients {
-		go v.start()
+		v.start()
 	}
 }
 
 func (c *TighteningController) shutdownClients() {
+
 	for _, v := range c.sockClients {
-		go v.stop()
+		v.stop()
 	}
 }
 
@@ -378,32 +375,16 @@ func (c *TighteningController) handlerOldResults() error {
 	return nil
 }
 
-func (c *TighteningController) startComm(sn string) error {
-	reply, err := c.getClient(sn).ProcessRequest(MID_0001_START, "", "", "", "")
-	if err != nil {
-		return err
-	}
-
-	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
-	}
-
-	return nil
-}
-
 func (c *TighteningController) handleStatus(sn string, status string) {
+	c.mtxStatus.Lock()
+	defer c.mtxStatus.Unlock()
+
 	if status == c.Status() {
 		return
 	}
+	c.UpdateStatus(status)
 
 	c.diag.Info(fmt.Sprintf("OpenProtocol handleStatus Model:%s SN:%s %s\n", c.Model(), sn, status))
-	c.UpdateStatus(status)
-	if status == device.BaseDeviceStatusOnline {
-		if err := c.startComm(sn); err != nil {
-			c.diag.Error("Start Comm Failed ", err)
-		}
-	}
-
 	ss := []device.Status{
 		{
 			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
@@ -418,6 +399,7 @@ func (c *TighteningController) handleStatus(sn string, status string) {
 }
 
 func (c *TighteningController) getDefaultTransportClient() *clientContext {
+
 	for _, sw := range c.sockClients {
 		return sw
 	}
@@ -425,6 +407,7 @@ func (c *TighteningController) getDefaultTransportClient() *clientContext {
 }
 
 func (c *TighteningController) getTransportClientBySymbol(symbol string) *clientContext {
+
 	if sw, ok := c.sockClients[symbol]; !ok {
 		err := errors.Errorf("Can Not Found Transport For %s", symbol)
 		c.diag.Error("getTransportClientBySymbol", err)
@@ -449,6 +432,11 @@ func (c *TighteningController) PSetSubscribe(sn string) error {
 }
 
 func (c *TighteningController) SelectorSubscribe(sn string) error {
+	if c.hasSubscribedSelector.Load() {
+		return nil
+	}
+	c.hasSubscribedSelector.Store(true)
+
 	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0250_SELECTOR_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
@@ -476,6 +464,11 @@ func (c *TighteningController) JobInfoSubscribe(sn string) error {
 }
 
 func (c *TighteningController) IOInputSubscribe(sn string) error {
+	if c.hasSubscribedIO.Load() {
+		return nil
+	}
+	c.hasSubscribedIO.Store(true)
+
 	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0210_INPUT_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
@@ -503,6 +496,11 @@ func (c *TighteningController) MultiSpindleResultSubscribe(sn string) error {
 }
 
 func (c *TighteningController) VinSubscribe(sn string) error {
+	if c.hasSubscribedVin.Load() {
+		return nil
+	}
+	c.hasSubscribedVin.Store(true)
+
 	reply, err := c.getDefaultTransportClient().ProcessRequest(MID_0051_VIN_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
@@ -606,5 +604,13 @@ func (c *TighteningController) SetInstance(instance IOpenProtocolController) {
 func (c *TighteningController) doDispatch(name string, data interface{}) {
 	if err := c.dispatcherBus.Dispatch(name, data); err != nil {
 		c.diag.Error("Dispatch Failed", err)
+	}
+}
+
+func (c *TighteningController) OpenProtocolParams() *OpenProtocolParams {
+	return &OpenProtocolParams{
+		MaxKeepAliveCheck: 3,
+		MaxReplyTime:      3 * time.Second,
+		KeepAlivePeriod:   10 * time.Second,
 	}
 }
