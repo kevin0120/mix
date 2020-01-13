@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	SUBJECT_RESULTS      = "saturn.results.%s"
-	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
+	SubjectResults     = "saturn.results.%s"
+	SubjectResultsResp = "saturn.results.%s.response"
 )
 
 func NewBrokerClient(d Diagnostic, bs ITransportService, dp Dispatcher) *BrokerClient {
@@ -54,7 +54,7 @@ func (s *BrokerClient) collectTools() {
 	for {
 		select {
 		case toolSN := <-s.toolCollector:
-			err := s.broker.OnMessage(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), s.onResultResp)
+			err := s.broker.OnMessage(fmt.Sprintf(SubjectResultsResp, toolSN), s.onResultResp)
 			if err != nil {
 				s.diag.Error("Subscribe Failed", err)
 			}
@@ -114,5 +114,5 @@ func (c *BrokerClient) SendResult(result *AIISResult) error {
 		Data:   result,
 	})
 
-	return c.broker.SendMessage(fmt.Sprintf(SUBJECT_RESULTS, result.ToolSN), str)
+	return c.broker.SendMessage(fmt.Sprintf(SubjectResults, result.ToolSN), str)
 }
