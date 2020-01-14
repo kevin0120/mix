@@ -3,8 +3,8 @@ package device
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"go.uber.org/atomic"
 	"sync"
-	"sync/atomic"
 )
 
 type BaseDeviceDiagnostic interface {
@@ -77,7 +77,6 @@ func (s *BaseDevice) Stop() error {
 	return nil
 }
 
-//todo: 当状态变化时候要做业务逻辑
 func (s *BaseDevice) DoOnDeviceStatus(symbol string, status string) error {
 	if s.service == nil {
 		return errors.New("Please Inject Device Parent Service First")

@@ -6,7 +6,7 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/tightening_device"
-	"sync/atomic"
+	"go.uber.org/atomic"
 )
 
 func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagnostic) *TighteningTool {
@@ -17,7 +17,7 @@ func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagno
 		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool, d, c.GetParentService()),
 	}
 	tool.SetSerialNumber(cfg.SN)
-	tool.UpdateStatus(device.BaseDeviceStatusOffline)
+	tool.BaseDevice.UpdateStatus(device.BaseDeviceStatusOffline)
 	tool.SetMode(c.ProtocolService.GetDefaultMode())
 	return &tool
 }
@@ -105,9 +105,9 @@ func (s *TighteningTool) ModeSelect(mode string) error {
 		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
-	flag := OPENPROTOCOL_MODE_PSET
+	flag := OpenprotocolModePset
 	if mode == tightening_device.MODE_JOB {
-		flag = OPENPROTOCOL_MODE_JOB
+		flag = OpenprotocolModeJob
 	}
 
 	reply, err := s.controller.getClient(s.SerialNumber()).ProcessRequest(MID_0130_JOB_OFF, "", "", "", flag)
@@ -288,7 +288,7 @@ func (s *TighteningTool) DeviceType() string {
 // 处理结果
 func (s *TighteningTool) onResult(result interface{}) {
 	if result == nil {
-		s.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", s.cfg.SN), errors.New("Result Is Nil"))
+		s.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", s.cfg.SN), errors.New("Result Is Nil "))
 		return
 	}
 
@@ -331,13 +331,13 @@ func (s *TighteningTool) onResult(result interface{}) {
 
 	// 分发结果
 	tighteningResult.ID = dbResult.Id
-	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_RESULT, tighteningResult)
+	s.controller.doDispatch(dispatcherbus.DispatcherResult, tighteningResult)
 }
 
 // 处理曲线
 func (s *TighteningTool) onCurve(curve interface{}) {
 	if curve == nil {
-		s.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", s.cfg.SN), errors.New("Curve Is Nil"))
+		s.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", s.cfg.SN), errors.New("Curve Is Nil "))
 		return
 	}
 
@@ -351,6 +351,21 @@ func (s *TighteningTool) onCurve(curve interface{}) {
 	}
 
 	// 分发曲线
-	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_CURVE, tighteningCurve)
+	s.controller.doDispatch(dispatcherbus.DispatcherCurve, tighteningCurve)
 	s.diag.Info(fmt.Sprintf("缓存曲线成功 工具:%s 对应拧紧ID:%s", dbCurves.ToolSN, dbCurves.TighteningID))
+}
+
+func (s *TighteningTool) UpdateStatus(status string) {
+	if status == s.Status() {
+		return
+	}
+
+	s.BaseDevice.UpdateStatus(status)
+	toolStatus := []device.Status{{
+		Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
+		SN:     s.SerialNumber(),
+		Status: status,
+	}}
+
+	s.controller.doDispatch(dispatcherbus.DispatcherDeviceStatus, toolStatus)
 }

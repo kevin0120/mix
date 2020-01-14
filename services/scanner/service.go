@@ -5,14 +5,13 @@ import (
 	"github.com/google/gousb"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/tarm/serial"
+	"go.uber.org/atomic"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -24,7 +23,7 @@ const (
 	ServiceSearchItv = 2000 * time.Millisecond
 )
 
-const ScannerDispatcherKey = dispatcherbus.DISPATCHER_SCANNER_DATA
+const ScannerDispatcherKey = dispatcherbus.DispatcherScannerData
 
 type Service struct {
 	configValue atomic.Value
@@ -34,7 +33,6 @@ type Service struct {
 	diag Diagnostic
 	Notify
 	dispatcher    Dispatcher
-	WS            *wsnotify.Service
 	DeviceService IDeviceService
 }
 
@@ -132,7 +130,7 @@ func (s *Service) search() {
 				break
 			}
 		}
-		if scanner != nil && scanner.Status() == SCANNER_STATUS_ONLINE {
+		if scanner != nil && scanner.Status() == ScannerStatusOnline {
 			time.Sleep(ServiceSearchItv)
 			continue
 		}
@@ -187,17 +185,13 @@ func (s *Service) removeScanner(id string) {
 	}
 }
 
-func (s *Service) sendScannerInfo(msg string) {
-	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, msg)
-}
-
 func (s *Service) OnStatus(id string, status string) {
 	s.diag.Debug(fmt.Sprintf("Scanner %s Status: %s\n", id, status))
-	if status == SCANNER_STATUS_OFFLINE {
+	if status == ScannerStatusOffline {
 		s.removeScanner(id)
 	}
 
-	scannerStatus := []device.DeviceStatus{
+	scannerStatus := []device.Status{
 		{
 			SN:     id,
 			Type:   device.BaseDeviceTypeScanner,
@@ -206,7 +200,7 @@ func (s *Service) OnStatus(id string, status string) {
 	}
 
 	// 分发扫码枪状态
-	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, scannerStatus)
+	s.dispatcher.Dispatch(dispatcherbus.DispatcherDeviceStatus, scannerStatus)
 }
 
 func (s *Service) OnRecv(id string, data string) {
@@ -222,5 +216,5 @@ func (s *Service) OnRecv(id string, data string) {
 	}
 
 	// 分发条码数据
-	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, barcodeData)
+	s.dispatcher.Dispatch(dispatcherbus.DispatcherScannerData, barcodeData)
 }

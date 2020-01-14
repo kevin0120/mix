@@ -3,8 +3,8 @@ package device
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
+	"go.uber.org/atomic"
 	"sync"
-	"sync/atomic"
 
 	"github.com/masami10/rush/services/wsnotify"
 )
@@ -65,15 +65,15 @@ func (s *Service) config() Config {
 
 func (s *Service) initDispatcherRegisters() {
 	// 注册websocket请求
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherWsNotify, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 }
 
 func (s *Service) setupGlobalDispatchers() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_DEVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCHER_READER_DATA:   utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCHER_SCANNER_DATA:  utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCHER_IO:            utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherDeviceStatus: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherReaderData:   utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherScannerData:  utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherIO:           utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -99,13 +99,13 @@ func (s *Service) AddDevice(sn string, d IBaseDevice) {
 	s.runningDevices[sn] = d
 }
 
-func (s *Service) fetchAllDevices() []DeviceStatus {
+func (s *Service) fetchAllDevices() []Status {
 	defer s.mtxDevices.Unlock()
 	s.mtxDevices.Lock()
 
-	var devices []DeviceStatus
+	var devices []Status
 	for k, v := range s.runningDevices {
-		devices = append(devices, DeviceStatus{
+		devices = append(devices, Status{
 			SN:       k,
 			Type:     v.DeviceType(),
 			Status:   v.Status(),
@@ -115,7 +115,7 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 		})
 
 		for cSN, c := range v.Children() {
-			devices = append(devices, DeviceStatus{
+			devices = append(devices, Status{
 				SN:     cSN,
 				Type:   c.DeviceType(),
 				Status: c.Status(),

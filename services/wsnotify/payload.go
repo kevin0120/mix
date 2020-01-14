@@ -1,12 +1,11 @@
 package wsnotify
 
 const (
-	WS_REG       = "WS_REG"
-	WS_RUSH_DATA = "WS_RUSH_DATA"
+	WsReg = "WS_REG"
 )
 
 type WSRegist struct {
-	HMI_SN string `json:"hmi_sn"`
+	HMISn string `json:"hmi_sn"`
 }
 
 type WSMsg struct {

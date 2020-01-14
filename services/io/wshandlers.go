@@ -11,7 +11,7 @@ import (
 func (s *Service) OnWSIOStatus(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	ioStatus := device.DeviceStatus{}
+	ioStatus := device.Status{}
 	err := json.Unmarshal(byteData, &ioStatus)
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
@@ -24,7 +24,7 @@ func (s *Service) OnWSIOStatus(c websocket.Connection, msg *wsnotify.WSMsg) {
 		return
 	}
 
-	wsMsg := wsnotify.GenerateWSMsg(msg.SN, wsnotify.WS_IO_STATUS, []device.DeviceStatus{
+	wsMsg := wsnotify.GenerateWSMsg(msg.SN, wsnotify.WS_IO_STATUS, []device.Status{
 		{
 			SN:     ioStatus.SN,
 			Type:   device.BaseDeviceTypeIO,

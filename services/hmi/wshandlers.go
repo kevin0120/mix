@@ -97,13 +97,13 @@ func (s *Service) OnWSOrderStepUpdate(c websocket.Connection, msg *wsnotify.WSMs
 
 // 开工请求
 func (s *Service) OnWSOrderStart(c websocket.Connection, msg *wsnotify.WSMsg) {
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_ORDER_START, msg.Data)
+	s.doDispatch(dispatcherbus.DispatcherOrderStart, msg.Data)
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 }
 
 // 完工请求
 func (s *Service) OnWSOrderFinish(c websocket.Connection, msg *wsnotify.WSMsg) {
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_ORDER_FINISH, msg.Data)
+	s.doDispatch(dispatcherbus.DispatcherOrderFinish, msg.Data)
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 }
 
@@ -168,8 +168,9 @@ func (s *Service) OnWSOrderDetailByCode(c websocket.Connection, msg *wsnotify.WS
 
 	w, err := s.storageService.WorkorderOut(orderReq.Code, 0)
 	if w == nil && err == nil {
-		s.backendService.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
+		_, _ = s.backendService.GetWorkorder("", orderReq.Workcenter, orderReq.Code)
 	}
+
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 		return

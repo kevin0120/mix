@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/pkg/errors"
-	"sync/atomic"
+	"go.uber.org/atomic"
 )
 
 type Diagnostic interface {
@@ -69,7 +69,7 @@ func (s *Service) GetDefaultMode() string {
 
 func (s *Service) generateIDInfo(info string) string {
 	ids := ""
-	for i := 0; i < MAX_IDS_NUM; i++ {
+	for i := 0; i < MaxIdsNum; i++ {
 		if i == s.config().DataIndex {
 			ids += fmt.Sprintf("%-25s", info)
 		} else {
@@ -78,10 +78,6 @@ func (s *Service) generateIDInfo(info string) string {
 	}
 
 	return ids
-}
-
-func (s *Service) TryCreateMaintenance(info ToolInfo) error {
-	return s.backendService.TryCreateMaintenance(info)
 }
 
 func (s *Service) OnStatus(string, string) {

@@ -23,7 +23,7 @@ func NewConfig() Config {
 		ResultUploadInteval: toml.Duration(time.Duration(1 * time.Hour)),
 		KeepAlive:           toml.Duration(time.Second * 3),
 		Recheck:             true,
-		TransportType:       TRANSPORT_TYPE_GRPC,
+		TransportType:       TransportTypeGrpc,
 	}
 
 	return c

@@ -17,13 +17,13 @@ import (
 type Service struct {
 	configValue    atomic.Value
 	diag           Diagnostic
+	opened         bool
 	storageService IStorageService
 	dispatcherBus  Dispatcher
 	notifyService  INotifyService
 	dispatcherMap  dispatcherbus.DispatcherMap
 	transport      ITransport
 
-	opened  bool
 	closing chan struct{}
 }
 
@@ -37,13 +37,13 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IT
 		notifyService:  ns,
 	}
 	s.configValue.Store(c)
-	s.initGlbDispatcher()
-	s.initTransport(bs, dp)
+	s.setupGlbDispatcher()
+	s.setupTransport(bs, dp)
 
 	return s
 }
 
-func (s *Service) initTransport(bs ITransportService, dispatcherBus Dispatcher) error {
+func (s *Service) setupTransport(bs ITransportService, dispatcherBus Dispatcher) {
 	switch s.Config().TransportType {
 	//case TRANSPORT_TYPE_GRPC:
 	//	s.transport = NewGRPCClient(s.diag, s.Config())
@@ -55,18 +55,17 @@ func (s *Service) initTransport(bs ITransportService, dispatcherBus Dispatcher) 
 	//	s.transport = NewGRPCClient(s.diag, s.Config())
 	}
 	if s.transport == nil {
-		return nil
+		return
 	}
 
 	s.transport.SetResultPatchHandler(s.onResultPatch)
 	s.transport.SetServiceStatusHandler(s.onServiceStatus)
 	s.transport.SetStatusHandler(s.onTransportStatus)
-	return nil
 }
 
-func (s *Service) initGlbDispatcher() {
+func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_SERVICE_STATUS: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherServiceStatus: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -81,28 +80,34 @@ func (s *Service) Open() error {
 	}
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
 
 	go s.manage()
 
-	s.transport.Start()
+	if err := s.transport.Start(); err != nil {
+		return err
+	}
 
 	s.opened = true
+
 	return nil
 }
 
 func (s *Service) Close() error {
-	if !s.opened {
+	if !s.opened || s.transport == nil {
 		return nil
+	}
+	if err := s.transport.Stop(); err != nil {
+		s.diag.Error("Stop Transport Failed", err)
 	}
 
 	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
-	s.transport.Stop()
 	s.closing <- struct{}{}
-	return s.transport.Stop()
+
+	return nil
 }
 
-func (s *Service) PutResult(body *AIISResult) {
+func (s *Service) PutResult(body *PublishResult) {
 
 	err := s.transport.SendResult(body)
 	if err != nil {
@@ -110,49 +115,54 @@ func (s *Service) PutResult(body *AIISResult) {
 	}
 }
 
-func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {
-	aiisResult := AIISResult{}
+func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, error) {
+	aiisResult := PublishResult{}
 	resultValue := tightening_device.ResultValue{}
-	json.Unmarshal([]byte(result.ResultValue), &resultValue)
-
-	psetDefine := tightening_device.PSetDefine{}
-	json.Unmarshal([]byte(result.PSetDefine), &psetDefine)
-
-	dbWorkorder, err := s.storageService.GetWorkOrder(result.WorkorderID, true)
-	if err == nil {
-		aiisResult.Payload = dbWorkorder.Payload
+	if err := json.Unmarshal([]byte(result.ResultValue), &resultValue); err != nil {
+		s.diag.Error("Unmarshal ResultValue Failed", err)
 	}
 
+	psetDefine := tightening_device.PSetDefine{}
+	if err := json.Unmarshal([]byte(result.PSetDefine), &psetDefine); err != nil {
+		s.diag.Error("Unmarshal PSetDefine Failed", err)
+	}
+
+	dbWorkorder, err := s.storageService.GetWorkOrder(result.WorkorderID, true)
+	if err != nil {
+		return aiisResult, err
+	}
+
+	aiisResult.Payload = dbWorkorder.Payload
 	aiisResult.CURObjects = append(aiisResult.CURObjects, CURObject{OP: result.Count, File: fmt.Sprintf("%s_%s.json", result.ToolSN, result.TighteningID)})
 	aiisResult.ID = result.Id
 	aiisResult.WorkorderID = dbWorkorder.WorkorderID
-	aiisResult.Control_date = result.UpdateTime.Format(time.RFC3339)
-	aiisResult.Measure_degree = resultValue.Wi
-	aiisResult.Measure_result = strings.ToLower(result.Result)
-	aiisResult.Measure_t_don = resultValue.Ti
-	aiisResult.Measure_torque = resultValue.Mi
-	aiisResult.Op_time = result.Count
-	aiisResult.Pset_m_max = psetDefine.Mp
-	aiisResult.Pset_m_min = psetDefine.Mm
-	aiisResult.Pset_m_target = psetDefine.Ma
-	aiisResult.Pset_m_threshold = psetDefine.Ms
-	aiisResult.Pset_strategy = psetDefine.Strategy
-	aiisResult.Pset_w_max = psetDefine.Wp
-	aiisResult.Pset_w_min = psetDefine.Wm
-	aiisResult.Pset_w_target = psetDefine.Wa
-	aiisResult.Pset_w_threshold = 1
+	aiisResult.ControlDate = result.UpdateTime.Format(time.RFC3339)
+	aiisResult.MeasureDegree = resultValue.Wi
+	aiisResult.MeasureResult = strings.ToLower(result.Result)
+	aiisResult.MeasureTDon = resultValue.Ti
+	aiisResult.MeasureTorque = resultValue.Mi
+	aiisResult.OpTime = result.Count
+	aiisResult.PsetMMax = psetDefine.Mp
+	aiisResult.PsetMMin = psetDefine.Mm
+	aiisResult.PsetMTarget = psetDefine.Ma
+	aiisResult.PsetMThreshold = psetDefine.Ms
+	aiisResult.PsetStrategy = psetDefine.Strategy
+	aiisResult.PsetWMax = psetDefine.Wp
+	aiisResult.PsetWMin = psetDefine.Wm
+	aiisResult.PsetWTarget = psetDefine.Wa
+	aiisResult.PsetWThreshold = 1
 	aiisResult.UserID = result.UserID
 	aiisResult.Seq = result.Seq
 
-	aiisResult.MO_AssemblyLine = dbWorkorder.MO_AssemblyLine
-	aiisResult.MO_EquipemntName = dbWorkorder.MO_EquipemntName
-	aiisResult.MO_FactoryName = dbWorkorder.MO_FactoryName
-	aiisResult.MO_Pin = dbWorkorder.MO_Pin
-	aiisResult.MO_Pin_check_code = dbWorkorder.MO_Pin_check_code
-	aiisResult.MO_Year = dbWorkorder.MO_Year
-	aiisResult.MO_Lnr = dbWorkorder.MO_Lnr
-	aiisResult.MO_NutNo = result.NutNo
-	aiisResult.MO_Model = dbWorkorder.MO_Model
+	aiisResult.MoAssemblyline = dbWorkorder.MO_AssemblyLine
+	aiisResult.MoEquipemntname = dbWorkorder.MO_EquipemntName
+	aiisResult.MoFactoryname = dbWorkorder.MO_FactoryName
+	aiisResult.MoPin = dbWorkorder.MO_Pin
+	aiisResult.MoPinCheckCode = dbWorkorder.MO_Pin_check_code
+	aiisResult.MoYear = dbWorkorder.MO_Year
+	aiisResult.MoLnr = dbWorkorder.MO_Lnr
+	aiisResult.MoNutno = result.NutNo
+	aiisResult.MoModel = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
 	aiisResult.Vin = dbWorkorder.Track_code
 	aiisResult.WorkorderName = dbWorkorder.Code
@@ -170,11 +180,11 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.Stage = result.Stage
 
 	if result.Result == storage.RESULT_OK {
-		aiisResult.Final_pass = tightening_device.RESULT_PASS
+		aiisResult.FinalPass = tightening_device.RESULT_PASS
 		if result.Count == 1 {
-			aiisResult.One_time_pass = tightening_device.RESULT_PASS
+			aiisResult.OneTimePass = tightening_device.RESULT_PASS
 		} else {
-			aiisResult.One_time_pass = tightening_device.RESULT_FAIL
+			aiisResult.OneTimePass = tightening_device.RESULT_FAIL
 		}
 
 		if s.Config().Recheck {
@@ -192,8 +202,8 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 		}
 
 	} else {
-		aiisResult.Final_pass = tightening_device.RESULT_FAIL
-		aiisResult.One_time_pass = tightening_device.RESULT_FAIL
+		aiisResult.FinalPass = tightening_device.RESULT_FAIL
+		aiisResult.OneTimePass = tightening_device.RESULT_FAIL
 	}
 
 	return aiisResult, nil
@@ -260,22 +270,24 @@ func (s *Service) manage() {
 
 // 服务状态变化
 func (s *Service) onServiceStatus(status ServiceStatus) {
-	if err :=s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status); err != nil {
-		s.diag.Error(fmt.Sprintf("onServiceStatus Dispatch: %s Error", dispatcherbus.DISPATCHER_SERVICE_STATUS), err)
-	}
+	s.doDispatch(dispatcherbus.DispatcherServiceStatus, status)
 }
 
 // 传输连接状态变化
 func (s *Service) onTransportStatus(status string) {
-	if err := s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, ServiceStatus{
-		Name:   SERVICE_AIIS,
+	s.doDispatch(dispatcherbus.DispatcherServiceStatus, ServiceStatus{
+		Name:   ServiceAiis,
 		Status: status,
-	}); err != nil {
-		s.diag.Error(fmt.Sprintf("onTransportStatus Dispatch: %s Error", dispatcherbus.DISPATCHER_SERVICE_STATUS), err)
-	}
+	})
 }
 
 // 收到结果上传反馈
 func (s *Service) onResultPatch(rp ResultPatch) {
 	s.patchResult(&rp)
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
+	}
 }

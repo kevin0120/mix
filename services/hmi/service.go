@@ -20,7 +20,7 @@ import (
 type Service struct {
 	diag           Diagnostic
 	storageService IStorageService
-	httpd          *httpd.Service
+	httpd          HTTPService
 	backendService IBackendService
 	notifyService  INotifyService
 
@@ -30,7 +30,7 @@ type Service struct {
 	wsnotify.WSRequestHandlers
 }
 
-func NewService(d Diagnostic, dp Dispatcher, ns INotifyService, httpd *httpd.Service, backend IBackendService, storage IStorageService) *Service {
+func NewService(d Diagnostic, dp Dispatcher, ns INotifyService, httpd HTTPService, backend IBackendService, storage IStorageService) *Service {
 
 	s := &Service{
 		diag:           d,
@@ -71,7 +71,7 @@ func (s *Service) wsTest(ctx iris.Context) {
 	}
 
 	payload, _ := json.Marshal(ws)
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_WS_NOTIFY, &wsnotify.DispatcherNotifyPackage{
+	s.doDispatch(dispatcherbus.DispatcherWsNotify, &wsnotify.DispatcherNotifyPackage{
 		C:    nil,
 		Data: payload,
 	})
@@ -80,31 +80,34 @@ func (s *Service) wsTest(ctx iris.Context) {
 func (s *Service) initDispatcherRegisters() {
 
 	// 接收设备状态变化
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_DEVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onDeviceStatus))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherDeviceStatus, utils.CreateDispatchHandlerStruct(s.onDeviceStatus))
 
 	// 接收读卡器数据
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_READER_DATA, utils.CreateDispatchHandlerStruct(s.onReaderData))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherReaderData, utils.CreateDispatchHandlerStruct(s.onReaderData))
 
 	// 接收条码数据
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_SCANNER_DATA, utils.CreateDispatchHandlerStruct(s.onScannerData))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherScannerData, utils.CreateDispatchHandlerStruct(s.onScannerData))
 
 	// 接收IO输入输出状态变化
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_IO, utils.CreateDispatchHandlerStruct(s.onIOContactData))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherIO, utils.CreateDispatchHandlerStruct(s.onIOContactData))
 
 	// 注册websocket请求
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherWsNotify, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
 	// 接收拧紧结果
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
 
 	// 接收外部服务状态推送
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_SERVICE_STATUS, utils.CreateDispatchHandlerStruct(s.onServiceStatus))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherServiceStatus, utils.CreateDispatchHandlerStruct(s.onServiceStatus))
 
 	// 接收新工单推送
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_ORDER_NEW, utils.CreateDispatchHandlerStruct(s.onNewOrder))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherOrderNew, utils.CreateDispatchHandlerStruct(s.onNewOrder))
 
 	// 接收保养信息推送
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_MAINTENANCE_INFO, utils.CreateDispatchHandlerStruct(s.onNewOrder))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherMaintenanceInfo, utils.CreateDispatchHandlerStruct(s.onNewMaintenance))
+
+	// 接收控制器JOB推送
+	s.dispatcherBus.Register(dispatcherbus.DispatcherJob, utils.CreateDispatchHandlerStruct(s.onTighteningJob))
 }
 
 func (s *Service) setupTestInterface() {
@@ -116,7 +119,7 @@ func (s *Service) setupTestInterface() {
 		Pattern:     "/ws-test",
 		HandlerFunc: s.wsTest,
 	}
-	s.httpd.Handler[0].AddRoute(r)
+	s.httpd.AddNewHttpHandler(r)
 }
 
 func (s *Service) setupWSRequestHandlers() {
@@ -146,10 +149,26 @@ func (s *Service) onTighteningResult(data interface{}) {
 	tighteningResult := data.(tightening_device.TighteningResult)
 
 	// 拧紧结果推送HMI
-	s.wsSendTighteningResult([]tightening_device.BaseResult{tighteningResult.BaseResult})
+	hmiTighteningResult := []tightening_device.BaseResult{tighteningResult.BaseResult}
+	s.wsSendTighteningResult(hmiTighteningResult)
 
-	body, _ := json.Marshal(tighteningResult)
+	body, _ := json.Marshal(hmiTighteningResult)
 	s.diag.Info(fmt.Sprintf("拧紧结果推送HMI:%s", string(body)))
+}
+
+// 收到推送的JOB
+func (s *Service) onTighteningJob(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	job := data.(tightening_device.JobInfo)
+
+	// JOB推送HMI
+	s.wsSendTighteningJob(&job)
+
+	body, _ := json.Marshal(job)
+	s.diag.Info(fmt.Sprintf("JOB推送HMI:%s", string(body)))
 }
 
 // 设备连接状态变化(根据设备类型,序列号来区分具体的设备)
@@ -158,7 +177,7 @@ func (s *Service) onDeviceStatus(data interface{}) {
 		return
 	}
 
-	deviceStatus := data.([]device.DeviceStatus)
+	deviceStatus := data.([]device.Status)
 
 	// 设备状态推送HMI
 	s.wsSendDeviceStatus(deviceStatus)
@@ -298,7 +317,7 @@ func (s *Service) wsSendIOContact(ioContact *io.IoContact) {
 }
 
 // websocket发送设备状态
-func (s *Service) wsSendDeviceStatus(deviceStatus []device.DeviceStatus) {
+func (s *Service) wsSendDeviceStatus(deviceStatus []device.Status) {
 	data, _ := json.Marshal(wsnotify.WSMsg{
 		Type: wsnotify.WS_DEVICE_STATUS,
 		Data: deviceStatus,
@@ -310,11 +329,21 @@ func (s *Service) wsSendDeviceStatus(deviceStatus []device.DeviceStatus) {
 // websocket发送拧紧结果
 func (s *Service) wsSendTighteningResult(results []tightening_device.BaseResult) {
 	data, _ := json.Marshal(wsnotify.WSMsg{
-		Type: wsnotify.WS_TIGHTENING_RESULT,
+		Type: wsnotify.WS_TOOL_RESULT,
 		Data: results,
 	})
 
-	s.notifyService.NotifyAll(wsnotify.WS_EVENT_RESULT, string(data))
+	s.notifyService.NotifyAll(wsnotify.WS_EVENT_TIGHTENING, string(data))
+}
+
+// websocket发送JOB
+func (s *Service) wsSendTighteningJob(job *tightening_device.JobInfo) {
+	data, _ := json.Marshal(wsnotify.WSMsg{
+		Type: wsnotify.WS_TOOL_JOB,
+		Data: job,
+	})
+
+	s.notifyService.NotifyAll(wsnotify.WS_EVENT_TIGHTENING, string(data))
 }
 
 // websocket发送外部系统状态
@@ -325,4 +354,10 @@ func (s *Service) wsSendServiceStatus(status *aiis.ServiceStatus) {
 	})
 
 	s.notifyService.NotifyAll(wsnotify.WS_EVENT_SERVICE, string(data))
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
+	}
 }

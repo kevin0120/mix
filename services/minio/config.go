@@ -23,7 +23,7 @@ func NewConfig() Config {
 		Access:      "access",
 		Secret:      "secret",
 		Secure:      false,
-		ReuploadItv: toml.Duration(time.Duration(24 * time.Hour)),
+		ReuploadItv: toml.Duration(24 * time.Hour),
 	}
 }
 

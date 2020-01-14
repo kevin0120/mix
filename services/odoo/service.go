@@ -6,11 +6,12 @@ import (
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
+	"go.uber.org/atomic"
 	"gopkg.in/resty.v1"
 	"net/http"
-	"sync/atomic"
 	"time"
 )
 
@@ -42,7 +43,7 @@ type Service struct {
 	dispatcherBus     Dispatcher
 	dispatcherMap     dispatcherbus.DispatcherMap
 	storageService    IStorageService
-	httpd             *httpd.Service
+	httpd             HTTPService
 	httpClient        *resty.Client
 	endpoints         []*Endpoint
 	configValue       atomic.Value
@@ -51,7 +52,7 @@ type Service struct {
 	closing           chan struct{}
 }
 
-func NewService(c Config, d Diagnostic, dp Dispatcher, storage IStorageService, httpd *httpd.Service) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher, storage IStorageService, httpd HTTPService) *Service {
 	e, _ := c.endpoints()
 	s := &Service{
 		diag:              d,
@@ -66,7 +67,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, storage IStorageService, 
 
 	s.configValue.Store(c)
 
-	s.initGlbDispatcher()
+	s.setupGlbDispatcher()
 	s.ensureHttpClient()
 	s.setupHttpHandlers()
 
@@ -108,15 +109,22 @@ func (s *Service) ensureHttpClient() *resty.Client {
 	return client
 }
 
-func (s *Service) initGlbDispatcher() {
+func (s *Service) initDispatcherRegisters() {
+
+	// 接收工具保养通知
+	s.dispatcherBus.Register(dispatcherbus.DispatcherToolMaintenance, utils.CreateDispatchHandlerStruct(s.onToolMaintenance))
+}
+
+func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_MAINTENANCE_INFO: utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DISPATCHER_ORDER_NEW:        utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherMaintenanceInfo: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherOrderNew:        utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
 func (s *Service) Open() error {
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+	s.initDispatcherRegisters()
 	go s.taskSaveWorkorders()
 	return nil
 }
@@ -129,15 +137,13 @@ func (s *Service) Close() error {
 
 func (s *Service) setupHttpHandlers() {
 
-	handler, _ := s.httpd.GetHandlerByName(httpd.BasePath)
-
 	r := httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "POST",
 		Pattern:     "/workorders",
 		HandlerFunc: s.postWorkorders,
 	}
-	handler.AddRoute(r)
+	s.httpd.AddNewHttpHandler(r)
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
@@ -145,7 +151,7 @@ func (s *Service) setupHttpHandlers() {
 		Pattern:     "/mrp.routing.workcenter",
 		HandlerFunc: s.putSyncRoutingOpertions,
 	}
-	handler.AddRoute(r)
+	s.httpd.AddNewHttpHandler(r)
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
@@ -153,7 +159,7 @@ func (s *Service) setupHttpHandlers() {
 		Pattern:     "/mrp.routing.workcenter.delete",
 		HandlerFunc: s.deleteRoutingOpertions,
 	}
-	handler.AddRoute(r)
+	s.httpd.AddNewHttpHandler(r)
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
@@ -161,7 +167,7 @@ func (s *Service) setupHttpHandlers() {
 		Pattern:     "/maintenance",
 		HandlerFunc: s.postMaintenance,
 	}
-	handler.AddRoute(r)
+	s.httpd.AddNewHttpHandler(r)
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
@@ -169,14 +175,14 @@ func (s *Service) setupHttpHandlers() {
 		Pattern:     "/mrp.routing.workcenter/all",
 		HandlerFunc: s.deleteAllRoutingOpertions,
 	}
-	handler.AddRoute(r)
+	s.httpd.AddNewHttpHandler(r)
 }
 
 func (s *Service) handleWorkorder(data []byte) {
 	s.workordersChannel <- data
 }
 
-func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error) {
+func (s *Service) GetWorkorder(hmiSn string, workcenterCode, code string) ([]byte, error) {
 
 	var err error
 	var body []byte
@@ -211,21 +217,19 @@ func (s *Service) getWorkorder(url string, method string) ([]byte, error) {
 	case "GET":
 		resp, err = r.Get(url)
 		if err != nil {
-			return nil, fmt.Errorf("Get workorder fail: %s", err.Error())
+			return nil, fmt.Errorf("Get Workorder Fail: %s ", err.Error())
 		} else {
 			status := resp.StatusCode()
 			if status != http.StatusOK {
-				return nil, fmt.Errorf("Get workorder fail: %d", status)
+				return nil, fmt.Errorf("Get Workorder Fail: %d ", status)
 			} else {
 				return resp.Body(), nil
 			}
 		}
 	default:
-		return nil, errors.New("Get workorder :the Method is wrong")
+		return nil, errors.New("Get Workorder :The Method Is Wrong")
 
 	}
-
-	return nil, nil
 }
 
 func (s *Service) taskSaveWorkorders() {
@@ -239,7 +243,7 @@ func (s *Service) taskSaveWorkorders() {
 				break
 			}
 
-			s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_ORDER_NEW, orderOut)
+			s.doDispatch(dispatcherbus.DispatcherOrderNew, orderOut)
 
 		case <-s.closing:
 			s.diag.Info("taskSaveWorkorders closed")
@@ -272,11 +276,11 @@ func (s *Service) TryCreateMaintenance(body interface{}) error {
 		case "POST":
 			resp, err = r.Post(url)
 			if err != nil {
-				return fmt.Errorf("TryCreateMaintenance: %s", err.Error())
+				return fmt.Errorf("CreateMaintenance: %s", err.Error())
 			} else {
 				status := resp.StatusCode()
 				if status > 400 {
-					return fmt.Errorf("TryCreateMaintenance return status code: %d", status)
+					return fmt.Errorf("CreateMaintenance return status code: %d", status)
 				} else if status == http.StatusCreated {
 					s.diag.Info("create Maintenance")
 					return nil
@@ -285,7 +289,7 @@ func (s *Service) TryCreateMaintenance(body interface{}) error {
 				}
 			}
 		default:
-			return errors.New("TryCreateMaintenance :the Method is wrong")
+			return errors.New("CreateMaintenance :the Method is wrong")
 		}
 
 	}
@@ -298,7 +302,10 @@ func (s *Service) GetConsumeBySeqInStep(step *storage.Steps, seq int) (*StepComs
 	}
 
 	ts := TighteningStep{}
-	json.Unmarshal([]byte(step.Step), &ts)
+	if err := json.Unmarshal([]byte(step.Step), &ts); err != nil {
+		return nil, err
+	}
+
 	if len(ts.TighteningPoints) == 0 {
 		return nil, errors.New("Consumes Is Empty")
 	}
@@ -310,4 +317,22 @@ func (s *Service) GetConsumeBySeqInStep(step *storage.Steps, seq int) (*StepComs
 	}
 
 	return nil, errors.New("Consume Not Found")
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
+	}
+}
+
+// 收到工具保养通知
+func (s *Service) onToolMaintenance(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	ti := data.(tightening_device.ToolMaintenanceInfo)
+	if err := s.TryCreateMaintenance(ti); err != nil {
+		s.diag.Error("Create Maintenance Failed ", err)
+	}
 }

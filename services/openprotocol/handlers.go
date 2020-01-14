@@ -1,7 +1,6 @@
 package openprotocol
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/device"
@@ -24,46 +23,44 @@ func GetMidHandler(mid string) (MidHandler, error) {
 }
 
 var MidHandlers = map[string]MidHandler{
-	MID_9999_ALIVE:                handleMID_9999_ALIVE,
-	MID_0002_START_ACK:            handleMID_0002_START_ACK,
-	MID_0005_CMD_OK:               handleMID_0005_CMD_OK,
-	MID_0004_CMD_ERR:              handleMID_0004_CMD_ERR,
-	MID_7410_LAST_CURVE:           handleMID_7410_LAST_CURVE,
-	MID_0061_LAST_RESULT:          handleMID_0061_LAST_RESULT,
-	MID_0065_OLD_DATA:             handleMID_0065_OLD_DATA,
-	MID_0013_PSET_DETAIL_REPLY:    handleMID_0013_PSET_DETAIL_REPLY,
-	MID_0011_PSET_LIST_REPLY:      handleMID_0011_PSET_LIST_REPLY,
-	MID_0031_JOB_LIST_REPLY:       handleMID_0031_JOB_LIST_REPLY,
-	MID_0033_JOB_DETAIL_REPLY:     handleMID_0033_JOB_DETAIL_REPLY,
-	MID_0035_JOB_INFO:             handleMID_0035_JOB_INFO,
-	MID_0211_INPUT_MONITOR:        handleMID_0211_INPUT_MONITOR,
-	MID_0101_MULTI_SPINDLE_RESULT: handleMID_0101_MULTI_SPINDLE_RESULT,
-	MID_0052_VIN:                  handleMID_0052_VIN,
-	MID_0071_ALARM:                handleMID_0071_ALARM,
-	MID_0076_ALARM_STATUS:         handleMID_0076_ALARM_STATUS,
-	MID_0041_TOOL_INFO_REPLY:      handleMID_0041_TOOL_INFO_REPLY,
+	MID_9999_ALIVE:                handleMid9999Alive,
+	MID_0002_START_ACK:            handleMid0002StartAck,
+	MID_0005_CMD_OK:               handleMid0005CmdOk,
+	MID_0004_CMD_ERR:              handleMid0004CmdErr,
+	MID_7410_LAST_CURVE:           handleMid7410LastCurve,
+	MID_0061_LAST_RESULT:          handleMid0061LastResult,
+	MID_0065_OLD_DATA:             handleMid0065OldData,
+	MID_0013_PSET_DETAIL_REPLY:    handleMid0013PsetDetailReply,
+	MID_0011_PSET_LIST_REPLY:      handleMid0011PsetListReply,
+	MID_0031_JOB_LIST_REPLY:       handleMid0031JobListReply,
+	MID_0033_JOB_DETAIL_REPLY:     handleMid0033JobDetailReply,
+	MID_0035_JOB_INFO:             handleMid0035JobInfo,
+	MID_0211_INPUT_MONITOR:        handleMid0211InputMonitor,
+	MID_0101_MULTI_SPINDLE_RESULT: handleMid0101MultiSpindleResult,
+	MID_0052_VIN:                  handleMid0052Vin,
+	MID_0071_ALARM:                handleMid0071Alarm,
+	MID_0076_ALARM_STATUS:         handleMid0076AlarmStatus,
+	MID_0041_TOOL_INFO_REPLY:      handleMid0041ToolInfoReply,
 }
 
 type MidHandler func(controller *TighteningController, pkg *handlerPkg) error
 
-func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
+func handleMid9999Alive(c *TighteningController, pkg *handlerPkg) error {
 	return nil
 }
 
-func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0002StartAck(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
 	seq := <-client.requestChannel
-	client.Response.update(seq, request_errors["00"])
+	client.response.update(seq, request_errors["00"])
 
 	go c.ProcessSubscribeControllerInfo(pkg.SN)
-	//go c.SolveOldResults()
-	//go c.getTighteningCount()
 
 	return nil
 }
 
 // 处理曲线
-func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
+func handleMid7410LastCurve(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
 	//讲收到的曲线先做反序列化处理
 	var curve = CurveBody{}
@@ -71,18 +68,12 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 	if err != nil {
 		c.diag.Error("ascii.Unmarshal", err)
 	}
-	if curve.ToolNumber == 0 {
+	if curve.ToolChannelNumber == 0 {
 		e := errors.New("收到的结果曲线数据不合法，未指定工具号")
 		c.diag.Error("handleMID_7410_LAST_CURVE", e)
 		return e
 	}
 
-	//_, ok := c.tempResultCurve[curve.ToolNumber]
-	//结果曲线 判断本toolNumber是否收到过数据
-	//if _, ok := client.tempResultCurve; !ok {
-	//	client.tempResultCurve = &tightening_device.TighteningCurve{}
-	//}
-	//收到的数据进行解析并将结果加到临时的切片中，等待整条曲线接收完毕。
 	torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.TorqueString), 64)
 	angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.AngleString), 64)
 	Torque, Angle := c.CurveDataDecoding([]byte(curve.Data), torqueCoefficient, angleCoefficient, c.diag)
@@ -98,17 +89,17 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 		}
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
-		tool, err := c.getInstance().GetToolViaChannel(curve.ToolNumber)
+		tool, err := c.getInstance().GetToolViaChannel(curve.ToolChannelNumber)
 		if err != nil {
 			return err
 		}
 
 		sn := tool.SerialNumber()
 
-		//defer delete(client.tempResultCurve, curve.ToolNumber)
+		//defer delete(client.tempResultCurve, curve.ToolChannelNumber)
 		client.tempResultCurve.ToolSN = sn
 		client.tempResultCurve.UpdateTime = time.Now()
-		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCHER_CURVE), client.tempResultCurve)
+		c.doDispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherCurve), client.tempResultCurve)
 		// dispatch完后创建新的缓存拧紧曲线
 		client.tempResultCurve = tightening_device.NewTighteningCurve()
 	}
@@ -116,7 +107,7 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 // 处理结果
-func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0061LastResult(c *TighteningController, pkg *handlerPkg) error {
 	resultData := ResultData{}
 	err := ascii.Unmarshal(pkg.Body, &resultData)
 	if err != nil {
@@ -128,87 +119,66 @@ func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error 
 }
 
 // 处理历史结果
-func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0065OldData(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
-	result_data := ResultDataOld{}
-	err := ascii.Unmarshal(pkg.Body, &result_data)
+	resultData := ResultDataOld{}
+	err := ascii.Unmarshal(pkg.Body, &resultData)
 	if err != nil {
 		return err
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, result_data.ToTighteningResult())
-
-	//flag := c.Response.get(MID_0064_OLD_SUBSCRIBE)
-
-	//if flag != nil {
-	//	defer c.Response.remove(MID_0064_OLD_SUBSCRIBE)
-	//	c.Response.Add(MID_0065_OLD_DATA, result_data)
-	//} else {
-	//	// 处理历史数据
-	//	// TODO: 通过工具获取psetdetail
-	//	//pset_detail, err := c.GetPSetDetail(result_data.PSetID)
-	//	//if err == nil {
-	//	//	result_data.TorqueMin = pset_detail.TorqueMin
-	//	//	result_data.TorqueMax = pset_detail.TorqueMax
-	//	//	result_data.TorqueFinalTarget = pset_detail.TorqueTarget
-	//	//	result_data.AngleMax = pset_detail.AngleMax
-	//	//	result_data.AngleMin = pset_detail.AngleMin
-	//	//	result_data.FinalAngleTarget = pset_detail.AngleTarget
-	//	//}
-	//
-	//	return c.handleResult(&result_data, nil)
-	//}
+	client.response.update(seq, resultData.ToTighteningResult())
 
 	return nil
 }
 
 // pset详情
-func handleMID_0013_PSET_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0013PsetDetailReply(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
-	pset_detail, err := DeserializePSetDetail(pkg.Body)
+	psetDetail, err := DeserializePSetDetail(pkg.Body)
 	if err != nil {
 		return err
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, pset_detail)
+	client.response.update(seq, psetDetail)
 
 	return nil
 }
 
 // pset列表
-func handleMID_0011_PSET_LIST_REPLY(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0011PsetListReply(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
-	pset_list := PSetList{}
-	err := pset_list.Deserialize(pkg.Body)
+	psetList := PSetList{}
+	err := psetList.Deserialize(pkg.Body)
 	if err != nil {
 		return err
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, pset_list)
+	client.response.update(seq, psetList)
 
 	return nil
 }
 
 // job列表
-func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0031JobListReply(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
-	job_list := JobList{}
-	err := job_list.Deserialize(pkg.Body)
+	jobList := JobList{}
+	err := jobList.Deserialize(pkg.Body)
 	if err != nil {
 		return err
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, job_list)
+	client.response.update(seq, jobList)
 
 	return nil
 }
 
 // job详情
-func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0033JobDetailReply(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
 	jobDetaill, err := DeserializeJobDetail(pkg.Body)
 	if err != nil {
@@ -216,55 +186,52 @@ func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) e
 	}
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, jobDetaill)
+	client.response.update(seq, jobDetaill)
 
 	return nil
 }
 
 // 请求错误
-func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0004CmdErr(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
 	errCode := pkg.Body[4:6]
 
 	seq := <-client.requestChannel
-	client.Response.update(seq, request_errors[errCode])
+	client.response.update(seq, request_errors[errCode])
 
 	return nil
 }
 
 // 请求成功
-func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0005CmdOk(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
 	seq := <-client.requestChannel
-	client.Response.update(seq, request_errors["00"])
+	client.response.update(seq, request_errors["00"])
 
 	return nil
 }
 
 // job推送信息
-func handleMID_0035_JOB_INFO(c *TighteningController, pkg *handlerPkg) error {
-	job_info := JobInfo{}
-	err := ascii.Unmarshal(pkg.Body, &job_info)
+func handleMid0035JobInfo(c *TighteningController, pkg *handlerPkg) error {
+	jobInfo := JobInfo{}
+	err := ascii.Unmarshal(pkg.Body, &jobInfo)
 	if err != nil {
 		return err
 	}
 
 	// 加入判断，防止重复推送
-	if job_info.JobStatus == JOB_INFO_NOT_COMPLETED &&
-		job_info.JobBatchCounter == 0 &&
-		job_info.JobCurrentStep > 0 &&
-		job_info.JobTotalStep > 0 &&
-		job_info.JobTighteningStatus == 0 {
+	if jobInfo.JobStatus == JobInfoNotCompleted &&
+		jobInfo.JobBatchCounter == 0 &&
+		jobInfo.JobCurrentStep > 0 &&
+		jobInfo.JobTotalStep > 0 &&
+		jobInfo.JobTighteningStatus == 0 {
 		// 推送job选择信息
 
-		job_select := tightening_device.JobInfo{
-			Job: job_info.JobID,
+		jobSelect := tightening_device.JobInfo{
+			Job: jobInfo.JobID,
 		}
 
-		ws_str, _ := json.Marshal(job_select)
-		c.ProtocolService.diag.Debug(fmt.Sprintf("push job to hmi: %s", string(ws_str)))
-		//c.ProtocolService.notifyService.WSSendJob(string(ws_str))
-		// TODO: 推送控制器job
+		c.doDispatch(dispatcherbus.DispatcherJob, jobSelect)
 	}
 
 	return nil
@@ -272,7 +239,7 @@ func handleMID_0035_JOB_INFO(c *TighteningController, pkg *handlerPkg) error {
 }
 
 // 控制器输入变化
-func handleMID_0211_INPUT_MONITOR(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0211InputMonitor(c *TighteningController, pkg *handlerPkg) error {
 	inputs := IOMonitor{}
 	err := inputs.Deserialize(pkg.Body)
 	if err != nil {
@@ -284,42 +251,26 @@ func handleMID_0211_INPUT_MONITOR(c *TighteningController, pkg *handlerPkg) erro
 	c.inputs = inputs.Inputs
 
 	// 分发控制器输入状态
-	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_IO, inputs.ToIOInput())
+	c.doDispatch(dispatcherbus.DispatcherIO, inputs.ToIOInput())
 
 	return nil
 }
 
 // 多轴结果
-func handleMID_0101_MULTI_SPINDLE_RESULT(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0101MultiSpindleResult(c *TighteningController, pkg *handlerPkg) error {
 	ms := MultiSpindleResult{}
 	ms.Deserialize(pkg.Body)
-
-	//wsResults := make([]wsnotify.WSResult, len(ms.Spindles), len(ms.Spindles))
-	////wsResult := wsnotify.WSResult{}
-	//for idx, v := range ms.Spindles {
-	//	wsResults[idx].Result = v.Result
-	//	wsResults[idx].MI = v.Torque
-	//	wsResults[idx].WI = v.Angle
-	//	//wsResults = append(wsResults, wsResult)
-	//}
-
-	//wsStrs, err := json.Marshal(wsResults)
-	//if err == nil {
-	//	c.ProtocolService.notifyService.NotifyAll(wsnotify.WS_EVENT_RESULT, string(wsStrs))
-	//}
-
-	//return err
 
 	return nil
 }
 
 // 收到条码推送
-func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0052Vin(c *TighteningController, pkg *handlerPkg) error {
 	ids := DeserializeIDS(pkg.Body)
 
 	bc := ""
 	for _, v := range c.ProtocolService.config().VinIndex {
-		if v < 0 || v > (MAX_IDS_NUM-1) {
+		if v < 0 || v > (MaxIdsNum-1) {
 			continue
 		}
 
@@ -330,13 +281,13 @@ func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
 		SN:      c.deviceConf.SN,
 		Barcode: bc,
 	}
-	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, ss)
+	c.doDispatch(dispatcherbus.DispatcherScannerData, ss)
 
 	return nil
 }
 
 // 报警信息
-func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0071Alarm(c *TighteningController, pkg *handlerPkg) error {
 	var ai AlarmInfo
 	err := ascii.Unmarshal(pkg.Body, &ai)
 	if err != nil {
@@ -350,18 +301,18 @@ func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
 	//}
 
 	switch ai.ErrorCode {
-	case EVT_CONTROLLER_TOOL_CONNECT:
-		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOnline)
+	case EvtControllerToolConnect:
+		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOnline)
 
-	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOffline)
+	case EvtControllerToolDisconnect:
+		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOffline)
 	}
 
 	return nil
 }
 
 // 报警状态
-func handleMID_0076_ALARM_STATUS(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0076AlarmStatus(c *TighteningController, pkg *handlerPkg) error {
 	var as = AlarmStatus{}
 	err := ascii.Unmarshal(pkg.Body, &as)
 	if err != nil {
@@ -369,18 +320,18 @@ func handleMID_0076_ALARM_STATUS(c *TighteningController, pkg *handlerPkg) error
 	}
 
 	switch as.ErrorCode {
-	case EVT_CONTROLLER_NO_ERR:
-		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOnline)
+	case EvtControllerNoErr:
+		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOnline)
 
-	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.getInstance().UpdateToolStatus(device.BaseDeviceStatusOffline)
+	case EvtControllerToolDisconnect:
+		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOffline)
 	}
 
 	return nil
 }
 
 // 工具状态(维护)
-func handleMID_0041_TOOL_INFO_REPLY(c *TighteningController, pkg *handlerPkg) error {
+func handleMid0041ToolInfoReply(c *TighteningController, pkg *handlerPkg) error {
 	var ti ToolInfo
 	err := ti.Deserialize(pkg.Body)
 
@@ -388,9 +339,8 @@ func handleMID_0041_TOOL_INFO_REPLY(c *TighteningController, pkg *handlerPkg) er
 		return err
 	}
 
-	// 将数据通过api传给odoo
 	if ti.ToolSN == "" {
-		return errors.New("Tool Serial Number Is Empty String")
+		return errors.New("Tool Serial Number Is Empty String ")
 	}
 
 	if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0 {
@@ -398,7 +348,6 @@ func handleMID_0041_TOOL_INFO_REPLY(c *TighteningController, pkg *handlerPkg) er
 		return nil
 	}
 
-	go c.ProtocolService.TryCreateMaintenance(ti) // 协程处理
-
+	c.doDispatch(dispatcherbus.DispatcherToolMaintenance, ti.ToMaintenanceInfo())
 	return nil
 }

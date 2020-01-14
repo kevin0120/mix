@@ -7,7 +7,7 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"time"
 )
 
@@ -57,7 +57,9 @@ func (s *Service) Open() error {
 func (s *Service) Close() error {
 
 	for _, dev := range s.ios {
-		dev.Stop()
+		if err := dev.Stop(); err != nil {
+			s.diag.Error("Stop IO Module Failed ", err)
+		}
 	}
 
 	return nil
@@ -65,7 +67,7 @@ func (s *Service) Close() error {
 
 func (s *Service) initDispatcherRegisters() {
 	// 注册websocket请求
-	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+	s.dispatcherBus.Register(dispatcherbus.DispatcherWsNotify, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 }
 
 func (s *Service) setupWSRequestHandlers() {
@@ -126,7 +128,7 @@ func (s *Service) getIO(sn string) (*IOModule, error) {
 func (s *Service) OnStatus(sn string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s status:%s", sn, status))
 
-	ioStatus := []device.DeviceStatus{
+	ioStatus := []device.Status{
 		{
 			SN:     sn,
 			Type:   device.BaseDeviceTypeIO,
@@ -134,7 +136,7 @@ func (s *Service) OnStatus(sn string, status string) {
 		},
 	}
 
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ioStatus)
+	s.doDispatch(dispatcherbus.DispatcherDeviceStatus, ioStatus)
 }
 
 func (s *Service) OnRecv(string, string) {
@@ -150,12 +152,18 @@ func (s *Service) OnChangeIOStatus(sn string, t string, status string) {
 		SN:  sn,
 	}
 
-	if t == IO_TYPE_INPUT {
+	if t == IoTypeInput {
 		ioContact.Inputs = status
 	} else {
 		ioContact.Outputs = status
 	}
 
 	// IO数据输出状态分发
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_IO, ioContact)
+	s.doDispatch(dispatcherbus.DispatcherIO, ioContact)
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
+	}
 }

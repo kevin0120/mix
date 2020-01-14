@@ -6,9 +6,7 @@ import (
 	"time"
 )
 
-
-
-var STATUS_BROKER = map[nats.Status]string{
+var StatusBroker = map[nats.Status]string{
 	nats.DISCONNECTED:  "DISCONNECTED",
 	nats.CONNECTED:     "CONNECTED",
 	nats.CLOSED:        "CLOSED",

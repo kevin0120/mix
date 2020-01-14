@@ -1,6 +1,6 @@
 package device
 
-type DeviceStatus struct {
+type Status struct {
 	SN       string      `json:"sn"`
 	Type     string      `json:"type"`
 	Status   string      `json:"status"`

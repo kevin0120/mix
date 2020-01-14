@@ -3,8 +3,8 @@ package minio
 import (
 	"fmt"
 	"github.com/minio/minio-go"
+	"go.uber.org/atomic"
 	"strings"
-	"sync/atomic"
 	"time"
 )
 
@@ -72,9 +72,14 @@ func (s *Service) initClient() error {
 
 func (s *Service) upload(obj string, data string) error {
 	isExist, err := s.minio.BucketExists(s.bucket)
-	if err != nil || !isExist {
-		return fmt.Errorf("Bucket %s Not Exist: %s ", s.bucket, err.Error())
+	if err != nil {
+		return fmt.Errorf("Get Bucket Failed: %s ", err.Error())
 	}
+
+	if !isExist {
+		return fmt.Errorf("Bucket %s Not Exist ", s.bucket)
+	}
+
 	reader := strings.NewReader(data)
 	_, e := s.minio.PutObject(s.bucket, obj, reader, reader.Size(), minio.PutObjectOptions{ContentType: "application/json"})
 	if e != nil {
@@ -95,8 +100,11 @@ func (s *Service) doReupload() {
 			s.diag.Error(fmt.Sprintf("上传曲线失败 工具:%s 对应拧紧ID:%s", v.ToolSN, v.TighteningID), err)
 		} else {
 			v.HasUpload = true
-			s.storageService.UpdateCurve(&v)
-			s.diag.Info(fmt.Sprintf("上传曲线成功 工具:%s 对应拧紧ID:%s", v.ToolSN, v.TighteningID))
+			if _, err := s.storageService.UpdateCurve(&v); err != nil {
+				s.diag.Error(fmt.Sprintf("本地更新曲线失败 工具:%s 对应拧紧ID:%s", v.ToolSN, v.TighteningID), err)
+			} else {
+				s.diag.Info(fmt.Sprintf("上传曲线成功 工具:%s 对应拧紧ID:%s", v.ToolSN, v.TighteningID))
+			}
 		}
 	}
 }

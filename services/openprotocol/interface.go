@@ -13,10 +13,11 @@ type Dispatcher interface {
 	Dispatch(name string, data interface{}) error
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 	Release(name string, handler string) error
+	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }
 
 type IStorageService interface {
-	FindTargetResultForJobManual(raw_workorder_id int64) (storage.Results, error)
+	FindTargetResultForJobManual(workorderID int64) (storage.Results, error)
 	UpdateTool(gun *storage.Tools) error
 	ClearToolResultAndCurve(toolSN string) error
 	GetTool(serial string) (storage.Tools, error)
@@ -26,7 +27,6 @@ type IStorageService interface {
 }
 
 type IBackendService interface {
-	TryCreateMaintenance(body interface{}) error
 	GetConsumeBySeqInStep(step *storage.Steps, seq int) (*odoo.StepComsume, error)
 }
 
@@ -40,7 +40,7 @@ type IOpenProtocolController interface {
 	GetVendorModel() map[string]interface{}
 
 	//控制器状态变化影响相关工具的状态变化
-	UpdateToolStatus(status string)
+	UpdateToolStatus(sn string, status string)
 
 	//根据标识获取工具，通道号或者序列号或者连接(tcp)
 	GetToolViaChannel(channel int) (tightening_device.ITighteningTool, error)
@@ -53,6 +53,8 @@ type IOpenProtocolController interface {
 
 	//曲线解析
 	CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64)
+
+	OpenProtocolParams() *OpenProtocolParams
 
 	New() IOpenProtocolController
 }

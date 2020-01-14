@@ -4,8 +4,8 @@ import (
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
+	"go.uber.org/atomic"
 	"sync"
-	"sync/atomic"
 )
 
 // name: handlerName
@@ -135,14 +135,18 @@ func (s *Service) LaunchDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
 		if handler != nil {
 			s.Register(name, handler)
 		}
-		s.Start(name)
+		if err := s.Start(name); err != nil {
+			s.diag.Error("Start Dispatcher Failed", err)
+		}
 	}
 }
 
 func (s *Service) ReleaseDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
 	for name, handler := range dispatcherMap {
 		if handler != nil {
-			s.Release(name, handler.ID)
+			if err := s.Release(name, handler.ID); err != nil {
+				s.diag.Error("Release Dispatcher Failed", err)
+			}
 		}
 	}
 }

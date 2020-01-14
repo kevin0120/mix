@@ -258,14 +258,11 @@ func (s *Server) appendTighteningDeviceService() error {
 	c := s.config.TighteningDevice
 	d := s.DiagService.NewTighteningDeviceHandler()
 	srv, err := tightening_device.NewService(c, d,
-		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService)
+		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService, s.StorageService)
 
 	if err != nil {
 		return errors.Wrap(err, "append tightening_device service fail")
 	}
-
-	//srv.notifyService = s.WSNotifyService
-	srv.StorageService = s.StorageService
 
 	s.TighteningDeviceService = srv
 	s.AppendService("tightening_device", srv)
@@ -298,9 +295,7 @@ func (s *Server) appendOdooService() error {
 func (s *Server) appendWebsocketService() error {
 	c := s.config.WSNotify
 	d := s.DiagService.NewWebsocketHandler()
-	srv := wsnotify.NewService(c, d, s.DispatcherBusService)
-
-	srv.Httpd = s.HTTPDService //http 服务注入
+	srv := wsnotify.NewService(c, d, s.DispatcherBusService, s.HTTPDService)
 
 	s.WSNotifyService = srv
 	s.AppendService("websocket", srv)
@@ -333,8 +328,6 @@ func (s *Server) AppendScannerService() error {
 	d := s.DiagService.NewScannerHandler()
 
 	srv := scanner.NewService(c, d, s.DispatcherBusService, s.DeviceService)
-	srv.WS = s.WSNotifyService
-	srv.DeviceService = s.DeviceService
 
 	s.ScannerService = srv
 	s.AppendService("scanner", srv)

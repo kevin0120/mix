@@ -1,6 +1,7 @@
 package hmi
 
 import (
+	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/utils"
 )
@@ -23,7 +24,6 @@ type Dispatcher interface {
 }
 
 type INotifyService interface {
-	GetWorkCenter() string
 	NotifyAll(evt string, payload string)
 }
 
@@ -37,5 +37,9 @@ type IStorageService interface {
 }
 
 type IBackendService interface {
-	GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error)
+	GetWorkorder(hmiSn string, workcenterCode, code string) ([]byte, error)
+}
+
+type HTTPService interface {
+	AddNewHttpHandler(r httpd.Route)
 }

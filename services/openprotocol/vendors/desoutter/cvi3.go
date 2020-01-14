@@ -45,7 +45,7 @@ func (c *CVI3Controller) GetVendorModel() map[string]interface{} {
 
 		openprotocol.MID_7408_LAST_CURVE_SUBSCRIBE: "001",
 
-		openprotocol.IO_MODEL: io.IoConfig{
+		openprotocol.IoModel: io.IoConfig{
 			InputNum:  8,
 			OutputNum: 8,
 		},
@@ -54,4 +54,4 @@ func (c *CVI3Controller) GetVendorModel() map[string]interface{} {
 	return vendorModels
 }
 
-// TODO: 可重写所有TighteningController中的方法
+// 可重写所有TighteningController中的方法

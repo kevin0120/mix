@@ -11,9 +11,9 @@ const (
 	TIGHTENING_AUDIVW       = "Audi/VW"
 )
 const (
-	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported"
-	TIGHTENING_ERR_UNKNOWN       = "Error Unknown"
-	TIGHTENING_ERR_TIMEOUT       = "Timeout"
+	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported "
+	TIGHTENING_ERR_UNKNOWN       = "Error Unknown "
+	TIGHTENING_ERR_TIMEOUT       = "Timeout "
 )
 
 const (
@@ -273,4 +273,11 @@ type JobStep struct {
 	PSetID    int    `json:"pset_id"`
 	BatchSize int    `json:"batch_size"`
 	Socket    int    `json:"socket"`
+}
+
+type ToolMaintenanceInfo struct {
+	ToolSN               string `json:"serial_no"`
+	ControllerSN         string `json:"controller_sn"`
+	TotalTighteningCount int    `json:"times"`
+	CountSinLastService  int    `json:"sin_last_service"`
 }

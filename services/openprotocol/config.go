@@ -7,17 +7,11 @@ import (
 )
 
 const (
-	OpenProtocolDefaultKeepAlivePeriod   = toml.Duration(time.Second * 10)
-	OpenProtocolDefaultRequestTimeOut    = toml.Duration(time.Millisecond * 3)
 	OpenProtocolDefaultGetTollInfoPeriod = toml.Duration(time.Hour * 12)
 )
 
 type Config struct {
-	KeepAlivePeriod   toml.Duration `yaml:"keep_alive_period"`
-	ReadBufferSize    int           `yaml:"read_buf"`
-	ReqTimeout        toml.Duration `yaml:"req_time_out"`
 	SkipJobs          []int         `yaml:"skip_job"`
-	IOTrigger         int           `yaml:"io_trigger"`
 	DataIndex         int           `yaml:"data_index"`
 	VinIndex          []int         `yaml:"vin_index"`
 	GetToolInfoPeriod toml.Duration `yaml:"tool_info_period"`
@@ -27,11 +21,7 @@ type Config struct {
 func NewConfig() Config {
 
 	return Config{
-		KeepAlivePeriod:   OpenProtocolDefaultKeepAlivePeriod,
-		ReadBufferSize:    65535,
-		ReqTimeout:        OpenProtocolDefaultRequestTimeOut,
 		SkipJobs:          []int{250},
-		IOTrigger:         0,
 		DataIndex:         1,
 		VinIndex:          []int{0, 1},
 		GetToolInfoPeriod: OpenProtocolDefaultGetTollInfoPeriod,

@@ -8,9 +8,9 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/socket_writer"
+	"go.uber.org/atomic"
 	"net"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -28,7 +28,7 @@ type TighteningController struct {
 	Srv         *Service
 	StatusValue atomic.Value
 
-	keepAliveCount    int32
+	keepAliveCount    atomic.Int32
 	response          chan string
 	sequence          uint32 // 1~9999
 	buffer            chan []byte
@@ -49,15 +49,15 @@ func (c *TighteningController) Inputs() string {
 }
 
 func (c *TighteningController) KeepAliveCount() int32 {
-	return atomic.LoadInt32(&c.keepAliveCount)
+	return c.keepAliveCount.Load()
 }
 
 func (c *TighteningController) updateKeepAliveCount(i int32) {
-	atomic.SwapInt32(&c.keepAliveCount, i)
+	c.keepAliveCount.Swap(i)
 }
 
 func (c *TighteningController) addKeepAliveCount() {
-	atomic.AddInt32(&c.keepAliveCount, 1)
+	c.keepAliveCount.Inc()
 }
 
 func (c *TighteningController) Sequence() uint32 {
@@ -422,7 +422,7 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 	seq := c.Sequence()
 	psetPacket, seq := GeneratePacket(seq, Header_type_request_with_reply, xmlPset)
 
-	//c.Response.Add(seq, "")
+	//c.response.Add(seq, "")
 	c.Write([]byte(psetPacket), seq)
 
 	c.Response.Add(seq, "")

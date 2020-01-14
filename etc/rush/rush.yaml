@@ -89,20 +89,16 @@ audi/vw:
   version: 21
 
 openprotocol:
-  keep_alive_period: 10s
-  read_buf: 65535
-  req_time_out: 300ms
   skip_jobs:
   - 250
   - 240
-  io_trigger: 7
 
   # 0:vin 1:id2 2:id3 3:id4
   data_index: 2
   vin_index:
     - 0
     - 1
-
+    -
   tool_info_period: 10h
   default_mode: pset
 
@@ -134,27 +130,24 @@ device:
 tightening_device:
   enable: true
   devices:
-#    - model: ModelDesoutterDeltaWrench
-#      protocol: OpenProtocol
-#      endpoint: tcp://192.168.5.187:4545
-#      sn: c1
-#      tools:
-#        - sn: xx0011
-#          channel: 1
-#        - sn: xx0011
-#          channel: 0
+    - model: ModelDesoutterDeltaWrench
+      protocol: OpenProtocol
+      endpoint: tcp://192.168.5.186:4545
+      sn: w1
+      tools:
+        - sn: w1
+          channel: 1
 
     - model: ModelDesoutterCvi3
       protocol: OpenProtocol
-      endpoint: tcp://192.168.3.23:4545
       sn: 0002
       tools:
-        - sn: 1234
-          channel: 51
-          endpoint: tcp://192.168.3.23:4545
-#        - sn: 5678
-#          channel: 1
-#          endpoint: tcp://192.168.3.23:4546
+#        - sn: 1234
+#          channel: 51
+#          endpoint: tcp://192.168.3.23:4545
+        - sn: 5678
+          channel: 1
+          endpoint: tcp://192.168.3.23:4546
 #
 #    - model: MODEL_DESOUTTER_CVI3
 #      protocol: Audi/VW

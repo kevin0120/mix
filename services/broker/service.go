@@ -33,7 +33,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 	p := s.newBroker(c.Provider)
 	s.provider = p
 
-	s.initGblDispatcher()
+	s.setupGblDispatcher()
 
 	s.status.Store(utils.STATUS_OFFLINE)
 
@@ -44,9 +44,9 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) initGblDispatcher() {
+func (s *Service) setupGblDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DISPATCHER_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherBrokerStatus: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -91,7 +91,7 @@ func (s *Service) dispatcherBrokerStatus(status string) {
 	if s.dispatcherBus == nil {
 		s.diag.Error("dispatcherBrokerStatus Error", errors.New("dispatcherBus Is Empty"))
 	}
-	if err := s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_BROKER_STATUS, status); err != nil {
+	if err := s.dispatcherBus.Dispatch(dispatcherbus.DispatcherBrokerStatus, status); err != nil {
 		s.diag.Error("dispatcherBrokerStatus", err)
 	}
 
@@ -179,4 +179,10 @@ func (s *Service) onStatus(status string) {
 
 func (s *Service) Status() string {
 	return s.status.Load()
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
+	}
 }

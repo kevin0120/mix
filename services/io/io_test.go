@@ -55,7 +55,7 @@ func getIO() *IOModule {
 		cfg:     cfg,
 		client: &ModbusTcp{
 			cfg:    cfg,
-			vendor: VENDOR_MODELS["MOXA_E1212"],
+			vendor: VendorModels["MOXA_E1212"],
 		},
 
 		flashInterval: 1 * time.Second,
@@ -81,12 +81,12 @@ func TestStop(t *testing.T) {
 func TestWrite(t *testing.T) {
 	io := getIO()
 	io.Start(nil)
-	err := io.Write(0, OUTPUT_STATUS_OFF)
+	err := io.Write(0, OutputStatusOff)
 	assert.NotNil(t, err)
 
-	err = io.Write(0, OUTPUT_STATUS_ON)
+	err = io.Write(0, OutputStatusOn)
 	assert.NotNil(t, err)
 
-	err = io.Write(0, OUTPUT_STATUS_FLASH)
+	err = io.Write(0, OutputStatusFlash)
 	assert.Nil(t, err)
 }
