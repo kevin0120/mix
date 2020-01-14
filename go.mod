@@ -14,11 +14,11 @@ require (
 	github.com/flosch/pongo2 v0.0.0-20190707114632-bbf5a6c351f4 // indirect
 	github.com/gavv/monotime v0.0.0-20190418164738-30dba4353424 // indirect
 	github.com/go-ini/ini v1.46.0 // indirect
+	github.com/go-log/log v0.2.0 // indirect
 	github.com/go-playground/validator/v10 v10.0.1
 	github.com/go-xorm/xorm v0.7.6
 	github.com/goburrow/modbus v0.1.0
 	github.com/goburrow/serial v0.1.0 // indirect
-	github.com/golang/protobuf v1.3.2
 	github.com/google/gousb v0.0.0-20190812193832-18f4c1d8a750
 	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/gorilla/websocket v1.4.1
@@ -43,10 +43,11 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/micro/go-micro v1.18.0
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
+	github.com/miekg/dns v1.1.27 // indirect
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/moul/http2curl v1.0.0 // indirect
 	github.com/nats-io/nats.go v1.9.1
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.0
 	github.com/ryanuber/columnize v2.1.0+incompatible // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337 // indirect
@@ -60,10 +61,13 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	go.uber.org/atomic v1.5.1
+	golang.org/x/crypto v0.0.0-20200109152110-61a87790db17 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
-	golang.org/x/net v0.0.0-20191109021931-daa7c04131f5
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
+	golang.org/x/sys v0.0.0-20200113162924-86b910548bc1 // indirect
 	golang.org/x/tools v0.0.0-20200108203644-89082a384178 // indirect
-	google.golang.org/grpc v1.25.1
+	google.golang.org/genproto v0.0.0-20200113173426-e1de0a7b01eb // indirect
+	google.golang.org/grpc v1.26.0 // indirect
 	gopkg.in/ini.v1 v1.46.0 // indirect
 	gopkg.in/resty.v1 v1.12.0
 	gopkg.in/yaml.v2 v2.2.2

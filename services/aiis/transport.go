@@ -6,11 +6,6 @@ const (
 )
 
 const (
-	TRANSPORT_STATUS_ONLINE  = "online"
-	TRANSPORT_STATUS_OFFLINE = "offline"
-)
-
-const (
 	TRANSPORT_METHOD_RESULT         = "method_result"
 	TRANSPORT_METHOD_RESULT_PATCH   = "method_result_patch"
 	TRANSPORT_METHOD_SERVICE_STATUS = "method_service_status"

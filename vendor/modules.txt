@@ -24,7 +24,7 @@ github.com/fatih/structs
 github.com/flosch/pongo2
 # github.com/go-ini/ini v1.46.0
 github.com/go-ini/ini
-# github.com/go-log/log v0.1.0
+# github.com/go-log/log v0.2.0
 github.com/go-log/log
 github.com/go-log/log/log
 # github.com/go-playground/locales v0.13.0
@@ -133,6 +133,8 @@ github.com/micro/go-micro/registry
 github.com/micro/go-micro/registry/cache
 github.com/micro/go-micro/server
 github.com/micro/go-micro/transport
+github.com/micro/go-micro/transport/grpc
+github.com/micro/go-micro/transport/grpc/proto
 github.com/micro/go-micro/util/addr
 github.com/micro/go-micro/util/buf
 github.com/micro/go-micro/util/log
@@ -143,7 +145,7 @@ github.com/micro/go-micro/util/tls
 github.com/micro/mdns
 # github.com/microcosm-cc/bluemonday v1.0.2
 github.com/microcosm-cc/bluemonday
-# github.com/miekg/dns v1.1.22
+# github.com/miekg/dns v1.1.27
 github.com/miekg/dns
 # github.com/minio/minio-go v6.0.14+incompatible
 github.com/minio/minio-go
@@ -170,7 +172,7 @@ github.com/nats-io/nkeys
 github.com/nats-io/nuid
 # github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
 github.com/oxtoacart/bpool
-# github.com/pkg/errors v0.8.1
+# github.com/pkg/errors v0.9.0
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
@@ -188,7 +190,7 @@ github.com/tarm/serial
 github.com/valyala/bytebufferpool
 # go.uber.org/atomic v1.5.1
 go.uber.org/atomic
-# golang.org/x/crypto v0.0.0-20191108234033-bd318be0434a
+# golang.org/x/crypto v0.0.0-20200109152110-61a87790db17
 golang.org/x/crypto/acme
 golang.org/x/crypto/acme/autocert
 golang.org/x/crypto/argon2
@@ -198,9 +200,8 @@ golang.org/x/crypto/ed25519/internal/edwards25519
 # golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f
 golang.org/x/lint
 golang.org/x/lint/golint
-# golang.org/x/net v0.0.0-20191109021931-daa7c04131f5
+# golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 golang.org/x/net/bpf
-golang.org/x/net/context
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/http/httpguts
@@ -215,7 +216,7 @@ golang.org/x/net/ipv4
 golang.org/x/net/ipv6
 golang.org/x/net/publicsuffix
 golang.org/x/net/trace
-# golang.org/x/sys v0.0.0-20191110163157-d32e6e3b99c4
+# golang.org/x/sys v0.0.0-20200113162924-86b910548bc1
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
 golang.org/x/sys/windows
@@ -228,10 +229,11 @@ golang.org/x/text/unicode/norm
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/gcimporter
-# google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a
+# google.golang.org/genproto v0.0.0-20200113173426-e1de0a7b01eb
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.25.1
+# google.golang.org/grpc v1.26.0
 google.golang.org/grpc
+google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/base

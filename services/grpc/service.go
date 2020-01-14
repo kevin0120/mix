@@ -1,23 +1,31 @@
 package grpc
 
 import (
+	"context"
 	"fmt"
 	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/utils"
 	microTransport "github.com/micro/go-micro/transport"
+	_ "github.com/micro/go-micro/transport/grpc"
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"go.uber.org/atomic"
 	"sync"
+	"time"
 )
 
 type Service struct {
 	microTransport.Transport
 	diag        Diagnostic
 	addr        string
+	workers     int
 	opened      bool
 	mtxHandlers sync.Mutex
 	msgHandlers map[string]transport.OnMsgHandler
 	status      atomic.String
+	msgs        chan transport.Message
+	exiting     chan chan struct{}
+	respChannel chan RespStruct
 	client      transport.Client
 }
 
@@ -36,7 +44,15 @@ func newGRPCTransport(config Config) transport.Transport {
 }
 
 func NewService(config Config, d Diagnostic) *Service {
-	s := &Service{addr: config.addr, diag: d, msgHandlers: map[string]transport.OnMsgHandler{}}
+	s := &Service{
+		addr:        config.addr,
+		workers:     config.workers,
+		exiting:     make(chan chan struct{}, config.workers),
+		diag:        d,
+		msgs:        make(chan transport.Message, 1024),
+		respChannel: make(chan RespStruct, 1024),
+		msgHandlers: map[string]transport.OnMsgHandler{},
+	}
 	s.Transport = newGRPCTransport(config)
 	s.status.Store(utils.STATUS_OFFLINE)
 	return s
@@ -54,6 +70,9 @@ func (s *Service) Open() error {
 	s.client = c
 	s.opened = true
 	s.setStatus(utils.STATUS_ONLINE)
+	for i := 0; i < s.workers; i++ {
+		go s.doWork()
+	}
 	return nil
 }
 
@@ -62,6 +81,14 @@ func (s *Service) setStatus(status string) {
 }
 
 func (s *Service) Close() error {
+	if !s.opened {
+		return nil
+	}
+	for i := 0; i < s.workers; i++ {
+		exit := make(chan struct{})
+		s.exiting <- exit
+		<-exit
+	}
 	return nil
 }
 
@@ -105,11 +132,19 @@ func (s *Service) SendMessage(subject string, data []byte) error {
 	if s == nil {
 		return nil
 	}
-
-	return s.client.Send(&transport.Message{
+	msg := &transport.Message{
 		Header: map[string]string{transport.HEADER_SUBJECT: subject},
 		Body:   data,
-	})
+	}
+
+	return s.doSendMessage(msg)
+}
+
+func (s *Service) doSendMessage(msg *transport.Message) error {
+	if s.client == nil {
+		return errors.New("GRPC Client Is Empty")
+	}
+	return s.client.Send(msg)
 }
 
 func getMsgHeaderProperty(message *transport.Message, property string) string {
@@ -118,6 +153,7 @@ func getMsgHeaderProperty(message *transport.Message, property string) string {
 	switch property {
 	case transport.HEADER_SUBJECT:
 	case transport.HEADER_REPLY:
+	case transport.HEADER_MSG_ID:
 		pp = property
 	default:
 		return ""
@@ -137,16 +173,58 @@ func getReply(message *transport.Message) string {
 	return getMsgHeaderProperty(message, transport.HEADER_REPLY)
 }
 
-func (s *Service) doOnMsg() {
-	c := s.client
-	if c == nil {
-		return
+func getMessageID(message *transport.Message) string {
+	return getMsgHeaderProperty(message, transport.HEADER_MSG_ID)
+}
+
+func (s *Service) Request(subject string, data []byte, timeOut time.Duration) ([]byte, error) {
+	msgId := uuid.NewV4().String()
+	msg := &transport.Message{
+		Header: map[string]string{transport.HEADER_SUBJECT: subject, transport.HEADER_MSG_ID: msgId},
+		Body:   data,
 	}
-	var msg transport.Message
+	if err := s.doSendMessage(msg); err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
+	defer cancel()
+	respChannel := s.respChannel
+	cc := make(chan *transport.Message, 2) //确保通道不会阻塞
+	//defer close(cc)
+	respChannel <- RespStruct{msgId, cc}
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case msg, ok := <-cc:
+		if msg == nil {
+			return nil, errors.New(fmt.Sprintf("Opening, Channel Is %v", ok))
+		}
+		return msg.Body, nil
+	}
+}
+
+func (s *Service) doWork() {
+	var needRespMsgIds map[string]chan *transport.Message
 	for ; ; {
-		if err := c.Recv(&msg); err != nil {
+		select {
+		case exit := <-s.exiting:
+			close(exit)
+			return
+		case resp := <-s.respChannel:
+			msgId := resp.msgId
+			needRespMsgIds[msgId] = resp.msg
+		case msg := <-s.msgs:
 			subject := getSubject(&msg)
 			if subject == "" {
+				continue
+			}
+			msgId := getMessageID(&msg)
+			if e, ok := needRespMsgIds[msgId]; ok {
+				if e != nil {
+					e <- &msg
+					close(e)
+				}
+				delete(needRespMsgIds, msgId)
 				continue
 			}
 			h := s.msgHandler(subject)
@@ -163,6 +241,19 @@ func (s *Service) doOnMsg() {
 					}
 				}
 			}
+		}
+	}
+}
+
+func (s *Service) doOnMsg() {
+	c := s.client
+	if c == nil {
+		return
+	}
+	var msg transport.Message
+	for ; ; {
+		if err := c.Recv(&msg); err != nil {
+			s.msgs <- msg
 		}
 	}
 }

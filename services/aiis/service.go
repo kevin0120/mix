@@ -2,7 +2,7 @@ package aiis
 
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"time"
 
 	"encoding/json"
@@ -10,22 +10,16 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
-	"github.com/pkg/errors"
-	"gopkg.in/resty.v1"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type Service struct {
 	configValue    atomic.Value
 	diag           Diagnostic
-	httpClient     *resty.Client
 	storageService IStorageService
 	dispatcherBus  Dispatcher
 	notifyService  INotifyService
-	updateQueue    map[int64]time.Time
-	mtx            sync.Mutex
 	dispatcherMap  dispatcherbus.DispatcherMap
 	transport      ITransport
 
@@ -37,7 +31,6 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IT
 	s := &Service{
 		diag:           d,
 		dispatcherBus:  dp,
-		updateQueue:    map[int64]time.Time{},
 		opened:         false,
 		closing:        make(chan struct{}, 1),
 		storageService: ss,
@@ -52,14 +45,17 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IT
 
 func (s *Service) initTransport(bs ITransportService, dispatcherBus Dispatcher) error {
 	switch s.Config().TransportType {
-	case TRANSPORT_TYPE_GRPC:
-		s.transport = NewGRPCClient(s.diag, s.Config())
-
-	case TRANSPORT_TYPE_BROKER:
-		s.transport = NewBrokerClient(s.diag, bs, dispatcherBus)
-
-	default:
-		s.transport = NewGRPCClient(s.diag, s.Config())
+	//case TRANSPORT_TYPE_GRPC:
+	//	s.transport = NewGRPCClient(s.diag, s.Config())
+	//
+	//case TRANSPORT_TYPE_BROKER:
+	//	s.transport = NewBrokerClient(s.diag, bs, dispatcherBus)
+	//
+	//default:
+	//	s.transport = NewGRPCClient(s.diag, s.Config())
+	}
+	if s.transport == nil {
+		return nil
 	}
 
 	s.transport.SetResultPatchHandler(s.onResultPatch)
@@ -74,75 +70,15 @@ func (s *Service) initGlbDispatcher() {
 	}
 }
 
-func (s *Service) AddToQueue(id int64) error {
-	defer s.mtx.Unlock()
-	s.mtx.Lock()
-
-	_, e := s.updateQueue[id]
-	if e {
-		return errors.New("exist")
-	}
-
-	s.updateQueue[id] = time.Now()
-
-	return nil
-}
-
-func (s *Service) RemoveFromQueue(id int64) error {
-	defer s.mtx.Unlock()
-	s.mtx.Lock()
-
-	_, e := s.updateQueue[id]
-	if !e {
-		return errors.Errorf("RemoveFromQueue Queue ID: %d Not Found", id)
-	}
-
-	delete(s.updateQueue, id)
-
-	return nil
-}
-
-func (s *Service) uploadQueueTimeoutCheck() {
-	defer s.mtx.Unlock()
-	s.mtx.Lock()
-
-	var wait4Delete []int64
-	for k, v := range s.updateQueue {
-		if time.Since(v) > time.Duration(s.Config().Timeout) {
-			wait4Delete = append(wait4Delete, k)
-		}
-	}
-
-	for _, id := range wait4Delete {
-		delete(s.updateQueue, id)
-	}
-}
-
 func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) ensureHttpClient() *resty.Client {
-	if s.httpClient != nil {
-		return s.httpClient
-	}
-	c := s.Config()
-	client := resty.New()
-	client.SetRESTMode() // restful mode is default
-	client.SetTimeout(time.Duration(c.Timeout))
-	client.SetContentLength(true)
-	// Headers for all request
-	client.
-		SetRetryCount(c.MaxRetry).
-		SetRetryWaitTime(time.Duration(c.PushInterval)).
-		SetRetryMaxWaitTime(20 * time.Second)
-
-	s.httpClient = client
-	return client
-}
-
 func (s *Service) Open() error {
-	s.ensureHttpClient()
+	c := s.Config()
+	if !c.Enable {
+		return nil
+	}
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
 	s.dispatcherBus.Register(dispatcherbus.DISPATCHER_RESULT, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
@@ -168,12 +104,7 @@ func (s *Service) Close() error {
 
 func (s *Service) PutResult(body *AIISResult) {
 
-	err := s.AddToQueue(body.ID)
-	if err != nil {
-		return
-	}
-
-	err = s.transport.SendResult(body)
+	err := s.transport.SendResult(body)
 	if err != nil {
 		s.diag.Error("Publish Tool Result Failed", err)
 	}
@@ -289,14 +220,13 @@ func (s *Service) onTighteningResult(data interface{}) {
 func (s *Service) patchResult(rp *ResultPatch) {
 	err := s.storageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
 	if err == nil {
-		s.RemoveFromQueue(rp.ID)
 		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
 	} else {
 		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
 	}
 }
 
-func (s *Service) reuploadResult() error {
+func (s *Service) reUploadResult() error {
 	results, err := s.storageService.ListUnUploadResults()
 	if err != nil {
 		return err
@@ -313,16 +243,14 @@ func (s *Service) reuploadResult() error {
 }
 
 func (s *Service) manage() {
+	config := s.Config()
 	for {
 		select {
-		case <-time.After(time.Duration(s.Config().ResultUploadInteval)):
-			err := s.reuploadResult()
+		case <-time.After(time.Duration(config.ResultUploadInteval)):
+			err := s.reUploadResult()
 			if err != nil {
 				s.diag.Error("Reupload Result Failed", err)
 			}
-
-		case <-time.After(time.Duration(s.Config().Timeout)):
-			s.uploadQueueTimeoutCheck()
 
 		case <-s.closing:
 			return
@@ -332,15 +260,19 @@ func (s *Service) manage() {
 
 // 服务状态变化
 func (s *Service) onServiceStatus(status ServiceStatus) {
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status)
+	if err :=s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, status); err != nil {
+		s.diag.Error(fmt.Sprintf("onServiceStatus Dispatch: %s Error", dispatcherbus.DISPATCHER_SERVICE_STATUS), err)
+	}
 }
 
 // 传输连接状态变化
 func (s *Service) onTransportStatus(status string) {
-	s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, ServiceStatus{
+	if err := s.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SERVICE_STATUS, ServiceStatus{
 		Name:   SERVICE_AIIS,
 		Status: status,
-	})
+	}); err != nil {
+		s.diag.Error(fmt.Sprintf("onTransportStatus Dispatch: %s Error", dispatcherbus.DISPATCHER_SERVICE_STATUS), err)
+	}
 }
 
 // 收到结果上传反馈
