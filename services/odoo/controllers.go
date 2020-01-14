@@ -79,7 +79,6 @@ func (s *Service) putSyncRoutingOpertions(ctx iris.Context) {
 	}
 
 	dbRo.Points = string(points)
-	dbRo.VehicleTypeImg = ro.VehicleTypeImg
 	dbRo.WorkcenterCode = ro.WorkcenterCode
 	dbRo.ProductType = ro.ProductType
 	dbRo.ProductId = ro.ProductId

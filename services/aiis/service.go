@@ -222,7 +222,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 	aiisResult.MoNutno = result.NutNo
 	aiisResult.MoModel = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
-	aiisResult.Vin = dbWorkorder.Track_code
+	aiisResult.Vin = dbWorkorder.TrackCode
 	aiisResult.WorkorderName = dbWorkorder.Code
 	aiisResult.Mode = dbWorkorder.Mode
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)

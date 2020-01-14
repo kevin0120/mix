@@ -118,10 +118,10 @@ func (s *Service) OnWSOrderStepDataUpdate(c websocket.Connection, msg *wsnotify.
 		return
 	}
 
-	_, err = s.storageService.UpdateStepData(&storage.Steps{
-		Id:   orderReq.ID,
-		Data: orderReq.Data,
-	})
+	var step storage.Steps
+	step.Id = orderReq.ID
+	step.Data = orderReq.Data
+	_, err = s.storageService.UpdateStepData(&step)
 
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
@@ -142,10 +142,10 @@ func (s *Service) OnWSOrderDataUpdate(c websocket.Connection, msg *wsnotify.WSMs
 		return
 	}
 
-	_, err = s.storageService.UpdateOrderData(&storage.Workorders{
-		Id:   orderReq.ID,
-		Data: orderReq.Data,
-	})
+	var order storage.Workorders
+	order.Id = orderReq.ID
+	order.Data = orderReq.Data
+	_, err = s.storageService.UpdateOrderData(&order)
 
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))

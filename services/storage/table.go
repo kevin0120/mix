@@ -39,46 +39,43 @@ type Workorders struct {
 	MO_Lnr            string `xorm:"varchar(64) 'lnr'" json:"-"`
 	MO_Model          string `xorm:"varchar(64) 'model'" json:"-"`
 
-	Name           string      `xorm:"varchar(64) 'name'" json:"-"`
-	Desc           string      `xorm:"varchar(64) 'desc'" json:"-"`
-	Payload        string      `xorm:"text" json:"-"`
-	MarshalPayload interface{} `xorm:"-" json:"-"`
+	Code                string    `xorm:"pk unique varchar(128) 'code'"  json:"code"`
+	TrackCode           string    `xorm:"varchar(128) 'track_code'" json:"track_code"`
+	ProductCode         string    `xorm:"varchar(128) 'product_code'" json:"product_code"  validator:"required"`
+	DatePlannedStart    time.Time `xorm:"datetime 'date_planned_start'" json:"date_planned_start"`
+	DatePlannedComplete time.Time `xorm:"datetime 'date_planned_complete'" json:"date_planned_complete"`
+	UniqueNum           int64     `xorm:"bigint 'unique_num'" json:"unique_num"`
+	Data                string    `xorm:"text 'data'" json:"data"`
 
-	Workorder    string `xorm:"text 'workorder'" json:"-"`
-	Code         string `xorm:"pk unique varchar(128) 'code'"  json:"code"`
-	Track_code   string `xorm:"varchar(128) 'track_code'" json:"track_code"`
-	Product_code string `xorm:"varchar(128) 'product_code'" json:"product_code"  validator:"required"`
-	//Workcenter            string    `xorm:"varchar(128) 'workcenter'" json:"workcenter"`
-	Date_planned_start    time.Time `xorm:"datetime 'date_planned_start'" json:"date_planned_start"`
-	Date_planned_complete time.Time `xorm:"datetime 'date_planned_complete'" json:"date_planned_complete"`
-	Status                string    `xorm:"varchar(32) default 'todo' 'status' " json:"status"`
-	Product_type_image    string    `json:"product_type_image"`
-
-	Unique_Num int64     `xorm:"bigint 'unique_num'" json:"unique_num"`
-	Data       string    `xorm:"text 'data'" json:"data"`
-	Created    time.Time `xorm:"created" json:"-"`
-	Updated    time.Time `xorm:"updated" json:"-"`
+	Name             string      `xorm:"varchar(64) 'name'" json:"-"`
+	Desc             string      `xorm:"varchar(64) 'desc'" json:"-"`
+	Payload          string      `xorm:"text" json:"-"`
+	MarshalPayload   interface{} `xorm:"-" json:"-"`
+	Workorder        string      `xorm:"text 'workorder'" json:"-"`
+	Status           string      `xorm:"varchar(32) default 'todo' 'status' " json:"status"`
+	ProductTypeImage string      `json:"product_type_image"`
+	Created          time.Time   `xorm:"created" json:"-"`
+	Updated          time.Time   `xorm:"updated" json:"-"`
 
 	Steps []Steps `json:"-" validator:"required"`
 }
 
 type Steps struct {
-	//Id             int64       `xorm:"pk autoincr notnull 'id'" json:"id"`
-	////CurrentWorkorderID    int64     `xorm:"bigint 'workorder_id'" json:"-"`
-	//Name           string      `xorm:"varchar(64) 'name'" json:"name"`
-	//Desc           string      `xorm:"varchar(64) 'desc'" json:"desc"`
-	//Type           string      `xorm:"varchar(64) 'type'" json:"type"`
-	//Skippable      bool        `xorm:"varchar(64) 'skippable'" json:"skippable"`
-	//Undoable       bool        `xorm:"varchar(64) 'undoable'" json:"undoable"`
-	//Status         string      `xorm:"varchar(32) 'status'"   json:"status"`
-	//Payload        string      `xorm:"text" json:"-"`
-	//MarshalPayload interface{} `xorm:"-" json:"payload"`
-
-	Id int64 `xorm:"pk autoincr notnull 'id'" json:"id"`
-	//CurrentWorkorderID    int64       `xorm:"bigint 'workorder_id'" json:"-"`
-	Name string `xorm:"varchar(64) 'name'" json:"-"`
-
-	Type string `xorm:"varchar(64) 'type'" json:"-"`
+	Id             int64  `xorm:"pk autoincr notnull 'id'" json:"id"`
+	Code           string `xorm:"varchar(128) 'code'" json:"code"`
+	Sequence       int64  `xorm:"bigint 'sequence'" json:"sequence"`
+	TestType       string `xorm:"varchar(128) 'test_type'" json:"test_type"`
+	FailureMessage string `xorm:"varchar(128) 'failure_msg'" json:"failure_msg"`
+	Desc           string `xorm:"varchar(128) 'desc'" json:"desc"`
+	Data           string `xorm:"text 'data'" json:"data"`
+	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code" validator:"required"`
+	Skippable      bool   `xorm:"varchar(64) 'skippable'" json:"skippable"`
+	Undoable       bool   `xorm:"varchar(64) 'undoable'" json:"undoable"`
+	Text           string `xorm:"text 'text'" json:"text"`
+	ToleranceMin   int64  `xorm:"bigint 'tolerance_min'" json:"tolerance_min"`
+	ToleranceMax   int64  `xorm:"bigint 'tolerance_max'" json:"tolerance_max"`
+	Target         int64  `xorm:"bigint 'target'" json:"target"`
+	ConsumeProduct string `xorm:"varchar(128) 'consume_product'" json:"consume_product"`
 
 	Payload        string      `xorm:"text" json:"payload"`
 	MarshalPayload interface{} `xorm:"-" json:"-"`
@@ -86,23 +83,8 @@ type Steps struct {
 	WorkorderID int64  `xorm:"bigint 'x_workorder_id'" json:"-"`
 	Step        string `xorm:"text 'step'" json:"-"`
 
-	Code           string `xorm:"varchar(128) 'code'" json:"code"`
-	Sequence       int64  `xorm:"bigint 'sequence'" json:"sequence"`
-	Testtype       string `xorm:"varchar(128) 'test_type'" json:"test_type"`
-	FailureMessage string `xorm:"varchar(128) 'failure_msg'" json:"failure_msg"`
-	Desc           string `xorm:"varchar(128) 'desc'" json:"desc"`
-	Image          string `xorm:"-" json:"image"`
-	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code" validator:"required"`
-	Skippable      bool   `xorm:"varchar(64) 'skippable'" json:"skippable"`
-	Undoable       bool   `xorm:"varchar(64) 'undoable'" json:"undoable"`
-	Data           string `xorm:"text 'data'" json:"data"`
-	Status         string `xorm:"varchar(32) default 'ready' 'status'" json:"status"`
-
-	Text           string `xorm:"text 'text'" json:"text"`
-	ToleranceMin   int64  `xorm:"bigint 'tolerance_min'" json:"tolerance_min"`
-	ToleranceMax   int64  `xorm:"bigint 'tolerance_max'" json:"tolerance_max"`
-	Target         int64  `xorm:"bigint 'target'" json:"target"`
-	ConsumeProduct string `xorm:"varchar(64) 'consume_product'" json:"consume_product"`
+	Image  string `xorm:"-" json:"image"`
+	Status string `xorm:"varchar(32) default 'ready' 'status'" json:"status"`
 
 	Created time.Time `xorm:"created" json:"-"`
 	Updated time.Time `xorm:"updated" json:"-"`

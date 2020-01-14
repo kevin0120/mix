@@ -604,8 +604,6 @@ func (s *Service) InitWorkorderForJob(workorder_id int64) error {
 	} else {
 		return nil
 	}
-
-	return nil
 }
 
 func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
@@ -889,7 +887,7 @@ func (s *Service) Workorders(par []byte) ([]Workorders, error) {
 	err = q.Find(&rt)
 
 	for i := 0; i < len(rt); i++ {
-		rt[i].Product_type_image, err = s.findOrderPicture(rt[i].Product_code)
+		rt[i].ProductTypeImage, err = s.findOrderPicture(rt[i].ProductCode)
 	}
 
 	if err != nil {
@@ -953,7 +951,7 @@ func (s *Service) DeleteWorkAndStep(ss *xorm.Session, code string, uniqueNum int
 	if !bool {
 		return false, nil
 	}
-	if workorder.Unique_Num > uniqueNum {
+	if workorder.UniqueNum > uniqueNum {
 		return true, nil
 	}
 	sql1 := "delete from `workorders` where id = ?"
