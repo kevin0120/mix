@@ -80,7 +80,7 @@ export class ClsOrderOperationPoints {
     let newActivePoints: Array<?ClsOperationPoint> = [];
     let newInactivePoints: Array<?ClsOperationPoint> = [];
     results.forEach(r => {
-      const { sequence: seq } = r;
+      const { seq } = r;
       const group = this.getGroupByPointSequence(seq);
       if (!group) {
         return;

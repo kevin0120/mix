@@ -1,7 +1,7 @@
 // @flow
 export const WEBSOCKET_EVENTS = Object.freeze({
   controller: 'controller',
-  result: 'result',
+  result: 'tightening',
   register: 'register',
   selector: 'selector',
   job: 'job',

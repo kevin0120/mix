@@ -8,7 +8,7 @@ const defaultConfigs = {
   appName: '长安汽车智能装配系统-终端',
   devices: {
     io: {
-      sn: '1',
+      sn: '3',
       enable: true,
       config: { input_num: 8, output_num: 8 },
       inputs: {

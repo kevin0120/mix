@@ -123,7 +123,7 @@ class Result extends React.Component {
               job_id: item.job_id,
               pset_id: item.pset_id,
               batch: item.batch,
-              result: item.result,
+              result: item.measure_result,
               vehicle_type: item.vehicle_type,
               actions: (
                 // we've added some custom button actions
@@ -191,7 +191,7 @@ class Result extends React.Component {
           </ListItem>
           <Divider component="li"/>
           <ListItem>
-            <ListItemText primary={`结果: ${selectObj.result}`}/>
+            <ListItemText primary={`结果: ${selectObj.measure_result}`}/>
           </ListItem>
           <Divider component="li"/>
           <ListItem>

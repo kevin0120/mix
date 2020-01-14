@@ -71,6 +71,13 @@ export function getDevice(sn: tDeviceSN): IDevice {
   return [...gDevices].filter((d: IDevice) => d.serialNumber === sn)?.[0];
 }
 
+export function removeDevice(sn: tDeviceSN): IDevice {
+  const device = [...gDevices].find(d => d.serialNumber === sn);
+  if(device){
+    gDevices.delete(device);
+  }
+}
+
 export function getDevicesByType(dType: tDeviceType): Array<IDevice> {
   return [...gDevices].filter((d: IDevice) => d instanceof sym2Device[dType]);
 }

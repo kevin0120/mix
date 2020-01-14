@@ -200,9 +200,9 @@ class ConnectedImageStick extends React.Component {
         : classes.circleStatus;
       // idx += 1;
       let status = 'waiting';
-      if (item.result === OPERATION_RESULT.NOK) {
+      if (item.measure_result === OPERATION_RESULT.NOK) {
         status = 'error';
-      } else if (item.result === OPERATION_RESULT.OK) {
+      } else if (item.measure_result === OPERATION_RESULT.OK) {
         status = 'success';
       }
       if (
@@ -213,7 +213,7 @@ class ConnectedImageStick extends React.Component {
           // case OPERATION_STATUS.TIMEOUT:
           case OPERATION_STATUS.DOING: {
             status = 'waitingActive';
-            if (item.result === OPERATION_RESULT.NOK) {
+            if (item.measure_result === OPERATION_RESULT.NOK) {
               status = 'failActive';
             }
             break;

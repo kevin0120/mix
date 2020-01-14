@@ -48,9 +48,9 @@ export class ClsOperationPoint {
     // );
     return (
       this._point.max_redo_times >= 0
-      && this._results.filter(r => r.result === RESULT_STATUS.nok)
+      && this._results.filter(r => r.measure_result === RESULT_STATUS.nok)
         .length >= this._point.max_redo_times
-      && this._results.slice(-1)[0].result === RESULT_STATUS.nok
+      && this._results.slice(-1)[0].measure_result === RESULT_STATUS.nok
     );
   }
 
@@ -62,9 +62,9 @@ export class ClsOperationPoint {
       return false;
     }
     return (
-      lastResult.result === RESULT_STATUS.ak2
+      lastResult.measure_result === RESULT_STATUS.ak2
       || this.isFinalFail
-      || lastResult.result === RESULT_STATUS.ok
+      || lastResult.measure_result === RESULT_STATUS.ok
     );
   }
 
@@ -75,7 +75,7 @@ export class ClsOperationPoint {
       return false;
     }
     return (
-      lastResult.result === RESULT_STATUS.ok
+      lastResult.measure_result === RESULT_STATUS.ok
     );
   }
 
@@ -140,7 +140,7 @@ export class ClsOperationPoint {
   newResult(result: tResult): ?ClsOperationPoint {
     const r = {
       ...result,
-      result: result.result.toUpperCase()
+      measure_result: result.measure_result.toUpperCase()
     };
     this._results.push(r);
 
@@ -153,14 +153,14 @@ export class ClsOperationPoint {
   }
 
   _parseStatus(result: tResult): void {
-    if (!result.result || typeof result.result !== 'string') {
+    if (!result.measure_result || typeof result.measure_result !== 'string') {
       return;
     }
 
-    if (result.result === RESULT_STATUS.ok) {
+    if (result.measure_result === RESULT_STATUS.ok) {
       this._status = POINT_STATUS.SUCCESS;
     }
-    if (result.result === RESULT_STATUS.nok) {
+    if (result.measure_result === RESULT_STATUS.nok) {
       this._status = POINT_STATUS.ERROR;
     }
   }

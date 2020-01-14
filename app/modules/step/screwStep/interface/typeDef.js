@@ -29,13 +29,14 @@ export type tPoint = {
 
 export type tResult = {
   tool_sn: string,
-  sequence: number,
-  group_sequence: number,
-  ti: number,
-  mi: number,
-  wi: number,
-  result: tResultStatus, // result
-  batch: string
+  seq: number,
+  group_seq: number,
+  measure_time: number,
+  measure_torque: number, // mi 扭矩
+  measure_angle: number, // wi 角度
+  measure_result: tResultStatus, // result
+  batch: string,
+  count: number
 };
 
 export type tScrewStepData = {

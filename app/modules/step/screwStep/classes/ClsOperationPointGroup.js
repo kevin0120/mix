@@ -92,8 +92,9 @@ export class ClsOperationPointGroup {
   newResult(result: tResult): Array<?ClsOperationPoint> {
     const inactivePoints = [];
     (() => {
-      const { sequence } = result;
-      const point = this._points.find(p => p.sequence === sequence);
+      console.log(result);
+      const { seq } = result;
+      const point = this._points.find(p => p.sequence === seq);
       if (!point) {
         return;
       }
