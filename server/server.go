@@ -164,9 +164,8 @@ func (s *Server) AppendService(name string, srv Service) {
 }
 
 func (s *Server) appendDispatcherBus() error {
-	c := s.config.DispatcherBus
 	d := s.DiagService.NewDispatcherBusHandler()
-	srv, err := dispatcherbus.NewService(c, d)
+	srv, err := dispatcherbus.NewService(d)
 
 	if err != nil {
 		return errors.Wrap(err, "Append dispatcherBus Service Fail")

@@ -18,7 +18,6 @@ import (
 
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
-	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
@@ -64,8 +63,6 @@ type Config struct {
 
 	Device device.Config `yaml:"device"`
 
-	DispatcherBus dispatcherbus.Config `yaml:"dispatcher_bus"`
-
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -92,7 +89,6 @@ func NewConfig() *Config {
 	c.TighteningDevice = tightening_device.NewConfig()
 	c.Device = device.NewConfig()
 	c.Broker = broker.NewConfig()
-	c.DispatcherBus = dispatcherbus.NewConfig()
 
 	return c
 }
