@@ -2,6 +2,7 @@ package aiis
 
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/pkg/errors"
 	"go.uber.org/atomic"
 	"time"
 
@@ -46,7 +47,6 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IT
 func (s *Service) setupTransport(bs ITransportService, dispatcherBus Dispatcher) {
 	s.transport = NewAIISBaseTransport(bs)
 
-	s.transport.SetResultPatchHandler(s.onResultPatch)
 	s.transport.SetServiceStatusHandler(s.onServiceStatus)
 	s.transport.SetStatusHandler(s.onTransportStatus)
 }
@@ -61,14 +61,51 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
+func (s *Service) onNewTool(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	toolSN := data.(string)
+
+	if s.transport == nil {
+		return
+	}
+	if err := s.transport.SetResultPatchHandler(toolSN, s.onResultPatch); err != nil {
+		s.diag.Error("SetResultPatchHandler", err)
+	}
+
+}
+
+func (s *Service) launchDispatchers() {
+	if s.dispatcherBus == nil {
+		s.diag.Error("setUpDispatcherRegister", errors.New("Please Inject Dispatcher First"))
+		return
+	}
+	if len(s.dispatcherMap) == 0 {
+		return
+	}
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+
+}
+
+func (s *Service) setUpDispatcherRegister() {
+	if s.dispatcherBus == nil {
+		s.diag.Error("setUpDispatcherRegister", errors.New("Please Inject Dispatcher First"))
+		return
+	}
+	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+
+	s.dispatcherBus.Register(dispatcherbus.DispatcherNewTool, utils.CreateDispatchHandlerStruct(s.onNewTool))
+}
+
 func (s *Service) Open() error {
 	c := s.Config()
 	if !c.Enable {
 		return nil
 	}
-	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-
-	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	s.launchDispatchers()
+	s.setUpDispatcherRegister()
 
 	go s.manage()
 

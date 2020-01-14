@@ -18,6 +18,7 @@ broker:
     token: Dummy Token
   name: 31a0def7-785c-4f43-ba19-1736a2e8b47c
 grpc:
+  enable: false
   address: 127.0.0.1:9093
   workers: 2
 transport:

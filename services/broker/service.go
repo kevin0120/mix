@@ -79,6 +79,9 @@ func (s *Service) TransportForceOpen() {
 }
 
 func (s *Service) Close() error {
+	if !s.opened {
+		return nil
+	}
 	s.closing <- struct{}{}
 	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
 	if s.provider != nil {

@@ -5,12 +5,14 @@ const (
 )
 
 type Config struct {
+	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address"`
 	Workers int    `yaml:"workers"`
 }
 
 func NewConfig() Config {
 	return Config{
+		Enable:  true,
 		Address: DefaultGRPCServerAddr,
 		Workers: 2,
 	}

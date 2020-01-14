@@ -10,6 +10,7 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/grpc"
 	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
@@ -21,6 +22,7 @@ import (
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
@@ -70,6 +72,10 @@ type Server struct {
 
 	BrokerService *broker.Service
 
+	GRPC *grpc.Service
+
+	Transport *transport.Service
+
 	config *Config
 	// List of services in startup order
 	Services []Service
@@ -101,7 +107,9 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		err:            make(chan error),
 		Commander:      c.Commander,
 	}
-	s.appendDispatcherBus()
+	if err := s.appendDispatcherBus(); err != nil {
+		return nil, errors.Wrap(err, "appendDispatcherBus")
+	}
 
 	if err := s.initHTTPDService(); err != nil {
 		return nil, errors.Wrap(err, "init httpd service")
@@ -117,9 +125,13 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendMinioService()
 
-	s.AppendBrokerService()
+	s.appendGRPCService()
 
-	s.appendDeviceService()
+	s.appendBrokerService()
+
+	if err := s.appendDeviceService(); err != nil {
+		return nil, errors.Wrap(err, "appendDeviceService")
+	}
 
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
 
@@ -133,15 +145,27 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendHMIService()
 
-	s.AppendScannerService()
+	s.appendScannerService()
 
-	s.AppendIOService()
+	s.appendIOService()
 
-	s.AppendReaderService()
+	s.appendReaderService()
+
+	s.appendTransportService() // append transport service
 
 	s.appendHTTPDService()
 
 	return s, nil
+}
+
+func (s *Server) appendTransportService() {
+	c := s.config.Transport
+	d := s.DiagService.NewTransportHandler()
+	srv := transport.NewService(c, d)
+
+	s.Transport = srv
+
+	s.AppendService("transport", s.OpenprotocolService)
 }
 
 func (s *Server) GetServiceByName(name string) Service {
@@ -228,7 +252,7 @@ func (s *Server) appendHTTPDService() {
 	s.AppendService("httpd", s.HTTPDService)
 }
 
-func (s *Server) appendMinioService() error {
+func (s *Server) appendMinioService() {
 	c := s.config.Minio
 	d := s.DiagService.NewMinioHandler()
 	srv := minio.NewService(c, d, s.StorageService)
@@ -236,7 +260,6 @@ func (s *Server) appendMinioService() error {
 	s.MinioService = srv
 	s.AppendService("minio", srv)
 
-	return nil
 }
 
 func (s *Server) appendDeviceService() error {
@@ -272,7 +295,7 @@ func (s *Server) appendTighteningDeviceService() error {
 func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
-	srv := aiis.NewService(c, d, s.DispatcherBusService, s.StorageService, s.BrokerService, s.WSNotifyService)
+	srv := aiis.NewService(c, d, s.DispatcherBusService, s.StorageService, s.Transport, s.WSNotifyService)
 
 	s.AiisService = srv
 	s.AppendService("aiis", srv)
@@ -291,7 +314,7 @@ func (s *Server) appendOdooService() error {
 	return nil
 }
 
-func (s *Server) appendWebsocketService() error {
+func (s *Server) appendWebsocketService() {
 	c := s.config.WSNotify
 	d := s.DiagService.NewWebsocketHandler()
 	srv := wsnotify.NewService(c, d, s.DispatcherBusService, s.HTTPDService)
@@ -299,7 +322,6 @@ func (s *Server) appendWebsocketService() error {
 	s.WSNotifyService = srv
 	s.AppendService("websocket", srv)
 
-	return nil
 }
 
 func (s *Server) appendHMIService() error {
@@ -310,7 +332,7 @@ func (s *Server) appendHMIService() error {
 	return nil
 }
 
-func (s *Server) appendStorageService() error {
+func (s *Server) appendStorageService() {
 	c := s.config.Storage
 	d := s.DiagService.NewStorageHandler()
 	srv := storage.NewService(c, d)
@@ -319,10 +341,9 @@ func (s *Server) appendStorageService() error {
 
 	s.AppendService("storage", srv)
 
-	return nil
 }
 
-func (s *Server) AppendScannerService() error {
+func (s *Server) appendScannerService() error {
 	c := s.config.Scanner
 	d := s.DiagService.NewScannerHandler()
 
@@ -334,21 +355,26 @@ func (s *Server) AppendScannerService() error {
 	return nil
 }
 
-func (s *Server) AppendBrokerService() error {
+func (s *Server) appendGRPCService() {
+	c := s.config.Grpc
+	d := s.DiagService.NewGRPCHandler()
+
+	srv := grpc.NewService(c, d)
+
+	s.GRPC = srv
+}
+
+func (s *Server) appendBrokerService() {
 	c := s.config.Broker
 	d := s.DiagService.NewBrokerHandler()
 
 	srv := broker.NewService(c, d, s.DispatcherBusService)
 
 	s.BrokerService = srv
-	if c.Enable {
-		s.AppendService("broker", srv)
-	}
 
-	return nil
 }
 
-func (s *Server) AppendIOService() error {
+func (s *Server) appendIOService() error {
 	c := s.config.IO
 	d := s.DiagService.NewIOHandler()
 
@@ -360,7 +386,7 @@ func (s *Server) AppendIOService() error {
 	return nil
 }
 
-func (s *Server) AppendReaderService() error {
+func (s *Server) appendReaderService() {
 	c := s.config.Reader
 	d := s.DiagService.NewReaderHandler()
 
@@ -369,7 +395,6 @@ func (s *Server) AppendReaderService() error {
 	s.ReaderService = srv
 	s.AppendService("reader", srv)
 
-	return nil
 }
 
 func (s *Server) Open() error {

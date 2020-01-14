@@ -448,6 +448,28 @@ func (h *OpenProtocolHandler) Info(msg string) {
 	h.l.Info(msg)
 }
 
+//transport
+type TransportHandler struct {
+	l Logger
+}
+
+func (h *TransportHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *TransportHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+func (h *TransportHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
+func (h *TransportHandler) SendMsgSuccess(msg string) {
+	h.l.Debug(msg)
+}
+
+
 // Controller
 type ControllerHandler struct {
 	l Logger

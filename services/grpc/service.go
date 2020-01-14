@@ -17,6 +17,7 @@ import (
 type Service struct {
 	microTransport.Transport
 	diag        Diagnostic
+	enable      bool
 	addr        string
 	workers     int
 	opened      bool
@@ -46,6 +47,7 @@ func newGRPCTransport(config Config) transport.Transport {
 func NewService(config Config, d Diagnostic) *Service {
 	s := &Service{
 		addr:        config.Address,
+		enable:      config.Enable,
 		workers:     config.Workers,
 		exiting:     make(chan chan struct{}, config.Workers),
 		diag:        d,
@@ -59,13 +61,20 @@ func NewService(config Config, d Diagnostic) *Service {
 }
 
 func (s *Service) Open() error {
+	if !s.enable {
+		return nil
+	}
+	return s.doOpen()
+}
+
+func (s *Service) doOpen() error {
 	addr := s.addr
 	if addr == "" {
 		return errors.New("GRPC Address Is Empty")
 	}
 	c, err := s.doConnect(addr)
 	if err != nil {
-		return errors.Wrap(err, "Open")
+		return errors.Wrap(err, "doOpen")
 	}
 	s.client = c
 	s.opened = true
@@ -117,7 +126,7 @@ func (s *Service) TransportForceOpen() error {
 	if s.opened {
 		return nil
 	}
-	return s.Open()
+	return s.doOpen()
 }
 
 func (s *Service) Status() string {

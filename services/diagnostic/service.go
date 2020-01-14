@@ -78,6 +78,12 @@ func (s *Service) NewOpenProtocolHandler() *OpenProtocolHandler {
 	}
 }
 
+func (s *Service) NewTransportHandler() *TransportHandler {
+	return &TransportHandler{
+		l: s.Logger.With(String("service", "transport")),
+	}
+}
+
 func (s *Service) NewControllerHandler() *ControllerHandler {
 	return &ControllerHandler{
 		l: s.Logger.With(String("service", "Controller")),
@@ -129,6 +135,12 @@ func (s *Service) NewScannerHandler() *ScannerHandler {
 func (s *Service) NewBrokerHandler() *BrokerHandler {
 	return &BrokerHandler{
 		l: s.Logger.With(String("service", "broker")),
+	}
+}
+
+func (s *Service) NewGRPCHandler() *BrokerHandler {
+	return &BrokerHandler{
+		l: s.Logger.With(String("service", "grpc")),
 	}
 }
 

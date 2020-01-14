@@ -3,6 +3,7 @@ package aiis
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/masami10/rush/services/transport"
 
 	"github.com/kataras/iris/core/errors"
 )
@@ -22,7 +23,7 @@ type ITransport interface {
 	SetServiceStatusHandler(handler ServiceStatusHandler)
 
 	// 设置接收结果上传反馈回调
-	SetResultPatchHandler(handler ResultPatchHandler)
+	SetResultPatchHandler(toolSN string, handler ResultPatchHandler) error
 
 	// 启动
 	Start() error
@@ -70,8 +71,22 @@ func (s *BaseTransport) SetServiceStatusHandler(handler ServiceStatusHandler) {
 	s.handlerServiceStatus = handler
 }
 
-func (s *BaseTransport) SetResultPatchHandler(handler ResultPatchHandler) {
-	s.handlerResultPatch = handler
+func (s *BaseTransport) SetResultPatchHandler(toolSN string, handler ResultPatchHandler) error {
+	trans := s.ITransportService
+	if trans == nil {
+		return errors.New("trans Is Empty")
+	}
+	subject := fmt.Sprintf(SubjectResultsResp, toolSN)
+	fn := func(msg *transport.Message) ([]byte, error) {
+		var result ResultPatch
+		data := msg.Body
+		if err := json.Unmarshal(data, &result); err != nil {
+			return nil, err
+		}
+		handler(result)
+		return nil, nil
+	}
+	return trans.OnMessage(subject, fn)
 }
 
 func (s *BaseTransport) SetStatusHandler(handler StatusHandler) {
