@@ -109,35 +109,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       return this._productCode;
     }
 
-    * _onPreviousStep() {
-      try {
-        const wStep = this.workingStep;
-        yield call([wStep, wStep.clearData]);
-        if (this._workingIndex - 1 >= 0) {
-          this._workingIndex -= 1;
-          const nextStep = this.workingStep;
-          yield call([nextStep, nextStep.clearData]);
-          return STEP_STATUS.READY;
-        }
-      } catch (e) {
-        CommonLog.lError(e);
-      }
-    }
-
-    * _onNextStep() {
-      try {
-        const mode = yield select(s => s.workCenterMode);
-        if (mode === workModes.normWorkCenterMode) {
-          this._workingIndex += 1;
-          yield put(orderActions.jumpToStep(this._workingIndex));
-        }
-      } catch (e) {
-        CommonLog.lError(e, { at: 'order._onNextStep' });
-        throw(e);
-      }
-
-    }
-
     _statusTasks = {
       * [ORDER_STATUS.TODO](config) {
         try {
@@ -322,6 +293,40 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
         (step: IWorkStep) => step.status === STEP_STATUS.FAIL
       );
       return ((ret: any): Array<IWorkStep>);
+    }
+
+    * _onPreviousStep() {
+      try {
+        const wStep = this.workingStep;
+        yield call([wStep, wStep.clearData]);
+        const mode = yield select(s => s.workCenterMode);
+        if (this._workingIndex - 1 >= 0) {
+          if (mode === workModes.normWorkCenterMode) {
+            this._workingIndex -= 1;
+            yield put(orderActions.jumpToStep(this._workingIndex));
+            const nextStep = this.workingStep;
+            yield call([nextStep, nextStep.clearData]);
+          }
+          return STEP_STATUS.READY;
+        }
+        return null;
+      } catch (e) {
+        CommonLog.lError(e);
+      }
+    }
+
+    * _onNextStep() {
+      try {
+        const mode = yield select(s => s.workCenterMode);
+        if (mode === workModes.normWorkCenterMode) {
+          this._workingIndex += 1;
+          yield put(orderActions.jumpToStep(this._workingIndex));
+        }
+      } catch (e) {
+        CommonLog.lError(e, { at: 'order._onNextStep' });
+        throw(e);
+      }
+
     }
 
     clearData() {

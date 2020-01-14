@@ -35,7 +35,9 @@ const mapState = (state, props) => {
     isPending: oSel.isPending(vOrder),
     isCancel: oSel.isCancel(vOrder),
     pendingable: oSel.pendingable(vOrder),
-    cancelable: oSel.cancelable(vOrder)
+    cancelable: oSel.cancelable(vOrder),
+    canReportFinish: oSel.canReportFinish(vOrder) || false,
+    reportFinishEnabled: state.setting.systemSettings.reportFinish
   };
 };
 
@@ -48,7 +50,8 @@ const mapDispatch = {
   pendingOrder: orderActions.pendingOrder,
   tryWorkOn: orderActions.tryWorkOn,
   showDialog: dialogActions.dialogShow,
-  viewModel: modelViewerActions.open
+  viewModel: modelViewerActions.open,
+  reportFinish: orderActions.reportFinish
 };
 
 /* eslint-disable flowtype/no-weak-types */
@@ -93,7 +96,10 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                                                            cancelable,
                                                            tryWorkOn,
                                                            viewModel,
-                                                           showDialog
+                                                           showDialog,
+                                                           reportFinish,
+                                                           canReportFinish,
+                                                           reportFinishEnabled
                                                          }: ButtonsContainerProps) => {
   const classes = makeStyles(styles.buttonsContainer)();
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
@@ -218,6 +224,13 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
               </Dialog>
             </React.Fragment>
           ) : null}
+          {canReportFinish && reportFinishEnabled ? <Button
+            color="warning"
+            type="button"
+            onClick={() => reportFinish(viewingOrder)}
+          >
+            {t(trans.reportFinish)}
+          </Button> : null}
           <Button
             color="primary"
             type="button"

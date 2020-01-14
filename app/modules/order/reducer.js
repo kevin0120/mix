@@ -103,15 +103,15 @@ const orderReducer: {
     };
   },
   [ORDER.STEP.DO_PREVIOUS](state) {
-    const wOrder = workingOrder(state);
-    const newIndex = limitIndex(wOrder, workingIndex(wOrder) - 1);
-    const vIndex =
-      workingStep(wOrder) === viewingStep(state)
-        ? newIndex
-        : viewingIndex(state);
+    // const wOrder = workingOrder(state);
+    // const newIndex = limitIndex(wOrder, workingIndex(wOrder) - 1);
+    // const vIndex =
+    //   workingStep(wOrder) === viewingStep(state)
+    //     ? newIndex
+    //     : viewingIndex(state);
     return {
       ...state,
-      viewingIndex: vIndex
+      // viewingIndex: vIndex
     };
   },
   [ORDER.CLEAR_DATA](state, { order }) {

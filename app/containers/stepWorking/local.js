@@ -16,6 +16,7 @@ export const translation = {
   name: 'name',
   desc: 'desc',
   action: 'action',
+  reportFinish:'reportFinish',
   ...stepTypeKeys
 };
 
@@ -44,7 +45,8 @@ const trans = [
     [translation.text]: '文字',
     [translation.passFail]: '检测',
     [translation.measure]: '测量',
-    [translation.video]: '视频'
+    [translation.video]: '视频',
+    [translation.reportFinish]: '报工'
   }),
   makeLocalBundle(lng.en, 'stepWorking', {
     skip: 'skip',
@@ -69,7 +71,8 @@ const trans = [
     [translation.text]: 'text',
     [translation.passFail]: 'pass/fail',
     [translation.measure]: 'measure',
-    [translation.video]: 'video'
+    [translation.video]: 'video',
+    [translation.reportFinish]: 'Report finish'
   })
 ];
 

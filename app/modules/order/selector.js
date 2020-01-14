@@ -80,3 +80,9 @@ export const cancelable = (order: ?IOrder): boolean =>
     (order?.status !== ORDER_STATUS.CANCEL &&
       order?.status !== ORDER_STATUS.DONE)) ||
   false;
+
+export const canReportFinish = (order: ?IOrder) =>
+  order && (
+    order.status === ORDER_STATUS.DONE
+    || order.status === ORDER_STATUS.FAIL
+  );
