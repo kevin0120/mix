@@ -1,22 +1,10 @@
 package aiis
 
-const (
-	TransportTypeBroker = "broker"
-	TransportTypeGrpc   = "grpc"
-)
+import (
+	"encoding/json"
+	"fmt"
 
-const (
-	TransportStatusOnline  = "online"
-	TransportStatusOffline = "offline"
-)
-
-const (
-	TransportMethodResult        = "method_result"
-	TransportMethodResultPatch   = "method_result_patch"
-	TransportMethodServiceStatus = "method_service_status"
-	//TransportMethodWorkorder     = "method_workorder"
-	//TransportMethodOrderStart    = "method_order_start"
-	//TransportMethodOrderFinish   = "method_order_finish"
+	"github.com/kataras/iris/core/errors"
 )
 
 type ServiceStatusHandler func(status ServiceStatus)
@@ -47,10 +35,35 @@ type ITransport interface {
 }
 
 type BaseTransport struct {
-	ITransport
+	ITransportService
 	handlerServiceStatus ServiceStatusHandler
 	handlerResultPatch   ResultPatchHandler
 	handlerStatus        StatusHandler
+}
+
+func (s *BaseTransport) Start() error {
+	return nil
+}
+
+func (s *BaseTransport) Stop() error {
+	return nil
+}
+
+func (s *BaseTransport) Status() string {
+	return s.ITransportService.Status()
+}
+
+func (s *BaseTransport) SendResult(result *PublishResult) error {
+	trans := s.ITransportService
+	if trans == nil {
+		return errors.New("trans Is Empty")
+	}
+	data, _ := json.Marshal(TransportPayload{
+		Method: TransportMethodResult,
+		Data:   result,
+	})
+
+	return trans.SendMessage(fmt.Sprintf(SubjectResults, result.ToolSN), data)
 }
 
 func (s *BaseTransport) SetServiceStatusHandler(handler ServiceStatusHandler) {
@@ -63,4 +76,10 @@ func (s *BaseTransport) SetResultPatchHandler(handler ResultPatchHandler) {
 
 func (s *BaseTransport) SetStatusHandler(handler StatusHandler) {
 	s.handlerStatus = handler
+}
+
+func NewAIISBaseTransport(t ITransportService) *BaseTransport {
+	s := &BaseTransport{}
+	s.ITransportService = t
+	return s
 }

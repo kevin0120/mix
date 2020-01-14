@@ -39,15 +39,15 @@ func (s *Service) msgHandler(subject string) transport.OnMsgHandler {
 }
 
 func newGRPCTransport(config Config) transport.Transport {
-	options := microTransport.Addrs(config.addr)
+	options := microTransport.Addrs(config.Address)
 	return microTransport.NewTransport(options)
 }
 
 func NewService(config Config, d Diagnostic) *Service {
 	s := &Service{
-		addr:        config.addr,
-		workers:     config.workers,
-		exiting:     make(chan chan struct{}, config.workers),
+		addr:        config.Address,
+		workers:     config.Workers,
+		exiting:     make(chan chan struct{}, config.Workers),
 		diag:        d,
 		msgs:        make(chan transport.Message, 1024),
 		respChannel: make(chan RespStruct, 1024),

@@ -8,6 +8,20 @@ logging:
   level: DEBUG
   max_age: 3000h
   rotate: 24h
+broker:
+  connect-urls:
+    - nats://127.0.0.1:4222
+  enable: false
+  provider: nats
+  connect-options:
+    name: Dummy Server
+    token: Dummy Token
+  name: 31a0def7-785c-4f43-ba19-1736a2e8b47c
+grpc:
+  address: 127.0.0.1:9093
+  workers: 2
+transport:
+  provider: grpc
 httpd:
   bind-address: :8082
   log-enabled: true
@@ -33,43 +47,30 @@ minio:
   secure: false
   reupload_interval: 1s
 aiis:
-  urls:
-  - http://127.0.0.1:9092
-  headers:
-    Content-Type: application/json
-  result_push_url: /aiis/v1/operation.results/%d
-  push_method: PUT
-  timeout: 6s
-  push_interval: 5s
-  max_retry: 3
-  ws_result_route: /aiis/v1/ws/results
-  result_upload_inteval: 2s
-  grpc_server: 127.0.0.1:9093
+  enable: true
+  timeout: 5s
+  ws_result_route: ws://127.0.0.1/aiis/v1/ws/results
+  result_upload_inteval: 1h0m0s
   keep_alive: 3s
-  recheck: false
-  transport_type: grpc
+  recheck: true
 odoo:
   urls:
-  - http://127.0.0.1:8069
-  timeout: 8s
+    - http://127.0.0.1:8069
+  timeout: 10ms
   interval: 1s
   max_retry: 3
-  workers: 8
+  workers: 1
   endpoints:
-  - name: getWorkorder
-    path: /ts002/workorders?code=%s&limit=1&order=production_date
-    headers:
-    method: GET
-  - name: tryCreateMaintenance
-    path: /api/v1/maintenance/requests/try
-    headers:
-    method: POST
+    - name: test
+      path: /api/v1/test
+      headers:
+        Content-Type: application/json
+      method: GET
 
 websocket:
   route: /rush/v1/ws
   read_buf_size: 4096
   write_buf_size: 4096
-  workcenter: TA-01L
 
 storage:
   db_url: 127.0.0.1:5432
@@ -157,15 +158,3 @@ tightening_device:
 #      protocol: OpenProtocol
 #      endpoint: tcp://192.168.0.222:4545
 #      sn: 0001
-
-
-broker:
-  enable: false
-  connect-urls:
-    - nats://192.168.4.203:4222
-    - nats://192.168.4.203:4223
-    - nats://192.168.4.203:4224
-  connect-options:
-    name: Dummy Server
-    token: Dummy Token
-  provider: nats

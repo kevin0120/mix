@@ -1,14 +1,18 @@
 package grpc
 
+const (
+	DefaultGRPCServerAddr = "127.0.0.1:9093"
+)
+
 type Config struct {
-	addr    string `yaml:"address"`
-	workers int    `yaml:"workers"`
+	Address string `yaml:"address"`
+	Workers int    `yaml:"workers"`
 }
 
 func NewConfig() Config {
 	return Config{
-		addr:    "localhost:8082",
-		workers: 2,
+		Address: DefaultGRPCServerAddr,
+		Workers: 2,
 	}
 }
 

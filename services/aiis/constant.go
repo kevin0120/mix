@@ -1,0 +1,15 @@
+package aiis
+
+const (
+	SubjectResults     = "saturn.results.%s"
+	SubjectResultsResp = "saturn.results.%s.response"
+)
+
+const (
+	TransportMethodResult        = "method_result"
+	TransportMethodResultPatch   = "method_result_patch"
+	TransportMethodServiceStatus = "method_service_status"
+	//TransportMethodWorkorder     = "method_workorder"
+	//TransportMethodOrderStart    = "method_order_start"
+	//TransportMethodOrderFinish   = "method_order_finish"
+)

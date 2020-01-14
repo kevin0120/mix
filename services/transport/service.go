@@ -8,14 +8,12 @@ type Service struct {
 	ITransportService
 	diag     Diagnostic
 	provider string
-	addrs    []string
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 	s := &Service{
 		diag:     d,
 		provider: c.Provider,
-		addrs:    c.Address,
 	}
 	return s
 }
@@ -34,5 +32,13 @@ func (s *Service) BindTransportByProvider(ss IServer) error {
 		err := errors.Errorf("Provider: %s Is Not Support Right Now", s.provider)
 		s.diag.Error("BindTransportByProvider", err)
 	}
+	return nil
+}
+
+func (s *Service) Open() error {
+	return nil
+}
+
+func (s *Service) Close() error {
 	return nil
 }

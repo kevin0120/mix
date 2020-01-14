@@ -12,7 +12,6 @@ type Config struct {
 	ResultUploadInteval toml.Duration `yaml:"result_upload_inteval"`
 	KeepAlive           toml.Duration `yaml:"keep_alive"`
 	Recheck             bool          `yaml:"recheck"`
-	TransportType       string        `yaml:"transport_type"`
 }
 
 func NewConfig() Config {
@@ -23,7 +22,6 @@ func NewConfig() Config {
 		ResultUploadInteval: toml.Duration(time.Duration(1 * time.Hour)),
 		KeepAlive:           toml.Duration(time.Second * 3),
 		Recheck:             true,
-		TransportType:       TransportTypeGrpc,
 	}
 
 	return c

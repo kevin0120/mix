@@ -44,19 +44,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IT
 }
 
 func (s *Service) setupTransport(bs ITransportService, dispatcherBus Dispatcher) {
-	switch s.Config().TransportType {
-	//case TRANSPORT_TYPE_GRPC:
-	//	s.transport = NewGRPCClient(s.diag, s.Config())
-	//
-	//case TRANSPORT_TYPE_BROKER:
-	//	s.transport = NewBrokerClient(s.diag, bs, dispatcherBus)
-	//
-	//default:
-	//	s.transport = NewGRPCClient(s.diag, s.Config())
-	}
-	if s.transport == nil {
-		return
-	}
+	s.transport = NewAIISBaseTransport(bs)
 
 	s.transport.SetResultPatchHandler(s.onResultPatch)
 	s.transport.SetServiceStatusHandler(s.onServiceStatus)

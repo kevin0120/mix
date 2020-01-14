@@ -36,6 +36,7 @@ func NewConfig() Config {
 		Timeout:   toml.Duration(time.Millisecond * 10),
 		Interval:  toml.Duration(time.Second * 1),
 		MaxRetry:  3,
+		Workers:   1,
 		Endpoints: []EndpointConf{ec},
 	}
 
