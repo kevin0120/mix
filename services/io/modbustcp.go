@@ -80,7 +80,7 @@ func (s *ModbusTcp) connect() {
 
 func (s *ModbusTcp) read() {
 	for {
-		_, _, err := s.Read()
+		_, _, err := s.IORead()
 		if err != nil {
 			// offline
 			s.status.Store(IoStatusOffline)
@@ -106,7 +106,7 @@ func (s *ModbusTcp) formatIO(results []byte, num uint16) string {
 	return rt
 }
 
-func (s *ModbusTcp) Read() (string, string, error) {
+func (s *ModbusTcp) IORead() (string, string, error) {
 	client := s.client
 	var err error
 	var result []byte
@@ -156,7 +156,7 @@ func (s *ModbusTcp) Read() (string, string, error) {
 	return inputs, outputs, nil
 }
 
-func (s *ModbusTcp) Write(index uint16, status uint16) error {
+func (s *ModbusTcp) IOWrite(index uint16, status uint16) error {
 	if s.Status() == IoStatusOffline {
 		return errors.New(IoStatusOffline)
 	}
@@ -178,4 +178,8 @@ func (s *ModbusTcp) Write(index uint16, status uint16) error {
 	}
 
 	return err
+}
+
+func (s *ModbusTcp) SetIONotify(notify IONotify) {
+	s.notify = notify
 }

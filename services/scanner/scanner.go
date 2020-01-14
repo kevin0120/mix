@@ -229,7 +229,7 @@ func (s *Scanner) _recv() {
 	for {
 		n, err := di.Read(buf)
 		if err != nil {
-			s.diag.Error("Read Fail", err)
+			s.diag.Error("IORead Fail", err)
 			// tightening_device offline
 			s.BaseDevice.OnDeviceStatus(device.BaseDeviceStatusOffline)
 			return

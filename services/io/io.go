@@ -35,6 +35,8 @@ func NewIOModule(flashInterval time.Duration, conf ConfigIO, d Diagnostic, servi
 	return s
 }
 
+func (s *IOModule) SetIONotify(notify IONotify) {}
+
 func (s *IOModule) SetSerialNumber(sn string) {
 	s.BaseDevice.SetSerialNumber(sn)
 	s.config.SN = sn
@@ -91,11 +93,11 @@ func (s *IOModule) Status() string {
 	return s.client.Status()
 }
 
-func (s *IOModule) Read() (string, string, error) {
-	return s.client.Read()
+func (s *IOModule) IORead() (string, string, error) {
+	return s.client.IORead()
 }
 
-func (s *IOModule) Write(index uint16, status uint16) error {
+func (s *IOModule) IOWrite(index uint16, status uint16) error {
 	switch status {
 	case OutputStatusOff:
 		// 从flash列表删除
@@ -106,7 +108,7 @@ func (s *IOModule) Write(index uint16, status uint16) error {
 		return nil
 	}
 
-	return s.client.Write(index, status)
+	return s.client.IOWrite(index, status)
 }
 
 func (s *IOModule) DeviceType() string {
@@ -118,7 +120,7 @@ func (s *IOModule) Children() map[string]device.IBaseDevice {
 }
 
 func (s *IOModule) Data() interface{} {
-	inputs, outputs, err := s.Read()
+	inputs, outputs, err := s.IORead()
 	if err != nil {
 		return nil
 	}
@@ -172,9 +174,9 @@ func (s *IOModule) flashProc() {
 
 			flashes := s.getFlashes()
 			for _, v := range flashes {
-				err := s.Write(v, uint16(status))
+				err := s.IOWrite(v, uint16(status))
 				if err != nil {
-					s.diag.Error("Write Failed", err)
+					s.diag.Error("IOWrite Failed", err)
 				}
 			}
 

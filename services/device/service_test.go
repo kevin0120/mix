@@ -1,4 +1,4 @@
-package io
+package device
 
 import (
 	"fmt"
@@ -32,19 +32,13 @@ func wsTest(msg *wsnotify.WSMsg) {
 	fmt.Println(resp.StatusCode())
 }
 
-func ioSet(sn string, index uint16, status uint16) {
+func deviceStatus() {
 	wsTest(&wsnotify.WSMsg{
 		SN:   0,
-		Type: wsnotify.WS_IO_SET,
-		Data: IoSet{
-			SN:     sn,
-			Index:  index,
-			Status: status,
-		},
+		Type: wsnotify.WS_DEVICE_STATUS,
 	})
 }
 
 func Test_SetPSet(t *testing.T) {
-
-	ioSet("2_io", 0, OutputStatusOn)
+	deviceStatus()
 }

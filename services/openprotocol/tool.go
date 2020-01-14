@@ -268,7 +268,7 @@ func (s *TighteningTool) TraceSet(str string) error {
 //	s := fmt.Sprintf("%03d", pset)
 //	ide := GeneratePackage(MID_0020_PSET_BATCH_RESET, rev, "", "", "", s)
 //
-//	c.Write([]byte(ide))
+//	c.IOWrite([]byte(ide))
 //
 //	return nil
 //}

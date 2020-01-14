@@ -14,6 +14,8 @@ const (
 	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported "
 	TIGHTENING_ERR_UNKNOWN       = "Error Unknown "
 	TIGHTENING_ERR_TIMEOUT       = "Timeout "
+
+	TIGHTENING_CONTROLLER_IO_SN_FORMAT = "%s_io"
 )
 
 const (
@@ -29,12 +31,6 @@ const (
 	STRATEGY_ADW = "ADW"
 	STRATEGY_LN  = "LN"
 	STRATEGY_AK2 = "AK2"
-)
-
-const (
-	IO_STATUS_ON       = "on"
-	IO_STATUS_OFF      = "off"
-	IO_STATUS_FLASHING = "flashing"
 )
 
 // type

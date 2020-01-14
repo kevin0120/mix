@@ -52,3 +52,15 @@ func (c *WrenchController) GetToolViaChannel(channel int) (tightening_device.ITi
 
 	return nil, errors.New("WrenchController.GetToolViaChannel: Tool Not Found")
 }
+
+func (c *WrenchController) HandleStatus(sn string, status string) {
+	c.TighteningController.HandleStatus(sn, status)
+
+	for _, tool := range c.Children() {
+		tool.(*openprotocol.TighteningTool).UpdateStatus(status)
+	}
+}
+
+func (c *WrenchController) CreateIO() tightening_device.ITighteningIO {
+	return nil
+}

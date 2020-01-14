@@ -120,6 +120,12 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendDeviceService()
 
+	s.AppendScannerService()
+
+	s.AppendIOService()
+
+	s.AppendReaderService()
+
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
 
 	s.appendOpenProtocolService()
@@ -131,12 +137,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendOdooService()
 
 	s.appendHMIService()
-
-	s.AppendScannerService()
-
-	s.AppendIOService()
-
-	s.AppendReaderService()
 
 	s.appendHTTPDService()
 
@@ -248,7 +248,7 @@ func (s *Server) appendTighteningDeviceService() error {
 	c := s.config.TighteningDevice
 	d := s.DiagService.NewTighteningDeviceHandler()
 	srv, err := tightening_device.NewService(c, d,
-		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService, s.StorageServie)
+		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService, s.StorageServie, s.IOService)
 
 	if err != nil {
 		return errors.Wrap(err, "append tightening_device service fail")

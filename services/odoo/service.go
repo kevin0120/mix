@@ -240,8 +240,6 @@ func (s *Service) taskSaveWorkorders() {
 			orderOut, err := s.handleSaveWorkorders(payload)
 			if err != nil {
 				s.diag.Error("Save Workorder Failed", err)
-				body, _ := json.Marshal(wsnotify.GenerateMessage(0, wsnotify.WS_TYPE_ERROR, err))
-				s.WS.WSSend(wsnotify.WS_EVENT_ERROR, string(body))
 				break
 			}
 

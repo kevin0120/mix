@@ -22,7 +22,7 @@ const (
 
 type IClientHandler interface {
 	handleMsg(pkg *handlerPkg) error
-	handleStatus(sn string, status string)
+	HandleStatus(sn string, status string)
 	GetVendorMid(mid string) (string, error)
 }
 
@@ -168,7 +168,7 @@ func (c *clientContext) manage() {
 
 			err := c.sockClient.Write(v)
 			if err != nil {
-				c.diag.Error("Write Data Fail", err)
+				c.diag.Error("IOWrite Data Fail", err)
 			} else {
 				c.updateKeepAliveDeadLine()
 			}
@@ -196,16 +196,16 @@ func (c *clientContext) Read(conn net.Conn) {
 
 	buf := make([]byte, BufferSize)
 	for {
-		//if err := conn.SetReadDeadline(time.Now().Add(c.params.KeepAlivePeriod * time.Duration(c.params.MaxKeepAliveCheck))); err != nil {
-		//	c.diag.Error("SetReadDeadline Failed ", err)
-		//	break
-		//}
+		if err := conn.SetReadDeadline(time.Now().Add(c.params.KeepAlivePeriod * time.Duration(c.params.MaxKeepAliveCheck))); err != nil {
+			c.diag.Error("SetReadDeadline Failed ", err)
+			break
+		}
 
 		n, err := conn.Read(buf)
 		if err != nil {
-			c.diag.Error("Read Failed ", err)
+			c.diag.Error("IORead Failed ", err)
 			c.handleStatus(device.BaseDeviceStatusOffline)
-			c.clientHandler.handleStatus(c.sn, device.BaseDeviceStatusOffline)
+			c.clientHandler.HandleStatus(c.sn, device.BaseDeviceStatusOffline)
 			break
 		}
 
@@ -293,7 +293,7 @@ func (c *clientContext) connect() {
 	}
 
 	c.handleStatus(device.BaseDeviceStatusOnline)
-	c.clientHandler.handleStatus(c.sn, device.BaseDeviceStatusOnline)
+	c.clientHandler.HandleStatus(c.sn, device.BaseDeviceStatusOnline)
 	if err := c.startComm(); err != nil {
 		c.diag.Error(fmt.Sprintf("Start Comm Failed: %s", c.sn), err)
 	}
@@ -305,7 +305,7 @@ func (c *clientContext) startComm() error {
 		return err
 	}
 
-	if reply.(string) != request_errors["00"] {
+	if reply.(string) != request_errors["00"] && reply.(string) != request_errors["96"] {
 		return errors.New(reply.(string))
 	}
 

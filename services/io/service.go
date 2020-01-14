@@ -13,7 +13,7 @@ import (
 
 type Service struct {
 	configValue   atomic.Value
-	ios           map[string]*IOModule
+	ios           map[string]IO
 	diag          Diagnostic
 	dispatcherBus Dispatcher
 	deviceService IDeviceService
@@ -29,12 +29,13 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ds IDeviceService) *Servi
 		diag:          d,
 		dispatcherBus: dp,
 		deviceService: ds,
-		ios:           map[string]*IOModule{},
+		ios:           map[string]IO{},
 	}
 
 	s.configValue.Store(c)
 
 	s.setupWSRequestHandlers()
+	s.loadModules()
 
 	return s
 }
@@ -48,8 +49,8 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	s.initModules()
 	s.initDispatcherRegisters()
+	s.initModules()
 
 	return nil
 }
@@ -82,18 +83,30 @@ func (s *Service) setupWSRequestHandlers() {
 	})
 }
 
-func (s *Service) initModules() {
+func (s *Service) AddModule(sn string, io IO) {
+	if io == nil {
+		return
+	}
+
+	io.SetIONotify(s)
+	s.ios[sn] = io
+	s.deviceService.AddDevice(sn, io.(device.IBaseDevice))
+}
+
+func (s *Service) loadModules() {
 	cfgs := s.config().IOS
 	for _, v := range cfgs {
 		io := NewIOModule(time.Duration(s.config().FlashInteval), v, s.diag, s)
+		s.AddModule(v.SN, io)
+	}
+}
 
-		s.deviceService.AddDevice(v.SN, io)
-
+func (s *Service) initModules() {
+	for _, io := range s.ios {
 		err := io.Start()
 		if err != nil {
 			s.diag.Error("start io failed", err)
 		}
-		s.ios[v.SN] = io
 	}
 }
 
@@ -103,7 +116,7 @@ func (s *Service) Read(sn string) (string, string, error) {
 		return "", "", err
 	}
 
-	return m.Read()
+	return m.IORead()
 }
 
 func (s *Service) Write(sn string, index uint16, status uint16) error {
@@ -112,10 +125,10 @@ func (s *Service) Write(sn string, index uint16, status uint16) error {
 		return err
 	}
 
-	return m.Write(index, status)
+	return m.IOWrite(index, status)
 }
 
-func (s *Service) getIO(sn string) (*IOModule, error) {
+func (s *Service) getIO(sn string) (IO, error) {
 	m := s.ios[sn]
 	if m == nil {
 		return nil, errors.New("not found")

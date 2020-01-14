@@ -3,6 +3,7 @@ package desoutter
 import (
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/openprotocol"
+	"github.com/masami10/rush/services/tightening_device"
 )
 
 type CVI2Controller struct {
@@ -42,3 +43,6 @@ func (c *CVI2Controller) GetVendorModel() map[string]interface{} {
 }
 
 // 可重写所有TighteningController中的方法
+func (c *CVI2Controller) CreateIO() tightening_device.ITighteningIO {
+	return nil
+}

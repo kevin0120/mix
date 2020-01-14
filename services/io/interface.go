@@ -24,12 +24,17 @@ type IONotify interface {
 	OnChangeIOStatus(sn string, t string, status string)
 }
 
+type BaseIO interface {
+	IORead() (string, string, error)
+	IOWrite(uint16, uint16) error
+	SetIONotify(notify IONotify)
+}
+
 type IO interface {
+	BaseIO
 	Status() string
 	Start() error
 	Stop() error
-	Read() (string, string, error)
-	Write(uint16, uint16) error
 }
 
 type IDeviceService = device.IDeviceService

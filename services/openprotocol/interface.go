@@ -56,5 +56,7 @@ type IOpenProtocolController interface {
 
 	OpenProtocolParams() *OpenProtocolParams
 
+	HandleStatus(sn string, status string)
+
 	New() IOpenProtocolController
 }

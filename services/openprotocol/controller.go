@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
@@ -40,6 +41,15 @@ type TighteningController struct {
 	mtxStatus             sync.Mutex
 
 	instance IOpenProtocolController
+	ioNotify io.IONotify
+	opened   atomic.Bool
+
+	internalIO tightening_device.ITighteningIO
+}
+
+func (c *TighteningController) CreateIO() tightening_device.ITighteningIO {
+	c.internalIO = NewTighteningIO(c)
+	return c.internalIO
 }
 
 func (c *TighteningController) createToolsByConfig() error {
@@ -61,6 +71,7 @@ func (c *TighteningController) createToolsByConfig() error {
 
 func (c *TighteningController) initController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) {
 
+	c.opened.Store(false)
 	c.dispatcherMap = map[string]dispatcherbus.DispatcherMap{}
 	c.sockClients = map[string]*clientContext{}
 	c.isGlobalConn = false
@@ -100,7 +111,7 @@ func (c *TighteningController) initClients(deviceConfig *tightening_device.Tight
 			c.isGlobalConn = false
 		}
 
-		client := newClientContext(endpoint, d, c, sn, c.getInstance().OpenProtocolParams())
+		client := newClientContext(endpoint, d, c.getInstance().(IClientHandler), sn, c.getInstance().OpenProtocolParams())
 		c.sockClients[sn] = client
 
 		if c.isGlobalConn {
@@ -270,6 +281,11 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 }
 
 func (c *TighteningController) Start() error {
+	if c.opened.Load() {
+		return nil
+	}
+	c.opened.Store(true)
+
 	for _, v := range c.deviceConf.Tools {
 		_ = c.ProtocolService.storageService.UpdateTool(&storage.Tools{
 			Serial: v.SN,
@@ -303,6 +319,11 @@ func (c *TighteningController) shutdownClients() {
 }
 
 func (c *TighteningController) Stop() error {
+	if !c.opened.Load() {
+		return nil
+	}
+	c.opened.Store(false)
+
 	// 停止客户端
 	c.shutdownClients()
 
@@ -322,27 +343,23 @@ func (c *TighteningController) getToolViaSerialNumber(toolSN string) (tightening
 	return tool.(tightening_device.ITighteningTool), nil
 }
 
-func (c *TighteningController) SetOutput(outputs []tightening_device.ControllerOutput) error {
-	if len(outputs) == 0 {
-		return errors.New("Output List Is Required")
-	}
+func (c *TighteningController) IOWrite(index uint16, status uint16) error {
 
 	strIo := ""
 	for i := 0; i < 10; i++ {
-		io, err := c.findIOByNo(i, outputs)
-		if err != nil {
-			strIo += "3"
-		} else {
-			switch io.Status {
-			case tightening_device.IO_STATUS_OFF:
+		if i == int(index) {
+			switch status {
+			case io.OutputStatusOff:
 				strIo += "0"
 
-			case tightening_device.IO_STATUS_ON:
+			case io.OutputStatusOn:
 				strIo += "1"
 
-			case tightening_device.IO_STATUS_FLASHING:
+			case io.OutputStatusFlash:
 				strIo += "2"
 			}
+		} else {
+			strIo += "3"
 		}
 	}
 
@@ -356,6 +373,14 @@ func (c *TighteningController) SetOutput(outputs []tightening_device.ControllerO
 	}
 
 	return nil
+}
+
+func (c *TighteningController) IORead() (string, string, error) {
+	return "", c.inputs, nil
+}
+
+func (c *TighteningController) SetIONotify(notify io.IONotify) {
+	c.ioNotify = notify
 }
 
 func (c *TighteningController) Protocol() string {
@@ -375,7 +400,7 @@ func (c *TighteningController) handlerOldResults() error {
 	return nil
 }
 
-func (c *TighteningController) handleStatus(sn string, status string) {
+func (c *TighteningController) HandleStatus(sn string, status string) {
 	c.mtxStatus.Lock()
 	defer c.mtxStatus.Unlock()
 
@@ -384,7 +409,8 @@ func (c *TighteningController) handleStatus(sn string, status string) {
 	}
 	c.UpdateStatus(status)
 
-	c.diag.Info(fmt.Sprintf("OpenProtocol handleStatus Model:%s SN:%s %s\n", c.Model(), sn, status))
+	c.NotifyIOStatus(status)
+	c.diag.Info(fmt.Sprintf("OpenProtocol HandleStatus Model:%s SN:%s %s\n", c.Model(), sn, status))
 	ss := []device.Status{
 		{
 			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
@@ -613,4 +639,24 @@ func (c *TighteningController) OpenProtocolParams() *OpenProtocolParams {
 		MaxReplyTime:      3 * time.Second,
 		KeepAlivePeriod:   10 * time.Second,
 	}
+}
+
+func (c *TighteningController) ioSerialNumber() string {
+	return fmt.Sprintf(tightening_device.TIGHTENING_CONTROLLER_IO_SN_FORMAT, c.SerialNumber())
+}
+
+func (c *TighteningController) NotifyIOStatus(status string) {
+	if c.ioNotify == nil {
+		return
+	}
+
+	c.ioNotify.OnStatus(c.ioSerialNumber(), status)
+}
+
+func (c *TighteningController) NotifyIOContact(t string, status string) {
+	if c.ioNotify == nil {
+		return
+	}
+
+	c.ioNotify.OnChangeIOStatus(c.ioSerialNumber(), t, status)
 }

@@ -195,7 +195,7 @@ func (c *TighteningController) manage() {
 			}
 			err := c.w.Write([]byte(v))
 			if err != nil {
-				c.Srv.diag.Error("Write data fail", err)
+				c.Srv.diag.Error("IOWrite data fail", err)
 			} else {
 				c.updateKeepAliveDeadLine()
 			}
@@ -265,9 +265,9 @@ func (c *TighteningController) Write(buf []byte, seq uint32) {
 //
 //	for {
 //		v := <-c.buffer
-//		err := c.w.Write([]byte(v))
+//		err := c.w.IOWrite([]byte(v))
 //		if err != nil {
-//			c.ProtocolService.diag.Error("Write data fail", err)
+//			c.ProtocolService.diag.Error("IOWrite data fail", err)
 //			break
 //		}
 //

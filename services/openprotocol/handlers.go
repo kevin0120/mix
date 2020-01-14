@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils/ascii"
@@ -250,8 +251,7 @@ func handleMid0211InputMonitor(c *TighteningController, pkg *handlerPkg) error {
 
 	c.inputs = inputs.Inputs
 
-	// 分发控制器输入状态
-	c.doDispatch(dispatcherbus.DispatcherIO, inputs.ToIOInput())
+	c.NotifyIOContact(io.IoTypeInput, c.inputs)
 
 	return nil
 }

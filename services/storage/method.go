@@ -3,7 +3,6 @@ package storage
 import (
 	"encoding/json"
 	"github.com/go-xorm/xorm"
-	"github.com/masami10/rush/typeDef"
 	"github.com/pkg/errors"
 )
 

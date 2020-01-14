@@ -108,7 +108,7 @@ func (sw *SocketWriter) setKeepAlive(c net.Conn) error {
 	return tcpc.SetKeepAlivePeriod(sw.KeepAlivePeriod)
 }
 
-// Write writes the given metrics to the destination.
+// IOWrite writes the given metrics to the destination.
 // If an error is encountered, it is up to the caller to retry the same write again later.
 // Not parallel safe.
 func (sw *SocketWriter) Write(buf []byte) error {

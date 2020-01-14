@@ -116,7 +116,7 @@ func (p *Service) Write(sn string, buf []byte) error {
 	//c := v.(*TighteningController)
 	//
 	//s := c.Sequence()
-	//c.Write(buf, s)
+	//c.IOWrite(buf, s)
 	return nil
 }
 
