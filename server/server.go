@@ -42,10 +42,7 @@ type Diagnostic interface {
 }
 
 // Service represents a service attached to the server.
-type Service interface {
-	Open() error
-	Close() error
-}
+type Service = utils.ICommonService
 
 type Server struct {
 	dataDir  string
@@ -151,21 +148,29 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendReaderService()
 
-	s.appendTransportService() // append transport service
+	if err := s.appendTransportService(); err != nil {
+		return nil, err
+	} // append transport service
 
 	s.appendHTTPDService()
 
 	return s, nil
 }
 
-func (s *Server) appendTransportService() {
+func (s *Server) appendTransportService() error {
 	c := s.config.Transport
 	d := s.DiagService.NewTransportHandler()
 	srv := transport.NewService(c, d)
 
+	if err := srv.BindTransportByProvider(s); err != nil {
+		s.Diag.Error("BindTransportByProvider", err)
+		return err
+	}
+
 	s.Transport = srv
 
-	s.AppendService("transport", s.OpenprotocolService)
+	s.AppendService("transport", srv)
+	return nil
 }
 
 func (s *Server) GetServiceByName(name string) Service {
@@ -245,7 +250,7 @@ func (s *Server) appendOpenProtocolService() {
 
 	s.OpenprotocolService = srv
 
-	s.AppendService("openprotocol", s.OpenprotocolService)
+	s.AppendService("openprotocol", srv)
 }
 
 func (s *Server) appendHTTPDService() {
@@ -362,6 +367,8 @@ func (s *Server) appendGRPCService() {
 	srv := grpc.NewService(c, d)
 
 	s.GRPC = srv
+
+	s.AppendService(transport.GRPCTransport, srv)
 }
 
 func (s *Server) appendBrokerService() {
@@ -371,6 +378,8 @@ func (s *Server) appendBrokerService() {
 	srv := broker.NewService(c, d, s.DispatcherBusService)
 
 	s.BrokerService = srv
+
+	s.AppendService(transport.BrokerTransport, srv)
 
 }
 

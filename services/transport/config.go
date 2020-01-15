@@ -2,16 +2,10 @@ package transport
 
 import "github.com/pkg/errors"
 
-const (
-	GRPCTransport         = "grpc"
-	BrokerTransport       = "broker"
-	HttpTransport         = "http"
-)
-
 var SupportProviders = []string{GRPCTransport, BrokerTransport, HttpTransport}
 
 type Config struct {
-	Provider string   `yaml:"provider"`
+	Provider string `yaml:"provider"`
 }
 
 func NewConfig() Config {

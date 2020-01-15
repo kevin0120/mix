@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"github.com/masami10/rush/utils"
 	"github.com/micro/go-micro/transport"
 	"time"
 )
@@ -12,14 +13,9 @@ type Diagnostic interface {
 	SendMsgSuccess(string)
 }
 
-// Service represents a service attached to the server.
-type ICommonService interface {
-	Open() error
-	Close() error
-}
 
 type IServer interface {
-	GetServiceByName(string) ICommonService
+	GetServiceByName(string) utils.ICommonService
 }
 
 type ITransportService interface {

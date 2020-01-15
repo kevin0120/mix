@@ -5,3 +5,9 @@ const (
 	HEADER_REPLY   = "X-Reply-To"
 	HEADER_MSG_ID  = "X-Message-ID"
 )
+
+const (
+	GRPCTransport         = "grpc"
+	BrokerTransport       = "broker"
+	HttpTransport         = "http"
+)
