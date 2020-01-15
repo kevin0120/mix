@@ -432,6 +432,12 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
         (step: IWorkable) => step.status === STEP_STATUS.FAIL
       );
     }
+
+    hasUnsuccessWorkStep(): boolean {
+      return this.steps.some(
+        (step: IWorkable) => step.status !== STEP_STATUS.FINISHED
+      );
+    }
   };
 
 export default OrderMixin;

@@ -103,6 +103,13 @@ function* enteringState(config) {
           this._tools = yield call(getTools, payload?.tightening_points || []);
           this._forcePset = null;
           this._forceTool = null;
+          yield call(
+            this.updateData,
+            (data: tScrewStepData): tScrewStepData => ({
+              ...data,
+              controllerMode: controllerModes.pset
+            })
+          );
         }
         break;
       }

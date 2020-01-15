@@ -29,7 +29,7 @@ function* tryRework(action: tAction = {}): Saga<void> {
     } else if (!order) {
       yield put(notifierActions.enqueueSnackbar('Error', '没有指定返工工单!'));
       canRework = false;
-    } else if (order && !order.hasFailWorkStep()) {
+    } else if (order && !order.hasUnsuccessWorkStep()) {
       yield put(notifierActions.enqueueSnackbar('Error', '当前工单没有可返工的工步'));
       canRework = false;
     } else if (point && point.noRedo) {
