@@ -58,7 +58,7 @@ func setPSet(controllerSN string, toolSN string, pset int) {
 
 func Test_SetPSet(t *testing.T) {
 	controllerSN := "w1"
-	toolSN := "w1"
+	toolSN := "xx4443"
 	pset := 4
 
 	enableTool(controllerSN, toolSN, true)

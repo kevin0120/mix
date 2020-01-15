@@ -43,7 +43,7 @@ aiis:
   push_interval: 5s
   max_retry: 3
   ws_result_route: /aiis/v1/ws/results
-  result_upload_inteval: 2s
+  result_upload_inteval: 9999h
   grpc_server: 127.0.0.1:9093
   keep_alive: 3s
   recheck: false

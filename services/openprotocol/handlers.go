@@ -55,7 +55,7 @@ func handleMid0002StartAck(c *TighteningController, pkg *handlerPkg) error {
 	seq := <-client.requestChannel
 	client.response.update(seq, request_errors["00"])
 
-	go c.ProcessSubscribeControllerInfo(pkg.SN)
+	go c.processSubscribeControllerInfo(pkg.SN)
 
 	return nil
 }

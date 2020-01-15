@@ -172,7 +172,7 @@ func (c *TighteningController) initSubscribeInfos() {
 	}
 }
 
-func (c *TighteningController) ProcessSubscribeControllerInfo(sn string) {
+func (c *TighteningController) processSubscribeControllerInfo(sn string) {
 	for _, subscribe := range c.controllerSubscribes {
 		err := subscribe(sn)
 		if err != nil {

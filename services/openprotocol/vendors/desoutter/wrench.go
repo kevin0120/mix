@@ -5,6 +5,7 @@ import (
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/tightening_device"
+	"time"
 )
 
 type WrenchController struct {
@@ -63,4 +64,12 @@ func (c *WrenchController) HandleStatus(sn string, status string) {
 
 func (c *WrenchController) CreateIO() tightening_device.ITighteningIO {
 	return nil
+}
+
+func (c *WrenchController) OpenProtocolParams() *openprotocol.OpenProtocolParams {
+	return &openprotocol.OpenProtocolParams{
+		MaxKeepAliveCheck: 3,
+		MaxReplyTime:      3 * time.Second,
+		KeepAlivePeriod:   5 * time.Second,
+	}
 }
