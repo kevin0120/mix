@@ -126,7 +126,7 @@ device:
   enable: true
 
 # 协议类型: Audi/VW, OpenProtocol
-# 支持型号: ModelDesoutterCvi3, ModelDesoutterDeltaWrench
+# 支持型号: ModelDesoutterCvi3, ModelDesoutterCvi2, ModelDesoutterDeltaWrench, ModelDesoutterConnect
 tightening_device:
   enable: true
   devices:
@@ -138,7 +138,7 @@ tightening_device:
           endpoint: tcp://192.168.5.186:4545
           channel: 1
 
-    - model: ModelDesoutterCvi3
+    - model: ModelDesoutterConnect
       protocol: OpenProtocol
       sn: 2
       tools:

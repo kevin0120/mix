@@ -21,7 +21,6 @@ type Service struct {
 	storageService IStorageService
 	backendService IBackendService
 
-	devices []*TighteningController
 	tightening_device.ITighteningProtocol
 	vendors map[string]IOpenProtocolController
 }
@@ -31,7 +30,6 @@ func NewService(c Config, d Diagnostic, vendors map[string]IOpenProtocolControll
 	s := &Service{
 		name:           tightening_device.TIGHTENING_OPENPROTOCOL,
 		diag:           d,
-		devices:        []*TighteningController{},
 		vendors:        vendors,
 		storageService: db,
 		backendService: backend,
@@ -51,7 +49,14 @@ func (s *Service) Name() string {
 }
 
 func (s *Service) NewController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
-	return s.newController(cfg, s.diag, s, dp)
+	c, exist := s.vendors[cfg.Model]
+	if !exist {
+		return nil, errors.New(fmt.Sprintf("Controller Model:%s Not Support", cfg.Model))
+	}
+
+	controllerInstance := c.New()
+	controllerInstance.initController(cfg, s.diag, s, dp)
+	return controllerInstance, nil
 }
 
 func (s *Service) Open() error {
@@ -86,16 +91,4 @@ func (s *Service) OnStatus(string, string) {
 
 func (s *Service) OnRecv(string, string) {
 	s.diag.Error("OnRecv", errors.New("OpenProtocol Service Not Support OnRecv"))
-}
-
-func (s *Service) newController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) (tightening_device.ITighteningController, error) {
-
-	c, exist := s.vendors[deviceConfig.Model]
-	if !exist {
-		return nil, errors.New(fmt.Sprintf("Controller Model:%s Not Support", deviceConfig.Model))
-	}
-
-	controllerInstance := c.New()
-	controllerInstance.initController(deviceConfig, d, service, dp)
-	return controllerInstance, nil
 }
