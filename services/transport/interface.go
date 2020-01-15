@@ -2,7 +2,7 @@ package transport
 
 import (
 	"github.com/masami10/rush/utils"
-	"github.com/micro/go-micro/transport"
+	microTransport "github.com/micro/go-micro/transport"
 	"time"
 )
 
@@ -27,15 +27,15 @@ type ITransportService interface {
 	Status() string
 }
 
-type Transport = transport.Transport
+type Transport = microTransport.Transport
 
-type Message = transport.Message
+type Message = microTransport.Message
 
-type Socket = transport.Socket
+type Socket = microTransport.Socket
 
-type Client = transport.Client
+type Client = microTransport.Client
 
-type Listener = transport.Listener
+type Listener = microTransport.Listener
 
 type Option func(*Options)
 
