@@ -5,7 +5,7 @@ export function getTools(points: Array<tPoint>) {
   const toolSnSet = new Set(points.map(p => p.tightening_tool));
   const lostTool = [];
   const tools = [];
-  toolSnSet.forEach(t => {
+  [...toolSnSet].forEach(t => {
     const tool = getDevice(t);
     if (tool) {
       tools.push(tool);

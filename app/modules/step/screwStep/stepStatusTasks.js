@@ -100,7 +100,9 @@ function* enteringState(config) {
           this._forcePset = pset;
           yield put(dialogActions.dialogClose());
         } else {
-          this._tools = yield call(getTools, payload?.tightening_points || []);
+          const { reworkConfig } = config || {};
+          const { point } = reworkConfig;
+          this._tools = yield call(getTools, [point] || []);
           this._forcePset = null;
           this._forceTool = null;
           yield call(
@@ -359,7 +361,7 @@ export function* onLeave() {
         })))
       );
     }
-    if(this._tools && this._listeners) {
+    if (this._tools && this._listeners) {
       this._tools.forEach(t => {
         this._listeners.forEach(l => {
           t.removeListener(l);
