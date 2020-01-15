@@ -79,7 +79,7 @@ func (s *Service) onNewTool(data interface{}) {
 
 func (s *Service) launchDispatchers() {
 	if s.dispatcherBus == nil {
-		s.diag.Error("setUpDispatcherRegister", errors.New("Please Inject Dispatcher First"))
+		s.diag.Error("launchDispatchers", errors.New("Please Inject Dispatcher First"))
 		return
 	}
 	if len(s.dispatcherMap) == 0 {
@@ -99,6 +99,20 @@ func (s *Service) setUpDispatcherRegister() {
 	s.dispatcherBus.Register(dispatcherbus.DispatcherNewTool, utils.CreateDispatchHandlerStruct(s.onNewTool))
 }
 
+func (s *Service) transportDoStart() error {
+	if s.transport == nil {
+		return errors.New("transport Is Empty, Please Inject First")
+	}
+	return s.transport.Start()
+}
+
+func (s *Service) transportDoStop() error {
+	if s.transport == nil {
+		return errors.New("transport Is Empty, Please Inject First")
+	}
+	return s.transport.Stop()
+}
+
 func (s *Service) Open() error {
 	c := s.Config()
 	if !c.Enable {
@@ -109,7 +123,7 @@ func (s *Service) Open() error {
 
 	go s.manage()
 
-	if err := s.transport.Start(); err != nil {
+	if err := s.transportDoStart(); err != nil {
 		return err
 	}
 
@@ -122,7 +136,7 @@ func (s *Service) Close() error {
 	if !s.opened || s.transport == nil {
 		return nil
 	}
-	if err := s.transport.Stop(); err != nil {
+	if err := s.transportDoStop(); err != nil {
 		s.diag.Error("Stop Transport Failed", err)
 	}
 
@@ -140,9 +154,33 @@ func (s *Service) PutResult(body *PublishResult) {
 	}
 }
 
+func oneTimePass(result *PublishResult, count int) {
+	if count == 1 {
+		result.OneTimePass = tightening_device.RESULT_PASS
+	} else {
+		result.OneTimePass = tightening_device.RESULT_FAIL
+	}
+}
+
+func doResultRecheck(result *PublishResult, resultValue *tightening_device.ResultValue, sResult *storage.Results, recheck bool) {
+	if recheck {
+		if (resultValue.Mi >= sResult.ToleranceMin && resultValue.Mi <= sResult.ToleranceMax) &&
+			(resultValue.Wi >= sResult.ToleranceMinDegree && resultValue.Wi <= sResult.ToleranceMaxDegree) {
+			result.QualityState = tightening_device.RESULT_PASS
+			result.ExceptionReason = ""
+		} else {
+			result.QualityState = tightening_device.RESULT_EXCEPTION
+			result.ExceptionReason = tightening_device.RESULT_EXCEPTION
+		}
+	} else {
+		result.QualityState = tightening_device.RESULT_PASS
+		result.ExceptionReason = ""
+	}
+}
+
 func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, error) {
-	aiisResult := PublishResult{}
-	resultValue := tightening_device.ResultValue{}
+	var aiisResult PublishResult
+	var resultValue tightening_device.ResultValue
 	if err := json.Unmarshal([]byte(result.ResultValue), &resultValue); err != nil {
 		s.diag.Error("Unmarshal ResultValue Failed", err)
 	}
@@ -204,29 +242,12 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
 	aiisResult.Stage = result.Stage
 
-	if result.Result == storage.RESULT_OK {
+	switch result.Result {
+	case storage.RESULT_OK:
 		aiisResult.FinalPass = tightening_device.RESULT_PASS
-		if result.Count == 1 {
-			aiisResult.OneTimePass = tightening_device.RESULT_PASS
-		} else {
-			aiisResult.OneTimePass = tightening_device.RESULT_FAIL
-		}
-
-		if s.Config().Recheck {
-			if (resultValue.Mi >= result.ToleranceMin && resultValue.Mi <= result.ToleranceMax) &&
-				(resultValue.Wi >= result.ToleranceMinDegree && resultValue.Wi <= result.ToleranceMaxDegree) {
-				aiisResult.QualityState = tightening_device.RESULT_PASS
-				aiisResult.ExceptionReason = ""
-			} else {
-				aiisResult.QualityState = tightening_device.RESULT_EXCEPTION
-				aiisResult.ExceptionReason = tightening_device.RESULT_EXCEPTION
-			}
-		} else {
-			aiisResult.QualityState = tightening_device.RESULT_PASS
-			aiisResult.ExceptionReason = ""
-		}
-
-	} else {
+		oneTimePass(&aiisResult, result.Count)
+		doResultRecheck(&aiisResult, &resultValue, result, s.Config().Recheck)
+	default:
 		aiisResult.FinalPass = tightening_device.RESULT_FAIL
 		aiisResult.OneTimePass = tightening_device.RESULT_FAIL
 	}
