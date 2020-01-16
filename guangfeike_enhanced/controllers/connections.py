@@ -21,7 +21,7 @@ class TS009Controller(http.Controller):
                 raise None
             connect = connections[0]
             d = {
-                "workcenter": masterpc.workcenter_id.name_get() if masterpc.workcenter_id else masterpc.serial_no,  # 如果找不动工位名称用序列号代替
+                "workcenter": masterpc.workcenter_id.display_name if masterpc.workcenter_id else masterpc.serial_no,  # 如果找不动工位名称用序列号代替
                 "serial_no": masterpc.serial_no,
                 "connection": 'ws://{0}:{1}'.format(connect.ip, connect.port)
             }
