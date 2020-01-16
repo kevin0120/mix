@@ -160,9 +160,7 @@ func getMsgHeaderProperty(message *transport.Message, property string) string {
 	header := message.Header
 	pp := property
 	switch property {
-	case transport.HEADER_SUBJECT:
-	case transport.HEADER_REPLY:
-	case transport.HEADER_MSG_ID:
+	case transport.HEADER_SUBJECT, transport.HEADER_REPLY, transport.HEADER_MSG_ID:
 		pp = property
 	default:
 		return ""

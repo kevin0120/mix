@@ -66,16 +66,17 @@ func (s *Service) Open() error {
 	return nil
 }
 
-func (s *Service) TransportForceOpen() {
+func (s *Service) TransportForceOpen() error {
 	if s.opened {
-		return
+		return nil
 	}
 	c := s.Config()
 	if err := c.Validate(); err != nil {
 		s.diag.Error("TransportForceOpen", err)
-		return
+		return err
 	}
 	s.doOpen()
+	return nil
 }
 
 func (s *Service) Close() error {
@@ -146,6 +147,11 @@ func (s *Service) OnMessage(subject string, handler transport.OnMsgHandler) erro
 
 func (s *Service) SendMessage(subject string, data []byte) error {
 	return s.publish(subject, data)
+}
+
+func (s *Service) GetServerAddress() []string {
+	c := s.Config()
+	return c.ConnectUrls
 }
 
 func (s *Service) subscribe(subject string, handler transport.OnMsgHandler) error {

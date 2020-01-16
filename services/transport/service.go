@@ -20,8 +20,7 @@ func NewService(c Config, d Diagnostic) *Service {
 
 func (s *Service) BindTransportByProvider(ss IServer) error {
 	switch s.provider {
-	case BrokerTransport:
-	case GRPCTransport:
+	case BrokerTransport,GRPCTransport:
 		p := ss.GetServiceByName(s.provider)
 		if p == nil {
 			err := errors.Errorf("%s Service Is Not Found", s.provider)
