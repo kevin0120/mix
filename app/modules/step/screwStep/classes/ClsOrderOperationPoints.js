@@ -4,10 +4,56 @@ import { CommonLog } from '../../../../common/utils';
 import type { tPoint, tResult, tScrewStepPayload } from '../interface/typeDef';
 import { ClsOperationPointGroup } from './ClsOperationPointGroup';
 import { ClsOperationPoint } from './ClsOperationPoint';
+import { getDevicesByType } from '../../../deviceManager/devices';
+import { deviceType } from '../../../deviceManager/constants';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOrderOperationPoints {
   _groups: { [groupSeq: number]: ClsOperationPointGroup } = {};
+
+  constructor(points: Array<tPoint>) {
+    // const ret: boolean = ClsOrderOperationPoints.validatePayload(p);
+    // if (!ret) {
+    //   // 验证失败
+    //   throw new Error(`validatePayload Error! Payload! `);
+    //   // CommonLog.lError(`validatePayload Error! Payload! `);
+    //   // return;
+    // }
+    // const { points } = p;
+    points.forEach((point: tPoint) => {
+      this._appendNewOperationPoint(point);
+    });
+  }
+
+  get operationGroups(): { [groupSeq: number]: ClsOperationPointGroup } {
+    return this._groups;
+  }
+
+  get points() {
+    // eslint-disable-next-line radix
+    const groupSeqs = Object.keys(this._groups).map(s => parseInt(s));
+    let points = [];
+    groupSeqs.forEach(g => {
+      points = points.concat(this._groups[g].points);
+    });
+    return points;
+  }
+
+  get currentActivePoints(): Array<ClsOperationPoint> {
+    return this.points.filter((p: ClsOperationPoint) => p.isActive) || [];
+  }
+
+  get isPass() {
+    return Object.keys(this._groups).every(g =>
+      this._groups[parseInt(g, 10)].isAllPass
+    );
+  }
+
+  get isFailed() {
+    return Object.keys(this._groups).some(g =>
+      this._groups[parseInt(g, 10)].isFailed
+    );
+  }
 
   static validatePayload(payload: tScrewStepPayload): boolean {
     CommonLog.Debug(
@@ -42,20 +88,6 @@ export class ClsOrderOperationPoints {
     return ret;
   }
 
-  constructor(points: Array<tPoint>) {
-    // const ret: boolean = ClsOrderOperationPoints.validatePayload(p);
-    // if (!ret) {
-    //   // 验证失败
-    //   throw new Error(`validatePayload Error! Payload! `);
-    //   // CommonLog.lError(`validatePayload Error! Payload! `);
-    //   // return;
-    // }
-    // const { points } = p;
-    points.forEach((point: tPoint) => {
-      this._appendNewOperationPoint(point);
-    });
-  }
-
   _appendNewOperationPoint(p: tPoint) {
     const groupSeq: number = p.group_sequence;
     const isExist = Object.hasOwnProperty.call(this.operationGroups, groupSeq);
@@ -70,10 +102,6 @@ export class ClsOrderOperationPoints {
     if (pg) {
       pg.appendNewOperationPoint(p); // always success
     }
-  }
-
-  get operationGroups(): { [groupSeq: number]: ClsOperationPointGroup } {
-    return this._groups;
   }
 
   newResult(results: Array<tResult>) {
@@ -108,11 +136,20 @@ export class ClsOrderOperationPoints {
   }
 
   start(): Array<ClsOperationPoint> {
-    // 开始可被最先开始的的组，并返回所有被开始的点
-    return this.nextActiveGroups().reduce((activatedPoints, g) => {
-      const points = g.start();
-      return activatedPoints.concat(points);
-    }, []);
+    // 所有可被最先开始的的组内的点
+    const allPoints = this.nextActiveGroups().reduce((points, g) => {
+      return points.concat(g.points);
+    }, []).filter(p => !p.isPass);
+    // 工具未被占用的点
+    const occupiedTools = getDevicesByType(deviceType.tool).filter(t => t.isEnable).map(t => t.serialNumber);
+    console.warn(occupiedTools, allPoints);
+    return allPoints.filter(p => {
+      if (occupiedTools.find(t => t === p.toolSN)) {
+        return false;
+      }
+      occupiedTools.push(p.toolSN);
+      return true;
+    }).map(p => p.start()).filter(p => !!p);
   }
 
   stop() {
@@ -143,27 +180,11 @@ export class ClsOrderOperationPoints {
     return groups;
   }
 
-
   nextGroupSequence(groupSequence) {
     const sequencesAfter = Object.keys(this._groups)
       .map(s => parseInt(s, 10))
       .filter(s => s > groupSequence);
     return Math.min(...sequencesAfter);
-  }
-
-
-  get points() {
-    // eslint-disable-next-line radix
-    const groupSeqs = Object.keys(this._groups).map(s => parseInt(s));
-    let points = [];
-    groupSeqs.forEach(g => {
-      points = points.concat(this._groups[g].points);
-    });
-    return points;
-  }
-
-  get currentActivePoints(): Array<ClsOperationPoint> {
-    return this.points.filter((p: ClsOperationPoint) => p.isActive) || [];
   }
 
   getGroupByPointSequence(seq: number): ?ClsOperationPointGroup {
@@ -172,18 +193,6 @@ export class ClsOrderOperationPoints {
       this.operationGroups
     ): any);
     return groups.find(g => g.points.some(p => p.sequence === seq));
-  }
-
-  get isPass() {
-    return Object.keys(this._groups).every(g =>
-      this._groups[parseInt(g, 10)].isAllPass
-    );
-  }
-
-  get isFailed() {
-    return Object.keys(this._groups).some(g =>
-      this._groups[parseInt(g, 10)].isFailed
-    );
   }
 
   hasPoint(point: ClsOperationPoint) {

@@ -118,6 +118,9 @@ export class ClsOperationPoint {
   }
 
   start(forceStart) {
+    if (this.isActive) {
+      return null;
+    }
     if (forceStart || !this.isPass) {
       this.setActive(true);
       return this;

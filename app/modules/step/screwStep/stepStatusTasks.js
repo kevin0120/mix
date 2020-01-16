@@ -161,6 +161,7 @@ function* enteringState(config) {
     });
     if (this._data && this._data.results) {
       this._pointsManager.newResult(this._data.results);
+      this._pointsManager.stop();
     }
 
     yield call(
@@ -234,7 +235,8 @@ function* doingState(config) {
             (p: ClsOperationPoint) => p.isFinalFail
           );
           yield call([this, byPassPoint], finalFailPoints);
-          this._pointsToActive = this._pointsManager.start();
+          const newActivePoints = this._pointsManager.start();
+          this._pointsToActive = newActivePoints.filter(p => this._pointsToActive.every(pp => pp.sequence !== p.sequence));
           console.warn(this._pointsToActive);
           if (
             this._pointsManager.isFailed &&
