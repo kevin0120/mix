@@ -6,13 +6,14 @@ import (
 	"time"
 )
 
+type StatusHandler func(status string)
+
 type Diagnostic interface {
 	Error(string, error)
 	Debug(string)
 	Info(string)
 	SendMsgSuccess(string)
 }
-
 
 type IServer interface {
 	GetServiceByName(string) utils.ICommonService
@@ -25,6 +26,7 @@ type ITransportService interface {
 	SendMessage(subject string, data []byte) error
 	Request(subject string, data []byte, timeOut time.Duration) ([]byte, error)
 	Status() string
+	SetStatusHandler(handler StatusHandler) error
 }
 
 type Transport = microTransport.Transport

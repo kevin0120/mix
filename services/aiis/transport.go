@@ -10,14 +10,14 @@ import (
 
 type ServiceStatusHandler func(status ServiceStatus)
 type ResultPatchHandler func(rp ResultPatch)
-type StatusHandler func(status string)
+type StatusHandler = transport.StatusHandler
 
 type ITransport interface {
 	// 上传结果
 	SendResult(result *PublishResult) error
 
 	// 设置连接状态回调
-	SetStatusHandler(handler StatusHandler)
+	SetStatusHandler(handler StatusHandler) error
 
 	// 设置接收服务状态回调
 	SetServiceStatusHandler(handler ServiceStatusHandler)
@@ -39,7 +39,6 @@ type BaseTransport struct {
 	ITransportService
 	handlerServiceStatus ServiceStatusHandler
 	handlerResultPatch   ResultPatchHandler
-	handlerStatus        StatusHandler
 }
 
 func (s *BaseTransport) Start() error {
@@ -89,8 +88,12 @@ func (s *BaseTransport) SetResultPatchHandler(toolSN string, handler ResultPatch
 	return trans.OnMessage(subject, fn)
 }
 
-func (s *BaseTransport) SetStatusHandler(handler StatusHandler) {
-	s.handlerStatus = handler
+func (s *BaseTransport) SetStatusHandler(handler StatusHandler) error {
+	trans := s.ITransportService
+	if trans == nil {
+		return errors.New("trans Is Empty")
+	}
+	return trans.SetStatusHandler(handler)
 }
 
 func NewAIISBaseTransport(t ITransportService) *BaseTransport {

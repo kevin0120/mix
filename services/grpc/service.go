@@ -16,18 +16,19 @@ import (
 
 type Service struct {
 	microTransport.Transport
-	diag        Diagnostic
-	enable      bool
-	addr        string
-	workers     int
-	opened      bool
-	mtxHandlers sync.Mutex
-	msgHandlers map[string]transport.OnMsgHandler
-	status      atomic.String
-	msgs        chan transport.Message
-	exiting     chan chan struct{}
-	respChannel chan RespStruct
-	client      transport.Client
+	diag          Diagnostic
+	enable        bool
+	addr          string
+	workers       int
+	opened        bool
+	mtxHandlers   sync.Mutex
+	msgHandlers   map[string]transport.OnMsgHandler
+	statusHandler StatusHandler
+	status        atomic.String
+	msgs          chan transport.Message
+	exiting       chan chan struct{}
+	respChannel   chan RespStruct
+	client        transport.Client
 }
 
 func (s *Service) msgHandler(subject string) transport.OnMsgHandler {
@@ -46,14 +47,15 @@ func newGRPCTransport(config Config) transport.Transport {
 
 func NewService(config Config, d Diagnostic) *Service {
 	s := &Service{
-		addr:        config.Address,
-		enable:      config.Enable,
-		workers:     config.Workers,
-		exiting:     make(chan chan struct{}, config.Workers),
-		diag:        d,
-		msgs:        make(chan transport.Message, 1024),
-		respChannel: make(chan RespStruct, 1024),
-		msgHandlers: map[string]transport.OnMsgHandler{},
+		addr:          config.Address,
+		enable:        config.Enable,
+		workers:       config.Workers,
+		statusHandler: nil,
+		exiting:       make(chan chan struct{}, config.Workers),
+		diag:          d,
+		msgs:          make(chan transport.Message, 1024),
+		respChannel:   make(chan RespStruct, 1024),
+		msgHandlers:   map[string]transport.OnMsgHandler{},
 	}
 	s.Transport = newGRPCTransport(config)
 	s.status.Store(utils.STATUS_OFFLINE)
@@ -65,6 +67,16 @@ func (s *Service) Open() error {
 		return nil
 	}
 	return s.doOpen()
+}
+
+func (s *Service) SetStatusHandler(handler StatusHandler) error {
+	p := s.Transport
+	if p == nil {
+		return errors.New("Transport Is Empty, Please Init It First")
+	}
+
+	s.statusHandler = handler
+	return nil
 }
 
 func (s *Service) doOpen() error {
@@ -135,6 +147,10 @@ func (s *Service) Status() string {
 
 func (s *Service) onStatus(status string) {
 	s.setStatus(status)
+	handler := s.statusHandler
+	if handler != nil {
+		handler(status)
+	}
 }
 
 func (s *Service) SendMessage(subject string, data []byte) error {

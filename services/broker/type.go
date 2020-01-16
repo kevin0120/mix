@@ -16,7 +16,7 @@ var StatusBroker = map[nats.Status]string{
 	nats.DRAINING_PUBS: "DRAINING_PUBS",
 }
 
-type StatusHandler func(string)
+type StatusHandler = transport.StatusHandler
 
 type IBrokerProvider interface {
 	Address() string

@@ -37,7 +37,26 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 
 	s.status.Store(utils.STATUS_OFFLINE)
 
+	if err := s.SetStatusHandler(nil); err != nil {
+		s.diag.Error("SetStatusHandler", err)
+	}
+
 	return s
+}
+
+func (s *Service) SetStatusHandler(handler StatusHandler) error {
+	p := s.provider
+	if p == nil {
+		return errors.New("Provider Is Empty, Please Init It First")
+	}
+	fn := func(status string) {
+		s.onStatus(status)
+		if handler != nil {
+			handler(status)
+		}
+	}
+	p.SetStatusHandler(fn)
+	return nil
 }
 
 func (s *Service) Config() Config {
@@ -46,7 +65,7 @@ func (s *Service) Config() Config {
 
 func (s *Service) setupGblDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DispatcherBrokerStatus: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherTransportStatus: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 
@@ -95,7 +114,7 @@ func (s *Service) dispatcherBrokerStatus(status string) {
 	if s.dispatcherBus == nil {
 		s.diag.Error("dispatcherBrokerStatus Error", errors.New("dispatcherBus Is Empty"))
 	}
-	if err := s.dispatcherBus.Dispatch(dispatcherbus.DispatcherBrokerStatus, status); err != nil {
+	if err := s.dispatcherBus.Dispatch(dispatcherbus.DispatcherTransportStatus, status); err != nil {
 		s.diag.Error("dispatcherBrokerStatus", err)
 	}
 
@@ -128,16 +147,15 @@ func (s *Service) connectProc() {
 	}
 }
 
-func (s *Service) newBroker(provider string) (ret IBrokerProvider) {
+func (s *Service) newBroker(provider string) (bp IBrokerProvider) {
 	c := s.Config()
 	switch provider {
 	case "nats":
-		ret = NewNats(s.diag, c)
+		bp = NewNats(s.diag, c)
 	default:
-		ret = NewDefaultBroker()
+		bp = NewDefaultBroker()
 	}
 
-	ret.SetStatusHandler(s.onStatus)
 	return
 }
 

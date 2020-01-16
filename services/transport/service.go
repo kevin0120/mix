@@ -20,7 +20,7 @@ func NewService(c Config, d Diagnostic) *Service {
 
 func (s *Service) BindTransportByProvider(ss IServer) error {
 	switch s.provider {
-	case BrokerTransport,GRPCTransport:
+	case BrokerTransport, GRPCTransport:
 		p := ss.GetServiceByName(s.provider)
 		if p == nil {
 			err := errors.Errorf("%s Service Is Not Found", s.provider)
@@ -40,4 +40,12 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 	return nil
+}
+
+func (s *Service) SetStatusHandler(handler StatusHandler) error {
+	t := s.ITransportService
+	if t == nil {
+		return errors.New("Please BindTransportByProvider First")
+	}
+	return t.SetStatusHandler(handler)
 }

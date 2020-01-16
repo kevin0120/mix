@@ -35,6 +35,7 @@ type ITransportService interface {
 	OnMessage(subject string, handler transport.OnMsgHandler) error
 	SendMessage(subject string, data []byte) error
 	Status() string
+	SetStatusHandler(StatusHandler) error
 }
 
 type INotifyService interface {
