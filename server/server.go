@@ -69,9 +69,9 @@ type Server struct {
 
 	BrokerService *broker.Service
 
-	GRPC *grpc.Service
+	GRPCService *grpc.Service
 
-	Transport *transport.Service
+	TransportService *transport.Service
 
 	config *Config
 	// List of services in startup order
@@ -136,8 +136,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendTighteningDeviceService()
 
-	s.appendAiisService()
-
 	s.appendOdooService()
 
 	s.appendHMIService()
@@ -151,6 +149,10 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	if err := s.appendTransportService(); err != nil {
 		return nil, err
 	} // append transport service
+
+	if err := s.appendAiisService(); err != nil {
+		return nil, err
+	}
 
 	s.appendHTTPDService()
 
@@ -167,7 +169,7 @@ func (s *Server) appendTransportService() error {
 		return err
 	}
 
-	s.Transport = srv
+	s.TransportService = srv
 
 	s.AppendService("transport", srv)
 	return nil
@@ -300,7 +302,7 @@ func (s *Server) appendTighteningDeviceService() error {
 func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
-	srv := aiis.NewService(c, d, s.DispatcherBusService, s.StorageService, s.Transport, s.WSNotifyService)
+	srv := aiis.NewService(c, d, s.DispatcherBusService, s.StorageService, s.TransportService, s.WSNotifyService)
 
 	s.AiisService = srv
 	s.AppendService("aiis", srv)
@@ -366,7 +368,7 @@ func (s *Server) appendGRPCService() {
 
 	srv := grpc.NewService(c, d)
 
-	s.GRPC = srv
+	s.GRPCService = srv
 
 	s.AppendService(transport.GRPCTransport, srv)
 }

@@ -409,7 +409,7 @@ func (c *TighteningController) getDefaultTransportClient() *clientContext {
 func (c *TighteningController) getTransportClientBySymbol(symbol string) *clientContext {
 
 	if sw, ok := c.sockClients[symbol]; !ok {
-		err := errors.Errorf("Can Not Found Transport For %s", symbol)
+		err := errors.Errorf("Can Not Found TransportService For %s", symbol)
 		c.diag.Error("getTransportClientBySymbol", err)
 		return nil
 	} else {

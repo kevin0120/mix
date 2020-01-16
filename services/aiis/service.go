@@ -138,7 +138,7 @@ func (s *Service) Close() error {
 	}
 	if s.transport != nil {
 		if err := s.transportDoStop(); err != nil {
-			s.diag.Error("Stop Transport Failed", err)
+			s.diag.Error("Stop TransportService Failed", err)
 		}
 	}
 

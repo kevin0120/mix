@@ -70,7 +70,7 @@ func (s *Service) Open() error {
 func (s *Service) doOpen() error {
 	addr := s.addr
 	if addr == "" {
-		return errors.New("GRPC Address Is Empty")
+		return errors.New("GRPCService Address Is Empty")
 	}
 	c, err := s.doConnect(addr)
 	if err != nil {
@@ -151,7 +151,7 @@ func (s *Service) SendMessage(subject string, data []byte) error {
 
 func (s *Service) doSendMessage(msg *transport.Message) error {
 	if s.client == nil {
-		return errors.New("GRPC Client Is Empty")
+		return errors.New("GRPCService Client Is Empty")
 	}
 	return s.client.Send(msg)
 }
