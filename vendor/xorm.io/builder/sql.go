@@ -8,7 +8,6 @@ import (
 	sql2 "database/sql"
 	"fmt"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -21,7 +20,7 @@ func condToSQL(cond Cond) (string, []interface{}, error) {
 	if err := cond.WriteTo(w); err != nil {
 		return "", nil, err
 	}
-	return w.String(), w.args, nil
+	return w.writer.String(), w.args, nil
 }
 
 func condToBoundSQL(cond Cond) (string, error) {
@@ -33,7 +32,7 @@ func condToBoundSQL(cond Cond) (string, error) {
 	if err := cond.WriteTo(w); err != nil {
 		return "", err
 	}
-	return ConvertToBoundSQL(w.String(), w.args)
+	return ConvertToBoundSQL(w.writer.String(), w.args)
 }
 
 // ToSQL convert a builder or conditions to SQL and args
@@ -93,7 +92,7 @@ func noSQLQuoteNeeded(a interface{}) bool {
 
 // ConvertToBoundSQL will convert SQL and args to a bound SQL
 func ConvertToBoundSQL(sql string, args []interface{}) (string, error) {
-	buf := strings.Builder{}
+	buf := StringBuilder{}
 	var i, j, start int
 	for ; i < len(sql); i++ {
 		if sql[i] == '?' {
@@ -115,10 +114,7 @@ func ConvertToBoundSQL(sql string, args []interface{}) (string, error) {
 			if noSQLQuoteNeeded(arg) {
 				_, err = fmt.Fprint(&buf, arg)
 			} else {
-				// replace ' -> '' (standard replacement) to avoid critical SQL injection,
-				// NOTICE: may allow some injection like % (or _) in LIKE query
-				_, err = fmt.Fprintf(&buf, "'%v'", strings.Replace(fmt.Sprintf("%v", arg), "'",
-					"''", -1))
+				_, err = fmt.Fprintf(&buf, "'%v'", arg)
 			}
 			if err != nil {
 				return "", err
@@ -135,7 +131,7 @@ func ConvertToBoundSQL(sql string, args []interface{}) (string, error) {
 
 // ConvertPlaceholder replaces ? to $1, $2 ... or :1, :2 ... according prefix
 func ConvertPlaceholder(sql, prefix string) (string, error) {
-	buf := strings.Builder{}
+	buf := StringBuilder{}
 	var i, j, start int
 	for ; i < len(sql); i++ {
 		if sql[i] == '?' {

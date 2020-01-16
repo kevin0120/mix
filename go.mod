@@ -1,52 +1,74 @@
 module github.com/masami10/rush
 
-go 1.13
+go 1.12
 
 require (
-	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
+	github.com/Joker/jade v1.0.0 // indirect
+	github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398 // indirect
 	github.com/ajg/form v1.5.1 // indirect
+	github.com/aymerick/raymond v2.0.2+incompatible // indirect
 	github.com/bep/debounce v1.2.0
 	github.com/ebfe/scard v0.0.0-20190212122703-c3d1b1916a95
-	github.com/fasthttp-contrib/websocket v0.0.0-20160511215533-1f3b11f56072 // indirect
+	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
 	github.com/fastly/go-utils v0.0.0-20180712184237-d95a45783239 // indirect
 	github.com/flosch/pongo2 v0.0.0-20190707114632-bbf5a6c351f4 // indirect
 	github.com/gavv/monotime v0.0.0-20190418164738-30dba4353424 // indirect
-	github.com/go-playground/validator/v10 v10.1.0
-	github.com/go-xorm/xorm v0.7.9
+	github.com/go-ini/ini v1.46.0 // indirect
+	github.com/go-log/log v0.2.0 // indirect
+	github.com/go-playground/validator/v10 v10.0.1
+	github.com/go-xorm/xorm v0.7.6
 	github.com/goburrow/modbus v0.1.0
 	github.com/goburrow/serial v0.1.0 // indirect
 	github.com/google/gousb v0.0.0-20190812193832-18f4c1d8a750
 	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/gorilla/websocket v1.4.1
 	github.com/imkira/go-interpol v1.1.0 // indirect
+	github.com/iris-contrib/blackfriday v2.0.0+incompatible // indirect
 	github.com/iris-contrib/formBinder v5.0.0+incompatible // indirect
 	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/httpexpect v0.0.0-20180314041918-ebe99fcebbce // indirect
-	github.com/iris-contrib/middleware/cors v0.0.0-20191219204441-78279b78a367
+	github.com/iris-contrib/middleware v0.0.0-20190720041902-5f3a20f489c4
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
-	github.com/juju/errors v0.0.0-20190930114154-d42613fe1ab9
-	github.com/juju/testing v0.0.0-20191001232224-ce9dec17d28b // indirect
+	github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d
+	github.com/juju/testing v0.0.0-20190723135506-ce30eb24acd2 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
+	github.com/kataras/golog v0.0.0-20190624001437-99c81de45f40 // indirect
 	github.com/kataras/iris v11.1.1+incompatible
+	github.com/kataras/pio v0.0.0-20190103105442-ea782b38602d // indirect
+	github.com/klauspost/compress v1.7.5 // indirect
+	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.2.0+incompatible
-	github.com/lestrrat-go/strftime v1.0.1 // indirect
-	github.com/lib/pq v1.3.0
-	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/lestrrat-go/strftime v0.0.0-20190725011945-5c849dd2c51d // indirect
+	github.com/lib/pq v1.2.0
+	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/micro/go-micro v1.18.0
+	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
+	github.com/miekg/dns v1.1.27 // indirect
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/moul/http2curl v1.0.0 // indirect
 	github.com/nats-io/nats.go v1.9.1
-	github.com/pkg/errors v0.9.1
+	github.com/pkg/errors v0.9.0
+	github.com/ryanuber/columnize v2.1.0+incompatible // indirect
 	github.com/satori/go.uuid v1.2.0
+	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
 	github.com/tebeka/strftime v0.1.3 // indirect
-	github.com/valyala/fasthttp v1.8.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/xeipuuv/gojsonpointer v0.0.0-20190809123943-df4f5c81cb3b // indirect
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	go.uber.org/atomic v1.5.1
+	golang.org/x/crypto v0.0.0-20200109152110-61a87790db17 // indirect
+	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
+	golang.org/x/sys v0.0.0-20200113162924-86b910548bc1 // indirect
+	golang.org/x/tools v0.0.0-20200108203644-89082a384178 // indirect
+	google.golang.org/genproto v0.0.0-20200113173426-e1de0a7b01eb // indirect
+	google.golang.org/grpc v1.26.0 // indirect
+	gopkg.in/ini.v1 v1.46.0 // indirect
 	gopkg.in/resty.v1 v1.12.0
-	gopkg.in/yaml.v2 v2.2.7
+	gopkg.in/yaml.v2 v2.2.2
 )

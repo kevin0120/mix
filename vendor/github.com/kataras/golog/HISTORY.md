@@ -1,12 +1,3 @@
-## Th 12 December 2019 | v0.0.10
-
-- Update [pio dependency](https://github.com/kataras/pio) to version 0.0.2 as it contains a small but important bugfix for GUI apps.
-
-## We 16 October 2019 | v0.0.9
-
-- Set the Logger's `NewLine` on `Clone` method which `golog` makes use inside its `Child("...")` method.
-- Go module (v0.0.9). 
-
 ## We 02 August 2017 | v0.0.8
 
 Add `fatal` level and `Fatal/Fatalf` funcs.

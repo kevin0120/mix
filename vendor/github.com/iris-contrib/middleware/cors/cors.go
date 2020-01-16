@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kataras/iris/v12/context"
+	"github.com/kataras/iris/context"
 )
 
 // Options is a configuration container to setup the CORS middleware.
@@ -267,11 +267,10 @@ func (c *Cors) handleActualRequest(ctx context.Context) {
 	}
 	// Always set Vary, see https://github.com/rs/cors/issues/10
 	ctx.ResponseWriter().Header().Add("Vary", "Origin")
-	if origin == "" && !c.allowedOriginsAll {
+	if origin == "" {
 		c.logf("  Actual request no headers added: missing origin")
 		return
 	}
-
 	if !c.isOriginAllowed(origin) {
 		c.logf("  Actual request no headers added: origin '%s' not allowed", origin)
 		//

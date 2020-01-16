@@ -5,6 +5,7 @@ import "reflect"
 // FieldLevel contains all the information and helper functions
 // to validate a field
 type FieldLevel interface {
+
 	// returns the top level struct, if any
 	Top() reflect.Value
 
@@ -24,9 +25,6 @@ type FieldLevel interface {
 
 	// returns param for validation against current field
 	Param() string
-
-	// GetTag returns the current validations tag name
-	GetTag() string
 
 	// ExtractType gets the actual underlying type of field value.
 	// It will dive into pointers, customTypes and return you the
@@ -73,11 +71,6 @@ func (v *validate) Field() reflect.Value {
 // name taking precedence over the fields actual name.
 func (v *validate) FieldName() string {
 	return v.cf.altName
-}
-
-// GetTag returns the current validations tag name
-func (v *validate) GetTag() string {
-	return v.ct.tag
 }
 
 // StructFieldName returns the struct field's name
