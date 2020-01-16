@@ -6,7 +6,7 @@ import (
 	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/utils"
 	microTransport "github.com/micro/go-micro/transport"
-	_ "github.com/micro/go-micro/transport/grpc"
+	microGrpc "github.com/micro/go-micro/transport/grpc"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/atomic"
@@ -42,7 +42,7 @@ func (s *Service) msgHandler(subject string) transport.OnMsgHandler {
 
 func newGRPCTransport(config Config) transport.Transport {
 	options := microTransport.Addrs(config.Address)
-	return microTransport.NewTransport(options)
+	return microGrpc.NewTransport(options)
 }
 
 func NewService(config Config, d Diagnostic) *Service {
@@ -113,8 +113,16 @@ func (s *Service) Close() error {
 	return nil
 }
 
+func withTimeOutBlock() microTransport.DialOption {
+	fn := func(option *microTransport.DialOptions) {
+		option.Timeout = time.Second * 0
+	}
+	return fn
+}
+
 func (s *Service) doConnect(addr string) (transport.Client, error) {
-	c, err := s.Dial(addr)
+	opt := withTimeOutBlock()
+	c, err := s.Dial(addr, opt)
 	if err != nil {
 		return nil, err
 	}
@@ -277,6 +285,8 @@ func (s *Service) doOnMsg() {
 	for ; ; {
 		if err := c.Recv(&msg); err != nil {
 			s.msgs <- msg
+		} else {
+			s.onStatus(utils.STATUS_OFFLINE)
 		}
 	}
 }
