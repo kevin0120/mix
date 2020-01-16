@@ -136,6 +136,7 @@ func (s *Nats) Connect(urls []string) error {
 
 	//最后设置默认句柄
 	s.setDefaultHandlers()
+	s.handleStatus(nats.CONNECTED)
 
 	return nil
 }

@@ -10,8 +10,10 @@ logging:
   rotate: 24h
 broker:
   connect-urls:
-    - nats://127.0.0.1:4222
-  enable: false
+    - nats://192.168.4.203:4222
+    - nats://192.168.4.203:4223
+    - nats://192.168.4.203:4224
+  enable: true
   provider: nats
   connect-options:
     name: Dummy Server
@@ -22,7 +24,7 @@ grpc:
   address: 127.0.0.1:9093
   workers: 2
 transport:
-  provider: grpc
+  provider: broker
 httpd:
   bind-address: :8082
   log-enabled: true
