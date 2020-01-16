@@ -7,7 +7,7 @@ const (
 )
 
 const (
-	GRPCTransport         = "grpc"
-	BrokerTransport       = "broker"
-	HttpTransport         = "http"
+	GRPCTransport   = "grpc"
+	BrokerTransport = "broker"
+	HttpTransport   = "http"
 )

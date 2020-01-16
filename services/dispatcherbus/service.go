@@ -16,7 +16,7 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	diag        Diagnostic
+	diag Diagnostic
 
 	dispatchers    map[string]*utils.Dispatcher
 	dispatchersMtx sync.Mutex
@@ -29,7 +29,6 @@ func NewService(d Diagnostic) (*Service, error) {
 		dispatchers:    map[string]*utils.Dispatcher{},
 		dispatchersMtx: sync.Mutex{},
 	}
-
 
 	return srv, nil
 }

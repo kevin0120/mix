@@ -469,7 +469,6 @@ func (h *TransportHandler) SendMsgSuccess(msg string) {
 	h.l.Debug(msg)
 }
 
-
 // Controller
 type ControllerHandler struct {
 	l Logger

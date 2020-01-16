@@ -688,7 +688,7 @@ func (cc *ClientConn) switchBalancer(name string) {
 	cc.balancerWrapper = newCCBalancerWrapper(cc, builder, cc.balancerBuildOpts)
 }
 
-func (cc *ClientConn) handleSubConnStateChange(sc balancer.SubConn, s connectivity.State, err error) {
+func (cc *ClientConn) handleSubConnStateChange(sc balancer.SubConn, s connectivity.State) {
 	cc.mu.Lock()
 	if cc.conns == nil {
 		cc.mu.Unlock()
@@ -696,7 +696,7 @@ func (cc *ClientConn) handleSubConnStateChange(sc balancer.SubConn, s connectivi
 	}
 	// TODO(bar switching) send updates to all balancer wrappers when balancer
 	// gracefully switching is supported.
-	cc.balancerWrapper.handleSubConnStateChange(sc, s, err)
+	cc.balancerWrapper.handleSubConnStateChange(sc, s)
 	cc.mu.Unlock()
 }
 
@@ -793,7 +793,7 @@ func (ac *addrConn) connect() error {
 	}
 	// Update connectivity state within the lock to prevent subsequent or
 	// concurrent calls from resetting the transport more than once.
-	ac.updateConnectivityState(connectivity.Connecting, nil)
+	ac.updateConnectivityState(connectivity.Connecting)
 	ac.mu.Unlock()
 
 	// Start a goroutine connecting to the server asynchronously.
@@ -879,8 +879,7 @@ func (cc *ClientConn) healthCheckConfig() *healthCheckConfig {
 }
 
 func (cc *ClientConn) getTransport(ctx context.Context, failfast bool, method string) (transport.ClientTransport, func(balancer.DoneInfo), error) {
-	t, done, err := cc.blockingpicker.pick(ctx, failfast, balancer.PickInfo{
-		Ctx:            ctx,
+	t, done, err := cc.blockingpicker.pick(ctx, failfast, balancer.PickOptions{
 		FullMethodName: method,
 	})
 	if err != nil {
@@ -939,7 +938,7 @@ func (cc *ClientConn) applyServiceConfigAndBalancer(sc *ServiceConfig, addrs []r
 	}
 }
 
-func (cc *ClientConn) resolveNow(o resolver.ResolveNowOptions) {
+func (cc *ClientConn) resolveNow(o resolver.ResolveNowOption) {
 	cc.mu.RLock()
 	r := cc.resolverWrapper
 	cc.mu.RUnlock()
@@ -1049,7 +1048,7 @@ type addrConn struct {
 }
 
 // Note: this requires a lock on ac.mu.
-func (ac *addrConn) updateConnectivityState(s connectivity.State, lastErr error) {
+func (ac *addrConn) updateConnectivityState(s connectivity.State) {
 	if ac.state == s {
 		return
 	}
@@ -1062,7 +1061,7 @@ func (ac *addrConn) updateConnectivityState(s connectivity.State, lastErr error)
 			Severity: channelz.CtINFO,
 		})
 	}
-	ac.cc.handleSubConnStateChange(ac.acbw, s, lastErr)
+	ac.cc.handleSubConnStateChange(ac.acbw, s)
 }
 
 // adjustParams updates parameters used to create transports upon
@@ -1082,7 +1081,7 @@ func (ac *addrConn) adjustParams(r transport.GoAwayReason) {
 func (ac *addrConn) resetTransport() {
 	for i := 0; ; i++ {
 		if i > 0 {
-			ac.cc.resolveNow(resolver.ResolveNowOptions{})
+			ac.cc.resolveNow(resolver.ResolveNowOption{})
 		}
 
 		ac.mu.Lock()
@@ -1111,7 +1110,7 @@ func (ac *addrConn) resetTransport() {
 		// https://github.com/grpc/grpc/blob/master/doc/connection-backoff.md#proposed-backoff-algorithm
 		connectDeadline := time.Now().Add(dialDuration)
 
-		ac.updateConnectivityState(connectivity.Connecting, nil)
+		ac.updateConnectivityState(connectivity.Connecting)
 		ac.transport = nil
 		ac.mu.Unlock()
 
@@ -1124,7 +1123,7 @@ func (ac *addrConn) resetTransport() {
 				ac.mu.Unlock()
 				return
 			}
-			ac.updateConnectivityState(connectivity.TransientFailure, err)
+			ac.updateConnectivityState(connectivity.TransientFailure)
 
 			// Backoff.
 			b := ac.resetBackoff
@@ -1180,7 +1179,6 @@ func (ac *addrConn) resetTransport() {
 // first successful one. It returns the transport, the address and a Event in
 // the successful case. The Event fires when the returned transport disconnects.
 func (ac *addrConn) tryAllAddrs(addrs []resolver.Address, connectDeadline time.Time) (transport.ClientTransport, resolver.Address, *grpcsync.Event, error) {
-	var firstConnErr error
 	for _, addr := range addrs {
 		ac.mu.Lock()
 		if ac.state == connectivity.Shutdown {
@@ -1209,14 +1207,11 @@ func (ac *addrConn) tryAllAddrs(addrs []resolver.Address, connectDeadline time.T
 		if err == nil {
 			return newTr, addr, reconnect, nil
 		}
-		if firstConnErr == nil {
-			firstConnErr = err
-		}
 		ac.cc.blockingpicker.updateConnectionError(err)
 	}
 
 	// Couldn't connect to any address.
-	return nil, resolver.Address{}, nil, firstConnErr
+	return nil, resolver.Address{}, nil, fmt.Errorf("couldn't connect to any address")
 }
 
 // createTransport creates a connection to addr. It returns the transport and a
@@ -1249,7 +1244,7 @@ func (ac *addrConn) createTransport(addr resolver.Address, copts transport.Conne
 				// state to Connecting.
 				//
 				// TODO: this should be Idle when grpc-go properly supports it.
-				ac.updateConnectivityState(connectivity.Connecting, nil)
+				ac.updateConnectivityState(connectivity.Connecting)
 			}
 		})
 		ac.mu.Unlock()
@@ -1264,7 +1259,7 @@ func (ac *addrConn) createTransport(addr resolver.Address, copts transport.Conne
 				// state to Connecting.
 				//
 				// TODO: this should be Idle when grpc-go properly supports it.
-				ac.updateConnectivityState(connectivity.Connecting, nil)
+				ac.updateConnectivityState(connectivity.Connecting)
 			}
 		})
 		ac.mu.Unlock()
@@ -1290,7 +1285,7 @@ func (ac *addrConn) createTransport(addr resolver.Address, copts transport.Conne
 	}
 
 	select {
-	case <-time.After(time.Until(connectDeadline)):
+	case <-time.After(connectDeadline.Sub(time.Now())):
 		// We didn't get the preface in time.
 		newTr.Close()
 		grpclog.Warningf("grpc: addrConn.createTransport failed to connect to %v: didn't receive server preface in time. Reconnecting...", addr)
@@ -1321,7 +1316,7 @@ func (ac *addrConn) startHealthCheck(ctx context.Context) {
 	var healthcheckManagingState bool
 	defer func() {
 		if !healthcheckManagingState {
-			ac.updateConnectivityState(connectivity.Ready, nil)
+			ac.updateConnectivityState(connectivity.Ready)
 		}
 	}()
 
@@ -1357,13 +1352,13 @@ func (ac *addrConn) startHealthCheck(ctx context.Context) {
 		ac.mu.Unlock()
 		return newNonRetryClientStream(ctx, &StreamDesc{ServerStreams: true}, method, currentTr, ac)
 	}
-	setConnectivityState := func(s connectivity.State, lastErr error) {
+	setConnectivityState := func(s connectivity.State) {
 		ac.mu.Lock()
 		defer ac.mu.Unlock()
 		if ac.transport != currentTr {
 			return
 		}
-		ac.updateConnectivityState(s, lastErr)
+		ac.updateConnectivityState(s)
 	}
 	// Start the health checking stream.
 	go func() {
@@ -1429,7 +1424,7 @@ func (ac *addrConn) tearDown(err error) {
 	ac.transport = nil
 	// We have to set the state to Shutdown before anything else to prevent races
 	// between setting the state and logic that waits on context cancellation / etc.
-	ac.updateConnectivityState(connectivity.Shutdown, nil)
+	ac.updateConnectivityState(connectivity.Shutdown)
 	ac.cancel()
 	ac.curAddr = resolver.Address{}
 	if err == errConnDrain && curTr != nil {

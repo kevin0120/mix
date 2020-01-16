@@ -11,7 +11,6 @@ type Dispatcher interface {
 	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }
 
-
 type Diagnostic interface {
 	Info(msg string)
 	Error(msg string, err error)

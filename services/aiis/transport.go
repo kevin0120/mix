@@ -8,8 +8,8 @@ import (
 	"github.com/kataras/iris/core/errors"
 )
 
-type ServiceStatusHandler func(status ServiceStatus)
-type ResultPatchHandler func(rp ResultPatch)
+type ServiceStatusHandler func(status *ServiceStatus)
+type ResultPatchHandler func(rp *ResultPatch)
 type StatusHandler = transport.StatusHandler
 
 type ITransport interface {
@@ -77,12 +77,19 @@ func (s *BaseTransport) SetResultPatchHandler(toolSN string, handler ResultPatch
 	}
 	subject := fmt.Sprintf(SubjectResultsResp, toolSN)
 	fn := func(msg *transport.Message) ([]byte, error) {
-		var result ResultPatch
+		var payload TransportPayload
 		data := msg.Body
-		if err := json.Unmarshal(data, &result); err != nil {
+		if err := json.Unmarshal(data, &payload); err != nil {
 			return nil, err
 		}
-		handler(result)
+
+		body, _ := json.Marshal(payload.Data)
+		var result ResultPatch
+		if err := json.Unmarshal(body, &result); err != nil {
+			return nil, err
+		}
+
+		handler(&result)
 		return nil, nil
 	}
 	return trans.OnMessage(subject, fn)

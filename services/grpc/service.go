@@ -228,7 +228,7 @@ func (s *Service) Request(subject string, data []byte, timeOut time.Duration) ([
 
 func (s *Service) doWork() {
 	var needRespMsgIds map[string]chan *transport.Message
-	for ; ; {
+	for {
 		select {
 		case exit := <-s.exiting:
 			close(exit)
@@ -274,7 +274,7 @@ func (s *Service) doOnMsg() {
 		return
 	}
 	var msg transport.Message
-	for ; ; {
+	for {
 		if err := c.Recv(&msg); err != nil {
 			s.msgs <- msg
 		}

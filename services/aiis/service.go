@@ -317,7 +317,7 @@ func (s *Service) manage() {
 }
 
 // 服务状态变化
-func (s *Service) onServiceStatus(status ServiceStatus) {
+func (s *Service) onServiceStatus(status *ServiceStatus) {
 	s.doDispatch(dispatcherbus.DispatcherServiceStatus, status)
 }
 
@@ -330,8 +330,8 @@ func (s *Service) onTransportStatus(status string) {
 }
 
 // 收到结果上传反馈
-func (s *Service) onResultPatch(rp ResultPatch) {
-	s.patchResult(&rp)
+func (s *Service) onResultPatch(rp *ResultPatch) {
+	s.patchResult(rp)
 }
 
 func (s *Service) doDispatch(name string, data interface{}) {

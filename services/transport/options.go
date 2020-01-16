@@ -8,4 +8,4 @@ type Options = transport.Options
 
 type DialOptions = transport.DialOptions
 
-type ListenOptions  = transport.ListenOptions
+type ListenOptions = transport.ListenOptions
