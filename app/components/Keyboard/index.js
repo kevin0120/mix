@@ -1,4 +1,5 @@
 // @flow
+import type { AbstractComponent } from 'react';
 /* eslint-disable react/no-this-in-sfc */
 import React, { useEffect, useState } from 'react';
 import Dialog from '@material-ui/core/Dialog';
@@ -13,7 +14,6 @@ import Clear from '@material-ui/icons/CancelOutlined';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { I18n } from 'react-i18next';
 import { isEqual } from 'lodash-es';
-import type { AbstractComponent } from 'react';
 import customSelectStyle from '../../common/jss/customSelectStyle';
 import Button from '../CustomButtons/Button';
 import CustomInput from '../CustomInput/CustomInput';
@@ -26,13 +26,23 @@ const customStyles = theme => ({
     '&,&::placeholder': {
       fontSize: '50px'
     }
+  },
+  numericKeyboardButton: {
+    flex: 1
   }
 });
+
+const layouts = {
+  numeric: {
+    default: ['1 2 3', '4 5 6', '7 8 9', '. 0 {bksp}']
+  }
+};
+
 
 type Props = {};
 
 // eslint-disable-next-line flowtype/no-weak-types
-export default function withKeyboard(SubComponents: AbstractComponent<any, any>): AbstractComponent<any, any> {
+export default function withKeyboard(SubComponents: AbstractComponent<any, any>, layoutType): AbstractComponent<any, any> {
   function KeyboardDialog(props: Props) {
     const [keyboard, setKeyboard]: [?tKeyboard, ((?tKeyboard => ?tKeyboard) | ?tKeyboard) => void] = useState(null);
     const [layout, setLayout] = useState('default');
@@ -85,6 +95,12 @@ export default function withKeyboard(SubComponents: AbstractComponent<any, any>)
 
     const { ...restProps } = props;
     const classes = makeStyles(customStyles)();
+    const buttonsThemes = {
+      numeric: {
+        class: classes.numericKeyboardButton,
+        buttons: layouts.numeric.default.join(' ')
+      }
+    };
     const submitEnable = config.required ? text.length !== 0 : true;
     return (
       <I18n ns="translations">
@@ -179,6 +195,14 @@ export default function withKeyboard(SubComponents: AbstractComponent<any, any>)
                   layoutName={layout}
                   onChange={setText}
                   onKeyPress={onKeyPress}
+                  mergeDisplay
+                  layout={layouts[layoutType]}
+                  display={{
+                    '{bksp}': '⌫'
+                  }}
+                  buttonTheme={[
+                    buttonsThemes[layoutType] || {}
+                  ]}
                 />
               </div>
             </Dialog> : null}

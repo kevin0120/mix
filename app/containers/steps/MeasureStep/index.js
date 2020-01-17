@@ -187,4 +187,4 @@ function MeasureStep({
 export default connect<Props, tOP, tSP, tDP, _, _>(
   mapState,
   mapDispatch
-)(withKeyboard(MeasureStep));
+)(withKeyboard(MeasureStep, 'numeric'));
