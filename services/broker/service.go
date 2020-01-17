@@ -44,6 +44,11 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 	return s
 }
 
+func (s *Service) GetID() string {
+	c := s.Config()
+	return c.Name
+}
+
 func (s *Service) SetStatusHandler(handler StatusHandler) error {
 	p := s.provider
 	if p == nil {

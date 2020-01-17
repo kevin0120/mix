@@ -1,8 +1,8 @@
 package aiis
 
 const (
-	SubjectResults       = "saturn.results.%s"
-	SubjectResultsResp   = "saturn.results.%s.response"
+	SubjectResults       = "saturn.%s.workcenter_%s.tool_%s.results"
+	SubjectResultsResp   = "saturn.%s.results.response"
 	SubjectServiceStatus = "saturn.service.status"
 )
 
