@@ -195,7 +195,7 @@ msgstr "螺栓编号"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_socket
 msgid "Bolt Socket No"
-msgstr "Bolt Socket No"
+msgstr "套筒号"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_bom_line_id
@@ -207,12 +207,12 @@ msgstr "物料清单行"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
 msgid "Can Redo"
-msgstr "Can Redo"
+msgstr "可重做"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
 msgid "Can Skip"
-msgstr "Can Skip"
+msgstr "可跳过"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
@@ -496,7 +496,7 @@ msgstr "角度测量值"
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_tolerance_min_degree
 #: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_tolerance_min_degree
 msgid "Degree Min Tolerance"
-msgstr "Degree Min Tolerance"
+msgstr "最小角度"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_tree_inherit
@@ -728,7 +728,7 @@ msgstr "Group Sequence for Multi Spindle"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_4031
 msgid "Group id"
-msgstr "Group id"
+msgstr "拧紧点组"
 
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_hmi
