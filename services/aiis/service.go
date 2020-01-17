@@ -16,14 +16,16 @@ import (
 )
 
 type Service struct {
-	configValue    atomic.Value
-	diag           Diagnostic
-	opened         bool
-	storageService IStorageService
-	dispatcherBus  Dispatcher
-	notifyService  INotifyService
-	dispatcherMap  dispatcherbus.DispatcherMap
-	transport      ITransport
+	configValue     atomic.Value
+	diag            Diagnostic
+	opened          bool
+	storageService  IStorageService
+	dispatcherBus   Dispatcher
+	notifyService   INotifyService
+	dispatcherMap   dispatcherbus.DispatcherMap
+	transport       ITransport
+	tools           []string
+	toolsRegistered bool
 
 	closing chan struct{}
 }
@@ -54,6 +56,7 @@ func (s *Service) setupTransport(bs ITransportService, dispatcherBus Dispatcher)
 func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DispatcherServiceStatus: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherNewTool:       utils.CreateDispatchHandlerStruct(s.onNewTool),
 	}
 }
 
@@ -61,20 +64,28 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
+func (s *Service) registerToolsResult() {
+	if s.toolsRegistered {
+		return
+	}
+	s.toolsRegistered = true
+
+	for _, v := range s.tools {
+		if err := s.transport.SetResultPatchHandler(v, s.onResultPatch); err != nil {
+			s.diag.Error("SetResultPatchHandler", err)
+			return
+		}
+
+		s.diag.Info(fmt.Sprintf("订阅工具结果成功 SN:%s", v))
+	}
+}
+
 func (s *Service) onNewTool(data interface{}) {
 	if data == nil {
 		return
 	}
 
-	toolSN := data.(string)
-
-	if s.transport == nil {
-		return
-	}
-	if err := s.transport.SetResultPatchHandler(toolSN, s.onResultPatch); err != nil {
-		s.diag.Error("SetResultPatchHandler", err)
-	}
-
+	s.tools = data.([]string)
 }
 
 func (s *Service) launchDispatchers() {
@@ -95,8 +106,6 @@ func (s *Service) setUpDispatcherRegister() {
 		return
 	}
 	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
-
-	s.dispatcherBus.Register(dispatcherbus.DispatcherNewTool, utils.CreateDispatchHandlerStruct(s.onNewTool))
 }
 
 func (s *Service) transportDoStart() error {
@@ -118,8 +127,9 @@ func (s *Service) Open() error {
 	if !c.Enable {
 		return nil
 	}
-	s.launchDispatchers()
+
 	s.setUpDispatcherRegister()
+	s.launchDispatchers()
 
 	go s.manage()
 
@@ -323,6 +333,10 @@ func (s *Service) onServiceStatus(status *ServiceStatus) {
 
 // 传输连接状态变化
 func (s *Service) onTransportStatus(status string) {
+	if status == utils.STATUS_ONLINE {
+		s.registerToolsResult()
+	}
+
 	s.doDispatch(dispatcherbus.DispatcherServiceStatus, ServiceStatus{
 		Name:   ServiceAiis,
 		Status: status,

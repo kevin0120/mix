@@ -134,8 +134,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendOpenProtocolService()
 
-	s.appendTighteningDeviceService()
-
 	s.appendOdooService()
 
 	s.appendHMIService()
@@ -153,6 +151,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	if err := s.appendAiisService(); err != nil {
 		return nil, err
 	}
+
+	s.appendTighteningDeviceService()
 
 	s.appendHTTPDService()
 

@@ -53,7 +53,7 @@ aiis:
   enable: true
   timeout: 5s
   ws_result_route: ws://127.0.0.1/aiis/v1/ws/results
-  result_upload_inteval: 1h0m0s
+  result_upload_inteval: 2s
   keep_alive: 3s
   recheck: true
 odoo:
@@ -139,7 +139,7 @@ tightening_device:
       endpoint: tcp://192.168.5.186:4545
       sn: w1
       tools:
-        - sn: w1
+        - sn: xx4443
           channel: 1
 
     - model: ModelDesoutterCvi3
