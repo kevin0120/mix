@@ -551,7 +551,7 @@ func (s *Service) OperationToChanganResult(r *aiis2.PublishResult) changan.Tight
 	return result
 }
 
-func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id int64, has_upload bool, ip string, port string, toolSN string) error {
+func (s *Service) PatchResultFlag(clientID string, result_id int64, has_upload bool, ip string, port string, toolSN string) error {
 	if s.httpClient == nil {
 		return errors.New("rush http client is nil")
 	}
@@ -579,7 +579,7 @@ func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id i
 		HasUpload: has_upload,
 	}
 
-	return s.transport.SendResultPatch(toolSN, &resultPatch)
+	return s.transport.SendResultPatch(clientID, &resultPatch)
 }
 
 func (s *Service) HandleResult(msg *tMessage) {
@@ -657,7 +657,7 @@ func (s *Service) TaskResultsBatchSave() {
 					for _, v := range rs {
 						resultID := int64(v.OR["id"].(float64))
 						if resultID > 0 {
-							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
+							go s.PatchResultFlag(v.ClientID, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
 						}
 					}
 				}
@@ -674,7 +674,7 @@ func (s *Service) TaskResultsBatchSave() {
 					for _, v := range rs {
 						resultID := int64(v.OR["id"].(float64))
 						if resultID > 0 {
-							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
+							go s.PatchResultFlag(v.ClientID, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
 						}
 					}
 				}

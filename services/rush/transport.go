@@ -15,7 +15,7 @@ type BaseTransport struct {
 }
 
 // 发送结果上传反馈
-func (s *BaseTransport) SendResultPatch(toolSN string, rp *aiis.ResultPatch) error {
+func (s *BaseTransport) SendResultPatch(clientID string, rp *aiis.ResultPatch) error {
 	trans := s.ITransportService
 	if trans == nil {
 		return errors.New("trans Is Empty")
@@ -25,7 +25,7 @@ func (s *BaseTransport) SendResultPatch(toolSN string, rp *aiis.ResultPatch) err
 		Data:   rp,
 	})
 
-	return trans.SendMessage(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), data)
+	return trans.SendMessage(fmt.Sprintf(SUBJECT_RESULTS_RESP, clientID), data)
 }
 
 // 发送服务状态
