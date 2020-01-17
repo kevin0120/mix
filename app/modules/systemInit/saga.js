@@ -1,16 +1,11 @@
 // @flow
 
-import { takeLatest, put, select } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import { CONNECTION } from '../connections/action';
 import { RUSH } from '../rush/action';
-import { RFID } from '../device/rfid/action';
 import { SYSTEM_INIT } from './action';
-// import { setLedStatusReady, setModBusIO } from '../io/saga';
-
 import notifierActions from '../Notifier/action';
-import { initAiis } from '../aiis/action';
-
+// import { setLedStatusReady, setModBusIO } from '../io/saga';
 // const lodash = require('lodash');
 
 function* sysInit(action) {
@@ -25,6 +20,17 @@ function* sysInit(action) {
 
     // 初始化rush
     yield put({ type: RUSH.INIT });
+
+    const { debugSettings } = yield select(s => s.setting);
+    if (
+      process.env.NODE_ENV === 'development'
+      || process.env.DEBUG_PROD === 'true'
+      || process.env.NODE_ENV === 'test'
+    ) {
+      if (debugSettings) {
+        window.debugSettings = debugSettings;
+      }
+    }
 
     // 初始化io
     // const modbusConfig = state.setting.page.modbus;

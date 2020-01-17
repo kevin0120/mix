@@ -186,7 +186,9 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
                   onNext: this._onNextStep.bind(this),
                   onPrevious: this._onPreviousStep.bind(this)
                 },
-                status || (wStep.status === STEP_STATUS.FINISHED ? null : STEP_STATUS.READY)
+                window.debugSettings && window.debugSettings.disableOrderTriggerLimit ?
+                  STEP_STATUS.READY :
+                  status || (wStep.status === STEP_STATUS.FINISHED ? null : STEP_STATUS.READY)
               );
             } else if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
               yield put(orderActions.stepStatus(this, ORDER_STATUS.FAIL));

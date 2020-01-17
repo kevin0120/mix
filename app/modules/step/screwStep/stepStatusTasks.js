@@ -160,7 +160,9 @@ function* enteringState(config) {
       );
     });
     if (this._data && this._data.results) {
-      this._pointsManager.newResult(this._data.results);
+      if (!(window.debugSettings && window.debugSettings.disableOrderTriggerLimit)) {
+        this._pointsManager.newResult(this._data.results);
+      }
       this._pointsManager.stop();
     }
 

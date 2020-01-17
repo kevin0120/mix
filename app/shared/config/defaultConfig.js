@@ -211,6 +211,9 @@ const defaultConfigs = {
     curveEnable: true,
     reportStart: false, // 报开工
     reportFinish: false // 报完工
+  },
+  debugSettings:{
+    disableOrderTriggerLimit: true
   }
 };
 

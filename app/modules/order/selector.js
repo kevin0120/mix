@@ -61,12 +61,16 @@ export const isPending = (order: ?IOrder): boolean =>
 export const isCancel = (order: ?IOrder): boolean =>
   order?.status === ORDER_STATUS.CANCEL || false;
 export const doable = (order: ?IOrder): boolean =>
-  order?.status === ORDER_STATUS.WIP ||
-  order?.status === ORDER_STATUS.TODO ||
-  // order?.status === ORDER_STATUS.DONE ||
-  // order?.status === ORDER_STATUS.FAIL ||
-  (order && !order.status) ||
-  false;
+  window.debugSettings && window.debugSettings.disableOrderTriggerLimit ?
+    order?.status === ORDER_STATUS.WIP ||
+    order?.status === ORDER_STATUS.TODO ||
+    order?.status === ORDER_STATUS.DONE ||
+    order?.status === ORDER_STATUS.FAIL ||
+    (order && !order.status) || false :
+    order?.status === ORDER_STATUS.WIP ||
+    order?.status === ORDER_STATUS.TODO ||
+    (order && !order.status) ||
+    false;
 
 export const pendingable = (order: ?IOrder): boolean =>
   (order?.status &&
