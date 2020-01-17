@@ -2,6 +2,7 @@ package broker
 
 import (
 	"fmt"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/toml"
 	"github.com/masami10/rush/utils"
 	"github.com/nats-io/nats.go"
@@ -17,7 +18,7 @@ type Nats struct {
 	addrs         []string
 	conn          *nats.Conn
 	diag          Diagnostic
-	opts          brokerOptions
+	opts          transport.Options
 	nopts         []nats.Option
 	subscribes    map[string]*nats.Subscription
 	loadBalancers map[string][]string
@@ -135,6 +136,7 @@ func (s *Nats) Connect(urls []string) error {
 
 	//最后设置默认句柄
 	s.setDefaultHandlers()
+	s.handleStatus(nats.CONNECTED)
 
 	return nil
 }
@@ -192,7 +194,7 @@ func (s *Nats) removeSub(subject string) error {
 	return nil
 }
 
-func (s *Nats) AppendWorkGroup(subject string, group string, handler SubscribeHandler) error {
+func (s *Nats) AppendWorkGroup(subject string, group string, handler transport.OnMsgHandler) error {
 	nc := s.conn
 	if nc == nil {
 		err := errors.New("Nats Is Not Connected!")
@@ -225,7 +227,7 @@ func (s *Nats) ensureWorkGroup(subject string, group string) []string {
 	return s.loadBalancers[name]
 }
 
-func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (registerName string, err error) {
+func (s *Nats) subscribe(subject, group string, handler transport.OnMsgHandler) (registerName string, err error) {
 	nc := s.conn
 	if nc == nil {
 		err = errors.New("Nats Is Not Connected!")
@@ -239,9 +241,9 @@ func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (regis
 	}
 
 	fn := func(msg *nats.Msg) {
-		d := &Message{
+		d := &transport.Message{
 			Body:   msg.Data,
-			Header: map[string]string{HeaderSubject: msg.Subject, HeaderReply: msg.Reply},
+			Header: map[string]string{transport.HEADER_SUBJECT: msg.Subject, transport.HEADER_REPLY: msg.Reply},
 		}
 		if resp, err := handler(d); err != nil {
 			s.diag.Error("Subscribe Handler Error", err)
@@ -273,7 +275,7 @@ func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (regis
 }
 
 // 创建一个新的订阅，然后对其订阅发起返回
-func (s *Nats) Subscribe(subject string, handler SubscribeHandler) error {
+func (s *Nats) Subscribe(subject string, handler transport.OnMsgHandler) error {
 	_, err := s.subscribe(subject, "", handler)
 	return err
 }

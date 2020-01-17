@@ -2,6 +2,7 @@ package aiis
 
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/pkg/errors"
 	"go.uber.org/atomic"
 	"time"
 
@@ -10,33 +11,30 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
-	"github.com/pkg/errors"
-	"gopkg.in/resty.v1"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type Service struct {
-	configValue    atomic.Value
-	diag           Diagnostic
-	httpClient     *resty.Client
-	storageService IStorageService
-	dispatcherBus  Dispatcher
-	notifyService  INotifyService
-	updateQueue    map[int64]time.Time
-	mtx            sync.Mutex
-	dispatcherMap  dispatcherbus.DispatcherMap
-	transport      ITransport
+	configValue     atomic.Value
+	diag            Diagnostic
+	opened          bool
+	storageService  IStorageService
+	dispatcherBus   Dispatcher
+	notifyService   INotifyService
+	dispatcherMap   dispatcherbus.DispatcherMap
+	transport       ITransport
+	tools           []string
+	toolsRegistered bool
 
 	closing chan struct{}
 }
 
-func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IBrokerService, ns INotifyService) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs ITransportService, ns INotifyService) *Service {
 	s := &Service{
 		diag:           d,
 		dispatcherBus:  dp,
-		updateQueue:    map[int64]time.Time{},
+		opened:         false,
 		closing:        make(chan struct{}, 1),
 		storageService: ss,
 		notifyService:  ns,
@@ -48,19 +46,9 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IB
 	return s
 }
 
-func (s *Service) setupTransport(bs IBrokerService, dispatcherBus Dispatcher) {
-	switch s.Config().TransportType {
-	case TransportTypeGrpc:
-		s.transport = NewGRPCClient(s.diag, s.Config())
+func (s *Service) setupTransport(bs ITransportService, dispatcherBus Dispatcher) {
+	s.transport = NewAIISBaseTransport(bs)
 
-	case TransportTypeBroker:
-		s.transport = NewBrokerClient(s.diag, bs, dispatcherBus)
-
-	default:
-		s.transport = NewGRPCClient(s.diag, s.Config())
-	}
-
-	s.transport.SetResultPatchHandler(s.onResultPatch)
 	s.transport.SetServiceStatusHandler(s.onServiceStatus)
 	s.transport.SetStatusHandler(s.onTransportStatus)
 }
@@ -68,46 +56,7 @@ func (s *Service) setupTransport(bs IBrokerService, dispatcherBus Dispatcher) {
 func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DispatcherServiceStatus: utils.CreateDispatchHandlerStruct(nil),
-	}
-}
-
-func (s *Service) AddToQueue(id int64) error {
-	defer s.mtx.Unlock()
-	s.mtx.Lock()
-
-	_, e := s.updateQueue[id]
-	if e {
-		return errors.New("exist")
-	}
-
-	s.updateQueue[id] = time.Now()
-
-	return nil
-}
-
-func (s *Service) RemoveFromQueue(id int64) {
-	defer s.mtx.Unlock()
-	s.mtx.Lock()
-
-	_, e := s.updateQueue[id]
-	if e {
-		delete(s.updateQueue, id)
-	}
-}
-
-func (s *Service) uploadQueueTimeoutCheck() {
-	defer s.mtx.Unlock()
-	s.mtx.Lock()
-
-	var wait4Delete []int64
-	for k, v := range s.updateQueue {
-		if time.Since(v) > time.Duration(s.Config().Timeout) {
-			wait4Delete = append(wait4Delete, k)
-		}
-	}
-
-	for _, id := range wait4Delete {
-		delete(s.updateQueue, id)
+		dispatcherbus.DispatcherNewTool:       utils.CreateDispatchHandlerStruct(s.onNewTool),
 	}
 }
 
@@ -115,43 +64,92 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) ensureHttpClient() *resty.Client {
-	if s.httpClient != nil {
-		return s.httpClient
+func (s *Service) registerToolsResult() {
+	if s.toolsRegistered {
+		return
 	}
-	c := s.Config()
-	client := resty.New()
-	client.SetRESTMode() // restful mode is default
-	client.SetTimeout(time.Duration(c.Timeout))
-	client.SetContentLength(true)
-	// Headers for all request
-	client.
-		SetRetryCount(c.MaxRetry).
-		SetRetryWaitTime(time.Duration(c.PushInterval)).
-		SetRetryMaxWaitTime(20 * time.Second)
+	s.toolsRegistered = true
 
-	s.httpClient = client
-	return client
+	for _, v := range s.tools {
+		if err := s.transport.SetResultPatchHandler(v, s.onResultPatch); err != nil {
+			s.diag.Error("SetResultPatchHandler", err)
+			return
+		}
+
+		s.diag.Info(fmt.Sprintf("订阅工具结果成功 SN:%s", v))
+	}
+}
+
+func (s *Service) onNewTool(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	s.tools = data.([]string)
+}
+
+func (s *Service) launchDispatchers() {
+	if s.dispatcherBus == nil {
+		s.diag.Error("launchDispatchers", errors.New("Please Inject Dispatcher First"))
+		return
+	}
+	if len(s.dispatcherMap) == 0 {
+		return
+	}
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+
+}
+
+func (s *Service) setUpDispatcherRegister() {
+	if s.dispatcherBus == nil {
+		s.diag.Error("setUpDispatcherRegister", errors.New("Please Inject Dispatcher First"))
+		return
+	}
+	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+}
+
+func (s *Service) transportDoStart() error {
+	if s.transport == nil {
+		return errors.New("transport Is Empty, Please Inject First")
+	}
+	return s.transport.Start()
+}
+
+func (s *Service) transportDoStop() error {
+	if s.transport == nil {
+		return errors.New("transport Is Empty, Please Inject First")
+	}
+	return s.transport.Stop()
 }
 
 func (s *Service) Open() error {
-	s.ensureHttpClient()
-	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+	c := s.Config()
+	if !c.Enable {
+		return nil
+	}
 
-	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	s.setUpDispatcherRegister()
+	s.launchDispatchers()
 
 	go s.manage()
 
-	if err := s.transport.Start(); err != nil {
+	if err := s.transportDoStart(); err != nil {
 		return err
 	}
+
+	s.opened = true
 
 	return nil
 }
 
 func (s *Service) Close() error {
-	if err := s.transport.Stop(); err != nil {
-		s.diag.Error("Stop Transport Failed", err)
+	if !s.opened || s.transport == nil {
+		return nil
+	}
+	if s.transport != nil {
+		if err := s.transportDoStop(); err != nil {
+			s.diag.Error("Stop TransportService Failed", err)
+		}
 	}
 
 	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
@@ -162,20 +160,39 @@ func (s *Service) Close() error {
 
 func (s *Service) PutResult(body *PublishResult) {
 
-	err := s.AddToQueue(body.ID)
-	if err != nil {
-		return
-	}
-
-	err = s.transport.SendResult(body)
+	err := s.transport.SendResult(body)
 	if err != nil {
 		s.diag.Error("Publish Tool Result Failed", err)
 	}
 }
 
+func oneTimePass(result *PublishResult, count int) {
+	if count == 1 {
+		result.OneTimePass = tightening_device.RESULT_PASS
+	} else {
+		result.OneTimePass = tightening_device.RESULT_FAIL
+	}
+}
+
+func doResultRecheck(result *PublishResult, resultValue *tightening_device.ResultValue, sResult *storage.Results, recheck bool) {
+	if recheck {
+		if (resultValue.Mi >= sResult.ToleranceMin && resultValue.Mi <= sResult.ToleranceMax) &&
+			(resultValue.Wi >= sResult.ToleranceMinDegree && resultValue.Wi <= sResult.ToleranceMaxDegree) {
+			result.QualityState = tightening_device.RESULT_PASS
+			result.ExceptionReason = ""
+		} else {
+			result.QualityState = tightening_device.RESULT_EXCEPTION
+			result.ExceptionReason = tightening_device.RESULT_EXCEPTION
+		}
+	} else {
+		result.QualityState = tightening_device.RESULT_PASS
+		result.ExceptionReason = ""
+	}
+}
+
 func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, error) {
-	aiisResult := PublishResult{}
-	resultValue := tightening_device.ResultValue{}
+	var aiisResult PublishResult
+	var resultValue tightening_device.ResultValue
 	if err := json.Unmarshal([]byte(result.ResultValue), &resultValue); err != nil {
 		s.diag.Error("Unmarshal ResultValue Failed", err)
 	}
@@ -237,29 +254,12 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
 	aiisResult.Stage = result.Stage
 
-	if result.Result == storage.RESULT_OK {
+	switch result.Result {
+	case storage.RESULT_OK:
 		aiisResult.FinalPass = tightening_device.RESULT_PASS
-		if result.Count == 1 {
-			aiisResult.OneTimePass = tightening_device.RESULT_PASS
-		} else {
-			aiisResult.OneTimePass = tightening_device.RESULT_FAIL
-		}
-
-		if s.Config().Recheck {
-			if (resultValue.Mi >= result.ToleranceMin && resultValue.Mi <= result.ToleranceMax) &&
-				(resultValue.Wi >= result.ToleranceMinDegree && resultValue.Wi <= result.ToleranceMaxDegree) {
-				aiisResult.QualityState = tightening_device.RESULT_PASS
-				aiisResult.ExceptionReason = ""
-			} else {
-				aiisResult.QualityState = tightening_device.RESULT_EXCEPTION
-				aiisResult.ExceptionReason = tightening_device.RESULT_EXCEPTION
-			}
-		} else {
-			aiisResult.QualityState = tightening_device.RESULT_PASS
-			aiisResult.ExceptionReason = ""
-		}
-
-	} else {
+		oneTimePass(&aiisResult, result.Count)
+		doResultRecheck(&aiisResult, &resultValue, result, s.Config().Recheck)
+	default:
 		aiisResult.FinalPass = tightening_device.RESULT_FAIL
 		aiisResult.OneTimePass = tightening_device.RESULT_FAIL
 	}
@@ -288,14 +288,13 @@ func (s *Service) onTighteningResult(data interface{}) {
 func (s *Service) patchResult(rp *ResultPatch) {
 	err := s.storageService.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
 	if err == nil {
-		s.RemoveFromQueue(rp.ID)
 		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
 	} else {
 		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
 	}
 }
 
-func (s *Service) reuploadResult() error {
+func (s *Service) reUploadResult() error {
 	results, err := s.storageService.ListUnUploadResults()
 	if err != nil {
 		return err
@@ -312,16 +311,14 @@ func (s *Service) reuploadResult() error {
 }
 
 func (s *Service) manage() {
+	config := s.Config()
 	for {
 		select {
-		case <-time.After(time.Duration(s.Config().ResultUploadInteval)):
-			err := s.reuploadResult()
+		case <-time.After(time.Duration(config.ResultUploadInteval)):
+			err := s.reUploadResult()
 			if err != nil {
 				s.diag.Error("Reupload Result Failed", err)
 			}
-
-		case <-time.After(time.Duration(s.Config().Timeout)):
-			s.uploadQueueTimeoutCheck()
 
 		case <-s.closing:
 			return
@@ -330,12 +327,16 @@ func (s *Service) manage() {
 }
 
 // 服务状态变化
-func (s *Service) onServiceStatus(status ServiceStatus) {
+func (s *Service) onServiceStatus(status *ServiceStatus) {
 	s.doDispatch(dispatcherbus.DispatcherServiceStatus, status)
 }
 
 // 传输连接状态变化
 func (s *Service) onTransportStatus(status string) {
+	if status == utils.STATUS_ONLINE {
+		s.registerToolsResult()
+	}
+
 	s.doDispatch(dispatcherbus.DispatcherServiceStatus, ServiceStatus{
 		Name:   ServiceAiis,
 		Status: status,
@@ -343,8 +344,8 @@ func (s *Service) onTransportStatus(status string) {
 }
 
 // 收到结果上传反馈
-func (s *Service) onResultPatch(rp ResultPatch) {
-	s.patchResult(&rp)
+func (s *Service) onResultPatch(rp *ResultPatch) {
+	s.patchResult(rp)
 }
 
 func (s *Service) doDispatch(name string, data interface{}) {

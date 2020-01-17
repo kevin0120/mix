@@ -86,7 +86,7 @@ func (s *Service) generateIDInfo(info string) string {
 }
 
 func (s *Service) OnStatus(string, string) {
-	s.diag.Error("OnStatus", errors.New("OpenProtocol Service Not Support OnStatus"))
+	s.diag.Error("onStatus", errors.New("OpenProtocol Service Not Support onStatus"))
 }
 
 func (s *Service) OnRecv(string, string) {

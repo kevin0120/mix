@@ -1,75 +1,33 @@
 package aiis
 
 import (
-	"errors"
-	"fmt"
 	"github.com/masami10/rush/toml"
 	"time"
 )
 
 type Config struct {
-	Urls                []string          `yaml:"urls"`
-	Headers             map[string]string `yaml:"headers" override:"headers"`
-	ResultPushUrl       string            `yaml:"result_push_url"`
-	PushMethod          string            `yaml:"push_method"`
-	Timeout             toml.Duration     `yaml:"timeout"`
-	PushInterval        toml.Duration     `yaml:"push_interval"`
-	MaxRetry            int               `yaml:"max_retry"` // api最大尝试次数
-	WSResultRoute       string            `yaml:"ws_result_route"`
-	ResultUploadInteval toml.Duration     `yaml:"result_upload_inteval"`
-	GRPCServer          string            `yaml:"grpc_server"`
-	KeepAlive           toml.Duration     `yaml:"keep_alive"`
-	Recheck             bool              `yaml:"recheck"`
-	TransportType       string            `yaml:"transport_type"`
+	Enable              bool          `yaml:"enable"`
+	Timeout             toml.Duration `yaml:"timeout"`
+	WSResultRoute       string        `yaml:"ws_result_route"`
+	ResultUploadInteval toml.Duration `yaml:"result_upload_inteval"`
+	KeepAlive           toml.Duration `yaml:"keep_alive"`
+	Recheck             bool          `yaml:"recheck"`
 }
 
 func NewConfig() Config {
 	c := Config{
-		Urls:                []string{"http://127.0.0.1:9092"},
-		ResultPushUrl:       "/aiis/v1/operation.results/%d",
-		Timeout:             toml.Duration(time.Millisecond * 10),
-		PushInterval:        toml.Duration(time.Second * 1),
-		PushMethod:          "PUT",
-		MaxRetry:            3,
-		Headers:             map[string]string{"Content-Type": "application/json"},
+		Enable:              true,
+		Timeout:             toml.Duration(5 * time.Second),
 		WSResultRoute:       "ws://127.0.0.1/aiis/v1/ws/results",
-		ResultUploadInteval: toml.Duration(1 * time.Hour),
-		GRPCServer:          "127.0.0.1:9093",
+		ResultUploadInteval: toml.Duration(time.Duration(1 * time.Hour)),
 		KeepAlive:           toml.Duration(time.Second * 3),
 		Recheck:             true,
-		TransportType:       TransportTypeGrpc,
 	}
 
 	return c
 }
 
 func (c Config) Validate() error {
-	if len(c.Urls) == 0 {
-		return errors.New("Aiis service URLs is empty ")
-	}
-	if c.ResultPushUrl[0] != '/' {
-		return fmt.Errorf("route patterns must begin with a '/' %s", c.ResultPushUrl)
-	}
-
-	m := []string{"PATCH", "PUT", "POST"}
-
-	for _, v := range m {
-		if c.PushMethod != v {
-			break
-		}
-		return fmt.Errorf("PushMethod: %s not in  %s", c.PushMethod, m)
-	}
 
 	return nil
-}
-
-func (c Config) index() ([]*Endpoint, error) {
-	capacity := len(c.Urls)
-	m := make([]*Endpoint, capacity, capacity) //提前分配内存
-
-	for idx, url := range c.Urls {
-		m[idx] = NewEndpoint(url+c.ResultPushUrl, c.Headers, c.PushMethod)
-	}
-
-	return m, nil
 }

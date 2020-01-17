@@ -10,6 +10,7 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/grpc"
 	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
@@ -21,6 +22,7 @@ import (
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
@@ -40,16 +42,13 @@ type Diagnostic interface {
 }
 
 // Service represents a service attached to the server.
-type Service interface {
-	Open() error
-	Close() error
-}
+type Service = utils.ICommonService
 
 type Server struct {
 	dataDir  string
 	hostname string
 
-	StorageServie *storage.Service
+	StorageService *storage.Service
 
 	HTTPDService        *httpd.Service
 	OdooService         *odoo.Service
@@ -70,12 +69,16 @@ type Server struct {
 
 	BrokerService *broker.Service
 
+	GRPCService *grpc.Service
+
+	TransportService *transport.Service
+
 	config *Config
 	// List of services in startup order
 	Services []Service
 
 	ServicesByName map[string]int
-	err            chan error ``
+	err            chan error
 
 	BuildInfo   BuildInfo
 	Commander   command.Commander
@@ -101,46 +104,84 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		err:            make(chan error),
 		Commander:      c.Commander,
 	}
-	s.appendDispatcherBus()
-
-	s.appendStorageService()
+	if err := s.appendDispatcherBus(); err != nil {
+		return nil, errors.Wrap(err, "appendDispatcherBus")
+	}
 
 	if err := s.initHTTPDService(); err != nil {
 		return nil, errors.Wrap(err, "init httpd service")
 	}
+
+	s.appendStorageService()
+
 	s.appendWebsocketService()
 
-	if err := s.initAudiVWDService(); err != nil {
+	if err := s.initAudiVWProtocolService(); err != nil {
 		return nil, errors.Wrap(err, "init Audi/VW service")
 	}
 
 	s.appendMinioService()
 
-	s.AppendBrokerService()
+	s.appendGRPCService()
 
-	s.appendDeviceService()
+	s.appendBrokerService()
 
-	s.AppendScannerService()
+	if err := s.appendDeviceService(); err != nil {
+		return nil, errors.Wrap(err, "appendDeviceService")
+	}
 
-	s.AppendIOService()
+	s.appendScannerService()
 
-	s.AppendReaderService()
+	s.appendIOService()
+
+	s.appendReaderService()
 
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
 
 	s.appendOpenProtocolService()
 
-	s.appendTighteningDeviceService()
-
-	s.appendAiisService()
-
 	s.appendOdooService()
 
 	s.appendHMIService()
 
+	if err := s.appendTransportService(); err != nil {
+		return nil, err
+	} // append transport service
+
+	if err := s.appendAiisService(); err != nil {
+		return nil, err
+	}
+
+	s.appendTighteningDeviceService()
+
 	s.appendHTTPDService()
 
 	return s, nil
+}
+
+func (s *Server) appendTransportService() error {
+	c := s.config.Transport
+	d := s.DiagService.NewTransportHandler()
+	srv := transport.NewService(c, d)
+
+	if err := srv.BindTransportByProvider(s); err != nil {
+		s.Diag.Error("BindTransportByProvider", err)
+		return err
+	}
+
+	s.TransportService = srv
+
+	s.AppendService("transport", srv)
+	return nil
+}
+
+func (s *Server) GetServiceByName(name string) Service {
+	if idx, ok := s.ServicesByName[name]; !ok {
+		// Should be unreachable code
+		return nil
+	} else {
+		return s.Services[idx]
+	}
 }
 
 func (s *Server) AppendService(name string, srv Service) {
@@ -154,9 +195,8 @@ func (s *Server) AppendService(name string, srv Service) {
 }
 
 func (s *Server) appendDispatcherBus() error {
-	c := s.config.DispatcherBus
 	d := s.DiagService.NewDispatcherBusHandler()
-	srv, err := dispatcherbus.NewService(c, d)
+	srv, err := dispatcherbus.NewService(d)
 
 	if err != nil {
 		return errors.Wrap(err, "Append dispatcherBus Service Fail")
@@ -183,7 +223,7 @@ func (s *Server) initHTTPDService() error {
 	return nil
 }
 
-func (s *Server) initAudiVWDService() error {
+func (s *Server) initAudiVWProtocolService() error {
 	c := s.config.AudiVW
 	d := s.DiagService.NewAudiVWHandler()
 	srv := audi_vw.NewService(c, d)
@@ -198,7 +238,7 @@ func (s *Server) appendAudiVWService() {
 	s.AudiVWService.Minio = s.MinioService
 	s.AudiVWService.Aiis = s.AiisService
 	s.AudiVWService.WS = s.WSNotifyService
-	s.AudiVWService.DB = s.StorageServie
+	s.AudiVWService.DB = s.StorageService
 	s.AudiVWService.Odoo = s.OdooService
 
 	s.AppendService("audi/vw", s.AudiVWService)
@@ -208,26 +248,25 @@ func (s *Server) appendOpenProtocolService() {
 
 	c := s.config.OpenProtocol
 	d := s.DiagService.NewOpenProtocolHandler()
-	srv := openprotocol.NewService(c, d, vendors.OpenProtocolVendors, s.StorageServie, s.OdooService)
+	srv := openprotocol.NewService(c, d, vendors.OpenProtocolVendors, s.StorageService, s.OdooService)
 
 	s.OpenprotocolService = srv
 
-	s.AppendService("openprotocol", s.OpenprotocolService)
+	s.AppendService("openprotocol", srv)
 }
 
 func (s *Server) appendHTTPDService() {
 	s.AppendService("httpd", s.HTTPDService)
 }
 
-func (s *Server) appendMinioService() error {
+func (s *Server) appendMinioService() {
 	c := s.config.Minio
 	d := s.DiagService.NewMinioHandler()
-	srv := minio.NewService(c, d, s.StorageServie)
+	srv := minio.NewService(c, d, s.StorageService)
 
 	s.MinioService = srv
 	s.AppendService("minio", srv)
 
-	return nil
 }
 
 func (s *Server) appendDeviceService() error {
@@ -248,7 +287,7 @@ func (s *Server) appendTighteningDeviceService() error {
 	c := s.config.TighteningDevice
 	d := s.DiagService.NewTighteningDeviceHandler()
 	srv, err := tightening_device.NewService(c, d,
-		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService, s.StorageServie, s.IOService)
+		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService, s.DeviceService, s.StorageService, s.IOService)
 
 	if err != nil {
 		return errors.Wrap(err, "append tightening_device service fail")
@@ -263,7 +302,7 @@ func (s *Server) appendTighteningDeviceService() error {
 func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
-	srv := aiis.NewService(c, d, s.DispatcherBusService, s.StorageServie, s.BrokerService, s.WSNotifyService)
+	srv := aiis.NewService(c, d, s.DispatcherBusService, s.StorageService, s.TransportService, s.WSNotifyService)
 
 	s.AiisService = srv
 	s.AppendService("aiis", srv)
@@ -274,7 +313,7 @@ func (s *Server) appendAiisService() error {
 func (s *Server) appendOdooService() error {
 	c := s.config.Odoo
 	d := s.DiagService.NewOdooHandler()
-	srv := odoo.NewService(c, d, s.DispatcherBusService, s.StorageServie, s.HTTPDService)
+	srv := odoo.NewService(c, d, s.DispatcherBusService, s.StorageService, s.HTTPDService)
 
 	s.OdooService = srv
 	s.AppendService("odoo", srv)
@@ -282,7 +321,7 @@ func (s *Server) appendOdooService() error {
 	return nil
 }
 
-func (s *Server) appendWebsocketService() error {
+func (s *Server) appendWebsocketService() {
 	c := s.config.WSNotify
 	d := s.DiagService.NewWebsocketHandler()
 	srv := wsnotify.NewService(c, d, s.DispatcherBusService, s.HTTPDService)
@@ -290,30 +329,28 @@ func (s *Server) appendWebsocketService() error {
 	s.WSNotifyService = srv
 	s.AppendService("websocket", srv)
 
-	return nil
 }
 
 func (s *Server) appendHMIService() error {
 	d := s.DiagService.NewHMIHandler()
-	srv := hmi.NewService(d, s.DispatcherBusService, s.WSNotifyService, s.HTTPDService, s.OdooService, s.StorageServie)
+	srv := hmi.NewService(d, s.DispatcherBusService, s.WSNotifyService, s.HTTPDService, s.OdooService, s.StorageService)
 	s.AppendService("hmi", srv)
 
 	return nil
 }
 
-func (s *Server) appendStorageService() error {
+func (s *Server) appendStorageService() {
 	c := s.config.Storage
 	d := s.DiagService.NewStorageHandler()
 	srv := storage.NewService(c, d)
 
-	s.StorageServie = srv
+	s.StorageService = srv
 
 	s.AppendService("storage", srv)
 
-	return nil
 }
 
-func (s *Server) AppendScannerService() error {
+func (s *Server) appendScannerService() error {
 	c := s.config.Scanner
 	d := s.DiagService.NewScannerHandler()
 
@@ -325,21 +362,30 @@ func (s *Server) AppendScannerService() error {
 	return nil
 }
 
-func (s *Server) AppendBrokerService() error {
+func (s *Server) appendGRPCService() {
+	c := s.config.Grpc
+	d := s.DiagService.NewGRPCHandler()
+
+	srv := grpc.NewService(c, d)
+
+	s.GRPCService = srv
+
+	s.AppendService(transport.GRPCTransport, srv)
+}
+
+func (s *Server) appendBrokerService() {
 	c := s.config.Broker
 	d := s.DiagService.NewBrokerHandler()
 
 	srv := broker.NewService(c, d, s.DispatcherBusService)
 
 	s.BrokerService = srv
-	if c.Enable {
-		s.AppendService("broker", srv)
-	}
 
-	return nil
+	s.AppendService(transport.BrokerTransport, srv)
+
 }
 
-func (s *Server) AppendIOService() error {
+func (s *Server) appendIOService() error {
 	c := s.config.IO
 	d := s.DiagService.NewIOHandler()
 
@@ -351,7 +397,7 @@ func (s *Server) AppendIOService() error {
 	return nil
 }
 
-func (s *Server) AppendReaderService() error {
+func (s *Server) appendReaderService() {
 	c := s.config.Reader
 	d := s.DiagService.NewReaderHandler()
 
@@ -360,7 +406,6 @@ func (s *Server) AppendReaderService() error {
 	s.ReaderService = srv
 	s.AppendService("reader", srv)
 
-	return nil
 }
 
 func (s *Server) Open() error {

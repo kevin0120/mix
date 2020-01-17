@@ -1,9 +1,9 @@
 package aiis
 
 import (
-	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/utils"
 )
 
@@ -31,10 +31,11 @@ type IStorageService interface {
 	ListUnUploadResults() ([]storage.Results, error)
 }
 
-type IBrokerService interface {
-	Publish(subject string, data []byte) error
-	Subscribe(subject string, handler broker.SubscribeHandler) error
+type ITransportService interface {
+	OnMessage(subject string, handler transport.OnMsgHandler) error
+	SendMessage(subject string, data []byte) error
 	Status() string
+	SetStatusHandler(StatusHandler) error
 }
 
 type INotifyService interface {

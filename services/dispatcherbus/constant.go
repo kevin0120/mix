@@ -41,6 +41,10 @@ const (
 	// 当Broker(MQ)服务状态变化时， 会通过此分发器进行状态分发
 	DispatcherBrokerStatus = "DISPATCHER_BROKER_STATUS"
 
+	// ********************************Transport***********************************
+	// 当Transport服务状态变化时， 会通过此分发器进行状态分发
+	DispatcherTransportStatus = "DISPATCHER_TRANSPORT_STATUS"
+
 	// ********************************WEBSOCKET***********************************
 	// 当收到WebSocket请求时， 会通过此分发器进行请求分发
 	DispatcherWsNotify = "DISPATCHER_WS_NOTIFY"

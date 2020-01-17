@@ -6,11 +6,13 @@ import (
 	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
+	"github.com/masami10/rush/services/grpc"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/utils"
 	"os"
 	"os/user"
@@ -18,7 +20,6 @@ import (
 
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
-	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
@@ -58,13 +59,15 @@ type Config struct {
 
 	Broker broker.Config `yaml:"broker"`
 
+	Grpc grpc.Config `yaml:"grpc"`
+
+	Transport transport.Config `yaml:"transport"`
+
 	Reader reader.Config `yaml:"reader"`
 
 	TighteningDevice tightening_device.Config `yaml:"tightening_device"`
 
 	Device device.Config `yaml:"device"`
-
-	DispatcherBus dispatcherbus.Config `yaml:"dispatcher_bus"`
 
 	Commander command.Commander `yaml:"-"`
 }
@@ -92,7 +95,8 @@ func NewConfig() *Config {
 	c.TighteningDevice = tightening_device.NewConfig()
 	c.Device = device.NewConfig()
 	c.Broker = broker.NewConfig()
-	c.DispatcherBus = dispatcherbus.NewConfig()
+	c.Grpc = grpc.NewConfig()
+	c.Transport = transport.NewConfig()
 
 	return c
 }
@@ -170,6 +174,14 @@ func (c *Config) Validate() error {
 	}
 	if err := c.Broker.Validate(); err != nil {
 		return errors.Wrap(err, "broker")
+	}
+
+	if err := c.Grpc.Validate(); err != nil {
+		return errors.Wrap(err, "grpc")
+	}
+
+	if err := c.Transport.Validate(); err != nil {
+		return errors.Wrap(err, "transport")
 	}
 
 	return nil

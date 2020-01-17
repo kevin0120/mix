@@ -3,27 +3,22 @@ package broker
 import (
 	"fmt"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"go.uber.org/atomic"
 	"time"
 )
 
-type Diagnostic interface {
-	Info(msg string)
-	Error(msg string, err error)
-	Debug(msg string)
-}
-
 type Service struct {
 	diag          Diagnostic
 	configValue   atomic.Value
 	provider      IBrokerProvider
-	opened        bool
 	dispatcherBus Dispatcher
 	dispatcherMap dispatcherbus.DispatcherMap
+	opened        bool
 	closing       chan struct{}
-	status        atomic.Value
+	status        atomic.String
 }
 
 func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
@@ -34,14 +29,34 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 		dispatcherBus: dp,
 	}
 	s.configValue.Store(c)
-	s.status.Store(utils.STATUS_OFFLINE)
 
 	p := s.newBroker(c.Provider)
 	s.provider = p
 
 	s.setupGblDispatcher()
 
+	s.status.Store(utils.STATUS_OFFLINE)
+
+	if err := s.SetStatusHandler(nil); err != nil {
+		s.diag.Error("SetStatusHandler", err)
+	}
+
 	return s
+}
+
+func (s *Service) SetStatusHandler(handler StatusHandler) error {
+	p := s.provider
+	if p == nil {
+		return errors.New("Provider Is Empty, Please Init It First")
+	}
+	fn := func(status string) {
+		s.onStatus(status)
+		if handler != nil {
+			handler(status)
+		}
+	}
+	p.SetStatusHandler(fn)
+	return nil
 }
 
 func (s *Service) Config() Config {
@@ -50,8 +65,15 @@ func (s *Service) Config() Config {
 
 func (s *Service) setupGblDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DispatcherBrokerStatus: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherTransportStatus: utils.CreateDispatchHandlerStruct(nil),
 	}
+}
+
+func (s *Service) doOpen() {
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
+	s.doConnect(false) // 初始化所有连接状态为未连接
+	go s.connectProc()
+	s.opened = true
 }
 
 func (s *Service) Open() error {
@@ -59,14 +81,27 @@ func (s *Service) Open() error {
 	if !c.Enable {
 		return nil
 	}
+	s.doOpen()
+	return nil
+}
 
-	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-	s.doConnect(false)
-	go s.connectProc()
+func (s *Service) TransportForceOpen() error {
+	if s.opened {
+		return nil
+	}
+	c := s.Config()
+	if err := c.Validate(); err != nil {
+		s.diag.Error("TransportForceOpen", err)
+		return err
+	}
+	s.doOpen()
 	return nil
 }
 
 func (s *Service) Close() error {
+	if !s.opened {
+		return nil
+	}
 	s.closing <- struct{}{}
 	s.dispatcherBus.ReleaseDispatchersByHandlerMap(s.dispatcherMap)
 	if s.provider != nil {
@@ -75,14 +110,23 @@ func (s *Service) Close() error {
 	return nil
 }
 
+func (s *Service) dispatcherBrokerStatus(status string) {
+	if s.dispatcherBus == nil {
+		s.diag.Error("dispatcherBrokerStatus Error", errors.New("dispatcherBus Is Empty"))
+	}
+	if err := s.dispatcherBus.Dispatch(dispatcherbus.DispatcherTransportStatus, status); err != nil {
+		s.diag.Error("dispatcherBrokerStatus", err)
+	}
+
+}
+
 func (s *Service) doConnect(opened bool) {
-	s.opened = true
 	s.diag.Debug(fmt.Sprintf("broker Service Is Opened: %v", opened))
 	status := utils.STATUS_OFFLINE
 	if opened {
 		status = utils.STATUS_ONLINE
 	}
-	s.doDispatch(dispatcherbus.DispatcherBrokerStatus, status)
+	s.dispatcherBrokerStatus(status)
 }
 
 func (s *Service) connectProc() {
@@ -92,8 +136,8 @@ func (s *Service) connectProc() {
 			if err := s.provider.Connect(s.Config().ConnectUrls); err != nil {
 				continue
 			} else {
-				s.opened = true
-				s.diag.Debug(fmt.Sprintf("broker Service Is Opened: %v", s.opened))
+				s.dispatcherBrokerStatus(utils.STATUS_ONLINE)
+				s.diag.Debug(fmt.Sprintf("broker Service Is Opened"))
 				return
 			}
 
@@ -103,20 +147,32 @@ func (s *Service) connectProc() {
 	}
 }
 
-func (s *Service) newBroker(provider string) (ret IBrokerProvider) {
+func (s *Service) newBroker(provider string) (bp IBrokerProvider) {
 	c := s.Config()
 	switch provider {
 	case "nats":
-		ret = NewNats(s.diag, c)
+		bp = NewNats(s.diag, c)
 	default:
-		ret = NewDefaultBroker()
+		bp = NewDefaultBroker()
 	}
 
-	ret.SetStatusHandler(s.onStatus)
 	return
 }
 
-func (s *Service) Subscribe(subject string, handler SubscribeHandler) error {
+func (s *Service) OnMessage(subject string, handler transport.OnMsgHandler) error {
+	return s.subscribe(subject, handler)
+}
+
+func (s *Service) SendMessage(subject string, data []byte) error {
+	return s.publish(subject, data)
+}
+
+func (s *Service) GetServerAddress() []string {
+	c := s.Config()
+	return c.ConnectUrls
+}
+
+func (s *Service) subscribe(subject string, handler transport.OnMsgHandler) error {
 	p := s.provider
 	if p == nil {
 		return errors.New("Can Not Create broker Subscribe, Cause provider Is Empty")
@@ -125,7 +181,7 @@ func (s *Service) Subscribe(subject string, handler SubscribeHandler) error {
 	return p.Subscribe(subject, handler)
 }
 
-func (s *Service) Publish(subject string, data []byte) error {
+func (s *Service) publish(subject string, data []byte) error {
 	p := s.provider
 	if p == nil {
 		return errors.New("Can Not Create broker Publish, Cause provider Is Empty")
@@ -145,11 +201,11 @@ func (s *Service) Request(subject string, data []byte, timeOut time.Duration) ([
 
 func (s *Service) onStatus(status string) {
 	s.status.Store(status)
-	s.doDispatch(dispatcherbus.DispatcherBrokerStatus, status)
+	s.dispatcherBrokerStatus(status)
 }
 
 func (s *Service) Status() string {
-	return s.status.Load().(string)
+	return s.status.Load()
 }
 
 func (s *Service) doDispatch(name string, data interface{}) {

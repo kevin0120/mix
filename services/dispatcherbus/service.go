@@ -4,7 +4,6 @@ import (
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"go.uber.org/atomic"
 	"sync"
 )
 
@@ -17,22 +16,19 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	diag        Diagnostic
-	configValue atomic.Value
+	diag Diagnostic
 
 	dispatchers    map[string]*utils.Dispatcher
 	dispatchersMtx sync.Mutex
 }
 
-func NewService(c Config, d Diagnostic) (*Service, error) {
+func NewService(d Diagnostic) (*Service, error) {
 
 	srv := &Service{
 		diag:           d,
 		dispatchers:    map[string]*utils.Dispatcher{},
 		dispatchersMtx: sync.Mutex{},
 	}
-
-	srv.configValue.Store(c)
 
 	return srv, nil
 }
@@ -49,10 +45,6 @@ func (s *Service) Close() error {
 	}
 
 	return nil
-}
-
-func (s *Service) config() Config {
-	return s.configValue.Load().(Config)
 }
 
 func (s *Service) getDispatcher(name string) (*utils.Dispatcher, error) {
