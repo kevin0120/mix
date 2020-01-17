@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/transport"
@@ -13,6 +14,7 @@ import (
 type Service struct {
 	diag          Diagnostic
 	configValue   atomic.Value
+	clientID      string
 	provider      IBrokerProvider
 	dispatcherBus Dispatcher
 	dispatcherMap dispatcherbus.DispatcherMap
@@ -27,6 +29,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 		diag:          d,
 		closing:       make(chan struct{}, 1),
 		dispatcherBus: dp,
+		clientID:      c.Name,
 	}
 	s.configValue.Store(c)
 
@@ -45,8 +48,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 }
 
 func (s *Service) GetID() string {
-	c := s.Config()
-	return c.Name
+	return s.clientID
 }
 
 func (s *Service) SetStatusHandler(handler StatusHandler) error {
@@ -169,7 +171,19 @@ func (s *Service) OnMessage(subject string, handler transport.OnMsgHandler) erro
 }
 
 func (s *Service) SendMessage(subject string, data []byte) error {
-	return s.publish(subject, data)
+	msg := &transport.Message{
+		Header: map[string]string{
+			transport.HEADER_SUBJECT:   subject,
+			transport.HEADER_CLIENT_ID: s.GetID(),
+			//transport.HEADER_REPLY:     fmt.Sprintf(utils.SubjectResultsResp, s.GetID()),
+		},
+		Body: data,
+	}
+	if d, err := json.Marshal(msg); err == nil {
+		return s.publish(subject, d)
+	} else {
+		return err
+	}
 }
 
 func (s *Service) GetServerAddress() []string {

@@ -1,8 +1,10 @@
 package aiis
 
+import "github.com/masami10/rush/utils"
+
 const (
-	SubjectResults       = "saturn.%s.workcenter_%s.tool_%s.results"
-	SubjectResultsResp   = "saturn.%s.results.response"
+	SubjectResults       = utils.SubjectResults
+	SubjectResultsResp   = utils.SubjectResultsResp
 	SubjectServiceStatus = "saturn.service.status"
 )
 
