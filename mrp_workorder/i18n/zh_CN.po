@@ -1,28 +1,34 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * mrp_workorder
-# 
-# Translators:
-# Jeffery CHEN <jeffery9@gmail.com>, 2016
-# 苏州远鼎 <tiexinliu@126.com>, 2017
+#	* mrp_workorder
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0+e\n"
+"Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-10 09:15+0000\n"
-"PO-Revision-Date: 2016-10-10 09:15+0000\n"
-"Last-Translator: 苏州远鼎 <tiexinliu@126.com>, 2017\n"
-"Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
+"POT-Creation-Date: 2020-01-17 07:32+0000\n"
+"PO-Revision-Date: 2020-01-17 07:32+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_CN\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: \n"
 
 #. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
 msgid "<span class=\"o_stat_text\">Scraps</span>"
 msgstr "<span class=\"o_stat_text\">报废</span>"
+
+#. module: mrp_workorder
+#: model:ir.ui.view,arch_db:mrp_workorder.mrp_routing_view_form_inherit_quality
+msgid "<span class=\"o_stat_text\">Steps</span>"
+msgstr "<span class=\"o_stat_text\">工步</span>"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_point_test_type_allow_registration
+msgid "Allow registration"
+msgstr "Allow registration"
 
 #. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
@@ -35,17 +41,22 @@ msgid "Click to start a new work order."
 msgstr "点击开始一个新的工单。"
 
 #. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_component_id
+msgid "Component"
+msgstr "組件"
+
+#. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
 msgid "Continue Production"
 msgstr "继续生产"
 
 #. module: mrp_workorder
-#: model:ir.model.fields,field_description:mrp_workorder.field_stock_traceability_report_create_uid
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_stock_traceability_report_create_uid
 msgid "Created by"
 msgstr "创建人"
 
 #. module: mrp_workorder
-#: model:ir.model.fields,field_description:mrp_workorder.field_stock_traceability_report_create_date
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_stock_traceability_report_create_date
 msgid "Created on"
 msgstr "创建时间"
 
@@ -60,17 +71,27 @@ msgid "Current Qty"
 msgstr "当前数量"
 
 #. module: mrp_workorder
-#: model:ir.model.fields,field_description:mrp_workorder.field_stock_traceability_report_display_name
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_stock_traceability_report_display_name
 msgid "Display Name"
 msgstr "显示名称"
 
 #. module: mrp_workorder
+#: selection:sa.quality.point,worksheet:0
+msgid "Do not update page"
+msgstr "无需翻页"
+
+#. module: mrp_workorder
+#: code:addons/mrp_workorder/models/quality.py:143
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_qty_done
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
+#, python-format
 msgid "Done"
 msgstr "完成"
 
 #. module: mrp_workorder
 #. openerp-web
+#: code:addons/mrp_workorder/static/src/js/stock_traceability_report_backend.js:43
+#: code:addons/mrp_workorder/static/src/js/stock_traceability_report_widgets.js:40
 #: code:addons/mrp_workorder/static/src/xml/stock_traceability_report_line.xml:63
 #: model:ir.ui.view,arch_db:mrp_workorder.report_mrp_line
 #, python-format
@@ -90,7 +111,17 @@ msgid "Finish Order"
 msgstr "完成工单"
 
 #. module: mrp_workorder
-#: model:ir.model.fields,field_description:mrp_workorder.field_stock_traceability_report_id
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_finished_lot_id
+msgid "Finished Product Lot"
+msgstr "产成品批次"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_finished_product_sequence
+msgid "Finished Product Sequence Number"
+msgstr "产成品序列号"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_stock_traceability_report_id
 msgid "ID"
 msgstr "ID"
 
@@ -98,33 +129,33 @@ msgstr "ID"
 #: model:ir.ui.view,arch_db:mrp_workorder.report_stock_body_print
 #: model:ir.ui.view,arch_db:mrp_workorder.report_stock_inventory
 msgid "LOCATION DESTINATION"
-msgstr "LOCATION DESTINATION"
+msgstr "目标位置"
 
 #. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.report_stock_body_print
 #: model:ir.ui.view,arch_db:mrp_workorder.report_stock_inventory
 msgid "LOCATION SOURCE"
-msgstr "LOCATION SOURCE"
+msgstr "源位置"
 
 #. module: mrp_workorder
-#: model:ir.model.fields,field_description:mrp_workorder.field_stock_traceability_report___last_update
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_stock_traceability_report___last_update
 msgid "Last Modified on"
 msgstr "最后修改日"
 
 #. module: mrp_workorder
-#: model:ir.model.fields,field_description:mrp_workorder.field_stock_traceability_report_write_uid
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_stock_traceability_report_write_uid
 msgid "Last Updated by"
 msgstr "最后更新人"
 
 #. module: mrp_workorder
-#: model:ir.model.fields,field_description:mrp_workorder.field_stock_traceability_report_write_date
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_stock_traceability_report_write_date
 msgid "Last Updated on"
 msgstr "最后更新时间"
 
 #. module: mrp_workorder
 #: model:ir.model,name:mrp_workorder.model_mrp_production
 msgid "Manufacturing Order"
-msgstr "制造订单"
+msgstr "工单"
 
 #. module: mrp_workorder
 #: model:ir.ui.menu,name:mrp_workorder.mrp_production_menu_planning
@@ -135,12 +166,23 @@ msgstr "制造订单"
 #. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.report_stock_inventory
 msgid "No operation made on this lot."
-msgstr ""
+msgstr "没有作业"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_alert_workorder_id
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_workorder_id
+msgid "Operation"
+msgstr "作业"
 
 #. module: mrp_workorder
 #: model:ir.ui.menu,name:mrp_workorder.menu_mrp_production_plan
 msgid "Orders to Plan"
 msgstr "待安排的订单"
+
+#. module: mrp_workorder
+#: selection:sa.quality.point,test_report_type:0
+msgid "PDF"
+msgstr "PDF"
 
 #. module: mrp_workorder
 #. openerp-web
@@ -154,6 +196,16 @@ msgstr "打印"
 #: model:ir.ui.view,arch_db:mrp_workorder.report_stock_inventory
 msgid "PRODUCT"
 msgstr "产品"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_parent_id
+msgid "Parent Quality Check"
+msgstr "父级工步"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_point_routing_id
+msgid "Parent Routing"
+msgstr "父级工艺路线"
 
 #. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
@@ -186,6 +238,17 @@ msgid "Planning by Workcenter"
 msgstr "按工作中心规划"
 
 #. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_point_component_id
+msgid "Product To Register"
+msgstr "所需物料"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_alert_production_id
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_production_id
+msgid "Production Order"
+msgstr "生产单"
+
+#. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
 msgid "Production Workcenter"
 msgstr "生产工作中心"
@@ -197,6 +260,31 @@ msgid "QUANTITY"
 msgstr "数量"
 
 #. module: mrp_workorder
+#: model:ir.model,name:mrp_workorder.model_sa_quality_alert
+msgid "Quality Alert"
+msgstr "质量警报"
+
+#. module: mrp_workorder
+#: model:ir.model,name:mrp_workorder.model_sa_quality_check
+msgid "Quality Check"
+msgstr "质量检查"
+
+#. module: mrp_workorder
+#: model:ir.model,name:mrp_workorder.model_sa_quality_point_test_type
+msgid "Quality Control Test Type"
+msgstr "质量控制类型"
+
+#. module: mrp_workorder
+#: model:ir.model,name:mrp_workorder.model_sa_quality_point
+msgid "Quality Point"
+msgstr "质量点"
+
+#. module: mrp_workorder
+#: model:ir.ui.view,arch_db:mrp_workorder.view_routing_steps_search
+msgid "Quality Point Steps"
+msgstr "工步"
+
+#. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_production_tree_view_planning
 msgid "Quantity"
 msgstr "数量"
@@ -205,6 +293,26 @@ msgstr "数量"
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
 msgid "Quantity Produced"
 msgstr "已制造数量"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_point_test_report_type
+msgid "Report Type"
+msgstr "报告类型"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_result
+msgid "Result"
+msgstr "结果"
+
+#. module: mrp_workorder
+#: model:ir.ui.view,arch_db:mrp_workorder.view_routing_steps_search
+msgid "Routing"
+msgstr "工艺路线"
+
+#. module: mrp_workorder
+#: model:ir.model,name:mrp_workorder.model_mrp_routing
+msgid "Routings"
+msgstr "工艺路线"
 
 #. module: mrp_workorder
 #: model:ir.model.fields,field_description:mrp_workorder.field_mrp_production_date_planned_finished_wo
@@ -222,14 +330,50 @@ msgid "Scrap"
 msgstr "报废"
 
 #. module: mrp_workorder
+#: selection:sa.quality.point,worksheet:0
+msgid "Scroll to specific page"
+msgstr "翻页至"
+
+#. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
 msgid "Start Working"
 msgstr "开始工作"
 
 #. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_quality_state_for_summary
+msgid "Status Summary"
+msgstr "状态说明"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_point_operation_id
+msgid "Step"
+msgstr "工步"
+
+#. module: mrp_workorder
+#: model:ir.actions.act_window,name:mrp_workorder.action_mrp_workorder_show_steps
+msgid "Steps"
+msgstr "工步"
+
+#. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workcenter_view_kanban_inherit_panel
 msgid "Tablet view to process work orders at the work center"
-msgstr ""
+msgstr "Tablet view to process work orders at the work center"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,help:mrp_workorder.field_sa_quality_point_routing_id
+msgid "The routing contains all the Work Centers used and for how long. This will create work orders afterwardswhich alters the execution of the manufacturing order. "
+msgstr "路由包含所有使用的工作中心和多久。 这将在之后创建工单，改变制造订单的执行。"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_title
+msgid "Title"
+msgstr "标题"
+
+#. module: mrp_workorder
+#: code:addons/mrp_workorder/models/quality.py:143
+#, python-format
+msgid "To Do"
+msgstr "待办"
 
 #. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
@@ -245,6 +389,11 @@ msgstr "总数量"
 #: model:ir.ui.view,arch_db:mrp_workorder.report_stock_body_print
 msgid "Traceability Report"
 msgstr "追溯报告"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_point_code
+msgid "Type of Operation"
+msgstr "作业的类型"
 
 #. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
@@ -275,6 +424,7 @@ msgstr "上/下追溯"
 
 #. module: mrp_workorder
 #. openerp-web
+#: code:addons/mrp_workorder/static/src/js/stock_traceability_report_widgets.js:38
 #: code:addons/mrp_workorder/static/src/xml/stock_traceability_report_line.xml:62
 #: model:ir.actions.client,name:mrp_workorder.action_stock_report
 #: model:ir.ui.view,arch_db:mrp_workorder.report_mrp_line
@@ -289,9 +439,21 @@ msgid "Waiting for Material Availability"
 msgstr "等待物料可用"
 
 #. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_alert_workcenter_id
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_check_workcenter_id
+msgid "Work Center"
+msgstr "工作中心"
+
+#. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_workorder_view_form_tablet
 msgid "Work Instruction"
 msgstr "工作指令"
+
+#. module: mrp_workorder
+#: model:ir.ui.view,arch_db:mrp_workorder.quality_point_view_form_inherit_mrp
+#: model:ir.ui.view,arch_db:mrp_workorder.quality_point_view_tree
+msgid "Work Order Operation"
+msgstr "作业"
 
 #. module: mrp_workorder
 #: model:ir.actions.act_window,name:mrp_workorder.mrp_workorder_action_tablet
@@ -301,21 +463,41 @@ msgstr "工单"
 
 #. module: mrp_workorder
 #: model:ir.actions.act_window,help:mrp_workorder.mrp_workorder_action_tablet
-msgid ""
-"Work Orders is the list of operations to be performed for each\n"
+msgid "Work Orders is the list of operations to be performed for each\n"
 "                manufacturing order. Once you start the first work order of a\n"
 "                manufacturing order, the manufacturing order is automatically\n"
 "                marked as started. Once you finish the latest operation of a\n"
 "                manufacturing order, the MO is automatically done and the related\n"
 "                products are produced."
-msgstr ""
+msgstr "Work Orders is the list of operations to be performed for each\n"
+"                manufacturing order. Once you start the first work order of a\n"
+"                manufacturing order, the manufacturing order is automatically\n"
+"                marked as started. Once you finish the latest operation of a\n"
+"                manufacturing order, the MO is automatically done and the related\n"
+"                products are produced."
 
 #. module: mrp_workorder
-#: model:ir.model,name:mrp_workorder.model_stock_traceability_report
-msgid "stock.traceability.report"
-msgstr ""
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_point_worksheet
+msgid "Worksheet"
+msgstr "工作记录"
+
+#. module: mrp_workorder
+#: model:ir.model.fields,field_description:mrp_workorder.field_sa_quality_point_worksheet_page
+msgid "Worksheet Page"
+msgstr "工艺文档"
+
+#. module: mrp_workorder
+#: selection:sa.quality.point,test_report_type:0
+msgid "ZPL"
+msgstr "ZPL"
+
+#. module: mrp_workorder
+#: model:ir.model,name:mrp_workorder.model_sa_stock_traceability_report
+msgid "sa.stock.traceability.report"
+msgstr "sa.stock.traceability.report"
 
 #. module: mrp_workorder
 #: model:ir.ui.view,arch_db:mrp_workorder.mrp_production_view_form_inherit_planning
 msgid "to"
 msgstr "到"
+

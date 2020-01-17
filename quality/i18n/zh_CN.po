@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-31 08:08+0000\n"
-"PO-Revision-Date: 2019-12-31 08:08+0000\n"
+"POT-Creation-Date: 2020-01-17 07:27+0000\n"
+"PO-Revision-Date: 2020-01-17 07:27+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_team_alert_count
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_alert_count
 msgid "# Quality Alerts"
-msgstr "# Quality Alerts"
+msgstr "# 质量预警"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_team_check_count
@@ -54,12 +54,12 @@ msgstr "<span>质量警报</span>"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_form
 msgid "<span>from</span>"
-msgstr "<span>from</span>"
+msgstr "<span>从</span>"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_form
 msgid "<span>to</span>"
-msgstr "<span>to</span>"
+msgstr "<span>到</span>"
 
 #. module: quality
 #: model:ir.model.fields,help:quality.field_sa_quality_alert_team_alias_defaults
@@ -135,12 +135,12 @@ msgstr "取消"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_check_id
 msgid "Check"
-msgstr "Check"
+msgstr "检测"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_check_count
 msgid "Check count"
-msgstr "Check count"
+msgstr "检测总计"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_tree
@@ -193,7 +193,7 @@ msgstr "配置"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_control_date
 msgid "Control Date"
-msgstr "Control Date"
+msgstr "控制日期"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_form
@@ -208,7 +208,7 @@ msgstr "控制人"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_point_id
 msgid "Control Point"
-msgstr "Control Point"
+msgstr "质量控制点"
 
 #. module: quality
 #: model:ir.ui.menu,name:quality.menu_quality_control_points
@@ -267,12 +267,12 @@ msgstr "仪表板"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_date_assign
 msgid "Date Assigned"
-msgstr "Date Assigned"
+msgstr "指派日期"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_date_close
 msgid "Date Closed"
-msgstr "Date Closed"
+msgstr "关闭日期"
 
 #. module: quality
 #: selection:sa.quality.point,measure_frequency_unit:0
@@ -285,7 +285,7 @@ msgid "Default Values"
 msgstr "默认值"
 
 #. module: quality
-#: model:ir.model.fields,help:quality.field_sa_quality_point_test_type_id_3720
+#: model:ir.model.fields,help:quality.field_sa_quality_point_test_type_id_3722
 msgid "Defines the type of the quality control point."
 msgstr "Defines the type of the quality control point."
 
@@ -359,18 +359,18 @@ msgstr "失败的"
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_failure_message
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_failure_message
 msgid "Failure Message"
-msgstr "Failure Message"
+msgstr "失败信息"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_stage_folded
 msgid "Folded"
-msgstr "Folded"
+msgstr "收缩"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_measure_frequency_type
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_measure_frequency_unit_value
 msgid "Frequency"
-msgstr "Frequency"
+msgstr "频率"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_search
@@ -424,7 +424,7 @@ msgstr "进行中"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_form
 msgid "Instructions"
-msgstr "Instructions"
+msgstr "工步指令"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert___last_update
@@ -487,17 +487,17 @@ msgstr "管理员"
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_tolerance_max
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_tolerance_max
 msgid "Max Tolerance"
-msgstr "Max Tolerance"
+msgstr "最大冗余"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_measure
 msgid "Measure"
-msgstr "Measure"
+msgstr "测量"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_measure_success
 msgid "Measure Success"
-msgstr "Measure Success"
+msgstr "测量成功"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_measure_frequency_unit
@@ -507,13 +507,13 @@ msgstr "Measure frequency unit"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_form
 msgid "Message If Failure"
-msgstr "Message If Failure"
+msgstr "失败消息"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_tolerance_min
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_tolerance_min
 msgid "Min Tolerance"
-msgstr "Min Tolerance"
+msgstr "最小冗余"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_form
@@ -529,7 +529,7 @@ msgstr "月"
 #: model:ir.ui.view,arch_db:quality.quality_alert_team_view_kanban
 msgid "More\n"
 "                                        <i class=\"fa fa-caret-down\"/>"
-msgstr "More\n"
+msgstr "更多\n"
 "                                        <i class=\"fa fa-caret-down\"/>"
 
 #. module: quality
@@ -696,7 +696,7 @@ msgstr "策略是通过邮件网关在文档上提交一个消息\n"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_action_preventive
 msgid "Preventive Action"
-msgstr "Preventive Action"
+msgstr "预防行动"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_form
@@ -937,7 +937,7 @@ msgid "Settings"
 msgstr "设置"
 
 #. module: quality
-#: model:ir.model.fields,field_description:quality.field_sa_quality_alert_stage_id_3869
+#: model:ir.model.fields,field_description:quality.field_sa_quality_alert_stage_id_3871
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_search
 msgid "Stage"
 msgstr "阶段"
@@ -963,7 +963,7 @@ msgid "Tags"
 msgstr "标签"
 
 #. module: quality
-#: model:ir.model.fields,field_description:quality.field_sa_quality_alert_team_id_3847
+#: model:ir.model.fields,field_description:quality.field_sa_quality_alert_team_id_3849
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_team_id
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_team_id
 msgid "Team"
@@ -979,11 +979,11 @@ msgstr "团队"
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_test_type
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_test_type_technical_name
 msgid "Technical name"
-msgstr "工步类型"
+msgstr "技术名称"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_test_type_id
-#: model:ir.model.fields,field_description:quality.field_sa_quality_point_test_type_id_3720
+#: model:ir.model.fields,field_description:quality.field_sa_quality_point_test_type_id_3722
 #: model:ir.ui.view,arch_db:quality.quality_point_view_search
 msgid "Test Type"
 msgstr "测试类型"
@@ -1016,7 +1016,7 @@ msgstr "质检用户使用质检过程"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_title
 msgid "Title"
-msgstr "称谓"
+msgstr "标题"
 
 #. module: quality
 #: selection:sa.quality.check,quality_state:0
@@ -1077,7 +1077,7 @@ msgstr "非常高"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_warning_message
 msgid "Warning message"
-msgstr "Warning message"
+msgstr "警告信息"
 
 #. module: quality
 #: selection:sa.quality.point,measure_frequency_unit:0
@@ -1099,5 +1099,5 @@ msgstr "You still need to do the quality checks!"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_search
 msgid "test_type"
-msgstr "test_type"
+msgstr "工步类型"
 
