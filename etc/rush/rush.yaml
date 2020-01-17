@@ -10,9 +10,12 @@ logging:
   rotate: 24h
 broker:
   connect-urls:
-    - nats://192.168.4.203:4222
-    - nats://192.168.4.203:4223
-    - nats://192.168.4.203:4224
+#    - nats://192.168.4.203:4222
+#    - nats://192.168.4.203:4223
+#    - nats://192.168.4.203:4224
+    - nats://192.168.4.113:4222
+    - nats://192.168.4.113:4223
+    - nats://192.168.4.113:4224
   enable: true
   provider: nats
   connect-options:
@@ -53,7 +56,7 @@ aiis:
   enable: true
   timeout: 5s
   ws_result_route: ws://127.0.0.1/aiis/v1/ws/results
-  result_upload_inteval: 9999h
+  result_upload_inteval: 5s
   keep_alive: 3s
   recheck: true
 odoo:

@@ -142,8 +142,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendOdooService()
 
-	s.appendHMIService()
-
 	if err := s.appendTransportService(); err != nil {
 		return nil, err
 	} // append transport service
@@ -153,6 +151,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	}
 
 	s.appendTighteningDeviceService()
+
+	s.appendHMIService()
 
 	s.appendHTTPDService()
 

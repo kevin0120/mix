@@ -163,7 +163,10 @@ func (s *Service) PutResult(body *PublishResult) {
 	err := s.transport.SendResult(body)
 	if err != nil {
 		s.diag.Error("Publish Tool Result Failed", err)
+		return
 	}
+
+	s.diag.Info(fmt.Sprintf("上传拧紧结果 ID:%d", body.ID))
 }
 
 func oneTimePass(result *PublishResult, count int) {
