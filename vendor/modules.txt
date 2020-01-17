@@ -32,6 +32,10 @@ github.com/go-playground/universal-translator
 github.com/go-playground/validator/v10
 # github.com/go-xorm/xorm v0.7.6
 github.com/go-xorm/xorm
+# github.com/goburrow/modbus v0.1.0
+github.com/goburrow/modbus
+# github.com/goburrow/serial v0.1.0
+github.com/goburrow/serial
 # github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe
 github.com/golang-sql/civil
 # github.com/golang/protobuf v1.3.2
@@ -106,7 +110,7 @@ github.com/lestrrat-go/strftime
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
-# github.com/masami10/rush v1.0.1-0.20200116084441-d08c94985b5d
+# github.com/masami10/rush v1.0.1-0.20200117065250-1d0489195ce8
 github.com/masami10/rush/keyvalue
 github.com/masami10/rush/services/aiis
 github.com/masami10/rush/services/broker
@@ -114,12 +118,12 @@ github.com/masami10/rush/services/device
 github.com/masami10/rush/services/diagnostic
 github.com/masami10/rush/services/dispatcherbus
 github.com/masami10/rush/services/httpd
+github.com/masami10/rush/services/io
 github.com/masami10/rush/services/storage
 github.com/masami10/rush/services/tightening_device
 github.com/masami10/rush/services/transport
 github.com/masami10/rush/services/wsnotify
 github.com/masami10/rush/toml
-github.com/masami10/rush/typeDef
 github.com/masami10/rush/utils
 # github.com/micro/go-micro v1.18.0
 github.com/micro/go-micro/codec

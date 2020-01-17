@@ -63,7 +63,7 @@ func (s *BaseTransport) SendResult(result *PublishResult) error {
 		Data:   result,
 	})
 
-	return trans.SendMessage(fmt.Sprintf(SubjectResults, result.ToolSN), data)
+	return trans.SendMessage(fmt.Sprintf(SubjectResults, trans.GetID(), result.WorkcenterCode, result.ToolSN), data)
 }
 
 func (s *BaseTransport) SetServiceStatusHandler(handler ServiceStatusHandler) {
@@ -75,7 +75,7 @@ func (s *BaseTransport) SetResultPatchHandler(toolSN string, handler ResultPatch
 	if trans == nil {
 		return errors.New("trans Is Empty")
 	}
-	subject := fmt.Sprintf(SubjectResultsResp, toolSN)
+	subject := fmt.Sprintf(SubjectResultsResp, trans.GetID()) //返回指定的客户端, 根据客户端ID标识
 	fn := func(msg *transport.Message) ([]byte, error) {
 		var payload TransportPayload
 		data := msg.Body

@@ -36,6 +36,7 @@ type ITransportService interface {
 	SendMessage(subject string, data []byte) error
 	Status() string
 	SetStatusHandler(StatusHandler) error
+	GetID() string
 }
 
 type INotifyService interface {

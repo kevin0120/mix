@@ -14,6 +14,7 @@ const (
 	ModelDesoutterCvi3        = "ModelDesoutterCvi3"
 	ModelDesoutterCvi2        = "ModelDesoutterCvi2"
 	ModelDesoutterDeltaWrench = "ModelDesoutterDeltaWrench"
+	ModelDesoutterConnect     = "ModelDesoutterConnect"
 )
 
 type Service struct {
@@ -28,6 +29,8 @@ type Service struct {
 	deviceService  IDeviceService
 	dispatcherMap  dispatcherbus.DispatcherMap
 
+	ioService IOService
+
 	// websocket请求处理器
 	wsnotify.WSRequestHandlers
 }
@@ -39,17 +42,20 @@ func (s *Service) loadTighteningController(c Config) {
 			s.diag.Error("loadTighteningController", err)
 			continue
 		}
+
 		c, err := p.NewController(&c.Devices[k], s.dispatcherBus)
 		if err != nil {
 			s.diag.Error("Create Controller Failed", err)
 			continue
 		}
 
+		c.SetSerialNumber(deviceConfig.SN)
+		s.ioService.AddModule(fmt.Sprintf(TIGHTENING_CONTROLLER_IO_SN_FORMAT, c.SerialNumber()), c.CreateIO())
 		s.addController(deviceConfig.SN, c)
 	}
 }
 
-func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Dispatcher, ds IDeviceService, db IStorageService) (*Service, error) {
+func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Dispatcher, ds IDeviceService, db IStorageService, io IOService) (*Service, error) {
 
 	s := &Service{
 		diag:               d,
@@ -58,6 +64,7 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Disp
 		protocols:          map[string]ITighteningProtocol{},
 		deviceService:      ds,
 		storageService:     db,
+		ioService:          io,
 	}
 
 	s.setupGlobalDispatchers()
@@ -87,7 +94,6 @@ func (s *Service) setupGlobalDispatchers() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DispatcherResult:          utils.CreateDispatchHandlerStruct(nil),
 		dispatcherbus.DispatcherCurve:           utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DispatcherNewTool:         utils.CreateDispatchHandlerStruct(nil),
 		dispatcherbus.DispatcherJob:             utils.CreateDispatchHandlerStruct(nil),
 		dispatcherbus.DispatcherToolMaintenance: utils.CreateDispatchHandlerStruct(nil),
 	}
@@ -117,15 +123,9 @@ func (s *Service) Open() error {
 	}
 
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-
-	controllers := s.getControllers()
-	for _, c := range controllers {
-		for toolSN := range c.Children() {
-			s.doDispatch(dispatcherbus.DispatcherNewTool, toolSN)
-		}
-	}
-
 	s.initDispatcherRegisters()
+
+	s.notifyTools()
 
 	// 启动所有拧紧控制器
 	s.startupControllers()
@@ -141,6 +141,19 @@ func (s *Service) Close() error {
 	s.shutdownControllers()
 
 	return nil
+}
+
+func (s *Service) notifyTools() {
+	var tools []string
+	controllers := s.getControllers()
+	for _, c := range controllers {
+		for toolSN := range c.Children() {
+			tools = append(tools, toolSN)
+
+		}
+	}
+
+	s.doDispatch(dispatcherbus.DispatcherNewTool, tools)
 }
 
 func (s *Service) config() Config {
@@ -191,17 +204,16 @@ func (s *Service) getController(controllerSN string) (ITighteningController, err
 }
 
 func (s *Service) getTool(controllerSN string, toolSN string) (ITighteningTool, error) {
-	controller, err := s.getController(controllerSN)
-	if err != nil {
-		return nil, err
+
+	for _, c := range s.runningControllers {
+		for _, t := range c.Children() {
+			if t.SerialNumber() == toolSN {
+				return t.(ITighteningTool), nil
+			}
+		}
 	}
 
-	tool, err := controller.GetToolViaSerialNumber(toolSN)
-	if err != nil {
-		return nil, err
-	}
-
-	return tool, nil
+	return nil, errors.New("Tool Not Found")
 }
 
 func (s *Service) startupControllers() {
