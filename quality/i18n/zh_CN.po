@@ -1088,13 +1088,13 @@ msgstr "周"
 #: code:addons/quality/models/quality.py:260
 #, python-format
 msgid "You measured %.2f %s and it should be between %.2f and %.2f %s."
-msgstr "You measured %.2f %s and it should be between %.2f and %.2f %s."
+msgstr "您测量的 %.2f %s, 它应该在 %.2f 到 %.2f %s 之间."
 
 #. module: quality
 #: code:addons/quality/models/stock_picking.py:46
 #, python-format
 msgid "You still need to do the quality checks!"
-msgstr "You still need to do the quality checks!"
+msgstr "您仍然需要进行质量检测!"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_search

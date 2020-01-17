@@ -45,9 +45,9 @@
                 <field name="product_tmpl_id" position="before">
                     <field name="ref" required="1" string="Reference"/>
                 </field>
-                <xpath expr="//label[@for='tolerance_min']" position="attributes">
-                    <attribute name="string">Torque Tolerance</attribute>
-                </xpath>
+                <!--<xpath expr="//label[@for='tolerance_min']" position="attributes">-->
+                    <!--<attribute name="string">Torque Tolerance</attribute>-->
+                <!--</xpath>-->
                 <!--<field name="operation_id" position="replace">&lt;!&ndash;>delete operation id<&ndash;&gt;-->
 
                 <!--</field>-->

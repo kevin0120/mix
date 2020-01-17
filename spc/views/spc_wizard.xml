@@ -227,11 +227,11 @@
         <field name="arch" type="xml">
             <xpath expr="//button[@name='action_see_quality_checks']" position="replace">
                 <button string="Results" name="action_see_result" type="object" icon="fa-table" class="oe_stat_button"
-                        groups="spc.group_spc_user, spc.group_spc_manager"/>
+                        groups="spc.group_spc_user, spc.group_spc_manager" attrs="{'invisible': [('test_type', '!=', 'tightening')]}"/>
             </xpath>
             <xpath expr="//button[@name='action_see_spc_control']" position="replace">
                 <button string="SPC" name="action_see_spc_control" type="object" icon="fa-bars" class="oe_stat_button"
-                        groups="spc.group_spc_user, spc.group_spc_manager"/>
+                        groups="spc.group_spc_user, spc.group_spc_manager" attrs="{'invisible': [('test_type', '!=', 'tightening')]}"/>
             </xpath>
         </field>
     </record>

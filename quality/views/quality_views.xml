@@ -758,7 +758,7 @@
                                 <field name="measure_frequency_unit"
                                        attrs="{'invisible': [('measure_frequency_type', '!=', 'periodical')]}"/>
                             </div>
-                            <field name="test_type"/>
+                            <!--<field name="test_type"/>-->
                             <label for="norm" attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
                             <div class="o_row" attrs="{'invisible': [('test_type', '!=', 'measure')]}">
                                 <field name="norm" attrs="{'required': [('test_type', '=', 'measure')]}"/>

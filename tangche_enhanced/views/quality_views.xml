@@ -8,9 +8,9 @@
                 <field name="sa_operation_ids" position="attributes">
                     <attribute name="readonly">1</attribute>
                 </field>
-                <field name="norm_unit" position="replace">
+                <!--<field name="norm_unit" position="replace">-->
 
-                </field>
+                <!--</field>-->
                 <field name="program_id" position="replace">
 
                 </field>
