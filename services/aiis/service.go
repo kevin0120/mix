@@ -25,7 +25,7 @@ type Service struct {
 	dispatcherMap   dispatcherbus.DispatcherMap
 	transport       ITransport
 	tools           []string
-	toolsRegistered bool
+	toolsRegistered atomic.Bool
 
 	closing chan struct{}
 }
@@ -39,6 +39,8 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IT
 		storageService: ss,
 		notifyService:  ns,
 	}
+	s.toolsRegistered.Store(false)
+
 	s.configValue.Store(c)
 	s.setupGlbDispatcher()
 	s.setupTransport(bs, dp)
@@ -65,19 +67,17 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) registerToolsResult() {
-	if s.toolsRegistered {
+	if s.toolsRegistered.Load() {
 		return
 	}
-	s.toolsRegistered = true
+	s.toolsRegistered.Store(true)
 
-	for _, v := range s.tools {
-		if err := s.transport.SetResultPatchHandler(v, s.onResultPatch); err != nil {
-			s.diag.Error("SetResultPatchHandler", err)
-			return
-		}
-
-		s.diag.Info(fmt.Sprintf("订阅工具结果成功 SN:%s", v))
+	if err := s.transport.SetResultPatchHandler(s.onResultPatch); err != nil {
+		s.diag.Error("SetResultPatchHandler", err)
+		return
 	}
+
+	s.diag.Info(fmt.Sprintf("订阅工具结果成功, 客户端"))
 }
 
 func (s *Service) onNewTool(data interface{}) {
