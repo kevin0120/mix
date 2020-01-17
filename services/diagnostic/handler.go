@@ -418,6 +418,38 @@ func (h *BrokerHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
+type TransportHandler struct {
+	l Logger
+}
+
+func (h *TransportHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *TransportHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+func (h *TransportHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
+func (h *TransportHandler) SendMsgSuccess(msg string) {
+	h.l.Debug(msg)
+}
+
+type DispatcherBusHandler struct {
+	l Logger
+}
+
+func (h *DispatcherBusHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *DispatcherBusHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 // 客制化项目模块使用的句柄
 type CustomizeHandler struct {
 	l Logger

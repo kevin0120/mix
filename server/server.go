@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/masami10/aiis/command"
 	"github.com/masami10/aiis/keyvalue"
-	"github.com/masami10/aiis/services/broker"
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/services/fis"
@@ -16,6 +15,11 @@ import (
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
+	"github.com/masami10/rush/services/broker"
+	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/transport"
+	"github.com/masami10/rush/utils"
+	"github.com/pkg/errors"
 )
 
 type BuildInfo struct {
@@ -41,12 +45,13 @@ type Server struct {
 	dataDir  string
 	hostname string
 
-	HTTPDService   *httpd.Service
-	PmonService    *pmon.Service
-	FisService     *fis.Service
-	ChanganService *changan.Service
-	OdooService    *odoo.Service
-	RushService    *rush.Service
+	DispatcherBusService *dispatcherbus.Service
+	HTTPDService         *httpd.Service
+	PmonService          *pmon.Service
+	FisService           *fis.Service
+	ChanganService       *changan.Service
+	OdooService          *odoo.Service
+	RushService          *rush.Service
 
 	StorageService  *storage.Service
 	WSNotifyService *wsnotify.Service
@@ -54,7 +59,8 @@ type Server struct {
 	MasterplcService *masterplc.Service
 	MinioService     *minio.Service
 
-	BrokerService *broker.Service
+	BrokerService    *broker.Service
+	TransportService *transport.Service
 
 	config *Config
 	// List of services in startup order
@@ -88,6 +94,10 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		Commander:      c.Commander,
 	}
 
+	if err := s.appendDispatcherBus(); err != nil {
+		return nil, errors.Wrap(err, "appendDispatcherBus")
+	}
+
 	s.initHTTPDService()
 
 	s.appendWebsocketService()
@@ -99,7 +109,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendStorageService()
 
-	s.AppendBrokerService()
+	s.appendBrokerService()
 
 	s.appendOdooService()
 
@@ -110,6 +120,10 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendFisService()
 
 	s.appendChanganService()
+
+	if err := s.appendTransportService(); err != nil {
+		return nil, err
+	} // append transport service
 
 	s.appendRushService() //必须后于http & storage
 
@@ -122,13 +136,12 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 func (s *Server) appendRushService() {
 	d := s.DiagService.NewRushHandler()
-	srv := rush.NewService(s.config.Rush, d)
+	srv := rush.NewService(s.config.Rush, d, s.TransportService)
 	srv.HTTPDService = s.HTTPDService
 	srv.StorageService = s.StorageService
 	srv.Fis = s.FisService
 	srv.Changan = s.ChanganService
 	srv.Odoo = s.OdooService
-	srv.Broker = s.BrokerService
 
 	s.RushService = srv
 
@@ -268,16 +281,43 @@ func (s *Server) appendOdooService() {
 
 }
 
-func (s *Server) AppendBrokerService() error {
+func (s *Server) appendBrokerService() {
 	c := s.config.Broker
 	d := s.DiagService.NewBrokerHandler()
 
-	srv := broker.NewService(c, d)
+	srv := broker.NewService(c, d, s.DispatcherBusService)
 
 	s.BrokerService = srv
-	if c.Enable {
-		s.AppendService("broker", srv)
+
+	s.AppendService(transport.BrokerTransport, srv)
+}
+
+func (s *Server) appendTransportService() error {
+	c := s.config.Transport
+	d := s.DiagService.NewTransportHandler()
+	srv := transport.NewService(c, d)
+
+	if err := srv.BindTransportByProvider(s); err != nil {
+		s.Diag.Error("BindTransportByProvider", err)
+		return err
 	}
+
+	s.TransportService = srv
+
+	s.AppendService("transport", srv)
+	return nil
+}
+
+func (s *Server) appendDispatcherBus() error {
+	d := s.DiagService.NewDispatcherBusHandler()
+	srv, err := dispatcherbus.NewService(d)
+
+	if err != nil {
+		return errors.Wrap(err, "Append dispatcherBus Service Fail")
+	}
+
+	s.DispatcherBusService = srv
+	s.AppendService("dispatcher_bus", srv)
 
 	return nil
 }
@@ -339,4 +379,13 @@ func (s *Server) Close() error {
 	}
 
 	return nil
+}
+
+func (s *Server) GetServiceByName(name string) utils.ICommonService {
+	if idx, ok := s.ServicesByName[name]; !ok {
+		// Should be unreachable code
+		return nil
+	} else {
+		return s.Services[idx]
+	}
 }

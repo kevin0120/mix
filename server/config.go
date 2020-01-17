@@ -11,7 +11,6 @@ import (
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/storage"
 
-	"github.com/masami10/aiis/services/broker"
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/masterplc"
@@ -20,6 +19,8 @@ import (
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/wsnotify"
+	"github.com/masami10/rush/services/broker"
+	"github.com/masami10/rush/services/transport"
 	"github.com/pkg/errors"
 )
 
@@ -51,6 +52,8 @@ type Config struct {
 
 	Broker broker.Config `yaml:"broker"`
 
+	Transport transport.Config `yaml:"transport"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -72,6 +75,7 @@ func NewConfig() *Config {
 	c.MasterPLC = masterplc.NewConfig()
 	c.Minio = minio.NewConfig()
 	c.Broker = broker.NewConfig()
+	c.Transport = transport.NewConfig()
 
 	return c
 }
@@ -141,6 +145,10 @@ func (c *Config) Validate() error {
 
 	if err := c.Broker.Validate(); err != nil {
 		return errors.Wrap(err, "broker")
+	}
+
+	if err := c.Transport.Validate(); err != nil {
+		return errors.Wrap(err, "transport")
 	}
 
 	return nil

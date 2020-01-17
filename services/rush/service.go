@@ -7,15 +7,15 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/aiis/services/aiis"
-	"github.com/masami10/aiis/services/broker"
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
+	aiis2 "github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/utils"
 	"gopkg.in/resty.v1"
-	"net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -46,7 +46,7 @@ type Service struct {
 	workers      int
 	Opened       bool
 	wg           sync.WaitGroup
-	chResult     chan CResult
+	chResult     chan *aiis2.PublishResult
 	closing      chan struct{}
 	configValue  atomic.Value
 	httpClient   *resty.Client
@@ -68,36 +68,36 @@ type Service struct {
 	diag    Diagnostic
 
 	//rpc *aiis.GRPCServer
-	Broker *broker.Service
+	//Broker *broker.Service
+	transport *BaseTransport
 }
 
-func NewService(c Config, d Diagnostic) *Service {
-	if c.Enable {
-		s := Service{
-			diag:     d,
-			workers:  c.Workers,
-			Opened:   false,
-			closing:  make(chan struct{}),
-			chResult: make(chan CResult, c.Workers*4),
-			route:    c.Route,
+func NewService(c Config, d Diagnostic, transport aiis2.ITransportService) *Service {
+	s := Service{
+		diag:     d,
+		workers:  c.Workers,
+		Opened:   false,
+		closing:  make(chan struct{}),
+		chResult: make(chan *aiis2.PublishResult, c.Workers*4),
+		route:    c.Route,
 
-			ws: websocket.New(websocket.Config{
-				WriteBufferSize: c.WSWriteBufferSize,
-				ReadBufferSize:  c.WSReadBufferSize,
-				ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
-			}),
-			clientManager: wsnotify.WSClientManager{},
-			results:       make(chan *storage.ResultObject, c.BatchSaveRowsLimit),
-			//rpc:           aiis.NewAiisGrpcServer(d),
-		}
-
-		//s.setGrpcHandler()
-		s.clientManager.Init()
-		s.configValue.Store(c)
-		return &s
+		ws: websocket.New(websocket.Config{
+			WriteBufferSize: c.WSWriteBufferSize,
+			ReadBufferSize:  c.WSReadBufferSize,
+			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
+		}),
+		clientManager: wsnotify.WSClientManager{},
+		results:       make(chan *storage.ResultObject, c.BatchSaveRowsLimit),
+		//rpc:           aiis.NewAiisGrpcServer(d),
+		transport: NewBaseTransport(transport),
 	}
 
-	return nil
+	//s.setGrpcHandler()
+	s.clientManager.Init()
+	s.configValue.Store(c)
+	s.transport.SetStatusHandler(s.onTransportStatus)
+
+	return &s
 }
 
 //func (s *Service) setGrpcHandler() {
@@ -113,23 +113,23 @@ func (s *Service) Open() error {
 
 	//c := s.Config()
 
+	//r := httpd.Route{
+	//	RouteType:   httpd.ROUTE_TYPE_HTTP,
+	//	Method:      "PUT",
+	//	Pattern:     "/operation.results/{result_id:long}",
+	//	HandlerFunc: s.getResultUpdate,
+	//}
+	//s.HTTPDService.Handler[0].AddRoute(r)
+
+	//r := httpd.Route{
+	//	RouteType:   httpd.ROUTE_TYPE_HTTP,
+	//	Method:      "PUT",
+	//	Pattern:     "/fis.results",
+	//	HandlerFunc: s.putFisResult,
+	//}
+	//s.HTTPDService.Handler[0].AddRoute(r)
+
 	r := httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/operation.results/{result_id:long}",
-		HandlerFunc: s.getResultUpdate,
-	}
-	s.HTTPDService.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/fis.results",
-		HandlerFunc: s.putFisResult,
-	}
-	s.HTTPDService.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "POST",
 		Pattern:     "/fis.urgs",
@@ -145,7 +145,7 @@ func (s *Service) Open() error {
 	}
 	s.HTTPDService.Handler[0].AddRoute(r)
 
-	s.ws.OnConnection(s.onConnect)
+	//s.ws.OnConnection(s.onConnect)
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_WS,
 		Method:      "GET",
@@ -175,7 +175,7 @@ func (s *Service) Open() error {
 
 	go s.TaskResultsBatchSave()
 
-	s.Broker.BrokerStatusDisptcher.Register(s.onBrokerStatus)
+	//s.Broker.BrokerStatusDisptcher.Register(s.onBrokerStatus)
 
 	//if err := s.rpc.Start(c.GRPCPort); err != nil {
 	//	s.diag.Error("Rush Start GRPC Server Error", err)
@@ -184,10 +184,27 @@ func (s *Service) Open() error {
 	//}
 
 	s.Opened = true
-
 	s.Odoo.OnStatus = s.OnOdooStatus
 
+	if err := s.transportDoStart(); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (s *Service) transportDoStart() error {
+	if s.transport == nil {
+		return errors.New("transport Is Empty, Please Inject First")
+	}
+	return s.transport.Start()
+}
+
+func (s *Service) transportDoStop() error {
+	if s.transport == nil {
+		return errors.New("transport Is Empty, Please Inject First")
+	}
+	return s.transport.Stop()
 }
 
 //func (s *Service) OnRPCNewClient(stream aiis.RPCAiis_RPCNodeServer) {
@@ -225,116 +242,116 @@ func (s *Service) Open() error {
 //	s.AddResultTask(cr)
 //}
 
-func (s *Service) onConnect(c websocket.Connection) {
+//func (s *Service) onConnect(c websocket.Connection) {
+//
+//	c.OnMessage(func(data []byte) {
+//		ws_msg := WSMsg{}
+//		err := json.Unmarshal(data, &ws_msg)
+//		if err != nil {
+//			s.diag.Error("ws error", err)
+//			return
+//		}
+//
+//		str_data, _ := json.Marshal(ws_msg.Data)
+//
+//		switch ws_msg.Type {
+//		case WS_REG:
+//			reg := WSRegist{}
+//			err := json.Unmarshal(str_data, &reg)
+//			if err != nil {
+//				Msg := map[string]string{"msg": "regist msg error"}
+//				msg, err := json.Marshal(Msg)
+//				if err != nil {
+//					c.Emit(wsnotify.WS_EVENT_REG, msg)
+//				}
+//
+//				c.Disconnect()
+//				return
+//			}
+//
+//			_, exist := s.clientManager.GetClient(reg.Rush_SN)
+//			if exist {
+//				Msg := fmt.Sprintf("client with sn:%s already exists", reg.Rush_SN)
+//				msgs := map[string]string{"msg": Msg}
+//				regStrs, err := json.Marshal(msgs)
+//				if err != nil {
+//					c.Emit(wsnotify.WS_EVENT_REG, regStrs)
+//				}
+//
+//				c.Disconnect()
+//			} else {
+//				// 将客户端加入列表
+//				s.clientManager.AddClient(reg.Rush_SN, c)
+//				Msg := map[string]string{"msg": "OK"}
+//				msg, err := json.Marshal(Msg)
+//				if err != nil {
+//					c.Emit(wsnotify.WS_EVENT_REG, msg)
+//				}
+//			}
+//
+//		case WS_RESULT:
+//			op_result := WSOpResult{}
+//			err := json.Unmarshal(str_data, &op_result)
+//			if err != nil {
+//				s.diag.Error("ws result error", err)
+//				return
+//			}
+//
+//			rush_ip := strings.Split(c.Context().RemoteAddr(), ":")[0]
+//			if strings.Contains(rush_ip, ":") {
+//				kvs := strings.Split(rush_ip, ":")
+//				rush_ip = kvs[0]
+//			}
+//
+//			cr := CResult{
+//				Result: &op_result.Result,
+//				ID:     op_result.ResultID,
+//				IP:     rush_ip,
+//				Port:   op_result.Port,
+//			}
+//
+//			s.chResult <- cr
+//		}
+//
+//	})
+//
+//	c.OnDisconnect(func() {
+//		s.clientManager.RemoveClient(c.ID())
+//	})
+//
+//	c.OnError(func(err error) {
+//		s.diag.Error("Connection get error", err)
+//		c.Disconnect()
+//	})
+//
+//}
 
-	c.OnMessage(func(data []byte) {
-		ws_msg := WSMsg{}
-		err := json.Unmarshal(data, &ws_msg)
-		if err != nil {
-			s.diag.Error("ws error", err)
-			return
-		}
-
-		str_data, _ := json.Marshal(ws_msg.Data)
-
-		switch ws_msg.Type {
-		case WS_REG:
-			reg := WSRegist{}
-			err := json.Unmarshal(str_data, &reg)
-			if err != nil {
-				Msg := map[string]string{"msg": "regist msg error"}
-				msg, err := json.Marshal(Msg)
-				if err != nil {
-					c.Emit(wsnotify.WS_EVENT_REG, msg)
-				}
-
-				c.Disconnect()
-				return
-			}
-
-			_, exist := s.clientManager.GetClient(reg.Rush_SN)
-			if exist {
-				Msg := fmt.Sprintf("client with sn:%s already exists", reg.Rush_SN)
-				msgs := map[string]string{"msg": Msg}
-				regStrs, err := json.Marshal(msgs)
-				if err != nil {
-					c.Emit(wsnotify.WS_EVENT_REG, regStrs)
-				}
-
-				c.Disconnect()
-			} else {
-				// 将客户端加入列表
-				s.clientManager.AddClient(reg.Rush_SN, c)
-				Msg := map[string]string{"msg": "OK"}
-				msg, err := json.Marshal(Msg)
-				if err != nil {
-					c.Emit(wsnotify.WS_EVENT_REG, msg)
-				}
-			}
-
-		case WS_RESULT:
-			op_result := WSOpResult{}
-			err := json.Unmarshal(str_data, &op_result)
-			if err != nil {
-				s.diag.Error("ws result error", err)
-				return
-			}
-
-			rush_ip := strings.Split(c.Context().RemoteAddr(), ":")[0]
-			if strings.Contains(rush_ip, ":") {
-				kvs := strings.Split(rush_ip, ":")
-				rush_ip = kvs[0]
-			}
-
-			cr := CResult{
-				Result: &op_result.Result,
-				ID:     op_result.ResultID,
-				IP:     rush_ip,
-				Port:   op_result.Port,
-			}
-
-			s.chResult <- cr
-		}
-
-	})
-
-	c.OnDisconnect(func() {
-		s.clientManager.RemoveClient(c.ID())
-	})
-
-	c.OnError(func(err error) {
-		s.diag.Error("Connection get error", err)
-		c.Disconnect()
-	})
-
-}
-
-func (s *Service) AddResultTask(cr CResult) {
+func (s *Service) AddResultTask(cr *aiis2.PublishResult) {
 	s.chResult <- cr
 }
 
-func (s *Service) putFisResult(ctx iris.Context) {
-
-	var r storage.OperationResult
-	err := ctx.ReadJSON(&r)
-
-	if err != nil {
-		ctx.Writef(fmt.Sprintf("Result Params from Odoo wrong: %s", err.Error()))
-		ctx.StatusCode(iris.StatusBadRequest)
-		return
-	}
-
-	if s.Fis != nil {
-		fis_result := s.OperationToFisResult(&r)
-		fis_err := s.Fis.PushResult(&fis_result)
-		if fis_err != nil {
-			ctx.Writef(fmt.Sprintf("Push fis err: %s", fis_err.Error()))
-			ctx.StatusCode(iris.StatusBadRequest)
-		} else {
-			ctx.StatusCode(iris.StatusOK)
-		}
-	}
-}
+//func (s *Service) putFisResult(ctx iris.Context) {
+//
+//	var r storage.OperationResult
+//	err := ctx.ReadJSON(&r)
+//
+//	if err != nil {
+//		ctx.Writef(fmt.Sprintf("Result Params from Odoo wrong: %s", err.Error()))
+//		ctx.StatusCode(iris.StatusBadRequest)
+//		return
+//	}
+//
+//	if s.Fis != nil {
+//		fis_result := s.OperationToFisResult(r)
+//		fis_err := s.Fis.PushResult(&fis_result)
+//		if fis_err != nil {
+//			ctx.Writef(fmt.Sprintf("Push fis err: %s", fis_err.Error()))
+//			ctx.StatusCode(iris.StatusBadRequest)
+//		} else {
+//			ctx.StatusCode(iris.StatusOK)
+//		}
+//	}
+//}
 
 func (s *Service) postUrgRequest(ctx iris.Context) {
 	urg := fis.UrgRequest{}
@@ -377,38 +394,38 @@ func (s *Service) postUrgRequest(ctx iris.Context) {
 	return
 }
 
-func (s *Service) getResultUpdate(ctx iris.Context) {
-
-	resultId, err := ctx.Params().GetInt64("result_id")
-
-	if err != nil {
-		ctx.Writef("error while trying to parse resultId parameter")
-		ctx.StatusCode(iris.StatusBadRequest)
-		return
-	}
-	var r storage.OperationResult
-	err = ctx.ReadJSON(&r)
-	//ctx.Request().Body.Read()
-
-	if err != nil {
-		ctx.Writef(fmt.Sprintf("Result Params from Rush wrong: %s", err))
-		ctx.StatusCode(iris.StatusBadRequest)
-		return
-	}
-	rush_port := ctx.GetHeader("rush_port")
-	rush_ip := ctx.GetHeader("rush_ip")
-
-	cr := CResult{
-		Result: &r,
-		ID:     resultId,
-		IP:     rush_ip,
-		Port:   rush_port,
-	}
-
-	s.chResult <- cr
-
-	ctx.StatusCode(iris.StatusNoContent)
-}
+//func (s *Service) getResultUpdate(ctx iris.Context) {
+//
+//	resultId, err := ctx.Params().GetInt64("result_id")
+//
+//	if err != nil {
+//		ctx.Writef("error while trying to parse resultId parameter")
+//		ctx.StatusCode(iris.StatusBadRequest)
+//		return
+//	}
+//	var r storage.OperationResult
+//	err = ctx.ReadJSON(&r)
+//	//ctx.Request().Body.Read()
+//
+//	if err != nil {
+//		ctx.Writef(fmt.Sprintf("Result Params from Rush wrong: %s", err))
+//		ctx.StatusCode(iris.StatusBadRequest)
+//		return
+//	}
+//	rush_port := ctx.GetHeader("rush_port")
+//	rush_ip := ctx.GetHeader("rush_ip")
+//
+//	cr := CResult{
+//		Result: &r,
+//		ID:     resultId,
+//		IP:     rush_ip,
+//		Port:   rush_port,
+//	}
+//
+//	s.chResult <- cr
+//
+//	ctx.StatusCode(iris.StatusNoContent)
+//}
 
 func (s *Service) getHealthz(ctx iris.Context) {
 
@@ -420,7 +437,7 @@ func (s *Service) run() {
 	for {
 		select {
 		case r := <-s.chResult:
-			s.HandleResult(&r)
+			s.HandleResult(r)
 
 		case <-s.closing:
 			s.diag.Debug("Rush Worker Stop")
@@ -440,6 +457,12 @@ func (s *Service) Close() error {
 		s.closing <- ss
 	}
 
+	if s.transport != nil {
+		if err := s.transportDoStop(); err != nil {
+			s.diag.Error("Stop TransportService Failed", err)
+		}
+	}
+
 	s.wg.Wait()
 
 	//s.rpc.Stop()
@@ -447,18 +470,18 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) OperationToFisResult(r *storage.OperationResult) fis.FisResult {
+func (s *Service) OperationToFisResult(r *aiis2.PublishResult) fis.FisResult {
 	var result fis.FisResult
 	result.Init()
 
-	result.EquipemntName = r.EquipemntName
-	result.FactoryName = r.FactoryName
-	result.Year = r.Year
-	result.Pin = r.Pin
-	result.PinCheckCode = r.Pin_check_code
-	result.AssemblyLine = r.AssemblyLine
-	result.ResultID = fmt.Sprintf("%s", r.NutNo)
-	result.Lnr = r.Lnr
+	result.EquipemntName = r.MoEquipemntname
+	result.FactoryName = r.MoFactoryname
+	result.Year = r.MoYear
+	result.Pin = r.MoPin
+	result.PinCheckCode = r.MoPinCheckCode
+	result.AssemblyLine = r.MoAssemblyline
+	result.ResultID = fmt.Sprintf("%s", r.MoNutno)
+	result.Lnr = r.MoLnr
 
 	valueResult := 1
 
@@ -472,7 +495,7 @@ func (s *Service) OperationToFisResult(r *storage.OperationResult) fis.FisResult
 		result.ResultValue = "LSN_"
 	}
 
-	result.Dat = r.ControlDate
+	//result.Dat = r.ControlDate
 	result.SystemType = s.Fis.Config().SystemType
 	result.SoftwareVersion = s.Fis.Config().SoftwareVersion
 	result.Mode = s.Fis.Config().Mode
@@ -495,7 +518,7 @@ func (s *Service) OperationToFisResult(r *storage.OperationResult) fis.FisResult
 	return result
 }
 
-func (s *Service) OperationToChanganResult(r *storage.OperationResult) changan.TighteningResults {
+func (s *Service) OperationToChanganResult(r *aiis2.PublishResult) changan.TighteningResults {
 	result := changan.TighteningResults{}
 
 	result.Spent = 0
@@ -507,7 +530,7 @@ func (s *Service) OperationToChanganResult(r *storage.OperationResult) changan.T
 	result.AngleMin = r.PsetWMin
 	result.AngleTarget = r.PsetWTarget
 	result.Batch = r.Batch
-	result.Cartype = r.Model
+	result.Cartype = r.MoModel
 	result.ControllerSn = r.ControllerSN
 	result.Exception = r.ExceptionReason
 	result.Strategy = r.PsetStrategy
@@ -516,7 +539,7 @@ func (s *Service) OperationToChanganResult(r *storage.OperationResult) changan.T
 	result.TorqueMax = r.PsetMMax
 	result.TorqueMin = r.PsetMMin
 	result.TorqueTarget = r.PsetMTarget
-	result.UpdateTime = r.ControlDate
+	//result.UpdateTime = r.ControlDate
 	result.Vin = r.Vin
 	result.WorkcenterCode = r.WorkcenterCode
 
@@ -528,49 +551,38 @@ func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id i
 		return errors.New("rush http client is nil")
 	}
 
-	rush_result := RushResult{}
-	rush_result.HasUpload = has_upload
-	r := s.httpClient.R().SetBody(rush_result)
+	//rush_result := RushResult{}
+	//rush_result.HasUpload = has_upload
+	//r := s.httpClient.R().SetBody(rush_result)
+	//
+	//s_port := port
+	//if s_port == "" {
+	//	s_port = "80"
+	//}
+	//url := fmt.Sprintf("http://%s:%s%s/%d", ip, s_port, s.route, result_id)
+	//resp, err := r.Patch(url)
+	//if err != nil {
+	//	return fmt.Errorf("patch result flag failed: %s\n", err)
+	//} else {
+	//	if resp.StatusCode() != http.StatusOK {
+	//		return fmt.Errorf("patch result flag failed: %s\n", resp.Status())
+	//	}
+	//}
 
-	s_port := port
-	if s_port == "" {
-		s_port = "80"
-	}
-	url := fmt.Sprintf("http://%s:%s%s/%d", ip, s_port, s.route, result_id)
-	resp, err := r.Patch(url)
-	if err != nil {
-		return fmt.Errorf("patch result flag failed: %s\n", err)
-	} else {
-		if resp.StatusCode() != http.StatusOK {
-			return fmt.Errorf("patch result flag failed: %s\n", resp.Status())
-		}
-	}
-
-	rushResult := RushResult{
+	resultPatch := aiis2.ResultPatch{
 		ID:        result_id,
 		HasUpload: has_upload,
 	}
 
-	payload := aiis.RPCPayload{
-		Type: aiis.TYPE_RESULT,
-		Data: rushResult,
-	}
-
-	body, err := json.Marshal(payload)
-	if err != nil {
-		s.diag.Error("PatchResultFlag Marshal fail", err)
-		return err
-	}
-
-	return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), body)
+	return s.transport.SendResultPatch(toolSN, &resultPatch)
 }
 
-func (s *Service) HandleResult(cr *CResult) {
+func (s *Service) HandleResult(cr *aiis2.PublishResult) {
 
 	// 结果推送fis
 	sent := true
-	if s.Fis != nil && cr.Result.Stage == "final" {
-		fisResult := s.OperationToFisResult(cr.Result)
+	if s.Fis != nil && cr.Stage == "final" {
+		fisResult := s.OperationToFisResult(cr)
 
 		e := s.Fis.PushResult(&fisResult)
 		if e != nil {
@@ -580,7 +592,7 @@ func (s *Service) HandleResult(cr *CResult) {
 	}
 
 	if s.Changan != nil {
-		changanResult := s.OperationToChanganResult(cr.Result)
+		changanResult := s.OperationToChanganResult(cr)
 
 		if !s.Changan.AndonDB.InsertResult(&changanResult) {
 			sent = false
@@ -588,7 +600,7 @@ func (s *Service) HandleResult(cr *CResult) {
 		}
 	}
 
-	jsonStrs, _ := json.Marshal(cr.Result)
+	jsonStrs, _ := json.Marshal(cr)
 	jsonObjs := map[string]interface{}{}
 	err := json.Unmarshal(jsonStrs, &jsonObjs)
 	if err != nil {
@@ -596,12 +608,12 @@ func (s *Service) HandleResult(cr *CResult) {
 		return
 	}
 	result := &storage.ResultObject{
-		OR:     jsonObjs,
-		ID:     cr.ID,
-		Send:   sent,
-		IP:     cr.IP,
-		Port:   cr.Port,
-		Stream: cr.Stream,
+		OR:   jsonObjs,
+		ID:   cr.ID,
+		Send: sent,
+		//IP:     cr.IP,
+		//Port:   cr.Port,
+		//Stream: cr.Stream,
 	}
 
 	s.AddResult(result)
@@ -683,38 +695,30 @@ func (s *Service) OnOdooStatus(status string) {
 	//}
 }
 
-func (s *Service) onBrokerStatus(data interface{}) {
-	if data == nil {
-		return
+func (s *Service) onTransportStatus(status string) {
+	if status == utils.STATUS_ONLINE {
+		if err := s.transport.SetResultHandler(s.onToolsResults); err != nil {
+			s.diag.Error("SetResultHandler Failed", err)
+		}
 	}
-
-	status := data.(bool)
-	if !status {
-		return
-	}
-
-	s.Broker.Subscribe(SUBJECT_RESULTS, s.onToolsResults)
 }
 
-func (s *Service) onToolsResults(message *broker.BrokerMessage) ([]byte, error) {
-	if message == nil {
-		return nil, nil
-	}
+//func (s *Service) onBrokerStatus(data interface{}) {
+//	if data == nil {
+//		return
+//	}
+//
+//	status := data.(bool)
+//	if !status {
+//		return
+//	}
+//
+//	s.Broker.Subscribe(SUBJECT_RESULTS, s.onToolsResults)
+//}
 
-	s.diag.Debug(fmt.Sprintf("收到结果: %s\n", string(message.Body)))
+func (s *Service) onToolsResults(result *aiis2.PublishResult) {
 
-	op_result := WSOpResult{}
-	err := json.Unmarshal(message.Body, &op_result)
-	if err != nil {
-		s.diag.Error("op result error", err)
-		return nil, nil
-	}
-
-	cr := CResult{
-		Result: &op_result.Result,
-		ID:     op_result.ResultID,
-	}
-
-	s.AddResultTask(cr)
-	return nil, nil
+	payload, _ := json.Marshal(result)
+	s.diag.Debug(fmt.Sprintf("收到结果: %s\n", string(payload)))
+	s.AddResultTask(result)
 }

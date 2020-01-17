@@ -229,13 +229,13 @@ func (s *Service) HandleProcess() {
 			opResult := storage.OperationResult{}
 			XML2Result(&cvi3Result, &opResult)
 
-			cr := rush.CResult{
-				Result: &opResult,
-				ID:     0,
-				Stream: nil,
-			}
+			//cr := rush.CResult{
+			//	Result: &opResult,
+			//	ID:     0,
+			//	Stream: nil,
+			//}
 
-			s.Rush.AddResultTask(cr)
+			//s.Rush.AddResultTask(cr)
 
 			// 处理曲线
 			if strings.Contains(msg, XML_RESULT_KEY) {
