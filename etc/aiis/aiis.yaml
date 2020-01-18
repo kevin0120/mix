@@ -127,9 +127,12 @@ rush:
 broker:
   enable: true
   connect-urls:
-    - nats://192.168.4.203:4222
-    - nats://192.168.4.203:4223
-    - nats://192.168.4.203:4224
+#    - nats://192.168.4.203:4222
+#    - nats://192.168.4.203:4223
+#    - nats://192.168.4.203:4224
+    - nats://192.168.4.113:4222
+    - nats://192.168.4.113:4223
+    - nats://192.168.4.113:4224
   connect-options:
     name: Dummy Server
     token: Dummy Token

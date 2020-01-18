@@ -42,27 +42,25 @@ func (s *Service) Config() Config {
 
 func (s *Service) openStorageEngine() error {
 	c := s.Config()
-	if c.Enable {
-		urls := strings.Split(c.Url, ":")
-		sConn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable connect_timeout=10",
-			urls[0],
-			urls[1],
-			c.User,
-			c.DBName,
-			c.Password)
+	urls := strings.Split(c.Url, ":")
+	sConn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable connect_timeout=10",
+		urls[0],
+		urls[1],
+		c.User,
+		c.DBName,
+		c.Password)
 
-		_db, err := gorm.Open("postgres", sConn)
-		if err != nil {
-			return err
-		}
-
-		_db.AutoMigrate(&OperationResultModel{})
-
-		s.eng = _db
-		s.open = true
-
-		s.diag.OpenEngineSuccess(sConn)
+	_db, err := gorm.Open("postgres", sConn)
+	if err != nil {
+		return err
 	}
+
+	_db.AutoMigrate(&OperationResultModel{})
+
+	s.eng = _db
+	s.open = true
+
+	s.diag.OpenEngineSuccess(sConn)
 
 	return nil
 }
