@@ -27,6 +27,7 @@ type ITransportService interface {
 	Request(subject string, data []byte, timeOut time.Duration) ([]byte, error)
 	Status() string
 	SetStatusHandler(handler StatusHandler) error
+	GetID() string
 }
 
 type Transport = microTransport.Transport
