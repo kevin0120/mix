@@ -2,6 +2,7 @@ package rush
 
 import (
 	"github.com/masami10/aiis/services/storage"
+	aiis2 "github.com/masami10/rush/services/aiis"
 )
 
 const (
@@ -10,8 +11,8 @@ const (
 )
 
 const (
-	SUBJECT_RESULTS      = "saturn.results.*"
-	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
+	SUBJECT_RESULTS      = ">.results"
+	SUBJECT_RESULTS_RESP = aiis2.SubjectResultsResp
 )
 
 //type AIISResult struct {

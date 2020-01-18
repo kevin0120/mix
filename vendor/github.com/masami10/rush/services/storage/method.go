@@ -3,7 +3,6 @@ package storage
 import (
 	"encoding/json"
 	"github.com/go-xorm/xorm"
-	"github.com/masami10/rush/typeDef"
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +21,7 @@ func (s *Service) WorkorderSync(work *Workorders) (string, error) {
 	defer session.Close()
 	session.Begin()
 
-	roll, err := s.DeleteWorkAndStep(session, work.Code, work.Unique_Num)
+	roll, err := s.DeleteWorkAndStep(session, work.Code, work.UniqueNum)
 	if roll {
 		session.Rollback()
 		return "", errors.Wrapf(err, "本地已有更新版本号对应的工单")
@@ -69,14 +68,15 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 	wp, err := json.Marshal(workPayload)
 
 	workorder1 := Workorders{
-		Workorder:             string(wp),
-		Code:                  work.Code,
-		Track_code:            work.Track_code,
-		Product_code:          work.Product_code,
-		Status:                "todo",
-		Date_planned_start:    work.Date_planned_start,
-		Date_planned_complete: work.Date_planned_complete,
-		Unique_Num:            work.Unique_Num,
+		Code:                work.Code,
+		TrackCode:           work.TrackCode,
+		ProductCode:         work.ProductCode,
+		DatePlannedStart:    work.DatePlannedStart,
+		DatePlannedComplete: work.DatePlannedComplete,
+		UniqueNum:           work.UniqueNum,
+		Workorder:           string(wp),
+
+		Status: "todo",
 	}
 
 	var workorderMap map[string]interface{}
@@ -93,11 +93,11 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		stepString, _ := json.Marshal(step[i])
 		var msg Steps
 		var stepText StepTextPayload
-		var stepTightening typeDef.StepTighteningPayload
+		var stepTightening StepTighteningPayload
 		var sp []byte
 		err = json.Unmarshal(stepString, &msg)
 
-		if msg.Testtype == "tightening" {
+		if msg.TestType == "tightening" {
 			err = json.Unmarshal(stepString, &stepTightening)
 			sp, _ = json.Marshal(stepTightening)
 		} else {
@@ -106,11 +106,8 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		}
 
 		step := Steps{
-			WorkorderID:    workorder1.Id,
-			Step:           string(sp),
 			ImageRef:       msg.ImageRef,
-			Testtype:       msg.Testtype,
-			Status:         "ready",
+			TestType:       msg.TestType,
 			Code:           msg.Code,
 			Sequence:       msg.Sequence,
 			FailureMessage: msg.FailureMessage,
@@ -118,6 +115,16 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 			Skippable:      msg.Skippable,
 			Undoable:       msg.Undoable,
 			Data:           msg.Data,
+
+			Text:           msg.Text,
+			ToleranceMin:   msg.ToleranceMin,
+			ToleranceMax:   msg.ToleranceMax,
+			Target:         msg.Target,
+			ConsumeProduct: msg.ConsumeProduct,
+			WorkorderID:    workorder1.Id,
+			Step:           string(sp),
+
+			Status: "ready",
 		}
 
 		workorder1.Steps = append(workorder1.Steps, step)
@@ -153,7 +160,7 @@ func (s *Service) WorkorderOut(order string, workorderID int64) (interface{}, er
 		stepOut := strucToMap(step[i])
 		stepOut["payload"] = stepMap
 
-		if step[i].Testtype != "tightening" {
+		if step[i].TestType != "tightening" {
 			delete(stepOut, "tightening_image_by_step_code")
 			steps = append(steps, stepOut)
 			continue
@@ -169,7 +176,7 @@ func (s *Service) WorkorderOut(order string, workorderID int64) (interface{}, er
 	workOrderOut["steps"] = steps
 	workOrderOut["payload"] = map2
 
-	image2, _ := s.findOrderPicture(workorder.Product_code)
+	image2, _ := s.findOrderPicture(workorder.ProductCode)
 	workOrderOut["product_type_image"] = image2
 	//delete(workOrderOut,"product_code")
 	//rr, _ := json.Marshal(workOrderOut)

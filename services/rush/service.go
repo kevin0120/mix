@@ -41,12 +41,17 @@ type RushResult struct {
 	HasUpload bool  `json:"has_upload"`
 }
 
+type tMessage struct {
+	clientID string
+	result   *aiis2.PublishResult
+}
+
 type Service struct {
 	HTTPDService *httpd.Service
 	workers      int
 	Opened       bool
 	wg           sync.WaitGroup
-	chResult     chan *aiis2.PublishResult
+	chResult     chan *tMessage
 	closing      chan struct{}
 	configValue  atomic.Value
 	httpClient   *resty.Client
@@ -78,7 +83,7 @@ func NewService(c Config, d Diagnostic, transport aiis2.ITransportService) *Serv
 		workers:  c.Workers,
 		Opened:   false,
 		closing:  make(chan struct{}),
-		chResult: make(chan *aiis2.PublishResult, c.Workers*4),
+		chResult: make(chan *tMessage, c.Workers*4),
 		route:    c.Route,
 
 		ws: websocket.New(websocket.Config{
@@ -326,7 +331,7 @@ func (s *Service) transportDoStop() error {
 //
 //}
 
-func (s *Service) AddResultTask(cr *aiis2.PublishResult) {
+func (s *Service) AddResultTask(cr *tMessage) {
 	s.chResult <- cr
 }
 
@@ -546,7 +551,7 @@ func (s *Service) OperationToChanganResult(r *aiis2.PublishResult) changan.Tight
 	return result
 }
 
-func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id int64, has_upload bool, ip string, port string, toolSN string) error {
+func (s *Service) PatchResultFlag(clientID string, result_id int64, has_upload bool, ip string, port string, toolSN string) error {
 	if s.httpClient == nil {
 		return errors.New("rush http client is nil")
 	}
@@ -574,10 +579,13 @@ func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id i
 		HasUpload: has_upload,
 	}
 
-	return s.transport.SendResultPatch(toolSN, &resultPatch)
+	return s.transport.SendResultPatch(clientID, &resultPatch)
 }
 
-func (s *Service) HandleResult(cr *aiis2.PublishResult) {
+func (s *Service) HandleResult(msg *tMessage) {
+
+	clientID := msg.clientID
+	cr := msg.result
 
 	// 结果推送fis
 	sent := true
@@ -608,9 +616,10 @@ func (s *Service) HandleResult(cr *aiis2.PublishResult) {
 		return
 	}
 	result := &storage.ResultObject{
-		OR:   jsonObjs,
-		ID:   cr.ID,
-		Send: sent,
+		OR:       jsonObjs,
+		ID:       cr.ID,
+		Send:     sent,
+		ClientID: clientID,
 		//IP:     cr.IP,
 		//Port:   cr.Port,
 		//Stream: cr.Stream,
@@ -648,7 +657,7 @@ func (s *Service) TaskResultsBatchSave() {
 					for _, v := range rs {
 						resultID := int64(v.OR["id"].(float64))
 						if resultID > 0 {
-							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
+							go s.PatchResultFlag(v.ClientID, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
 						}
 					}
 				}
@@ -665,7 +674,7 @@ func (s *Service) TaskResultsBatchSave() {
 					for _, v := range rs {
 						resultID := int64(v.OR["id"].(float64))
 						if resultID > 0 {
-							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
+							go s.PatchResultFlag(v.ClientID, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
 						}
 					}
 				}
@@ -716,9 +725,9 @@ func (s *Service) onTransportStatus(status string) {
 //	s.Broker.Subscribe(SUBJECT_RESULTS, s.onToolsResults)
 //}
 
-func (s *Service) onToolsResults(result *aiis2.PublishResult) {
+func (s *Service) onToolsResults(clientID string, result *aiis2.PublishResult) {
 
 	payload, _ := json.Marshal(result)
 	s.diag.Debug(fmt.Sprintf("收到结果: %s\n", string(payload)))
-	s.AddResultTask(result)
+	s.AddResultTask(&tMessage{clientID: clientID, result: result})
 }

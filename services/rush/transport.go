@@ -8,14 +8,14 @@ import (
 	"github.com/masami10/rush/services/transport"
 )
 
-type ResultHandler func(result *aiis.PublishResult)
+type ResultHandler func(clientID string, result *aiis.PublishResult)
 
 type BaseTransport struct {
 	aiis.BaseTransport
 }
 
 // 发送结果上传反馈
-func (s *BaseTransport) SendResultPatch(toolSN string, rp *aiis.ResultPatch) error {
+func (s *BaseTransport) SendResultPatch(clientID string, rp *aiis.ResultPatch) error {
 	trans := s.ITransportService
 	if trans == nil {
 		return errors.New("trans Is Empty")
@@ -25,7 +25,7 @@ func (s *BaseTransport) SendResultPatch(toolSN string, rp *aiis.ResultPatch) err
 		Data:   rp,
 	})
 
-	return trans.SendMessage(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), data)
+	return trans.SendMessage(fmt.Sprintf(SUBJECT_RESULTS_RESP, clientID), data)
 }
 
 // 发送服务状态
@@ -42,6 +42,26 @@ func (s *BaseTransport) SendServiceStatus(status *aiis.ServiceStatus) error {
 	return trans.SendMessage(aiis.SubjectServiceStatus, data)
 }
 
+func getMsgHeaderProperty(message *transport.Message, property string) string {
+	header := message.Header
+	pp := property
+	switch property {
+	case transport.HEADER_SUBJECT, transport.HEADER_REPLY, transport.HEADER_MSG_ID, transport.HEADER_CLIENT_ID:
+		pp = property
+	default:
+		return ""
+	}
+	if ret, ok := header[pp]; ok {
+		return ret
+	} else {
+		return ""
+	}
+}
+
+func getClientID(message *transport.Message) string {
+	return getMsgHeaderProperty(message, transport.HEADER_CLIENT_ID)
+}
+
 // 设置接收结果回调
 func (s *BaseTransport) SetResultHandler(handler ResultHandler) error {
 	trans := s.ITransportService
@@ -50,6 +70,7 @@ func (s *BaseTransport) SetResultHandler(handler ResultHandler) error {
 	}
 	subject := SUBJECT_RESULTS
 	fn := func(msg *transport.Message) ([]byte, error) {
+		clientID := getClientID(msg)
 		var payload aiis.TransportPayload
 		data := msg.Body
 		if err := json.Unmarshal(data, &payload); err != nil {
@@ -62,7 +83,7 @@ func (s *BaseTransport) SetResultHandler(handler ResultHandler) error {
 			return nil, err
 		}
 
-		handler(&result)
+		handler(clientID, &result)
 		return nil, nil
 	}
 

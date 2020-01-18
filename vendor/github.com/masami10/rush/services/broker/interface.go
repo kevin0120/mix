@@ -1,6 +1,9 @@
 package broker
 
-import "github.com/masami10/rush/services/dispatcherbus"
+import (
+	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/utils"
+)
 
 type Dispatcher interface {
 	Create(name string, len int) error
@@ -16,3 +19,10 @@ type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
 }
+
+
+const (
+	SubjectResults       = utils.SubjectResults
+	SubjectResultsResp   = utils.SubjectResultsResp
+	SubjectServiceStatus = "saturn.service.status"
+)

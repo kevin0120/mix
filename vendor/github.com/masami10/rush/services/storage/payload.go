@@ -61,14 +61,28 @@ type WorkorderListPar struct {
 }
 
 type WorkorderPayload struct {
-	Product      interface{}   `json:"product"`
+	Products     interface{}   `json:"products"`
 	Worksheet    interface{}   `json:"worksheet"`
 	Environments []interface{} `json:"environments"`
 	Components   []interface{} `json:"components"`
 	Operation    interface{}   `json:"operation"`
 	Workcenter   interface{}   `json:"workcenter"`
+
+	SYSTEMTYPE         interface{} `json:"SYSTEMTYPE"`
+	WIPORDERTYPE       interface{} `json:"WIPORDERTYPE"`
+	MOMDISPOSITIONS    interface{} `json:"MOMDISPOSITIONS"`
+	MOMCONFIG          interface{} `json:"MOMCONFIG"`
+	RESOURCEGROUP      interface{} `json:"RESOURCEGROUP"`
+	STARTEMPLOYEE      interface{} `json:"STARTEMPLOYEE"`
+	RESOURCENAMES      interface{} `json:"RESOURCENAMES"`
+	PARENTWIPORDERNO   interface{} `json:"PARENTWIPORDERNO"`
+	PARENTWIPORDERTYPE interface{} `json:"PARENTWIPORDERTYPE"`
 }
 
 type StepTextPayload struct {
-	Text string `json:"text"`
+}
+
+type StepTighteningPayload struct {
+	TighteningTotal int           `json:"tightening_total"`
+	TighteningPoint []interface{} `json:"tightening_points"`
 }

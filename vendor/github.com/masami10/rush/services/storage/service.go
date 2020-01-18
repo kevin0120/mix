@@ -604,8 +604,6 @@ func (s *Service) InitWorkorderForJob(workorder_id int64) error {
 	} else {
 		return nil
 	}
-
-	return nil
 }
 
 func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
@@ -698,7 +696,7 @@ func (s *Service) ResetTightning(controller_sn string) error {
 }
 
 func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
-	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ?, workcenter_id = ? where operation_id = ? and product_type = ?"
+	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ?, workcenter_id = ? where id = ?"
 	_, err := s.eng.Exec(sql,
 		ro.Job,
 		ro.MaxOpTime,
@@ -710,8 +708,7 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 		ro.VehicleTypeImg,
 		ro.Points,
 		ro.WorkcenterID,
-		ro.OperationID,
-		ro.ProductType)
+		ro.Id)
 
 	if err != nil {
 		return err
@@ -720,11 +717,11 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 	}
 }
 
-func (s *Service) GetRoutingOperations(name string, model string) (RoutingOperations, error) {
+func (s *Service) GetRoutingOperations(name string, model string, step string) (RoutingOperations, error) {
 
 	var ro RoutingOperations
 
-	rt, err := s.eng.Alias("r").Where("r.name = ?", name).And("r.product_type = ?", model).Get(&ro)
+	rt, err := s.eng.Alias("r").Where("r.name = ?", name).And("r.product_type = ?", model).And("r.tightening_step_ref = ?", step).Get(&ro)
 
 	if err != nil {
 		return ro, err
@@ -890,7 +887,7 @@ func (s *Service) Workorders(par []byte) ([]Workorders, error) {
 	err = q.Find(&rt)
 
 	for i := 0; i < len(rt); i++ {
-		rt[i].Product_type_image, err = s.findOrderPicture(rt[i].Product_code)
+		rt[i].ProductTypeImage, err = s.findOrderPicture(rt[i].ProductCode)
 	}
 
 	if err != nil {
@@ -954,7 +951,7 @@ func (s *Service) DeleteWorkAndStep(ss *xorm.Session, code string, uniqueNum int
 	if !bool {
 		return false, nil
 	}
-	if workorder.Unique_Num > uniqueNum {
+	if workorder.UniqueNum > uniqueNum {
 		return true, nil
 	}
 	sql1 := "delete from `workorders` where id = ?"

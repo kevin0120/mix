@@ -3,6 +3,7 @@ package tightening_device
 import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/utils"
 )
@@ -28,6 +29,10 @@ type Dispatcher interface {
 	ReleaseDispatchersByHandlerMap(dispatcherMap dispatcherbus.DispatcherMap)
 }
 
+type IOService interface {
+	AddModule(sn string, io io.IO)
+}
+
 type ITighteningProtocol interface {
 
 	// 协议名称
@@ -41,14 +46,22 @@ type ITighteningDevice interface {
 	device.IBaseDevice
 }
 
+type ITighteningIO interface {
+	ITighteningDevice
+	io.BaseIO
+}
+
 type ITighteningController interface {
 	ITighteningDevice
 
 	// 定位工具
 	GetToolViaSerialNumber(toolSN string) (ITighteningTool, error)
 
-	// 控制输出
-	SetOutput(outputs []ControllerOutput) error
+	CreateIO() ITighteningIO
+
+	NotifyIOStatus(status string)
+
+	NotifyIOContact(t string, status string)
 }
 
 type ITighteningTool interface {

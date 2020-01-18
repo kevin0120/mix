@@ -14,7 +14,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.2.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.1 // indirect
 	github.com/lib/pq v1.3.0
-	github.com/masami10/rush v1.0.1-0.20200116084441-d08c94985b5d
+	github.com/masami10/rush v1.0.1-0.20200117065250-1d0489195ce8
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/onsi/ginkgo v1.11.0 // indirect

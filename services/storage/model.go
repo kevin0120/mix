@@ -119,9 +119,13 @@ type ResultObject struct {
 	OR     map[string]interface{}
 	ID     int64
 	Send   bool
+	//deprecated
 	Port   string
+	//deprecated
 	IP     string
+	//deprecated
 	Stream aiis.RPCAiis_RPCNodeServer
+	ClientID string
 }
 
 type OperationResult struct {

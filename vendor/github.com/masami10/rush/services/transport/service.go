@@ -49,3 +49,12 @@ func (s *Service) SetStatusHandler(handler StatusHandler) error {
 	}
 	return t.SetStatusHandler(handler)
 }
+
+func (s *Service)GetID() string {
+	t := s.ITransportService
+	if t == nil {
+		s.diag.Error("GetID",errors.New("Please BindTransportByProvider First"))
+		return ""
+	}
+	return t.GetID()
+}
