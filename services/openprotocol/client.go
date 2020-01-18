@@ -78,7 +78,6 @@ func (c *clientContext) initProcs() {
 	go c.procWrite()
 	go c.procHandle()
 	go c.procAlive()
-
 }
 
 func (c *clientContext) handlePackageOPPayload(src []byte) error {
@@ -141,6 +140,10 @@ func (c *clientContext) procHandleRecv() {
 				} else {
 					// 找到结束字符，结合缓冲进行处理
 					targetBuf := append(handleRecvBuf[0:writeOffset], buf[readOffset:readOffset+index]...)
+					if len(buf) == 1 && index == 0 {
+						targetBuf = handleRecvBuf[0:writeOffset]
+					}
+
 					err := c.handlePackageOPPayload(targetBuf)
 					if err != nil {
 						//数据需要丢弃
@@ -291,7 +294,7 @@ func (c *clientContext) addKeepAliveCount() {
 }
 
 func (c *clientContext) updateKeepAliveDeadLine() {
-	c.keepaliveDeadLine.Store(time.Now().Add(time.Duration(c.params.KeepAlivePeriod)))
+	c.keepaliveDeadLine.Store(time.Now().Add(c.params.KeepAlivePeriod))
 }
 
 func (c *clientContext) KeepAliveDeadLine() time.Time {
@@ -324,7 +327,7 @@ func (c *clientContext) resetConn() {
 
 func (c *clientContext) connect() {
 	c.diag.Debug(fmt.Sprintf("OpenProtocol SN:%s Connecting ...", c.sn))
-
+	c.updateKeepAliveDeadLine()
 	c.resetConn()
 
 	for {

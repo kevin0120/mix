@@ -637,7 +637,7 @@ func (c *TighteningController) OpenProtocolParams() *OpenProtocolParams {
 	return &OpenProtocolParams{
 		MaxKeepAliveCheck: 3,
 		MaxReplyTime:      3 * time.Second,
-		KeepAlivePeriod:   10 * time.Second,
+		KeepAlivePeriod:   8 * time.Second,
 	}
 }
 

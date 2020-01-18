@@ -14,13 +14,13 @@ func (s *Service) OnWSIOStatus(c websocket.Connection, msg *wsnotify.WSMsg) {
 	ioStatus := device.Status{}
 	err := json.Unmarshal(byteData, &ioStatus)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
 		return
 	}
 
 	m, err := s.getIO(ioStatus.SN)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
 		return
 	}
 
@@ -32,7 +32,7 @@ func (s *Service) OnWSIOStatus(c websocket.Connection, msg *wsnotify.WSMsg) {
 		},
 	})
 
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_IO, wsMsg)
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_IO, wsMsg, s.diag)
 }
 
 // 获取io状态
@@ -42,13 +42,13 @@ func (s *Service) OnWSIOContact(c websocket.Connection, msg *wsnotify.WSMsg) {
 	ioContact := IoContact{}
 	err := json.Unmarshal(byteData, &ioContact)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
 		return
 	}
 
 	inputs, outputs, err := s.Read(ioContact.SN)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
 		return
 	}
 
@@ -58,7 +58,7 @@ func (s *Service) OnWSIOContact(c websocket.Connection, msg *wsnotify.WSMsg) {
 		Outputs: outputs,
 	})
 
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_IO, wsMsg)
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_IO, wsMsg, s.diag)
 }
 
 // 控制输出
@@ -68,15 +68,15 @@ func (s *Service) OnWSIOSet(c websocket.Connection, msg *wsnotify.WSMsg) {
 	ioSet := IoSet{}
 	err := json.Unmarshal(byteData, &ioSet)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
 		return
 	}
 
 	err = s.Write(ioSet.SN, ioSet.Index, ioSet.Status)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
 		return
 	}
 
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""), s.diag)
 }

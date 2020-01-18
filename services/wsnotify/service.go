@@ -25,11 +25,12 @@ const (
 	WS_EVENT_ERROR = "err"
 )
 
-const (
-	WS_TYPE_ERROR = "new_error"
-)
+type BaseDiag interface {
+	Debug(msg string)
+}
 
 type Diagnostic interface {
+	BaseDiag
 	Error(msg string, err error)
 	Disconnect(id string)
 	OnMessage(msg string)
@@ -77,7 +78,12 @@ func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnDisconnect(func() {
 		s.clientManager.RemoveClient(c.ID())
-		s.diag.Disconnect(c.ID())
+
+		errInfo := "No Error"
+		if c.Err() != nil {
+			errInfo = c.Err().Error()
+		}
+		s.diag.Disconnect(fmt.Sprintf("ClientID:%s ErrorInfo:%s", c.ID(), errInfo))
 	})
 
 	c.OnError(func(err error) {
@@ -119,7 +125,7 @@ func (s *Service) handleRegister(msg *WSMsg, c websocket.Connection) {
 		_ = c.Disconnect()
 		s.clientManager.RemoveClientBySN(reg.HMISn)
 
-		_ = WSClientSend(c, WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		_ = WSClientSend(c, WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
 	}
 
 	_, exist := s.clientManager.GetClient(reg.HMISn)
@@ -128,13 +134,13 @@ func (s *Service) handleRegister(msg *WSMsg, c websocket.Connection) {
 		_ = c.Disconnect()
 		s.clientManager.RemoveClientBySN(reg.HMISn)
 
-		_ = WSClientSend(c, WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, -2, Msg))
+		_ = WSClientSend(c, WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, -2, Msg), s.diag)
 	} else {
 		// 将客户端加入列表
 		s.clientManager.AddClient(reg.HMISn, c)
 
 		// 注册成功
-		_ = WSClientSend(c, WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, 0, ""))
+		_ = WSClientSend(c, WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, 0, ""), s.diag)
 	}
 }
 
@@ -147,6 +153,7 @@ func (s *Service) createAndStartWebSocketNotifyDispatcher() error {
 }
 
 func (s *Service) postNotify(msg *DispatcherNotifyPackage) {
+	s.diag.Debug(fmt.Sprintf("WS REQ: %s", string(msg.Data)))
 	if err := s.dispatcherBus.Dispatch(dispatcherbus.DispatcherWsNotify, msg); err != nil {
 		s.diag.Error("notify", err)
 	}
@@ -189,6 +196,7 @@ func (s *Service) NotifyAll(evt string, payload string) {
 		return
 	}
 	s.clientManager.NotifyALL(evt, payload)
+	s.diag.Debug(fmt.Sprintf("WS NOTIFY: %s", payload))
 }
 
 func GenerateReply(sn uint64, wsType string, result int, msg string) *WSMsg {
@@ -206,10 +214,11 @@ func GenerateWSMsg(sn uint64, wsType string, data interface{}) *WSMsg {
 	}
 }
 
-func WSClientSend(c websocket.Connection, event string, payload interface{}) error {
+func WSClientSend(c websocket.Connection, event string, payload interface{}, diag BaseDiag) error {
 	if c == nil {
 		return errors.New("conn is nil")
 	}
 
+	diag.Debug(fmt.Sprintf("WS RESP: %s", payload))
 	return c.Emit(event, payload)
 }
