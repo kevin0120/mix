@@ -366,6 +366,10 @@ func (h *WsHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *WsHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 func (h *WsHandler) Disconnect(id string) {
 	h.l.Info("ws Connection disconnected", String("ID", id))
 }

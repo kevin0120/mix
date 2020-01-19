@@ -130,14 +130,14 @@ broker:
 #    - nats://192.168.4.203:4222
 #    - nats://192.168.4.203:4223
 #    - nats://192.168.4.203:4224
-    - nats://192.168.4.113:4222
-    - nats://192.168.4.113:4223
-    - nats://192.168.4.113:4224
+    - nats://127.0.0.1:4222
+    - nats://127.0.0.1:4223
+    - nats://127.0.0.1:4224
   connect-options:
     name: Dummy Server
     token: Dummy Token
   provider: nats
-  name: 31a0def7-785c-4f43-ba19-17f8a2e8b47c
+  name: 31a0def7-785c-4f43-ba19-17f813e8b47c
 
 transport:
   provider: broker

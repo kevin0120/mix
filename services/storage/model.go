@@ -116,15 +116,15 @@ type OperationResultModel struct {
 }
 
 type ResultObject struct {
-	OR     map[string]interface{}
-	ID     int64
-	Send   bool
+	OR   map[string]interface{}
+	ID   int64
+	Send bool
 	//deprecated
-	Port   string
+	Port string
 	//deprecated
-	IP     string
+	IP string
 	//deprecated
-	Stream aiis.RPCAiis_RPCNodeServer
+	Stream   aiis.RPCAiis_RPCNodeServer
 	ClientID string
 }
 

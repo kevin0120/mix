@@ -23,7 +23,7 @@ type ITransport interface {
 	SetServiceStatusHandler(handler ServiceStatusHandler)
 
 	// 设置接收结果上传反馈回调
-	SetResultPatchHandler(toolSN string, handler ResultPatchHandler) error
+	SetResultPatchHandler(handler ResultPatchHandler) error
 
 	// 启动
 	Start() error
@@ -70,7 +70,7 @@ func (s *BaseTransport) SetServiceStatusHandler(handler ServiceStatusHandler) {
 	s.handlerServiceStatus = handler
 }
 
-func (s *BaseTransport) SetResultPatchHandler(toolSN string, handler ResultPatchHandler) error {
+func (s *BaseTransport) SetResultPatchHandler(handler ResultPatchHandler) error {
 	trans := s.ITransportService
 	if trans == nil {
 		return errors.New("trans Is Empty")

@@ -10,5 +10,5 @@ func (s *Service) OnWSDeviceStatus(c websocket.Connection, msg *wsnotify.WSMsg) 
 	devices := s.fetchAllDevices()
 	body, _ := json.Marshal(wsnotify.GenerateWSMsg(msg.SN, msg.Type, devices))
 
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_DEVICE, string(body))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_DEVICE, string(body), s.diag)
 }

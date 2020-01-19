@@ -11,7 +11,7 @@ const (
 )
 
 const (
-	SUBJECT_RESULTS      = ">.results"
+	SUBJECT_RESULTS      = "saturn.results.>"
 	SUBJECT_RESULTS_RESP = aiis2.SubjectResultsResp
 )
 
