@@ -7,6 +7,7 @@ const (
 )
 
 type Config struct {
+	Enable          bool   `yaml:"enable"`
 	Route           string `yaml:"route"`
 	ReadBufferSize  int    `yaml:"read_buf_size"`
 	WriteBufferSize int    `yaml:"write_buf_size"`
@@ -14,6 +15,7 @@ type Config struct {
 
 func NewConfig() Config {
 	c := Config{
+		Enable:          false,
 		Route:           WS_ROUTE,
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -23,6 +25,9 @@ func NewConfig() Config {
 }
 
 func (c Config) Validate() error {
+	if !c.Enable {
+		return nil
+	}
 	route := c.Route
 	if route == "" {
 		return fmt.Errorf("websocket server route can not be empty")
