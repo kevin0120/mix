@@ -24,9 +24,6 @@ const (
 	// 当收到拧紧曲线时，会通过此分发器进行拧紧曲线分发
 	DispatcherCurve = "DISPATCHER_CURVE"
 
-	// 当检测到新工具时，会通过此分发器进行新工具分发
-	DispatcherNewTool = "DISPATCHER_NEW_TOOL"
-
 	// 当收到控制器推送的JOB时，会通过此分发器进行分发
 	DispatcherJob = "DISPATCHER_JOB"
 
@@ -36,10 +33,6 @@ const (
 	// ********************************Service***********************************
 	// 当检测到服务状态变化时(aiis, odoo, 外部系统等)，会通过此分发器进行状态分发
 	DispatcherServiceStatus = "DISPATCHER_SERVICE_STATUS"
-
-	// ********************************BROKER***********************************
-	// 当Broker(MQ)服务状态变化时， 会通过此分发器进行状态分发
-	DispatcherBrokerStatus = "DISPATCHER_BROKER_STATUS"
 
 	// ********************************Transport***********************************
 	// 当Transport服务状态变化时， 会通过此分发器进行状态分发

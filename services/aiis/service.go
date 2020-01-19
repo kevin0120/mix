@@ -24,7 +24,6 @@ type Service struct {
 	notifyService   INotifyService
 	dispatcherMap   dispatcherbus.DispatcherMap
 	transport       ITransport
-	tools           []string
 	toolsRegistered atomic.Bool
 
 	closing chan struct{}
@@ -58,9 +57,7 @@ func (s *Service) setupTransport(bs ITransportService, dispatcherBus Dispatcher)
 func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DispatcherServiceStatus: utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DispatcherNewTool:       utils.CreateDispatchHandlerStruct(s.onNewTool),
-
-		dispatcherbus.DispatcherResult: utils.CreateDispatchHandlerStruct(s.onTighteningResult),
+		dispatcherbus.DispatcherResult:        utils.CreateDispatchHandlerStruct(s.onTighteningResult),
 	}
 }
 
@@ -80,14 +77,6 @@ func (s *Service) registerToolsResult() {
 	}
 
 	s.diag.Info(fmt.Sprintf("订阅工具结果成功, 客户端"))
-}
-
-func (s *Service) onNewTool(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	s.tools = data.([]string)
 }
 
 func (s *Service) launchDispatchers() {
@@ -163,7 +152,7 @@ func (s *Service) PutResult(body *PublishResult) {
 }
 
 func oneTimePass(result *PublishResult, count int) {
-	if count == 1 {
+	if count == 0 {
 		result.OneTimePass = tightening_device.RESULT_PASS
 	} else {
 		result.OneTimePass = tightening_device.RESULT_FAIL
@@ -233,7 +222,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 	aiisResult.MoYear = dbWorkorder.MO_Year
 	aiisResult.MoLnr = dbWorkorder.MO_Lnr
 	aiisResult.MoNutno = result.NutNo
-	aiisResult.MoModel = dbWorkorder.MO_Model
+	aiisResult.MoModel = dbWorkorder.ProductCode
 	aiisResult.Batch = result.Batch
 	aiisResult.Vin = dbWorkorder.TrackCode
 	aiisResult.WorkorderName = dbWorkorder.Code
@@ -251,7 +240,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 	aiisResult.Stage = result.Stage
 
 	switch result.Result {
-	case storage.RESULT_OK:
+	case tightening_device.RESULT_OK:
 		aiisResult.FinalPass = tightening_device.RESULT_PASS
 		oneTimePass(&aiisResult, result.Count)
 		doResultRecheck(&aiisResult, &resultValue, result, s.Config().Recheck)

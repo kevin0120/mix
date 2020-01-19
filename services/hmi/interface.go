@@ -34,6 +34,8 @@ type IStorageService interface {
 	UpdateStep(step *storage.Steps) (*storage.Steps, error)
 	UpdateStepData(step *storage.Steps) (*storage.Steps, error)
 	UpdateOrderData(order *storage.Workorders) (*storage.Workorders, error)
+	GetWorkorderByCode(code string) (*storage.Workorders, error)
+	GetStepByCode(code string) (*storage.Steps, error)
 }
 
 type IBackendService interface {

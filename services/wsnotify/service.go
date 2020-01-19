@@ -223,6 +223,7 @@ func WSClientSend(c websocket.Connection, event string, payload interface{}, dia
 		return errors.New("conn is nil")
 	}
 
-	diag.Debug(fmt.Sprintf("WS RESP: %s", payload))
+	body, _ := json.Marshal(payload)
+	diag.Debug(fmt.Sprintf("WS RESP: %s", string(body)))
 	return c.Emit(event, payload)
 }

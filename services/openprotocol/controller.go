@@ -650,6 +650,7 @@ func (c *TighteningController) NotifyIOStatus(status string) {
 		return
 	}
 
+	c.internalIO.(*TighteningIO).UpdateStatus(status)
 	c.ioNotify.OnStatus(c.ioSerialNumber(), status)
 }
 

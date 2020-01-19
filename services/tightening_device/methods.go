@@ -35,15 +35,16 @@ type PSetBatchSet struct {
 }
 
 type PSetSet struct {
-	ControllerSN string `json:"controller_sn"`
-	ToolSN       string `json:"tool_sn"`
-	StepID       int64  `json:"step_id"`
-	WorkorderID  int64  `json:"workorder_id"`
-	UserID       int64  `json:"user_id"`
-	PSet         int    `json:"pset"`
-	Sequence     uint   `json:"sequence"`
-	Count        int    `json:"count"`
-	Total        int    `json:"total"`
+	ControllerSN  string `json:"controller_sn"`
+	ToolSN        string `json:"tool_sn"`
+	StepCode      string `json:"workstep_code"`
+	WorkorderID   int64  `json:"workorder_id"`
+	WorkorderCode string `json:"workorder_code"`
+	UserID        int64  `json:"user_id"`
+	PSet          int    `json:"pset"`
+	Sequence      uint   `json:"sequence"`
+	Count         int    `json:"count"`
+	Total         int    `json:"total"`
 }
 
 func (s *PSetSet) Validate() error {
@@ -174,14 +175,24 @@ func (s *Service) ToolPSetSet(req *PSetSet) error {
 		req.UserID = 1
 	}
 
+	order, err := s.storageService.GetWorkorderByCode(req.WorkorderCode)
+	if err != nil {
+		return err
+	}
+
+	step, err := s.storageService.GetStepByCode(req.StepCode)
+	if err != nil {
+		return err
+	}
+
 	_ = s.storageService.UpdateTool(&storage.Tools{
 		Serial:             req.ToolSN,
-		CurrentWorkorderID: req.WorkorderID,
+		CurrentWorkorderID: order.Id,
 		Seq:                int(req.Sequence),
 		Count:              req.Count,
 		UserID:             req.UserID,
 		Total:              req.Total,
-		StepID:             req.StepID,
+		StepID:             step.Id,
 	})
 
 	return tool.SetPSet(req.PSet)

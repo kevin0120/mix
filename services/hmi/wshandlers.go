@@ -58,13 +58,19 @@ func (s *Service) OnWSOrderUpdate(c websocket.Connection, msg *wsnotify.WSMsg) {
 		return
 	}
 
+	currentOrder, err := s.storageService.GetWorkorderByCode(orderReq.WorkorderCode)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		return
+	}
+
 	_, err = s.storageService.UpdateWorkorder(&storage.Workorders{
-		Id:     orderReq.ID,
+		Id:     currentOrder.Id,
 		Status: orderReq.Status,
 	})
 
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, err.Error()), s.diag)
 		return
 	}
 
@@ -75,20 +81,26 @@ func (s *Service) OnWSOrderUpdate(c websocket.Connection, msg *wsnotify.WSMsg) {
 func (s *Service) OnWSOrderStepUpdate(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	orderReq := WSOrderReq{}
-	err := json.Unmarshal(byteData, &orderReq)
+	stepReq := WSStepReq{}
+	err := json.Unmarshal(byteData, &stepReq)
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
 		return
 	}
 
+	currentStep, err := s.storageService.GetStepByCode(stepReq.StepCode)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		return
+	}
+
 	_, err = s.storageService.UpdateStep(&storage.Steps{
-		Id:     orderReq.ID,
-		Status: orderReq.Status,
+		Id:     currentStep.Id,
+		Status: stepReq.Status,
 	})
 
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, err.Error()), s.diag)
 		return
 	}
 
@@ -111,20 +123,26 @@ func (s *Service) OnWSOrderFinish(c websocket.Connection, msg *wsnotify.WSMsg) {
 func (s *Service) OnWSOrderStepDataUpdate(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
-	orderReq := WSOrderReqData{}
-	err := json.Unmarshal(byteData, &orderReq)
+	stepReq := WSStepReqData{}
+	err := json.Unmarshal(byteData, &stepReq)
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
 		return
 	}
 
+	currentStep, err := s.storageService.GetStepByCode(stepReq.StepCode)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		return
+	}
+
 	var step storage.Steps
-	step.Id = orderReq.ID
-	step.Data = orderReq.Data
+	step.Id = currentStep.Id
+	step.Data = stepReq.Data
 	_, err = s.storageService.UpdateStepData(&step)
 
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, err.Error()), s.diag)
 		return
 	}
 
@@ -142,13 +160,19 @@ func (s *Service) OnWSOrderDataUpdate(c websocket.Connection, msg *wsnotify.WSMs
 		return
 	}
 
+	currentOrder, err := s.storageService.GetWorkorderByCode(orderReq.WorkorderCode)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		return
+	}
+
 	var order storage.Workorders
-	order.Id = orderReq.ID
+	order.Id = currentOrder.Id
 	order.Data = orderReq.Data
 	_, err = s.storageService.UpdateOrderData(&order)
 
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, err.Error()), s.diag)
 		return
 	}
 

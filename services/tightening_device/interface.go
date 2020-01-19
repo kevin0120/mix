@@ -15,6 +15,8 @@ type Diagnostic interface {
 
 type IStorageService interface {
 	UpdateTool(guns *storage.Tools) error
+	GetWorkorderByCode(code string) (*storage.Workorders, error)
+	GetStepByCode(code string) (*storage.Steps, error)
 }
 
 type IDeviceService = device.IDeviceService

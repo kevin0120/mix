@@ -1226,3 +1226,33 @@ func (s *Service) ClearToolResultAndCurve(toolSN string) error {
 
 	return nil
 }
+
+func (s *Service) GetWorkorderByCode(code string) (*Workorders, error) {
+	order := Workorders{}
+	rt, err := s.eng.Alias("w").Where("w.code = ?", code).Limit(1).Get(&order)
+
+	if err != nil {
+		return nil, err
+	} else {
+		if !rt {
+			return nil, errors.New("Workorder Does Not Exist")
+		} else {
+			return &order, nil
+		}
+	}
+}
+
+func (s *Service) GetStepByCode(code string) (*Steps, error) {
+	step := Steps{}
+	rt, err := s.eng.Alias("s").Where("s.code = ?", code).Limit(1).Get(&step)
+
+	if err != nil {
+		return nil, err
+	} else {
+		if !rt {
+			return nil, errors.New("Step Does Not Exist")
+		} else {
+			return &step, nil
+		}
+	}
+}

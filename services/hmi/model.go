@@ -18,13 +18,27 @@ package hmi
 //}
 
 type WSOrderReq struct {
-	ID     int64  `json:"id"`
-	Status string `json:"status"`
+	ID            int64  `json:"id"`
+	WorkorderCode string `json:"workorder_code"`
+	Status        string `json:"status"`
 }
 
 type WSOrderReqData struct {
-	ID   int64  `json:"id"`
-	Data string `json:"data"`
+	ID            int64  `json:"id"`
+	WorkorderCode string `json:"workorder_code"`
+	Data          string `json:"data"`
+}
+
+type WSStepReq struct {
+	ID       int64  `json:"id"`
+	StepCode string `json:"workstep_code"`
+	Status   string `json:"status"`
+}
+
+type WSStepReqData struct {
+	ID       int64  `json:"id"`
+	StepCode string `json:"workstep_code"`
+	Data     string `json:"data"`
 }
 
 type WSOrderReqCode struct {

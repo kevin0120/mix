@@ -351,6 +351,7 @@ func (c *clientContext) connect() {
 	c.closinghandleRecv = make(chan struct{}, 1)
 	go c.procHandleRecv()
 
+	time.Sleep(100 * time.Millisecond)
 	if err := c.startComm(); err != nil {
 		c.diag.Error(fmt.Sprintf("Start Comm Failed: %s", c.sn), err)
 	}

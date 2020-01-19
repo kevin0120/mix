@@ -123,8 +123,6 @@ func (s *Service) Open() error {
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 	s.initDispatcherRegisters()
 
-	s.notifyTools()
-
 	// 启动所有拧紧控制器
 	s.startupControllers()
 
@@ -139,19 +137,6 @@ func (s *Service) Close() error {
 	s.shutdownControllers()
 
 	return nil
-}
-
-func (s *Service) notifyTools() {
-	var tools []string
-	controllers := s.getControllers()
-	for _, c := range controllers {
-		for toolSN := range c.Children() {
-			tools = append(tools, toolSN)
-
-		}
-	}
-
-	s.doDispatch(dispatcherbus.DispatcherNewTool, tools)
 }
 
 func (s *Service) config() Config {

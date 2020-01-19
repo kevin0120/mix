@@ -65,6 +65,12 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		return "", err
 	}
 
+	workcenterBody, _ := json.Marshal(workPayload.Workcenter)
+	var wc WorkCenterPayload
+	if err := json.Unmarshal(workcenterBody, &wc); err != nil {
+		return "", err
+	}
+
 	wp, err := json.Marshal(workPayload)
 
 	workorder1 := Workorders{
@@ -75,6 +81,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		DatePlannedComplete: work.DatePlannedComplete,
 		UniqueNum:           work.UniqueNum,
 		Workorder:           string(wp),
+		WorkcenterCode:      wc.Code,
 
 		Status: "todo",
 	}

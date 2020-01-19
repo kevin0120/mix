@@ -79,6 +79,10 @@ type WorkorderPayload struct {
 	PARENTWIPORDERTYPE interface{} `json:"PARENTWIPORDERTYPE"`
 }
 
+type WorkCenterPayload struct {
+	Code string `json:"code"`
+}
+
 type StepTextPayload struct {
 }
 
