@@ -131,10 +131,8 @@ class OperationResult(models.HyperModel):
 
     tightening_id = fields.Integer('TighteningID')
 
-    _sql_constraints = [('tid_track_no_gun_uniq', 'unique(tool_id, tightening_id, track_no,time)',
-                         'Per Screw Gun tightening ID Tracking Number must different'),
-                        ('tid_wo_gun_uniq', 'unique(tool_id, tightening_id, workorder_id,time)',
-                         'Per Screw Gun tightening ID  Work Order must different')]
+    _sql_constraints = [('tid_tool_uniq', 'unique(tool_id, tightening_id,time)',
+                         'Per Screw Gun tightening ID Tracking Number must different')]
 
 # FIXME: 无工单模式存储过程
     def init(self):
@@ -182,30 +180,55 @@ BEGIN
 
   if order_no != ''
   then
-    select qc.id,
-           qc.point_id,
-           co.id,
-           mp.id,
-           wo.id,
-           wo.workcenter_id,
-           me.id,
-           mp.product_id,
-           co.program_id,
-           qc.product_id,
-           mp.assembly_line_id,
-           co.operation_point_id
-           into r_qc_id, r_qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_operation_point_id
-    from public.mrp_workorder wo,
-         public.mrp_wo_consu_line co,
-         public.sa_quality_check qc,
-         public.mrp_production mp,
-         public.product_product pp,
-         public.maintenance_equipment me
-    where wo.name = order_no
-      and qc.bolt_number = nut_serial_no
-      and co.check_id = qc.id
-      and wo.production_id = mp.id
-      and me.serial_no = gun_sn;
+    select  wp.qc_id,
+            r.qcp_id,
+            wp.wo_consu_line_id,
+            wp.production_id,
+            wp.workorder_id,
+            r.workcenter_id,
+            r.tool_id,
+            r.product_id,
+            r.program_id,
+            r.consu_product_id,
+            wp.assembly_line_id, 
+            r.point_id 
+            into r_qc_id, r_qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_operation_point_id
+   from
+        (select 
+            qp.id as qcp_id,
+            me.workcenter_id,
+            me.id as tool_id, 
+            pp.id as product_id,
+            qp.program_id,
+            qp.product_id as consu_product_id,
+            op.id as point_id 
+            
+        from      
+             public.product_product pp,
+             public.maintenance_equipment me,
+             public.sa_quality_point qp,
+             public.operation_point op
+             where 
+             qp.name = nut_serial_no
+             and qp.id = op.qcp_id
+             and pp.default_code = vehicle_type
+             and me.serial_no = gun_sn) r
+         LEFT JOIN 
+         (select 
+            qc.point_id, 
+            qc.id as qc_id, 
+            co.id as wo_consu_line_id, 
+            mp.id as production_id, 
+            wo.id as workorder_id, 
+            mp.assembly_line_id
+         from   public.mrp_workorder wo,
+                public.mrp_wo_consu_line co,
+                public.sa_quality_check qc,
+                public.mrp_production mp
+         where wo.name = order_no
+            and co.check_id = qc.id
+            and wo.production_id = mp.id) wp
+         ON r.qcp_id = wp.point_id;
 
     select wo.id into r_expect_order_id
     from public.mrp_workorder wo,
