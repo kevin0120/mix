@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/utils"
 	"go.uber.org/atomic"
+	"time"
 )
 
 const (
@@ -94,6 +95,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 }
 
 func NewService(c Config, d Diagnostic, dp Dispatcher, httpd HTTPService) *Service {
+	defaultPingPeriod := 20 * time.Second
 	s := &Service{
 		diag:          d,
 		dispatcherBus: dp,
@@ -102,6 +104,8 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, httpd HTTPService) *Servi
 			ReadBufferSize:  c.ReadBufferSize,
 			MaxMessageSize:  int64(c.WriteBufferSize),
 			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
+			PingPeriod:      defaultPingPeriod,
+			PongTimeout:     (defaultPingPeriod * 9) / 10, // 参考iris算法实现
 		}),
 		clientManager: &WSClientManager{
 			diag: d,
