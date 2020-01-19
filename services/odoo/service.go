@@ -109,22 +109,16 @@ func (s *Service) ensureHttpClient() *resty.Client {
 	return client
 }
 
-func (s *Service) initDispatcherRegisters() {
-
-	// 接收工具保养通知
-	s.dispatcherBus.Register(dispatcherbus.DispatcherToolMaintenance, utils.CreateDispatchHandlerStruct(s.onToolMaintenance))
-}
-
 func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DispatcherMaintenanceInfo: utils.CreateDispatchHandlerStruct(nil),
 		dispatcherbus.DispatcherOrderNew:        utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherToolMaintenance: utils.CreateDispatchHandlerStruct(s.onToolMaintenance),
 	}
 }
 
 func (s *Service) Open() error {
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-	s.initDispatcherRegisters()
 	go s.taskSaveWorkorders()
 	return nil
 }

@@ -62,7 +62,6 @@ func NewService(config Config, d Diagnostic) *Service {
 	return s
 }
 
-
 func (s *Service) GetID() string {
 	return "grpc"
 }

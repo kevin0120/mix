@@ -25,6 +25,7 @@ type IClientHandler interface {
 	handleMsg(pkg *handlerPkg) error
 	HandleStatus(sn string, status string)
 	GetVendorMid(mid string) (string, error)
+	UpdateToolStatus(sn string, status string)
 }
 
 func newClientContext(endpoint string, diag Diagnostic, handler IClientHandler, sn string, params *OpenProtocolParams) *clientContext {
@@ -251,6 +252,7 @@ func (c *clientContext) Read(conn net.Conn) {
 			c.diag.Error("Failed ", err)
 			c.handleStatus(device.BaseDeviceStatusOffline)
 			c.clientHandler.HandleStatus(c.sn, device.BaseDeviceStatusOffline)
+			c.clientHandler.UpdateToolStatus(c.sn, device.BaseDeviceStatusOffline)
 			break
 		}
 
@@ -344,6 +346,7 @@ func (c *clientContext) connect() {
 
 	c.handleStatus(device.BaseDeviceStatusOnline)
 	c.clientHandler.HandleStatus(c.sn, device.BaseDeviceStatusOnline)
+	c.clientHandler.UpdateToolStatus(c.sn, device.BaseDeviceStatusOnline)
 
 	c.closinghandleRecv = make(chan struct{}, 1)
 	go c.procHandleRecv()

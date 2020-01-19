@@ -59,6 +59,8 @@ func (s *Service) setupGlbDispatcher() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		dispatcherbus.DispatcherServiceStatus: utils.CreateDispatchHandlerStruct(nil),
 		dispatcherbus.DispatcherNewTool:       utils.CreateDispatchHandlerStruct(s.onNewTool),
+
+		dispatcherbus.DispatcherResult: utils.CreateDispatchHandlerStruct(s.onTighteningResult),
 	}
 }
 
@@ -100,14 +102,6 @@ func (s *Service) launchDispatchers() {
 
 }
 
-func (s *Service) setUpDispatcherRegister() {
-	if s.dispatcherBus == nil {
-		s.diag.Error("setUpDispatcherRegister", errors.New("Please Inject Dispatcher First"))
-		return
-	}
-	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
-}
-
 func (s *Service) transportDoStart() error {
 	if s.transport == nil {
 		return errors.New("transport Is Empty, Please Inject First")
@@ -128,7 +122,6 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	s.setUpDispatcherRegister()
 	s.launchDispatchers()
 
 	go s.manage()

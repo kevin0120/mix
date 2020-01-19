@@ -17,7 +17,7 @@ func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagno
 		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool, d, c.GetParentService()),
 	}
 	tool.SetSerialNumber(cfg.SN)
-	tool.BaseDevice.UpdateStatus(device.BaseDeviceStatusOnline)
+	tool.BaseDevice.UpdateStatus(device.BaseDeviceStatusOffline)
 	tool.SetMode(c.ProtocolService.GetDefaultMode())
 	return &tool
 }

@@ -92,10 +92,8 @@ func (s *Service) getProtocol(protocolName string) (ITighteningProtocol, error) 
 
 func (s *Service) setupGlobalDispatchers() {
 	s.dispatcherMap = dispatcherbus.DispatcherMap{
-		dispatcherbus.DispatcherResult:          utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DispatcherCurve:           utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DispatcherJob:             utils.CreateDispatchHandlerStruct(nil),
-		dispatcherbus.DispatcherToolMaintenance: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherCurve: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DispatcherJob:   utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 

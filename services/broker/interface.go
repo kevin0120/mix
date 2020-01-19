@@ -20,7 +20,6 @@ type Diagnostic interface {
 	Debug(msg string)
 }
 
-
 const (
 	SubjectResults       = utils.SubjectResults
 	SubjectResultsResp   = utils.SubjectResultsResp

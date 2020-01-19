@@ -3,7 +3,6 @@ package openprotocol
 import (
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/scanner"
@@ -300,13 +299,13 @@ func handleMid0071Alarm(c *TighteningController, pkg *handlerPkg) error {
 	//	// do nothing,当前未确认是否为这个错误代码
 	//}
 
-	switch ai.ErrorCode {
-	case EvtControllerToolConnect:
-		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOnline)
-
-	case EvtControllerToolDisconnect:
-		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOffline)
-	}
+	//switch ai.ErrorCode {
+	//case EvtControllerToolConnect:
+	//	c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOnline)
+	//
+	//case EvtControllerToolDisconnect:
+	//	c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOffline)
+	//}
 
 	return nil
 }
@@ -319,13 +318,13 @@ func handleMid0076AlarmStatus(c *TighteningController, pkg *handlerPkg) error {
 		return err
 	}
 
-	switch as.ErrorCode {
-	case EvtControllerNoErr:
-		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOnline)
-
-	case EvtControllerToolDisconnect:
-		c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOffline)
-	}
+	//switch as.ErrorCode {
+	//case EvtControllerNoErr:
+	//	c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOnline)
+	//
+	//case EvtControllerToolDisconnect:
+	//	c.getInstance().UpdateToolStatus(pkg.SN, device.BaseDeviceStatusOffline)
+	//}
 
 	return nil
 }

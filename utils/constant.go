@@ -6,7 +6,7 @@ const (
 )
 
 const (
-	SubjectResults       = "saturn.%s.workcenter_%s.tool_%s.results"
+	SubjectResults       = "saturn.results.%s.workcenter_%s.tool_%s"
 	SubjectResultsResp   = "saturn.%s.results.response"
 	SubjectServiceStatus = "saturn.service.status"
 )
