@@ -32,17 +32,17 @@ export function orderDetailApi(id: number): Promise<any> {
 }
 
 // 更新工单状态
-export function orderUpdateApi(id: number, orderStatus: string): Promise<any> {
+export function orderUpdateApi(code: string, orderStatus: string): Promise<any> {
   return rushSendApi(ORDER_WS_TYPES.UPDATE, {
-    id,
+    workorder_code: code,
     status: orderStatus
   });
 }
 
 // 更新工步状态
-export function orderStepUpdateApi(id: number, status: string): Promise<any> {
+export function orderStepUpdateApi(code: string, status: string): Promise<any> {
   return rushSendApi(ORDER_WS_TYPES.STEP_UPDATE, {
-    id,
+    workstep_code: code,
     status
   });
 }
@@ -96,22 +96,22 @@ export function orderReportFinishApi(
   });
 }
 
-export function stepDataApi(id: number, data: Object): Promise<any> {
-  let idNum = id;
-  if (typeof id === 'string') {
-    idNum = parseInt(id, 10);
-  }
+export function stepDataApi(code: string, data: Object): Promise<any> {
+  // let idNum = code;
+  // if (typeof id === 'string') {
+  //   idNum = parseInt(code, 10);
+  // }
   const json = JSON.stringify(data);
-  return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { id: idNum, data: json });
+  return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { workstep_code: code, data: json });
 }
 
-export function orderDataApi(id: number, data: Object): Promise<any> {
-  let idNum = id;
-  if (typeof id === 'string') {
-    idNum = parseInt(id, 10);
-  }
+export function orderDataApi(id: code, data: Object): Promise<any> {
+  // let idNum = id;
+  // if (typeof id === 'string') {
+  //   idNum = parseInt(id, 10);
+  // }
   const json = JSON.stringify(data);
-  return rushSendApi(ORDER_WS_TYPES.ORDER_DATA, { id: idNum, data: json });
+  return rushSendApi(ORDER_WS_TYPES.ORDER_DATA, { workorder_code: code, data: json });
 }
 
 export function orderDetailByCodeApi(

@@ -11,9 +11,9 @@ export function toolEnableApi(toolSN: string, ControllerSN: string = '', enable:
   });
 }
 
-export function psetApi(toolSN: string = '', ControllerSN: string = '', stepID: number, userIDs: Array<number>,
+export function psetApi(toolSN: string = '', ControllerSN: string = '', stepCode: number, userIDs: Array<number>,
                         pset: string, sequence: number, count: number,
-                        total: number, workorderID: number): Promise<any> {
+                        total: number, workorderCode: number): Promise<any> {
   let psetNum = pset;
   if (typeof pset === 'string') {
     psetNum = parseInt(pset, 10);
@@ -21,13 +21,13 @@ export function psetApi(toolSN: string = '', ControllerSN: string = '', stepID: 
   return rushSendApi('WS_TOOL_PSET', {
     tool_sn: toolSN,
     controller_sn: ControllerSN,
-    step_id: stepID,
+    workstep_code: stepCode,
     user_id: userIDs[0],
     total,
     pset: psetNum,
     sequence,
     count,
-    workorder_id: workorderID
+    workorder_code: workorderCode
   });
 }
 

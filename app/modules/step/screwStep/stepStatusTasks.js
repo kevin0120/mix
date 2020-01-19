@@ -355,7 +355,7 @@ export const screwStepStatusTasksMixin = (superTasks) => ({
 
 export function* onLeave() {
   try {
-    yield call(stepDataApi, this.id, this._data);
+    yield call(stepDataApi, this.code, this._data);
     if (this._pointsManager) {
       this._pointsManager.stop();
     }

@@ -161,7 +161,7 @@ export const materialStepStatusMixin = (superTasks) => ({
 
 export function* onLeave(): Saga<void> {
   try {
-    yield call(stepDataApi, this.id, this._data);
+    yield call(stepDataApi, this.code, this._data);
     yield all(
       [...this._io].map(io =>
         call(io.closeIO, [...this._ports].filter(p => io.hasPort(p)))

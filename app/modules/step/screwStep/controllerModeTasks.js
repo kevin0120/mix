@@ -14,7 +14,7 @@ export default {
   * [controllerModes.pset](point: tPoint, tool, pset): Saga<void> {
     try {
       const sData: tScrewStepData = this.data;
-      const stepId = this.id;
+      const stepCode = this.code;
       const { retryTimes } = sData;
       const { points } = this._pointsManager;
       const userIDs: Array<number> = yield select(s => s.users.map(u => u.uid));
@@ -27,11 +27,11 @@ export default {
         throw new Error(`工具(${tool?.serialNumber})缺少控制器`);
       }
       const total = points.length;
-      const workorderID = yield select(s => workingOrder(s.order)?.id);
+      const workorderCode = yield select(s => workingOrder(s.order)?.code);
       if (isNil(pset)) {
         throw new Error('pset号为空');
       }
-      if (isNil(workorderID)) {
+      if (isNil(workorderCode)) {
         throw new Error('工单ID为空');
       }
       console.log(pset, typeof pset);
@@ -39,13 +39,13 @@ export default {
         psetApi,
         tool?.serialNumber || '',
         ControllerSN || '',
-        stepId,
+        stepCode,
         userIDs,
         pset,
         sequence,
         retryTimes,
         total,
-        workorderID
+        workorderCode
       );
     } catch (e) {
       // 程序号设置失败

@@ -32,7 +32,7 @@ export const scannerStepStatusMixin = (superTasks) => ({
 
 export function *onLeave() {
   try{
-    yield call(stepDataApi, this.id, this._data);
+    yield call(stepDataApi, this.code, this._data);
     (this._scanners || []).forEach(s => {
       this._listeners.forEach(l => {
         s.removeListener(l);

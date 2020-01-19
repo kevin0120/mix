@@ -144,7 +144,7 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
     * updateStatus({ status }: { status: tStepStatus }): Saga<void> {
       try {
         yield call([this, super.updateStatus], { status });
-        yield call(orderStepUpdateApi, this.id, status);
+        yield call(orderStepUpdateApi, this.code, status);
       } catch (e) {
         yield put(notifierActions.enqueueSnackbar(
           'Error', `更新工步状态失败（${e.message}）`, {
@@ -159,7 +159,7 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
 
     * _onLeave() {
       try {
-        yield call(stepDataApi, this.id, this._data);
+        yield call(stepDataApi, this.code, this._data);
       } catch (e) {
         CommonLog.lError(e, {
           at: `step (${String((this: IWorkable)._code)})._onLeave`
