@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/toml"
@@ -241,11 +242,13 @@ func (s *Nats) subscribe(subject, group string, handler transport.OnMsgHandler) 
 	}
 
 	fn := func(msg *nats.Msg) {
-		d := &transport.Message{
-			Body:   msg.Data,
-			Header: map[string]string{transport.HEADER_SUBJECT: msg.Subject, transport.HEADER_REPLY: msg.Reply},
+		var d transport.Message
+		if err := json.Unmarshal(msg.Data, &d); err != nil {
+			s.diag.Error("Unmarshal Error", err)
+			return
 		}
-		if resp, err := handler(d); err != nil {
+
+		if resp, err := handler(&d); err != nil {
 			s.diag.Error("Subscribe Handler Error", err)
 		} else {
 			if len(resp) == 0 {
