@@ -1,8 +1,8 @@
 // @flow
 /* eslint-disable no-empty-function */
-import { put, fork, call } from 'redux-saga/effects';
+import { call, fork, put } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import type { tWebSocketEvent, tRushData } from './type';
+import type { tRushData, tWebSocketEvent } from './type';
 import { WEBSOCKET_EVENTS as wse, WS_RUSH } from './constants';
 import notifierActions from '../Notifier/action';
 import { CommonLog } from '../../common/utils';
@@ -54,7 +54,7 @@ export default function* (payload: string): Saga<void> {
       yield fork(rushDataHandlers[event], json); // 异步处理rush数据
     }
   } catch (e) {
-    CommonLog.lError(e, { at: 'rush handleData' });
+    CommonLog.lError(e, { at: 'rush handleData', payload });
   }
 }
 
