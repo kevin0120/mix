@@ -2,6 +2,8 @@ package wsnotify
 
 import (
 	"github.com/kataras/iris/websocket"
+	"github.com/pkg/errors"
+	"time"
 
 	"encoding/json"
 	"fmt"
@@ -50,7 +52,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 				c.Emit(WS_EVENT_REG, msg)
 			}
 
-			c.Disconnect()
+			_ = c.Disconnect()
 			return
 		}
 
@@ -63,7 +65,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 				c.Emit(WS_EVENT_REG, regStrs)
 			}
 
-			c.Disconnect()
+			_ = c.Disconnect()
 		} else {
 			// 将客户端加入列表
 			s.clientManager.AddClient(reg.HMI_SN, c)
@@ -82,12 +84,14 @@ func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnError(func(err error) {
 		s.diag.Error("Connection get error", err)
-		c.Disconnect()
+		_ = c.Disconnect()
 	})
 
 }
 
 func NewService(c Config, d Diagnostic) *Service {
+
+	defaultPingPeriod := 20 * time.Second
 
 	s := &Service{
 		diag: d,
@@ -95,6 +99,8 @@ func NewService(c Config, d Diagnostic) *Service {
 			WriteBufferSize: c.WriteBufferSize,
 			ReadBufferSize:  c.ReadBufferSize,
 			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
+			PingPeriod:      defaultPingPeriod,
+			PongTimeout:     (defaultPingPeriod * 9) / 10, //参考iris默认算法
 		}),
 		clientManager: WSClientManager{},
 	}
@@ -121,7 +127,10 @@ func (s *Service) Open() error {
 		Pattern:     c.Route,
 		HandlerFunc: s.ws.Handler(),
 	}
-	s.Httpd.Handler[0].AddRoute(r)
+	if err := s.Httpd.Handler[0].AddRoute(r); err != nil {
+		s.diag.Error(fmt.Sprintf("AddRoute: %s Error", c.Route), err)
+		return err
+	}
 
 	return nil
 }
@@ -140,6 +149,10 @@ func (s *Service) Close() error {
 func (s *Service) WSSendTask(sn string, payload string) {
 	c, exist := s.clientManager.GetClient(sn)
 	if exist {
-		c.Emit(WS_EVENT_TASK, payload)
+		if err := c.Emit(WS_EVENT_TASK, payload); err != nil {
+			s.diag.Error("Websocket Emit", errors.Wrapf(err, "Emit To Client SN: %s", sn))
+		}
+	} else {
+		s.diag.Error("WSSendTask", errors.Errorf("Websocket Client: %s Is Not Existed", sn))
 	}
 }

@@ -207,8 +207,10 @@ func (s *Server) appendWebsocketService() error {
 
 	srv.Httpd = s.HTTPDService //http 服务注入
 
-	s.WSNotifyService = srv
-	s.AppendService("websocket", srv)
+	if c.Enable {
+		s.WSNotifyService = srv
+		s.AppendService("websocket", srv)
+	}
 
 	return nil
 }

@@ -315,8 +315,8 @@ func (s *Service) manage() {
 
 				for _, v := range tasks {
 					t, _ := json.Marshal(v)
-					s.WS.WSSendTask(strings.TrimSpace(v.Workcenter)+ANDON_WORKCENTER_LEFT, string(t))
-					s.WS.WSSendTask(strings.TrimSpace(v.Workcenter)+ANDON_WORKCENTER_RIGHT, string(t))
+					s.webSocketSendTask(strings.TrimSpace(v.Workcenter)+ANDON_WORKCENTER_LEFT, string(t))
+					s.webSocketSendTask(strings.TrimSpace(v.Workcenter)+ANDON_WORKCENTER_RIGHT, string(t))
 				}
 				s.Write(PakcageMsg(MSG_TASK_ACK, msg.Seq, nil))
 			case MSG_GET_TASK_ACK:
@@ -341,7 +341,7 @@ func (s *Service) manage() {
 					err := json.Unmarshal(strData, &v)
 					if err == nil {
 						t, _ := json.Marshal(v)
-						s.WS.WSSendTask(v.Workcenter, string(t))
+						s.webSocketSendTask(v.Workcenter, string(t))
 					}
 				}
 			default:
@@ -417,11 +417,18 @@ func (s *Service) andonGetTaskbyworkCenter(ctx iris.Context) {
 			return
 		}
 
-		s.WS.WSSendTask(workcenter, msg) //发送到指定工位,相应的作业内容
+		s.webSocketSendTask(workcenter, msg) //发送到指定工位,相应的作业内容
 
 		ctx.StatusCode(iris.StatusOK)
 		return
 	}
+}
+
+func (s *Service) webSocketSendTask(workcenter, data string)  {
+	if s.WS == nil {
+		return
+	}
+	s.WS.WSSendTask(workcenter, data)
 }
 
 func (s *Service) andonTest(ctx iris.Context) {
@@ -448,7 +455,7 @@ func (s *Service) andonTest(ctx iris.Context) {
 
 		for _, v := range tasks {
 			t, _ := json.Marshal(v)
-			s.WS.WSSendTask(v.Workcenter, string(t))
+			s.webSocketSendTask(v.Workcenter, string(t))
 
 			//fmt.Printf("send task -- workcenter:%s payload:%s\n", v.Workcenter, string(t))
 		}
