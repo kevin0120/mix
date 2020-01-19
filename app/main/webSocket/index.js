@@ -106,9 +106,9 @@ export function init(url, hmiSN, window) {
     if (!ws) {
       ws = new WebSocket(url, {
         reconnectInterval: 3000,
-        options: {
-          maxPayload: 200 * 1024 * 1024
-        }
+        // options: {
+        //   maxPayload: 200 * 1024 * 1024
+        // }
       });
       ws.on('open', () => {
         ws.sendJson(

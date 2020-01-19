@@ -41,7 +41,7 @@ export default class ClsScrewTool extends Device implements IScrewTool {
       CommonLog.lError(e, {
         at: 'ClsScrewTool.Enable'
       });
-      throw new Error(`工具使能失败: ${e.message}`);
+      throw new Error(`工具使能失败: ${e.message}，${this.serialNumber}`);
 
     }
   }

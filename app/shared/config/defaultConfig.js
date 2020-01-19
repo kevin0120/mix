@@ -8,7 +8,7 @@ const defaultConfigs = {
   appName: '长安汽车智能装配系统-终端',
   devices: {
     io: {
-      sn: '3',
+      sn: '11',
       enable: true,
       config: { input_num: 8, output_num: 8 },
       inputs: {
@@ -147,10 +147,10 @@ const defaultConfigs = {
     connections: {
       // rush: 'http://192.168.4.32:8082',
       // rush: 'http://192.168.4.18:8082',
-      // rush: 'http://192.168.3.118:8082',
+      rush: 'http://192.168.3.118:8082',
       // rush: 'http://192.168.4.96:8082',
       // rush: 'http://192.168.5.2:8082',
-      rush: 'http://127.0.0.1:8082',
+      // rush: 'http://127.0.0.1:8082',
       // rush: 'http://192.168.3.240:8082',
       // rush: 'http://0da41704.ngrok.io:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
       rfid: 'tcp://127.0.0.1:2112',

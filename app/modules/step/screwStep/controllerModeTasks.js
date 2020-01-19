@@ -49,7 +49,7 @@ export default {
       );
     } catch (e) {
       // 程序号设置失败
-      const msg = `pset失败，${e.message}`;
+      const msg = `pset失败，${e.message}, 工具：${tool?.serialNumber}`;
       yield put(
         notifierActions.enqueueSnackbar('Error', msg, {
           at: 'controllerModes.pset'

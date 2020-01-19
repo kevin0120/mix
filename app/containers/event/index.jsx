@@ -1,7 +1,6 @@
 import React from 'react';
 // react component for creating dynamic tables
 import PropTypes from 'prop-types';
-
 // @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
 // @material-ui/icons
@@ -14,7 +13,6 @@ import Typography from '@material-ui/core/Typography';
 
 import Divider from '@material-ui/core/Divider';
 import Alert from '../../components/Alert';
-
 // core components
 import Button from '../../components/CustomButtons/Button';
 import Card from '../../components/Card/Card';
@@ -23,7 +21,7 @@ import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 import CustomReactTable from '../../components/CustomReactTable';
 
-import { Query, CreateDailyLogger } from '../../logger';
+import { CreateDailyLogger, Query } from '../../logger';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 import withKeyboard from '../../components/Keyboard';
@@ -128,7 +126,7 @@ class Event extends React.Component {
       // Now just get the rows of data to your React Table (and update anything else like total pages or loading)
       this.setState({
         loading: false,
-        data: res.info.map((item, key) => ({
+        data: ((res && res.info) instanceof Array ? res.info : []).map((item, key) => ({
           id: key,
           timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
           level: item.level,
