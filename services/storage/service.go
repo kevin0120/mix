@@ -92,37 +92,37 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 	for _, v := range results {
 		cur, _ := json.Marshal(v.OR["cur_objects"])
 
-		oneTimePass := false
-		if reflect.ValueOf(v.OR["one_time_pass"]).String() == "pass" {
-			oneTimePass = true
-		}
+		//oneTimePass := false
+		//if reflect.ValueOf(v.OR["one_time_pass"]).String() == "pass" {
+		//	oneTimePass = true
+		//}
 
-		sql := fmt.Sprintf("SELECT create_operation_result(%v, %v, timestamp '%s', %v, %v, %v, '%s', '%s', %v, '%s', %v, %v, '%s', %v, %v, %v, %v, %v, %v, '%s', '%s', '%s', %v, '%s', %v, '%s', %v, '%s', '%s', '%s')",
+		sql := fmt.Sprintf("SELECT create_operation_result(%v, %v, timestamp '%s', %v, %v, '%s', '%s', %v, '%s', %v, %v, %v, %v, %v, %v, %v, %v, '%s', '%s', %v, '%s', '%s', '%s', %v, '%s', '%s', '%s')",
 			v.OR["pset_m_threshold"],
 			v.OR["pset_m_max"],
 			reflect.ValueOf(v.OR["control_date"]).String(),
 			v.OR["pset_w_max"],
 			v.OR["user_id"],
-			oneTimePass,
+			//oneTimePass,
 			reflect.ValueOf(v.OR["pset_strategy"]).String(),
 			reflect.ValueOf(v.OR["measure_result"]).String(),
 			v.OR["pset_w_threshold"],
 			string(cur),
 			v.OR["pset_m_target"],
 			v.OR["pset_m_min"],
-			reflect.ValueOf(v.OR["final_pass"]).String(),
+			//reflect.ValueOf(v.OR["final_pass"]).String(),
 			v.OR["measure_degree"],
 			v.OR["measure_t_don"],
 			v.OR["measure_torque"],
 			v.OR["op_time"],
 			v.OR["pset_w_min"],
 			v.OR["pset_w_target"],
-			reflect.ValueOf(v.OR["lacking"]).String(),
+			//reflect.ValueOf(v.OR["lacking"]).String(),
 			reflect.ValueOf(v.OR["quality_state"]).String(),
 			reflect.ValueOf(v.OR["exception_reason"]).String(),
 			v.Send,
 			reflect.ValueOf(v.OR["batch"]).String(),
-			v.OR["workorder_id"],
+			reflect.ValueOf(v.OR["workorder_name"]).String(),
 			v.OR["nut_no"],
 			v.OR["tightening_id"],
 			reflect.ValueOf(v.OR["vin"]).String(),
@@ -135,7 +135,8 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 		}
 		for _, err := range e.GetErrors() {
 			if err != nil {
-				if strings.HasSuffix(err.Error(), "tid_vin_gun_uniq\"") || strings.HasSuffix(err.Error(), "tid_wo_gun_uniq\"") {
+				fmt.Println(err.Error())
+				if strings.Contains(err.Error(), "tid_tool") {
 					continue
 				}
 				return err
