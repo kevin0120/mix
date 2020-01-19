@@ -102,10 +102,10 @@ function startListenSend() {
 export function init(url, hmiSN, window) {
   mainWindow = window;
   ipcMain.on('rush', () => {
-    const wsMessage = onWSMessage(parseData);
     if (!ws) {
+      const wsMessage = onWSMessage(parseData);
       ws = new WebSocket(url, {
-        reconnectInterval: 3000,
+        reconnectInterval: 3000
         // options: {
         //   maxPayload: 200 * 1024 * 1024
         // }
