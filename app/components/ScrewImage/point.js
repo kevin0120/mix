@@ -73,7 +73,9 @@ function Point({ info, twinkle, x, y, status, label, scale, reworkModiBGColor, o
       {Object.keys(info || {}).map(i => <ListItem style={{
         display: 'flex',
         justifyContent: 'space-between'
-      }}><span>{`${i} : `}</span><span>{info[i]}</span></ListItem>)}
+      }}
+        key={i}
+      ><span>{`${i} : `}</span><span>{info[i]}</span></ListItem>)}
     </List> : null}
   </div>;
 }

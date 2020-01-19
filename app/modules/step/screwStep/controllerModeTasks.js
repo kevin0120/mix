@@ -15,7 +15,7 @@ export default {
     try {
       const sData: tScrewStepData = this.data;
       const stepCode = this.code;
-      const { retryTimes } = sData;
+      // const { retryTimes } = sData;
       const { points } = this._pointsManager;
       const userIDs: Array<number> = yield select(s => s.users.map(u => u.uid));
       const { sequence } = point;
@@ -43,7 +43,7 @@ export default {
         userIDs,
         pset,
         sequence,
-        retryTimes,
+        // retryTimes,
         total,
         workorderCode
       );
