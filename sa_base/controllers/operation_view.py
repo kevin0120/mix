@@ -123,6 +123,7 @@ class OperationView(http.Controller):
                     # 新增
                     val.update({
                         'parent_qcp_id': operation_id,
+                        'sa_operation_ids': [(6, 0, operation.sa_operation_ids.ids)],
                         'sequence': val['sequence'],
                         'x_offset': val['x_offset'],
                         'y_offset': val['y_offset'],
@@ -145,7 +146,8 @@ class OperationView(http.Controller):
 
             ret = need_delete_points.unlink()
             if not ret and need_delete_points:
-                _logger.error("Delete Operation Point Fail, Points: {0}".format(pprint.pformat(need_delete_points, indent=4)))
+                _logger.error(
+                    "Delete Operation Point Fail, Points: {0}".format(pprint.pformat(need_delete_points, indent=4)))
 
             body = json.dumps({'msg': "Edit point success"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
