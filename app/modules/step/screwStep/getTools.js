@@ -18,13 +18,13 @@ export function getTools(points: Array<tPoint>) {
     throw new Error(`tools not found: ${String(lostTool.map(t => `${t}`))}`);
   }
 
-  const unhealthyTools = tools.filter(t => !t.Healthz);
-  if (unhealthyTools.length > 0) {
-    throw new Error(
-      `tool not connected: ${JSON.stringify(
-        unhealthyTools.map(t => `${String(t.serialNumber)}`)
-      )}`
-    );
-  }
+  // const unhealthyTools = tools.filter(t => !t.Healthz);
+  // if (unhealthyTools.length > 0) {
+  //   throw new Error(
+  //     `tool not connected: ${JSON.stringify(
+  //       unhealthyTools.map(t => `${String(t.serialNumber)}`)
+  //     )}`
+  //   );
+  // }
   return tools;
 }
