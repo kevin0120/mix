@@ -1,7 +1,10 @@
-import { call, put, take, actionChannel } from 'redux-saga/effects';
+import { actionChannel, call, put, select, take } from 'redux-saga/effects';
 import { orderActions } from '../order/action';
 import { STEP_ACTIONS, STEP_STATUS } from './constants';
 import { CommonLog } from '../../common/utils';
+import dialogActions from '../dialog/action';
+import actions from './actions';
+import { workModes } from '../workCenterMode/constants';
 
 function* readyState(config) {
   try {
@@ -74,6 +77,33 @@ function* finishState(config) {
 
 function* failState(config) {
   try {
+    const { error } = config;
+    const { workCenterMode } = yield select();
+    const isNormal = workCenterMode === workModes.normWorkCenterMode;
+    let buttons = [
+      {
+        label: 'Common.Close',
+        color: 'danger',
+        action: actions.confirmFail()
+      }
+    ];
+    if (isNormal) {
+      buttons = buttons.concat([
+        {
+          label: 'Order.Next',
+          color: 'warning',
+          action: actions.confirmFail()
+        }
+      ]);
+    }
+    yield put(
+      dialogActions.dialogShow({
+        buttons,
+        title: `工步失败：${this._code}`,
+        content: `${error || this.failureMsg}`
+      })
+    );
+    yield take(STEP_ACTIONS.CONFIRM_FAIL);
     yield put(orderActions.finishStep(this));
   } catch (e) {
     console.error(e);

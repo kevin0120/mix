@@ -31,7 +31,7 @@ if (!isNil(ipcRenderer)) {
 
 // send message to rush and receives response
 // eslint-disable-next-line flowtype/no-weak-types
-export function rushSendApi(msgType: string, data: any, timeout: number = defaultTimeout): Promise<tRushData<any, any>> {
+export function rushSendApi(msgType: string, data: any, timeout: number = defaultTimeout, retry = 0): Promise<tRushData<any, any>> {
   const sn = getSN();
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line flowtype/no-weak-types
@@ -54,7 +54,7 @@ export function rushSendApi(msgType: string, data: any, timeout: number = defaul
       data: {
         type: msgType,
         data
-      }, timeout, sn
+      }, timeout, sn, retry
     });
     CommonLog.Info(`rush send (${msgType})`, {
       type: msgType,

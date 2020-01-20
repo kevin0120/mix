@@ -9,6 +9,7 @@ import type { IDevice } from '../../device/IDevice';
 import { getDevice } from '../../deviceManager/devices';
 import ClsIOModule from '../../device/io/ClsIOModule';
 import { stepDataApi } from '../../../api/order';
+import notifierActions from '../../Notifier/action';
 
 function* enteringState(config) {
   try {
@@ -58,7 +59,13 @@ function* enteringState(config) {
     yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
   } catch (e) {
     CommonLog.lError(e);
-    yield put(orderActions.stepStatus(this, STEP_STATUS.DOING, { msg: e.message }));
+    yield put(
+      notifierActions.enqueueSnackbar(
+        'Error',
+        `${this.failureMsg}(${e.message})`
+      )
+    );
+    yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { msg: e.message }));
   }
 }
 
@@ -120,42 +127,9 @@ function* doingState() {
   }
 }
 
-function* failState(config) {
-  try {
-    const { msg } = config;
-    yield put(
-      dialogActions.dialogShow({
-        maxWidth: 'md',
-        buttons: [
-          {
-            label: 'Common.Close',
-            color: 'danger'
-          },
-          {
-            label: '重试',
-            color: 'info',
-            action: orderActions.doPreviousStep()
-          },
-          {
-            label: 'Order.Next',
-            color: 'warning',
-            action: orderActions.finishStep(this)
-          }
-        ],
-        title: `工步失败：${this._name}`,
-        content: `${msg || ''}`
-      })
-    );
-    // yield put(orderActions.finishStep(this));
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-}
-
 export const materialStepStatusMixin = (superTasks) => ({
   ...superTasks,
   [STEP_STATUS.DOING]: doingState,
-  [STEP_STATUS.FAIL]: failState,
   [STEP_STATUS.ENTERING]: enteringState
 });
 

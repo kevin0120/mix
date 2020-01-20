@@ -8,5 +8,8 @@ export default {
   input:(input)=>({
     type:STEP_ACTIONS.INPUT,
     input
+  }),
+  confirmFail:()=>({
+    type:STEP_ACTIONS.CONFIRM_FAIL
   })
 }

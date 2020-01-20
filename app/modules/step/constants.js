@@ -23,7 +23,8 @@ export const stepTypeKeys=Object.freeze({
 
 export const STEP_ACTIONS={
   SUBMIT:'STEP_SUBMIT',
-  INPUT:'STEP_INPUT'
+  INPUT:'STEP_INPUT',
+  CONFIRM_FAIL: 'STEP_CONFIRM_FAIL'
 };
 
 export default STEP_STATUS;
