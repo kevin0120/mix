@@ -153,9 +153,11 @@ export class ClsOperationPoint {
     this._results.push(r);
 
     this._parseStatus(r);
-    this._parseActive(r);
-    if (!this._isActive) {
-      return this;
+    if(this._isActive){
+      this._parseActive(r);
+      if (!this._isActive) {
+        return this;
+      }
     }
     return null;
   }

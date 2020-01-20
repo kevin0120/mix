@@ -1,4 +1,4 @@
-import { all, call } from 'redux-saga/effects';
+import { all, call, fork } from 'redux-saga/effects';
 import { controllerModes } from './constants';
 import controllerModeTasks from './controllerModeTasks';
 import { CommonLog } from '../../../common/utils';
@@ -35,7 +35,7 @@ function* setSingleTool(controllerMode, point, tool, controllerModeId) {
     }));
   } catch (e) {
     CommonLog.lError(e);
-    yield call([this, byPassPoint], [point]);
+    yield fork([this, byPassPoint], [point]);
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)
@@ -56,7 +56,7 @@ function* disableSingleTool(point) {
     }));
   } catch (e) {
     CommonLog.lError(e);
-    yield call([this, byPassPoint], [point]);
+    yield fork([this, byPassPoint], [point]);
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)

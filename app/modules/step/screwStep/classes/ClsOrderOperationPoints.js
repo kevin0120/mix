@@ -105,7 +105,6 @@ export class ClsOrderOperationPoints {
   }
 
   newResult(results: Array<tResult>) {
-    let newActivePoints: Array<?ClsOperationPoint> = [];
     let newInactivePoints: Array<?ClsOperationPoint> = [];
     results.forEach(r => {
       const { seq } = r;
@@ -113,23 +112,8 @@ export class ClsOrderOperationPoints {
       if (!group) {
         return;
       }
-      const groupSeq = group.groupSequence;
       const inactivePoints = group.newResult(r);
       newInactivePoints = newInactivePoints.concat(inactivePoints);
-      // if (!group.isKeyPass) {
-      //   return;
-      // }
-      // const gSeq = Math.min(
-      //   ...Object.keys(this._groups)
-      //     .map(s => parseInt(s, 10))
-      //     .filter(s => s > groupSeq)
-      // );
-      // const nextGroup = this._groups[gSeq];
-      // if (!nextGroup) {
-      //   return;
-      // }
-      // nextGroup.setActive(true);
-      // newActivePoints = newActivePoints.concat(nextGroup.points);
     });
 
     return newInactivePoints;
