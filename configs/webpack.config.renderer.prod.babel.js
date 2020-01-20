@@ -152,6 +152,7 @@ export default merge.smart(baseConfig, {
       // SVG Font
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        exclude: [path.resolve(__dirname, '..', 'app')],
         use: {
           loader: 'url-loader',
           options: {
@@ -161,7 +162,7 @@ export default merge.smart(baseConfig, {
         }
       },
       {
-        test: /\.svg$/,
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         exclude: /node_modules/,
         use: [
           {

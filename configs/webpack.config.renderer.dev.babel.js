@@ -191,7 +191,7 @@ export default merge.smart(baseConfig, {
         }
       },
       {
-        test: /\.svg$/,
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         exclude: /node_modules/,
         use: [
           {
