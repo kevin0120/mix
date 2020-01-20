@@ -41,6 +41,9 @@ export function* byPassPoint(finalFailPoints) {
       if (fail) {
         yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '拧紧失败' })); // 失败退出
       }
+      if(bypass){
+        this._pointsManager.byPassPoint(finalFailPoints);
+      }
     }
   } catch (e) {
     CommonLog.lError(e);

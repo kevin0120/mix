@@ -23,6 +23,7 @@ import { byPassPoint } from './byPassPoint';
 import { stepDataApi } from '../../../api/order';
 import type { IWorkable } from '../../workable/IWorkable';
 import { getResult } from './getResult';
+import { disableTools, setTools } from './setTools';
 
 function* enteringState(config) {
   try {
@@ -77,7 +78,6 @@ function* enteringState(config) {
           this._tools = [tool];
           this._forceTool = tool;
           yield put(dialogActions.dialogClose());
-          console.log('tool selected', tool);
           const PsetSelect = SelectCard(screwStepActions.selectPset);
 
           // TODO get tool psets
@@ -238,8 +238,9 @@ function* doingState(config) {
           );
           yield call([this, byPassPoint], finalFailPoints);
           const newActivePoints = this._pointsManager.start();
-          this._pointsToActive = newActivePoints.filter(p => this._pointsToActive.every(pp => pp.sequence !== p.sequence));
-          console.warn(this._pointsToActive);
+          this._pointsToActive = newActivePoints.filter(p =>
+            this._pointsToActive.every(pp => pp.sequence !== p.sequence)
+          );
           if (
             this._pointsManager.isFailed &&
             this._pointsManager.points.filter(p => p.isActive).length === 0
@@ -268,24 +269,20 @@ function* doingState(config) {
           controllerModeId: cModeId
         };
       });
-      const results = yield call(
-        [this, getResult],
+      yield call([this, setTools],
         activeConfigs,
-        resultChannel,
         controllerMode,
         isFirst
+      );
+      const results = yield call(
+        [this, getResult],
+        resultChannel
       );
       this._pointsToActive = [];
 
       this._newInactivePoints = this._pointsManager.newResult(results);
       // disable tools before bypass point
-      yield all(this._newInactivePoints.map(p => call(
-        getDevice(p.toolSN)?.Disable || (() => {
-          CommonLog.lError(
-            `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
-          );
-        })
-      )));
+      yield call([this, disableTools], this._newInactivePoints);
       yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
         ...data,
         tightening_points: this._pointsManager.points.map(p => p.data)
@@ -297,7 +294,6 @@ function* doingState(config) {
     }
   } catch (e) {
     CommonLog.lError(e, { at: 'screwStep DOING' });
-    console.log(e);
     yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: e }));
   }
 }
@@ -306,6 +302,7 @@ function* failState(config) {
   try {
     const { error, silent } = config;
     yield all(this._tools.map(t => call(t.Disable)));
+    yield call([this, clearStepData]);
     if (!silent) {
       const { workCenterMode } = yield select();
       const isNormal = workCenterMode === workModes.normWorkCenterMode;
@@ -353,11 +350,11 @@ export const screwStepStatusTasksMixin = (superTasks) => ({
   [STEP_STATUS.FAIL]: failState
 });
 
-export function* onLeave() {
+function* clearStepData() {
   try {
-    yield call(stepDataApi, this.code, this._data);
     if (this._pointsManager) {
       this._pointsManager.stop();
+      this._pointsManager.clearByPass();
     }
     if (this._tools) {
       yield all(
@@ -374,10 +371,23 @@ export function* onLeave() {
       this._tools = [];
       this._listeners = [];
     }
+    this._pointsToActive = [];
 
     CommonLog.Info('tools cleared', {
       at: `screwStep(${String((this: IWorkable)._code)})._onLeave`
     });
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: `screwStep(${String((this: IWorkable)._code)}).clearStepData`
+    });
+  }
+
+}
+
+export function* onLeave() {
+  try {
+    yield call(stepDataApi, this.code, this._data);
+    yield call([this, clearStepData]);
   } catch (e) {
     CommonLog.lError(e, {
       at: `screwStep(${String((this: IWorkable)._code)})._onLeave`

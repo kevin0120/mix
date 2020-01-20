@@ -1,5 +1,5 @@
 // @flow
-import { put, select, call } from 'redux-saga/effects';
+import { call, put, select } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { isNil } from 'lodash-es';
 import { controllerModes } from './constants';
@@ -34,19 +34,35 @@ export default {
       if (isNil(workorderCode)) {
         throw new Error('工单ID为空');
       }
-      console.log(pset, typeof pset);
-      yield call(
-        psetApi,
-        tool?.serialNumber || '',
-        ControllerSN || '',
-        stepCode,
-        userIDs,
-        pset,
-        sequence,
-        // retryTimes,
-        total,
-        workorderCode
-      );
+      const retries = 1;
+      for (let retry = 0; retry <= retries; retry += 1) {
+        try {
+          yield call(
+            psetApi,
+            tool?.serialNumber || '',
+            ControllerSN || '',
+            stepCode,
+            userIDs,
+            pset,
+            sequence,
+            // retryTimes,
+            total,
+            workorderCode
+          );
+          break;
+        } catch (e) {
+          const msg = `pset失败，${e.message}, 工具：${tool?.serialNumber}`;
+          yield put(
+            notifierActions.enqueueSnackbar('Error', msg, {
+              at: 'controllerModes.pset'
+            })
+          );
+          if (retry === retries) {
+            throw e;
+          }
+        }
+      }
+
     } catch (e) {
       // 程序号设置失败
       const msg = `pset失败，${e.message}, 工具：${tool?.serialNumber}`;

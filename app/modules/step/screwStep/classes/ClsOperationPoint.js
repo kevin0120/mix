@@ -7,6 +7,7 @@ import type { tPoint, tPointStatus, tResult } from '../interface/typeDef';
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOperationPoint {
   _results: Array<tResult>;
+  _bypass = false;
 
   constructor(p: tPoint) {
     this._point = p;
@@ -40,12 +41,6 @@ export class ClsOperationPoint {
 
   get isFinalFail(): boolean {
     // 结果的长度已经达到最大重试次数，同时最后一条结果为fail
-    // const rsCount = this._results.length;
-    // return (
-    //   this._point.maxRetryTimes >= 0 &&
-    //   rsCount >= this._point.maxRetryTimes &&
-    //   this._results[rsCount - 1].result === RESULT_STATUS.nok
-    // );
     return (
       this._point.max_redo_times >= 0
       && this._results.filter(r => r.measure_result === RESULT_STATUS.nok)
@@ -56,6 +51,9 @@ export class ClsOperationPoint {
 
   get isPass(): boolean {
     // 是否需要跳到下一个拧紧点
+    if (this._bypass) {
+      return true;
+    }
     const rsCount = this._results.length;
     const lastResult: tResult = this._results[rsCount - 1];
     if (!lastResult) {
@@ -115,6 +113,13 @@ export class ClsOperationPoint {
 
   get pset() {
     return this._point.pset;
+  }
+
+  setBypass(status) {
+    this._bypass = status;
+    if (status) {
+      this.setActive(false);
+    }
   }
 
   start(forceStart) {

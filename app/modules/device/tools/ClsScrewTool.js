@@ -1,12 +1,13 @@
 // @flow
 
 import type { Saga } from 'redux-saga';
-import { call } from 'redux-saga/effects';
+import { call, put } from 'redux-saga/effects';
 import Device from '../Device';
 import { CommonLog } from '../../../common/utils';
 import { toolEnableApi } from '../../../api/tools';
 import type { IScrewTool } from './interface/IScrewTool';
 import type { IDevice } from '../IDevice';
+import notifierActions from '../../Notifier/action';
 
 export default class ClsScrewTool extends Device implements IScrewTool {
   constructor(name: string, serialNumber: string, config: Object, ...rest: Array<any>) {
@@ -28,34 +29,66 @@ export default class ClsScrewTool extends Device implements IScrewTool {
   * Enable(): Saga<void> {
     try {
       if (!this.isEnable) {
-        yield call(
-          toolEnableApi,
-          this.serialNumber || '',
-          // eslint-disable-next-line flowtype/no-weak-types
-          ((this.parent: any): IDevice)?.serialNumber || '',
-          true
-        );
+        const retries = 1;
+        for (let retry = 0; retry <= retries; retry += 1) {
+          try {
+            yield call(
+              toolEnableApi,
+              this.serialNumber || '',
+              // eslint-disable-next-line flowtype/no-weak-types
+              ((this.parent: any): IDevice)?.serialNumber || '',
+              true
+            );
+            break;
+          } catch (e) {
+            if (retry === retries) {
+              throw e;
+            }
+            const msg = `工具使能失败: ${e.message}, 工具：${this.serialNumber}`;
+            yield put(
+              notifierActions.enqueueSnackbar('Error', msg, {
+                at: 'tool.Enable'
+              })
+            );
+
+          }
+        }
         yield call([this, super.Enable]);
       }
     } catch (e) {
       CommonLog.lError(e, {
         at: 'ClsScrewTool.Enable'
       });
-      throw new Error(`工具使能失败: ${e.message}，${this.serialNumber}`);
-
+      throw new Error(`工具使能失败: ${e.message}，工具：${this.serialNumber}`);
     }
   }
 
   * Disable(): Saga<void> {
     try {
       if (this.isEnable) {
-        yield call(
-          toolEnableApi,
-          this.serialNumber || '',
-          // eslint-disable-next-line flowtype/no-weak-types
-          ((this.parent: any): IDevice)?.serialNumber || '',
-          false
-        );
+        const retries = 1;
+        for (let retry = 0; retry <= retries; retry += 1) {
+          try {
+            yield call(
+              toolEnableApi,
+              this.serialNumber || '',
+              // eslint-disable-next-line flowtype/no-weak-types
+              ((this.parent: any): IDevice)?.serialNumber || '',
+              false
+            );
+            break;
+          } catch (e) {
+            if (retry === retries) {
+              throw e;
+            }
+            const msg = `工具禁用失败: ${e.message}, 工具：${this.serialNumber}`;
+            yield put(
+              notifierActions.enqueueSnackbar('Error', msg, {
+                at: 'tool.Enable'
+              })
+            );
+          }
+        }
         yield call([this, super.Disable]);
       }
     } catch (e) {

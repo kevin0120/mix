@@ -72,7 +72,7 @@
     "react/prefer-stateless-function": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "redux-saga/yield-effects": "warn"
+    "redux-saga/yield-effects": "off"
   },
   "plugins": [
     "flowtype",

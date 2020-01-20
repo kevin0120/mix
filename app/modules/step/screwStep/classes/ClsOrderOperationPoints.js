@@ -158,6 +158,23 @@ export class ClsOrderOperationPoints {
     });
   }
 
+  byPassPoint(points: Array<ClsOperationPoint> | number) {
+    points.forEach(p => {
+      if (p instanceof ClsOperationPoint) {
+        p.setBypass(true);
+      } else if (typeof p === 'number') {
+        const point = this.points.find(pp => pp.sequence === p);
+        if (point) {
+          point.setBypass(true);
+        }
+      }
+    });
+  }
+
+  clearByPass() {
+    this.points.forEach(p => p.setBypass(false));
+  }
+
   nextActiveGroups(seq) {
     // 下一步可工作的组，即之前所有组都完成的组
     const groups = [];
