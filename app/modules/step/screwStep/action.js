@@ -31,4 +31,7 @@ export default {
     type: SCREW_STEP.SELECT_PSET,
     pset
   }),
+  bypassRetry: ()=>({
+    type: SCREW_STEP.BYPASS_RETRY
+  })
 };

@@ -90,6 +90,7 @@
   "Common": {
     "Yes": "Confirm",
     "No": "Cancel",
+    "Retry": "Retry",
     "WorkSegment": "Work Segment",
     "WorkCenter": "Work Center",
     "SocketTray": "Socket Tray",

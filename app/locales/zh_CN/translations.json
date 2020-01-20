@@ -89,6 +89,7 @@
   },
   "Common": {
     "Yes": "确认",
+    "Retry": "重试",
     "No": "取消",
     "Idx": "序号",
     "WorkSegment": "工段",

@@ -35,7 +35,9 @@ function* setSingleTool(controllerMode, point, tool, controllerModeId) {
     }));
   } catch (e) {
     CommonLog.lError(e);
-    yield fork([this, byPassPoint], [point]);
+    yield call([this, byPassPoint], [point],
+      call([this, setSingleTool], controllerMode, point, tool, controllerModeId)
+    );
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)
@@ -56,7 +58,7 @@ function* disableSingleTool(point) {
     }));
   } catch (e) {
     CommonLog.lError(e);
-    yield fork([this, byPassPoint], [point]);
+    yield call([this, byPassPoint], [point], call([this, disableSingleTool], point));
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)

@@ -7,7 +7,7 @@ import { SCREW_STEP } from './constants';
 import { orderActions } from '../../order/action';
 import { STEP_STATUS } from '../constants';
 
-export function* byPassPoint(finalFailPoints) {
+export function* byPassPoint(finalFailPoints, retry = false) {
   try {
     const n: string = finalFailPoints
       .map((p: ClsOperationPoint) => p.point.nut_no)
@@ -16,6 +16,7 @@ export function* byPassPoint(finalFailPoints) {
       CommonLog.Debug('Show Next Point By Pass Diag');
       yield put(
         dialogActions.dialogShow({
+          maxWidth: 'md',
           buttons: [
             {
               label: 'Order.Next',
@@ -23,6 +24,11 @@ export function* byPassPoint(finalFailPoints) {
               action: screwStepActions.confirmFailSpecPoint()
 
             },
+            ...(retry ? [{
+              label: 'Common.Retry',
+              color: 'info',
+              action: screwStepActions.bypassRetry()
+            }] : []),
             {
               label: 'Screw.Next',
               color: 'warning',
@@ -34,15 +40,19 @@ export function* byPassPoint(finalFailPoints) {
           content: `${this.failureMsg}`
         })
       );
-      const { bypass, fail } = yield race({
+      const { retry: doRetry,bypass, fail } = yield race({
         bypass: take(SCREW_STEP.BYPASS_SPEC_POINT),
+        retry: take(SCREW_STEP.BYPASS_RETRY),
         fail: take(SCREW_STEP.CONFIRM_FAIL_SPEC_POINT)
       });
       if (fail) {
         yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '拧紧失败' })); // 失败退出
       }
-      if(bypass){
+      if (bypass) {
         this._pointsManager.byPassPoint(finalFailPoints);
+      }
+      if (doRetry) {
+        yield retry;
       }
     }
   } catch (e) {
