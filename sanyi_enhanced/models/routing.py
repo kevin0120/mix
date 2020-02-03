@@ -46,6 +46,8 @@ class MrpRoutingWorkcenter(models.Model):
                     'max_redo_times': point.max_redo_times,
                     'tool_sn': '',  # 默认模式下这里传送的枪的序列号是空字符串
                     'controller_sn': '',
+                    'norm_torque': point.norm,
+                    'norm_angle': point.norm_degree,
                     'pset': point.program_id.code if point.program_id else False,
                     'consu_product_id': point.product_id.id if point.product_id.id else 0,
                     'nut_no': point.name,  # 螺栓编号为拧紧点上的名称
