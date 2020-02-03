@@ -1,40 +1,50 @@
 package io
 
 import (
-	"github.com/masami10/rush/services/device"
+	"fmt"
 	"github.com/masami10/rush/services/wsnotify"
-	"github.com/stretchr/testify/assert"
+	"gopkg.in/resty.v1"
 	"testing"
+	"time"
 )
 
-func getSrv() *Service {
-	srv := NewService(NewConfig(), nil)
-	srv.WS = wsnotify.NewService(wsnotify.NewConfig(), nil)
-	srv.DeviceService, _ = device.NewService(device.NewConfig(), nil)
+func getHttpClient() *resty.Client {
+	client := resty.New()
+	client.SetRESTMode() // restful mode is default
+	client.SetTimeout(3 * time.Second)
+	client.SetContentLength(true)
+	// Headers for all request
+	client.
+		SetRetryCount(1).
+		SetRetryWaitTime(1 * time.Second).
+		SetRetryMaxWaitTime(20 * time.Second)
 
-	return srv
+	return client
 }
 
-func Test_Open(t *testing.T) {
-	srv := getSrv()
-	err := srv.Open()
-	assert.Nil(t, err)
+func wsTest(msg *wsnotify.WSMsg) {
+	http := getHttpClient()
+	resp, err := http.R().SetBody(msg).Put("http://127.0.0.1:8082/rush/v1/ws-test")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fmt.Println(resp.StatusCode())
 }
 
-func Test_Close(t *testing.T) {
-	srv := getSrv()
-	err := srv.Close()
-	assert.Nil(t, err)
+func ioSet(sn string, index uint16, status uint16) {
+	wsTest(&wsnotify.WSMsg{
+		SN:   0,
+		Type: wsnotify.WS_IO_SET,
+		Data: IoSet{
+			SN:     sn,
+			Index:  index,
+			Status: status,
+		},
+	})
 }
 
-func Test_Read(t *testing.T) {
-	srv := getSrv()
-	_, _, err := srv.Read("1")
-	assert.NotNil(t, err)
-}
+func Test_SetPSet(t *testing.T) {
 
-func Test_Write(t *testing.T) {
-	srv := getSrv()
-	err := srv.Write("1", 0, 0)
-	assert.NotNil(t, err)
+	ioSet("2_io", 0, OutputStatusOn)
 }

@@ -1,59 +1,42 @@
 package aiis
 
 const (
-	WS_REG    = "reg"
-	WS_RESULT = "result"
+	ServiceAiis = "aiis"
 )
 
-const (
-	SUBJECT_RESULTS      = "saturn.results.%s"
-	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
-)
+type TransportPayload struct {
+	Method string      `json:"method"`
+	Data   interface{} `json:"data"`
+}
 
-const (
-	ODOO_RESULT_PASS = "pass"
-	ODOO_RESULT_FAIL = "fail"
-
-	QUALITY_STATE_PASS = "pass"
-	QUALITY_STATE_FAIL = "fail"
-	QUALITY_STATE_EX   = "exception"
-
-	HANDLER_TYPE_CURVE = "curve"
-	HANDLER_TYPE_AIIS  = "aiis"
-
-	ODOO_STATUS_ONLINE  = "online"
-	ODOO_STATUS_OFFLINE = "offline"
-)
-
-type AIISResult struct {
-	// local_id
+type PublishResult struct {
 	ID int64 `json:"id"`
 
 	// db
-	Vin              string      `json:"vin"`
-	Pset_strategy    string      `json:"pset_strategy"`
-	Pset_m_max       float64     `json:"pset_m_max"`
-	Pset_m_min       float64     `json:"pset_m_min"`
-	Pset_m_threshold float64     `json:"pset_m_threshold"`
-	Pset_m_target    float64     `json:"pset_m_target"`
-	Pset_w_max       float64     `json:"pset_w_max"`
-	Pset_w_min       float64     `json:"pset_w_min"`
-	Pset_w_threshold float64     `json:"pset_w_threshold"`
-	Pset_w_target    float64     `json:"pset_w_target"`
-	CURObjects       []CURObject `json:"cur_objects"`
-	QualityState     string      `json:"quality_state"`
-	ExceptionReason  string      `json:"exception_reason"`
-	Job              string      `json:"job"`
-	Control_date     string      `json:"control_date"`
-	Measure_torque   float64     `json:"measure_torque"`
-	Measure_degree   float64     `json:"measure_degree"`
-	Measure_t_don    float64     `json:"measure_t_don"`
-	Measure_result   string      `json:"measure_result"`
-	Lacking          string      `json:"lacking"`
-	Op_time          int         `json:"op_time"`
-	One_time_pass    string      `json:"one_time_pass"`
-	Final_pass       string      `json:"final_pass"`
-	Batch            string      `json:"batch"`
+	Vin             string      `json:"vin"`
+	PsetStrategy    string      `json:"pset_strategy"`
+	PsetMMax        float64     `json:"pset_m_max"`
+	PsetMMin        float64     `json:"pset_m_min"`
+	PsetMThreshold  float64     `json:"pset_m_threshold"`
+	PsetMTarget     float64     `json:"pset_m_target"`
+	PsetWMax        float64     `json:"pset_w_max"`
+	PsetWMin        float64     `json:"pset_w_min"`
+	PsetWThreshold  float64     `json:"pset_w_threshold"`
+	PsetWTarget     float64     `json:"pset_w_target"`
+	CURObjects      []CURObject `json:"cur_objects"`
+	QualityState    string      `json:"quality_state"`
+	ExceptionReason string      `json:"exception_reason"`
+	Job             string      `json:"job"`
+	ControlDate     string      `json:"control_date"`
+	MeasureTorque   float64     `json:"measure_torque"`
+	MeasureDegree   float64     `json:"measure_degree"`
+	MeasureTDon     float64     `json:"measure_t_don"`
+	MeasureResult   string      `json:"measure_result"`
+	Lacking         string      `json:"lacking"`
+	OpTime          int         `json:"op_time"`
+	OneTimePass     string      `json:"one_time_pass"`
+	FinalPass       string      `json:"final_pass"`
+	Batch           string      `json:"batch"`
 
 	//db_fk
 	UserID       int64 `json:"user_id"`
@@ -63,15 +46,15 @@ type AIISResult struct {
 	NutID        int64 `json:"consu_product_id"`
 
 	// mo相关信息
-	MO_EquipemntName  string `json:"equipment_name"` // 设备名
-	MO_FactoryName    string `json:"factory_name"`   // 工厂代码
-	MO_Year           int64  `json:"year"`
-	MO_Pin            int64  `json:"pin"`
-	MO_Pin_check_code int64  `json:"pin_check_code"`
-	MO_AssemblyLine   string `json:"assembly_line"`
-	MO_Lnr            string `json:"lnr"`
-	MO_NutNo          string `json:"nut_no"`
-	MO_Model          string `json:"model"`
+	MoEquipemntname string `json:"equipment_name"` // 设备名
+	MoFactoryname   string `json:"factory_name"`   // 工厂代码
+	MoYear          int64  `json:"year"`
+	MoPin           int64  `json:"pin"`
+	MoPinCheckCode  int64  `json:"pin_check_code"`
+	MoAssemblyline  string `json:"assembly_line"`
+	MoLnr           string `json:"lnr"`
+	MoNutno         string `json:"nut_no"`
+	MoModel         string `json:"model"`
 
 	// others
 	Seq            int    `json:"seq"`
@@ -92,22 +75,13 @@ type CURObject struct {
 	OP   int    `json:"op"`
 }
 
-type WSOpResult struct {
-	ResultID int64       `json:"result_id"`
-	Result   interface{} `json:"result"`
-	Port     string      `json:"port"`
-}
-
 type ResultPatch struct {
 	ID        int64 `json:"id"`
 	HasUpload bool  `json:"has_upload"`
 }
 
-type ODOOStatus struct {
-	Status string `json:"status"`
-}
-
-type SystemStatus struct {
+// 服务状态(aiis, odoo, 外部系统等)
+type ServiceStatus struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
 }

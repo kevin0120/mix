@@ -7,7 +7,7 @@ type TighteningDeviceConfig struct {
 	// 控制器协议类型
 	Protocol string `yaml:"protocol"`
 
-	// 连接地址
+	// 连接地址(如果在控制器上配了连接地址，则下属所有工具共用此地址进行通信)
 	Endpoint string `yaml:"endpoint"`
 
 	// 控制器序列号
@@ -23,6 +23,9 @@ type ToolConfig struct {
 
 	// 工具通道号
 	Channel int `yaml:"channel"`
+
+	// 连接地址
+	Endpoint string `yaml:"endpoint"`
 }
 
 type Config struct {

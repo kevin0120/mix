@@ -12,7 +12,7 @@ func TestService(t *testing.T) {
 		fmt.Println("List available readers")
 		ctx, err := scard.EstablishContext()
 		if err != nil {
-			time.Sleep(SEARCH_ITV)
+			time.Sleep(SearchItv)
 			continue
 		}
 
@@ -21,7 +21,7 @@ func TestService(t *testing.T) {
 		if err != nil {
 			fmt.Println("reader lost")
 			_ = ctx.Release()
-			time.Sleep(SEARCH_ITV)
+			time.Sleep(SearchItv)
 			continue
 		}
 
@@ -35,7 +35,7 @@ func TestService(t *testing.T) {
 				fmt.Println("connect to card")
 				card, err := ctx.Connect(readers[index], scard.ShareExclusive, scard.ProtocolAny)
 				if err != nil {
-					time.Sleep(SEARCH_ITV)
+					time.Sleep(SearchItv)
 					continue
 				}
 
@@ -52,7 +52,7 @@ func TestService(t *testing.T) {
 					uid := fmt.Sprintf("%x", string(rsp))
 					fmt.Println(uid)
 
-					time.Sleep(SEARCH_ITV)
+					time.Sleep(SearchItv)
 				}
 			}
 		}

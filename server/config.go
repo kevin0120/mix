@@ -6,11 +6,13 @@ import (
 	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
+	"github.com/masami10/rush/services/grpc"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/services/ts002"
 	"github.com/masami10/rush/utils"
 	"os"
@@ -19,7 +21,6 @@ import (
 
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
@@ -43,7 +44,7 @@ type Config struct {
 
 	Aiis aiis.Config `yaml:"aiis"`
 
-	Ws wsnotify.Config `yaml:"websocket"`
+	WSNotify wsnotify.Config `yaml:"websocket"`
 
 	Odoo odoo.Config `yaml:"odoo"`
 
@@ -53,13 +54,15 @@ type Config struct {
 
 	OpenProtocol openprotocol.Config `yaml:"openprotocol"`
 
-	Contollers controller.Config `yaml:"controller_service"`
-
 	Scanner scanner.Config `yaml:"scanner"`
 
 	IO io.Config `yaml:"io"`
 
 	Broker broker.Config `yaml:"broker"`
+
+	Grpc grpc.Config `yaml:"grpc"`
+
+	Transport transport.Config `yaml:"transport"`
 
 	Reader reader.Config `yaml:"reader"`
 
@@ -83,7 +86,7 @@ func NewConfig() *Config {
 	c.HTTP = httpd.NewConfig()
 	c.Minio = minio.NewConfig()
 	c.Aiis = aiis.NewConfig()
-	c.Ws = wsnotify.NewConfig()
+	c.WSNotify = wsnotify.NewConfig()
 	c.Storage = storage.NewConfig()
 	c.Logging = diagnostic.NewConfig()
 	c.AudiVW = audi_vw.NewConfig()
@@ -95,9 +98,9 @@ func NewConfig() *Config {
 	c.TighteningDevice = tightening_device.NewConfig()
 	c.Device = device.NewConfig()
 	c.Broker = broker.NewConfig()
+	c.Grpc = grpc.NewConfig()
+	c.Transport = transport.NewConfig()
 	c.TS002 = ts002.NewConfig()
-
-	c.Contollers = controller.NewConfig()
 
 	return c
 }
@@ -146,16 +149,12 @@ func (c *Config) Validate() error {
 		return errors.Wrap(err, "odoo")
 	}
 
-	if err := c.Ws.Validate(); err != nil {
+	if err := c.WSNotify.Validate(); err != nil {
 		return errors.Wrap(err, "websocket")
 	}
 
 	if err := c.Storage.Validate(); err != nil {
 		return errors.Wrap(err, "storage")
-	}
-
-	if err := c.Contollers.Validate(); err != nil {
-		return errors.Wrap(err, "controller")
 	}
 
 	if err := c.Scanner.Validate(); err != nil {
@@ -179,6 +178,14 @@ func (c *Config) Validate() error {
 	}
 	if err := c.Broker.Validate(); err != nil {
 		return errors.Wrap(err, "broker")
+	}
+
+	if err := c.Grpc.Validate(); err != nil {
+		return errors.Wrap(err, "grpc")
+	}
+
+	if err := c.Transport.Validate(); err != nil {
+		return errors.Wrap(err, "transport")
 	}
 
 	if err := c.TS002.Validate(); err != nil {

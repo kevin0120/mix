@@ -1,8 +1,11 @@
 package broker
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/masami10/rush/services/transport"
 	"github.com/masami10/rush/toml"
+	"github.com/masami10/rush/utils"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
@@ -16,12 +19,13 @@ type Nats struct {
 	addrs         []string
 	conn          *nats.Conn
 	diag          Diagnostic
-	opts          brokerOptions
+	opts          transport.Options
 	nopts         []nats.Option
 	subscribes    map[string]*nats.Subscription
 	loadBalancers map[string][]string
 	respSubject   string
 	workGroups    map[string][]string
+	handler       StatusHandler
 }
 
 func NewNats(d Diagnostic, c Config) *Nats {
@@ -66,6 +70,10 @@ func (s *Nats) Address() string {
 	return strings.Join(s.addrs, ",")
 }
 
+func (s *Nats) SetStatusHandler(handler StatusHandler) {
+	s.handler = handler
+}
+
 func setAddrs(addrs []string) []string {
 	var cAddrs []string
 	for _, addr := range addrs {
@@ -83,17 +91,30 @@ func setAddrs(addrs []string) []string {
 	return cAddrs
 }
 
+func (s *Nats) handleStatus(status nats.Status) {
+	switch status {
+	case nats.CONNECTED:
+		s.handler(utils.STATUS_ONLINE)
+	case nats.DISCONNECTED:
+		s.handler(utils.STATUS_OFFLINE)
+	}
+}
+
 func (s *Nats) statusHandler(conn *nats.Conn) {
+	s.handleStatus(conn.Status())
 	if cid, err := conn.GetClientID(); err == nil {
-		s.diag.Debug(fmt.Sprintf("Client %d is %s ", cid, STATUS_BROKER[conn.Status()]))
+		s.diag.Debug(fmt.Sprintf("Client %d is %s ", cid, StatusBroker[conn.Status()]))
 	} else {
 		s.diag.Error("statusHandler", err)
 	}
 }
 
-func (s *Nats) statusErrHandler(conn *nats.Conn, err error) {
+func (s *Nats) statusErrHandler(conn *nats.Conn, e error) {
+	s.diag.Error("statusErrHandler Error Occurs", e)
+
+	s.handleStatus(conn.Status())
 	if cid, err := conn.GetClientID(); err == nil {
-		s.diag.Error(fmt.Sprintf("Client %d is %s ", cid, STATUS_BROKER[conn.Status()]), err)
+		s.diag.Error(fmt.Sprintf("Client %d is %s ", cid, StatusBroker[conn.Status()]), err)
 	} else {
 		s.diag.Error("statusErrHandler", err)
 	}
@@ -116,6 +137,7 @@ func (s *Nats) Connect(urls []string) error {
 
 	//最后设置默认句柄
 	s.setDefaultHandlers()
+	s.handleStatus(nats.CONNECTED)
 
 	return nil
 }
@@ -173,11 +195,11 @@ func (s *Nats) removeSub(subject string) error {
 	return nil
 }
 
-func (s *Nats) AppendWorkGroup(subject string, group string, handler SubscribeHandler) error {
+func (s *Nats) AppendWorkGroup(subject string, group string, handler transport.OnMsgHandler) error {
 	nc := s.conn
 	if nc == nil {
 		err := errors.New("Nats Is Not Connected!")
-		s.diag.Error("Subscribe Error", err)
+		s.diag.Error("AppendWorkGroup Error", err)
 		return err
 	}
 	if group == "" {
@@ -206,7 +228,7 @@ func (s *Nats) ensureWorkGroup(subject string, group string) []string {
 	return s.loadBalancers[name]
 }
 
-func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (registerName string, err error) {
+func (s *Nats) subscribe(subject, group string, handler transport.OnMsgHandler) (registerName string, err error) {
 	nc := s.conn
 	if nc == nil {
 		err = errors.New("Nats Is Not Connected!")
@@ -220,11 +242,13 @@ func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (regis
 	}
 
 	fn := func(msg *nats.Msg) {
-		d := &BrokerMessage{
-			Body:   msg.Data,
-			Header: map[string]string{HEADER_SUBJECT: msg.Subject, HEADER_REPLY: msg.Reply},
+		var d transport.Message
+		if err := json.Unmarshal(msg.Data, &d); err != nil {
+			s.diag.Error("Unmarshal Error", err)
+			return
 		}
-		if resp, err := handler(d); err != nil {
+
+		if resp, err := handler(&d); err != nil {
 			s.diag.Error("Subscribe Handler Error", err)
 		} else {
 			if len(resp) == 0 {
@@ -254,7 +278,7 @@ func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (regis
 }
 
 // 创建一个新的订阅，然后对其订阅发起返回
-func (s *Nats) Subscribe(subject string, handler SubscribeHandler) error {
+func (s *Nats) Subscribe(subject string, handler transport.OnMsgHandler) error {
 	_, err := s.subscribe(subject, "", handler)
 	return err
 }
@@ -267,7 +291,7 @@ func (s *Nats) Publish(subject string, data []byte) error {
 	nc := s.conn
 	if nc == nil {
 		err := errors.New("Nats Is Not Connected!")
-		s.diag.Error("Subscribe Error", err)
+		s.diag.Error("Publish Error", err)
 		return err
 	}
 

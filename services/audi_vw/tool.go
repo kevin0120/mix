@@ -13,20 +13,19 @@ func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagno
 		diag:       d,
 		cfg:        cfg,
 		parent:     c,
-		BaseDevice: device.CreateBaseDevice(),
+		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool, d, c.GetParentService()),
 	}
 
-	tool.UpdateStatus(device.STATUS_ONLINE)
+	tool.UpdateStatus(device.BaseDeviceStatusOnline)
 	return &tool
 }
 
 type TighteningTool struct {
+	device.BaseDevice
 	diag   Diagnostic
 	cfg    tightening_device.ToolConfig
 	Mode   string
 	parent *TighteningController
-
-	device.BaseDevice
 }
 
 // 工具使能控制
@@ -85,8 +84,8 @@ func (s *TighteningTool) TraceSet(str string) error {
 }
 
 func (s *TighteningTool) Status() string {
-	if s.parent.Status() == device.STATUS_OFFLINE {
-		return device.STATUS_OFFLINE
+	if s.parent.Status() == device.BaseDeviceStatusOffline {
+		return device.BaseDeviceStatusOffline
 	}
 
 	return s.BaseDevice.Status()
@@ -99,7 +98,7 @@ func (s *TighteningTool) DeviceType() string {
 // 处理结果
 func (c *TighteningTool) OnResult(result interface{}) {
 	if result == nil {
-		c.diag.Error(fmt.Sprintf("Tool SN: %s", c.cfg.SN), errors.New("Result Is Nil"))
+		c.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", c.cfg.SN), errors.New("Result Is Nil"))
 		return
 	}
 
@@ -108,7 +107,7 @@ func (c *TighteningTool) OnResult(result interface{}) {
 // 处理曲线
 func (c *TighteningTool) OnCurve(curve interface{}) {
 	if curve == nil {
-		c.diag.Error(fmt.Sprintf("Tool SN: %s", c.cfg.SN), errors.New("Curve Is Nil"))
+		c.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", c.cfg.SN), errors.New("Curve Is Nil"))
 		return
 	}
 }

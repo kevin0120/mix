@@ -8,10 +8,7 @@ import (
 )
 
 type Config struct {
-	Urls []string `yaml:"urls"`
-	//Headers         map[string]string `yaml:"headers" override:"headers"`
-	//WorkorderGetUrl string            `yaml:"workorder_get_url"`
-	//Method          string            `yaml:"method"`
+	Urls      []string       `yaml:"urls"`
 	Timeout   toml.Duration  `yaml:"timeout"`
 	Interval  toml.Duration  `yaml:"interval"`
 	MaxRetry  int            `yaml:"max_retry"` // api最大尝试次数
@@ -35,13 +32,11 @@ func NewConfig() Config {
 	}
 
 	c := Config{
-		Urls: []string{"http://127.0.0.1:8069"},
-		//WorkorderGetUrl: "/api/v1/mrp.workorders?masterpc=%s&hmi=%s&code=%s&limit=1&order=production_date",
-		Timeout:  toml.Duration(time.Millisecond * 10),
-		Interval: toml.Duration(time.Second * 1),
-		//Method:          "GET",
-		MaxRetry: 3,
-		//Headers:         map[string]string{"Content-Type": "application/json"},
+		Urls:      []string{"http://127.0.0.1:8069"},
+		Timeout:   toml.Duration(time.Millisecond * 10),
+		Interval:  toml.Duration(time.Second * 1),
+		MaxRetry:  3,
+		Workers:   1,
 		Endpoints: []EndpointConf{ec},
 	}
 
@@ -50,21 +45,20 @@ func NewConfig() Config {
 
 func (c Config) Validate() error {
 	if len(c.Urls) == 0 {
-		return errors.New("ODOO service URLs is empty ")
+		return errors.New("backend service URLs is empty ")
 	}
 
 	for _, v := range c.Endpoints {
 		if v.Path[0] != '/' {
-			return fmt.Errorf("route patterns must begin with a '/' %s", v.Path[0])
+			return fmt.Errorf("route patterns must begin with a '/' %s", v.Path)
 		}
 	}
 
 	return nil
 }
 
-func (c Config) index() ([]*Endpoint, error) {
-	m := []*Endpoint{}
-
+func (c Config) endpoints() ([]*Endpoint, error) {
+	var m []*Endpoint
 	for _, v := range c.Endpoints {
 		for _, url := range c.Urls {
 			m = append(m, NewEndpoint(url+v.Path, v.Headers, v.Method, v.Name))

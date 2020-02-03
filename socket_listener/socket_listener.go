@@ -179,7 +179,7 @@ func (sl *SocketListener) Description() string {
 //  ## 0 (default) is unlimited.
 //  # max_connections = 1024
 //
-//  ## Read timeout.
+//  ## IORead timeout.
 //  ## Only applies to stream sockets (e.g. TCP).
 //  ## 0 (default) is unlimited.
 //  # read_timeout = "30s"

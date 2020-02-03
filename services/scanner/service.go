@@ -1,18 +1,17 @@
 package scanner
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/pkg/errors"
 	"github.com/tarm/serial"
+	"go.uber.org/atomic"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -24,11 +23,7 @@ const (
 	ServiceSearchItv = 2000 * time.Millisecond
 )
 
-type Diagnostic interface {
-	Info(msg string)
-	Error(msg string, err error)
-	Debug(msg string)
-}
+const ScannerDispatcherKey = dispatcherbus.DispatcherScannerData
 
 type Service struct {
 	configValue atomic.Value
@@ -37,17 +32,18 @@ type Service struct {
 
 	diag Diagnostic
 	Notify
-
-	WS            *wsnotify.Service
-	DeviceService *device.Service
+	dispatcher    Dispatcher
+	DeviceService IDeviceService
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, dispatcher Dispatcher, ds IDeviceService) *Service {
 
 	s := &Service{
-		diag:        d,
-		mtxScanners: sync.Mutex{},
-		scanners:    map[string]*Scanner{},
+		diag:          d,
+		mtxScanners:   sync.Mutex{},
+		scanners:      map[string]*Scanner{},
+		dispatcher:    dispatcher,
+		DeviceService: ds,
 	}
 
 	s.configValue.Store(c)
@@ -63,10 +59,39 @@ func (s *Service) Open() error {
 	if !s.config().Enable {
 		return nil
 	}
-
 	go s.search()
-
+	err := s.createAndStartScannerDispatcher()
+	if err != nil {
+		s.diag.Error("Open", err)
+		return err
+	}
 	return nil
+}
+
+func (s *Service) dispatchRecvData(data string) {
+	if s.dispatcher == nil {
+		err := errors.New("Please Inject dispatcherBus Service First")
+		s.diag.Error("dispatchRecvData", err)
+		return
+	}
+	err := s.dispatcher.Dispatch(ScannerDispatcherKey, data)
+	if err != nil {
+		s.diag.Error("dispatchRecvData", err)
+	}
+	return
+}
+
+func (s *Service) createAndStartScannerDispatcher() error {
+	if s.dispatcher == nil {
+		err := errors.New("Please Inject dispatcherBus Service First")
+		s.diag.Error("createAndStartScannerDispatcher", err)
+		return err
+	}
+	err := s.dispatcher.Create(ScannerDispatcherKey, 20)
+	if err == nil || strings.HasPrefix(err.Error(), "Dispatcher Already Exist") {
+		return s.dispatcher.Start(ScannerDispatcherKey)
+	}
+	return err
 }
 
 func (s *Service) Close() error {
@@ -105,7 +130,7 @@ func (s *Service) search() {
 				break
 			}
 		}
-		if scanner != nil && scanner.Status() == SCANNER_STATUS_ONLINE {
+		if scanner != nil && scanner.Status() == ScannerStatusOnline {
 			time.Sleep(ServiceSearchItv)
 			continue
 		}
@@ -113,7 +138,7 @@ func (s *Service) search() {
 			d, err := ctx.OpenDeviceWithVIDPID(ID(vid), ID(pid))
 			if err == nil && d != nil {
 				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
-				newScanner := NewScanner(label, s.diag, d)
+				newScanner := NewScanner(label, s.diag, d, s)
 				s.addScanner(newScanner)
 				s.DeviceService.AddDevice(fmt.Sprintf("%d:%d", vid, pid), newScanner)
 			} else if err != nil {
@@ -127,7 +152,7 @@ func (s *Service) search() {
 			d, err := serial.OpenPort(c)
 			if err == nil {
 				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
-				newScanner := NewScanner(label, s.diag, d)
+				newScanner := NewScanner(label, s.diag, d, s)
 				s.addScanner(newScanner)
 				s.DeviceService.AddDevice(fmt.Sprintf("%s", label), newScanner)
 			} else {
@@ -144,7 +169,6 @@ func (s *Service) addScanner(scanner *Scanner) {
 
 	if _, ok := s.scanners[scanner.Channel()]; !ok {
 		s.scanners[scanner.Channel()] = scanner
-		scanner.notify = s
 		scanner.Start()
 	}
 }
@@ -162,21 +186,21 @@ func (s *Service) removeScanner(id string) {
 }
 
 func (s *Service) OnStatus(id string, status string) {
-	s.diag.Debug(fmt.Sprintf("scanner %s status: %s\n", id, status))
-	if status == SCANNER_STATUS_OFFLINE {
+	s.diag.Debug(fmt.Sprintf("Scanner %s Status: %s\n", id, status))
+	if status == ScannerStatusOffline {
 		s.removeScanner(id)
 	}
-	barcode, _ := json.Marshal(wsnotify.WSMsg{
-		Type: device.WS_DEVICE_STATUS,
-		Data: []device.DeviceStatus{
-			{
-				SN:     id,
-				Type:   device.DEVICE_TYPE_SCANNER,
-				Status: status,
-			},
+
+	scannerStatus := []device.Status{
+		{
+			SN:     id,
+			Type:   device.BaseDeviceTypeScanner,
+			Status: status,
 		},
-	})
-	s.WS.WSSendScanner(string(barcode))
+	}
+
+	// 分发扫码枪状态
+	s.dispatcher.Dispatch(dispatcherbus.DispatcherDeviceStatus, scannerStatus)
 }
 
 func (s *Service) OnRecv(id string, data string) {
@@ -184,14 +208,13 @@ func (s *Service) OnRecv(id string, data string) {
 	if data == "" {
 		return
 	}
-	barcode, _ := json.Marshal(wsnotify.WSMsg{
-		Type: WS_SCANNER_READ,
-		Data: ScannerRead{
-			Src:     device.DEVICE_TYPE_SCANNER,
-			SN:      id,
-			Barcode: data,
-		},
-	})
 
-	s.WS.WSSendScanner(string(barcode))
+	barcodeData := ScannerRead{
+		Src:     device.BaseDeviceTypeScanner,
+		SN:      id,
+		Barcode: data,
+	}
+
+	// 分发条码数据
+	s.dispatcher.Dispatch(dispatcherbus.DispatcherScannerData, barcodeData)
 }

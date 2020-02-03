@@ -1,56 +1,38 @@
 package reader
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/ebfe/scard"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/wsnotify"
+	dispatcherBus "github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
-	"sync/atomic"
+	"github.com/satori/go.uuid"
+	"go.uber.org/atomic"
 	"time"
 )
 
 const (
-	SEARCH_ITV = 1 * time.Second
+	SearchItv = 1 * time.Second
 )
 
-type Diagnostic interface {
-	Error(msg string, err error)
-	Debug(msg string)
-}
-
 type Service struct {
-	configValue atomic.Value
-
+	device.BaseDevice
+	configValue   atomic.Value
 	diag          Diagnostic
 	ctx           *scard.Context
-	WS            *wsnotify.Service
-	DeviceService *device.Service
+	deviceService IDeviceService
+	dispatcherBus Dispatcher
 	nfcDispatcher *utils.Dispatcher
 }
 
-func (s *Service) initNFCDispatchers() {
-	s.nfcDispatcher = utils.CreateDispatcher(utils.DEFAULT_BUF_LEN)
-	s.nfcDispatcher.Start()
-}
-
-func (s *Service) RegisterNFCDispatcher(dispatcher utils.DispatchHandler) error {
-	s.nfcDispatcher.Register(dispatcher)
-	return nil
-}
-
-func (s *Service) StopNFCDispatcher() {
-	s.nfcDispatcher.Release()
-}
-
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, ds IDeviceService, dp Dispatcher) *Service {
 
 	s := &Service{
-		diag: d,
+		diag:          d,
+		deviceService: ds,
+		dispatcherBus: dp,
 	}
-
-	s.initNFCDispatchers()
+	s.SetSerialNumber(uuid.NewV4().String())
 
 	s.configValue.Store(c)
 
@@ -70,9 +52,19 @@ func (s *Service) Open() error {
 		return nil
 	}
 
+	if err := s.dispatcherBus.Create(dispatcherBus.DispatcherReaderData, utils.DefaultDispatcherBufLen); err != nil {
+		s.diag.Error("Create DispatcherReaderData Failed", err)
+		return err
+	}
+
+	err := s.dispatcherBus.Start(dispatcherBus.DispatcherReaderData)
+	if err != nil {
+		return err
+	}
+
 	go s.search()
 
-	s.DeviceService.AddDevice("reader", s)
+	s.deviceService.AddDevice("reader", s)
 
 	return nil
 }
@@ -113,8 +105,8 @@ func (s *Service) DeviceType() string {
 	return "reader"
 }
 
-func (s *Service) Children() map[string]device.IDevice {
-	return map[string]device.IDevice{}
+func (s *Service) Children() map[string]device.IBaseDevice {
+	return map[string]device.IBaseDevice{}
 }
 
 func (s *Service) Status() string {
@@ -130,17 +122,8 @@ func (s *Service) Data() interface{} {
 }
 
 func (s *Service) notifyUID(uid string) {
-	barcode, _ := json.Marshal(wsnotify.WSMsg{
-		Type: WS_READER_UID,
-		Data: ReaderUID{
-			UID: uid,
-		},
-	})
-
-	//ts002 接收nfc数据
-	s.nfcDispatcher.Dispatch(uid)
-
-	s.WS.WSSendReader(string(barcode))
+	// 分发读卡器数据
+	s.doDispatch(dispatcherBus.DispatcherReaderData, uid)
 }
 
 func (s *Service) search() {
@@ -151,7 +134,7 @@ func (s *Service) search() {
 		if err == nil {
 			break
 		} else {
-			time.Sleep(SEARCH_ITV)
+			time.Sleep(SearchItv)
 		}
 	}
 
@@ -159,7 +142,7 @@ func (s *Service) search() {
 		// List available readers
 		ctx, err := scard.EstablishContext()
 		if err != nil {
-			time.Sleep(SEARCH_ITV)
+			time.Sleep(SearchItv)
 			continue
 		}
 
@@ -167,7 +150,7 @@ func (s *Service) search() {
 		if err != nil {
 			//s.diag.Debug("reader lost")
 			_ = ctx.Release()
-			time.Sleep(SEARCH_ITV)
+			time.Sleep(SearchItv)
 			continue
 		}
 
@@ -181,7 +164,7 @@ func (s *Service) search() {
 				// connect to card
 				card, err := ctx.Connect(readers[index], scard.ShareExclusive, scard.ProtocolAny)
 				if err != nil {
-					time.Sleep(SEARCH_ITV)
+					time.Sleep(SearchItv)
 					continue
 				}
 
@@ -210,9 +193,15 @@ func (s *Service) search() {
 
 					_ = card.Disconnect(scard.ResetCard)
 
-					time.Sleep(SEARCH_ITV)
+					time.Sleep(SearchItv)
 				}
 			}
 		}
+	}
+}
+
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.dispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error("Dispatch Failed", err)
 	}
 }

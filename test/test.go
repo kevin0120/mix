@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"gopkg.in/resty.v1"
@@ -100,19 +99,19 @@ func putResult(body interface{}, url string) error {
 	return nil
 }
 
-func resultToAiis(odoo_result *odoo.ODOOResultSync) aiis.AIISResult {
-	aiisResult := aiis.AIISResult{}
+func resultToAiis(odoo_result *odoo.ODOOResultSync) aiis.PublishResult {
+	aiisResult := aiis.PublishResult{}
 
 	if odoo_result.Measure_result == storage.RESULT_OK {
-		aiisResult.Final_pass = controller.ODOO_RESULT_PASS
-		aiisResult.One_time_pass = controller.ODOO_RESULT_PASS
+		aiisResult.FinalPass = controller.ODOO_RESULT_PASS
+		aiisResult.OneTimePass = controller.ODOO_RESULT_PASS
 
 		aiisResult.QualityState = controller.QUALITY_STATE_PASS
 		aiisResult.ExceptionReason = ""
 
 	} else {
-		aiisResult.Final_pass = controller.ODOO_RESULT_FAIL
-		aiisResult.One_time_pass = controller.ODOO_RESULT_FAIL
+		aiisResult.FinalPass = controller.ODOO_RESULT_FAIL
+		aiisResult.OneTimePass = controller.ODOO_RESULT_FAIL
 		aiisResult.QualityState = controller.QUALITY_STATE_PASS
 		aiisResult.ExceptionReason = ""
 	}
@@ -121,10 +120,10 @@ func resultToAiis(odoo_result *odoo.ODOOResultSync) aiis.AIISResult {
 
 	//aiisResult.Control_date = odoo_result.UpdateTime.Format(time.RFC3339)
 
-	aiisResult.Measure_degree = odoo_result.Measure_degree
-	aiisResult.Measure_result = strings.ToLower(odoo_result.Measure_result)
-	aiisResult.Measure_t_don = odoo_result.Measure_t_don
-	aiisResult.Measure_torque = odoo_result.Measure_torque
+	aiisResult.MeasureDegree = odoo_result.Measure_degree
+	aiisResult.MeasureResult = strings.ToLower(odoo_result.Measure_result)
+	aiisResult.MeasureTDon = odoo_result.Measure_t_don
+	aiisResult.MeasureTorque = odoo_result.Measure_torque
 	//aiisResult.Op_time = result.Count
 	//aiisResult.Pset_m_max = result.PSetDefine.Mp
 	//aiisResult.Pset_m_min = result.PSetDefine.Mm

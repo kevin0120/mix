@@ -35,7 +35,7 @@ func (d *Duration) UnmarshalText(text []byte) error {
 		return err
 	}
 
-	// Set duration and return.
+	// SetupHandlers duration and return.
 	*d = Duration(duration)
 	return nil
 }

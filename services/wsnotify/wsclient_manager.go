@@ -1,6 +1,7 @@
 package wsnotify
 
 import (
+	"fmt"
 	"github.com/kataras/iris/websocket"
 	"sync"
 )
@@ -8,6 +9,7 @@ import (
 type WSClientManager struct {
 	conn  map[string]websocket.Connection // sn : Connection
 	mutex sync.Mutex                      //为了连接进行锁操作
+	diag  Diagnostic
 }
 
 func (s *WSClientManager) Init() {
@@ -17,8 +19,8 @@ func (s *WSClientManager) Init() {
 
 func (s *WSClientManager) AddClient(sn string, c websocket.Connection) {
 	defer s.mutex.Unlock()
-
 	s.mutex.Lock()
+
 	s.conn[sn] = c
 }
 
@@ -33,10 +35,9 @@ func (s *WSClientManager) RemoveClientBySN(sn string) {
 
 func (s *WSClientManager) RemoveClient(cid string) {
 	defer s.mutex.Unlock()
-
 	s.mutex.Lock()
 
-	var key string = ""
+	var key string
 	for k, v := range s.conn {
 		if v.ID() == cid {
 			key = k
@@ -51,7 +52,6 @@ func (s *WSClientManager) RemoveClient(cid string) {
 
 func (s *WSClientManager) NotifyALL(evt string, payload string) {
 	defer s.mutex.Unlock()
-
 	s.mutex.Lock()
 
 	for _, v := range s.conn {
@@ -61,18 +61,19 @@ func (s *WSClientManager) NotifyALL(evt string, payload string) {
 
 func (s *WSClientManager) CloseAll() {
 	defer s.mutex.Unlock()
-
 	s.mutex.Lock()
 
 	for _, v := range s.conn {
-		v.Disconnect()
+		if err := v.Disconnect(); err != nil {
+			s.diag.Error(fmt.Sprintf("Close Websocket Client:%s Failed", v.ID()), err)
+		}
 	}
 }
 
 func (s *WSClientManager) GetClient(sn string) (websocket.Connection, bool) {
 	defer s.mutex.Unlock()
-
 	s.mutex.Lock()
+
 	v, e := s.conn[sn]
 	return v, e
 }

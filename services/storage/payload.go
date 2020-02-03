@@ -82,6 +82,10 @@ type WorkorderPayload struct {
 	SKILL              interface{} `json:"SKILL"`
 }
 
+type WorkCenterPayload struct {
+	Code string `json:"code"`
+}
+
 type StepTextPayload struct {
 }
 

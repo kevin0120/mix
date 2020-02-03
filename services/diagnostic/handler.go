@@ -287,7 +287,7 @@ func (h *AiisHandler) PutResultDone() {
 	h.l.Debug("Put Result to AIIS successful")
 }
 
-// Odoo Handler
+// backendService Handler
 
 type OdooHandler struct {
 	l Logger
@@ -340,6 +340,10 @@ func (h *HmiHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
+func (h *HmiHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *HmiHandler) Close() {
 	h.l.Info("hmi server closing")
 }
@@ -360,6 +364,10 @@ type WsHandler struct {
 
 func (h *WsHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
+}
+
+func (h *WsHandler) Debug(msg string) {
+	h.l.Debug(msg)
 }
 
 func (h *WsHandler) Disconnect(id string) {
@@ -444,6 +452,27 @@ func (h *OpenProtocolHandler) Info(msg string) {
 	h.l.Info(msg)
 }
 
+//transport
+type TransportHandler struct {
+	l Logger
+}
+
+func (h *TransportHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *TransportHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+func (h *TransportHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
+func (h *TransportHandler) SendMsgSuccess(msg string) {
+	h.l.Debug(msg)
+}
+
 // Controller
 type ControllerHandler struct {
 	l Logger
@@ -493,6 +522,10 @@ type IOHandler struct {
 	l Logger
 }
 
+func (h *IOHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *IOHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
@@ -534,6 +567,18 @@ func (h *DeviceHandler) Error(msg string, err error) {
 }
 
 func (h *DeviceHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+type DispatcherBusHandler struct {
+	l Logger
+}
+
+func (h *DispatcherBusHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *DispatcherBusHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 

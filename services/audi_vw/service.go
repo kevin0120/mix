@@ -3,17 +3,17 @@ package audi_vw
 import (
 	"fmt"
 	"github.com/masami10/rush/services/tightening_device"
+	"go.uber.org/atomic"
 	"net"
 	"strings"
 	"sync"
-	"sync/atomic"
 
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/socket_listener"
 	"github.com/pkg/errors"
 
 	"encoding/xml"
 	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	ERR_CVI3_NOT_FOUND      = "CIV3 SN is invalid"
-	ERR_CVI3_TOOL_NOT_FOUND = "CIV3 TOOL SN is invalid"
+	ERR_CVI3_NOT_FOUND      = "CIV3 SerialNumber is invalid"
+	ERR_CVI3_TOOL_NOT_FOUND = "CIV3 TOOL SerialNumber is invalid"
 	ERR_CVI3_OFFLINE        = "cvi3 offline"
 	ERR_CVI3_REQUEST        = "request to cvi3 failed"
 	ERR_CVI3_REPLY_TIMEOUT  = "cvi3 reply timeout"
@@ -56,7 +56,7 @@ type Service struct {
 	wg            sync.WaitGroup
 	closing       chan struct{}
 	handle_buffer chan string
-	Parent        *controller.Service
+	//Parent        *controller.Service
 	tightening_device.ITighteningProtocol
 }
 
@@ -64,16 +64,15 @@ func (s *Service) Err() <-chan error {
 	return s.err
 }
 
-func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
+func NewService(c Config, d Diagnostic) *Service {
 	addr := fmt.Sprintf("tcp://:%d", c.Port)
 
 	s := &Service{
-		name:    controller.AUDIPROTOCOL,
+		name:    tightening_device.TIGHTENING_AUDIVW,
 		err:     make(chan error, 1),
 		diag:    d,
 		wg:      sync.WaitGroup{},
 		closing: make(chan struct{}, 1),
-		Parent:  parent,
 	}
 
 	s.handle_buffer = make(chan string, 1024)
@@ -89,14 +88,14 @@ func (s *Service) config() Config {
 }
 
 func (s *Service) Name() string {
-	return "Audi/VW"
+	return tightening_device.TIGHTENING_AUDIVW
 }
 
-func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig) (tightening_device.ITighteningController, error) {
+func (s *Service) NewController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
 	return nil, nil
 }
 
-func (s *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
+func (s *Service) AddNewController(cfg tightening_device.TighteningDeviceConfig) *TighteningController {
 	config := s.config()
 	c := NewController(config)
 	c.Srv = s //服务注入
@@ -105,19 +104,19 @@ func (s *Service) AddNewController(cfg controller.ControllerConfig) controller.C
 	return &c
 }
 
-func (s *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) controller.Controller {
+func (s *Service) AddDevice(cfg device.Config, ts interface{}) *TighteningController {
 	return nil
 }
 
 func (p *Service) Write(sn string, buf []byte) error {
-	if _, ok := p.Parent.Controllers[sn]; !ok {
-		return fmt.Errorf("can not found controller :%s", sn)
-	}
-	v := p.Parent.Controllers[sn]
-	c := v.(*TighteningController)
-
-	s := c.Sequence()
-	c.Write(buf, s)
+	//if _, ok := p.Parent.Controllers[sn]; !ok {
+	//	return fmt.Errorf("can not found controller :%s", sn)
+	//}
+	//v := p.Parent.Controllers[sn]
+	//c := v.(*TighteningController)
+	//
+	//s := c.Sequence()
+	//c.IOWrite(buf, s)
 	return nil
 }
 
@@ -127,14 +126,14 @@ func (p *Service) Open() error {
 
 	err := p.listener.Start()
 	if err != nil {
-		return errors.Wrapf(err, "AudiVW XML Protocol %s Listener fail", p.name)
+		return errors.Wrapf(err, "AudiVW XML IProtocol %s Listener fail", p.name)
 	}
 
-	for _, w := range p.Parent.Controllers {
-		if w.Protocol() == controller.AUDIPROTOCOL {
-			go w.Start() //异步启动控制器
-		}
-	}
+	//for _, w := range p.Parent.Controllers {
+	//	if w.Protocol() == controller.AUDIPROTOCOL {
+	//		go w.Start() //异步启动控制器
+	//	}
+	//}
 
 	p.wg.Add(1)
 	go p.HandleProcess()
@@ -143,17 +142,17 @@ func (p *Service) Open() error {
 }
 
 func (p *Service) Close() error {
-	err := p.listener.Close()
-	if err != nil {
-		return errors.Wrapf(err, "Close Protocol %s Listener fail", p.name)
+	if p.listener == nil {
+		return nil
 	}
+	p.listener.Stop()
 
-	for _, w := range p.Parent.Controllers {
-		err := w.Close()
-		if err != nil {
-			return errors.Wrapf(err, "Close Protocol %s Writer fail", p.name)
-		}
-	}
+	//for _, w := range p.Parent.Controllers {
+	//	err := w.Close()
+	//	if err != nil {
+	//		return errors.Wrapf(err, "Close IProtocol %s Writer fail", p.name)
+	//	}
+	//}
 
 	p.closing <- struct{}{}
 
@@ -181,7 +180,7 @@ func (p *Service) Read(c net.Conn) {
 		n, err := c.Read(buffer)
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				p.diag.Error("Timeout in plugin AduiVW Protocol: %s", err)
+				p.diag.Error("Timeout in plugin AduiVW IProtocol: %s", err)
 				continue
 			} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
 				p.diag.Error("using closing connection", err)
@@ -302,21 +301,21 @@ func (p *Service) HandleProcess() {
 				} else {
 
 					// 结果数据
-					controllerResult := controller.ControllerResult{}
+					controllerResult := tightening_device.TighteningResult{}
 					XML2Result(&cvi3Result, &controllerResult)
-					controllerResult.NeedPushHmi = true
-					controllerResult.Raw = msg
+					//controllerResult.NeedPushHmi = true
+					//controllerResult.Raw = msg
 
 					if strings.Contains(msg, XML_CURVE_KEY) {
 
 						// 曲线数据
-						controllerCurve := minio.ControllerCurve{}
+						controllerCurve := tightening_device.TighteningCurve{}
 						XML2Curve(&cvi3Result, &controllerCurve)
 
-						p.Parent.Handle(&controllerResult, &controllerCurve)
+						//p.Parent.Handle(&controllerResult, &controllerCurve)
 					} else {
 
-						p.Parent.Handle(&controllerResult, nil)
+						//p.Parent.Handle(&controllerResult, nil)
 					}
 				}
 
@@ -342,14 +341,14 @@ func (p *Service) HandleProcess() {
 				//if strings.Contains(msg, XML_NUT_KEY) {
 				//	// 将套筒信息推送hmi
 				//	ws := wsnotify.WSSelector{}
-				//	ws.SN = ""
+				//	ws.SerialNumber = ""
 				//	ws.Selectors = []int{}
 				//	for _, v := range evt.MSL_MSG.EVT.STS.ONC.NUT.NIDs {
 				//		ws.Selectors = append(ws.Selectors, nut_ids[v])
 				//	}
 				//	ws_str, _ := json.Marshal(ws)
 				//
-				//	p.WS.WSSendControllerSelectorStatus(string(ws_str))
+				//	p.notifyService.WSSendControllerSelectorStatus(string(ws_str))
 				//}
 			}
 
@@ -360,7 +359,7 @@ func (p *Service) HandleProcess() {
 					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
 				}
 
-				//go p.TryCreateMaintenance(info)
+				//go p.CreateMaintenance(info)
 			}
 
 		case <-p.closing:
@@ -376,25 +375,25 @@ func (p *Service) GetControllersStatus(sns []string) ([]ControllerStatus, error)
 	var status []ControllerStatus
 
 	if len(sns) == 0 {
-		for k, v := range p.Parent.Controllers {
-			s := ControllerStatus{}
-			s.SN = k
-			s.Status = v.Status()
-			status = append(status, s)
-		}
+		//for k, v := range p.Parent.Controllers {
+		//	s := ControllerStatus{}
+		//	s.SN = k
+		//	s.Status = v.Status()
+		//	status = append(status, s)
+		//}
 
 		return status, nil
 
 	} else {
-		for _, v := range sns {
-			c, exist := p.Parent.Controllers[v]
-			if exist {
-				s := ControllerStatus{}
-				s.SN = v
-				s.Status = c.Status()
-				status = append(status, s)
-			}
-		}
+		//for _, v := range sns {
+		//	c, exist := p.Parent.Controllers[v]
+		//	if exist {
+		//		s := ControllerStatus{}
+		//		s.SN = v
+		//		s.Status = c.Status()
+		//		status = append(status, s)
+		//	}
+		//}
 
 		return status, nil
 	}
@@ -403,40 +402,40 @@ func (p *Service) GetControllersStatus(sns []string) ([]ControllerStatus, error)
 // 设置拧接程序
 func (p *Service) PSet(controller_sn string, tool_sn string, pset int, workorderId int64, resultId int64, count int, userId int64) error {
 	// 判断控制器是否存在
-	v, exist := p.Parent.Controllers[controller_sn]
-	if !exist {
-		// SN对应控制器不存在
-		return errors.New(ERR_CVI3_NOT_FOUND)
-	}
-
-	c := v.(*TighteningController)
-
-	var t controller.ToolConfig
-
-	var toolExist = false
-
-	for _, t = range c.cfg.Tools {
-		if t.SerialNO == tool_sn {
-			toolExist = true
-			break
-		}
-	}
-
-	if !toolExist {
-		return errors.New(fmt.Sprintf(ERR_CVI3_NOT_FOUND+" tool serial number:%s", tool_sn))
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		// 控制器离线
-		return errors.New(ERR_CVI3_OFFLINE)
-	}
-
-	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, workorderId, resultId, count, userId, t.ToolChannel)
-	if err != nil {
-		// 控制器请求失败
-		return err
-	}
+	//v, exist := p.Parent.Controllers[controller_sn]
+	//if !exist {
+	//	// SN对应控制器不存在
+	//	return errors.New(ERR_CVI3_NOT_FOUND)
+	//}
+	//
+	//c := v.(*TighteningController)
+	//
+	//var t controller.ToolConfig
+	//
+	//var toolExist = false
+	//
+	//for _, t = range c.cfg.Tools {
+	//	if t.SerialNO == tool_sn {
+	//		toolExist = true
+	//		break
+	//	}
+	//}
+	//
+	//if !toolExist {
+	//	return errors.New(fmt.Sprintf(ERR_CVI3_NOT_FOUND+" tool serial number:%s", tool_sn))
+	//}
+	//
+	//if c.Status() == controller.STATUS_OFFLINE {
+	//	// 控制器离线
+	//	return errors.New(ERR_CVI3_OFFLINE)
+	//}
+	//
+	//// 设定pset并判断控制器响应
+	//_, err := c.PSet(pset, workorderId, resultId, count, userId, t.ToolChannel)
+	//if err != nil {
+	//	// 控制器请求失败
+	//	return err
+	//}
 
 	return nil
 
@@ -445,40 +444,40 @@ func (p *Service) PSet(controller_sn string, tool_sn string, pset int, workorder
 // 拧紧抢使能控制
 func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	// 判断控制器是否存在
-	v, exist := p.Parent.Controllers[sn]
-	if !exist {
-		// SN对应控制器不存在
-		return errors.New(ERR_CVI3_NOT_FOUND)
-	}
-
-	c := v.(*TighteningController)
-
-	var t controller.ToolConfig
-
-	var toolExist = false
-
-	for _, t = range c.cfg.Tools {
-		if t.SerialNO == tool_sn {
-			toolExist = true
-			break
-		}
-	}
-
-	if !toolExist {
-		return errors.New(fmt.Sprintf(ERR_CVI3_NOT_FOUND+" tool serial number:%s", tool_sn))
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		// 控制器离线
-		return errors.New(ERR_CVI3_OFFLINE)
-	}
-
-	// 使能控制
-	err := c.ToolControl(enable, t.ToolChannel)
-	if err != nil {
-		// 控制器请求失败
-		return err
-	}
+	//v, exist := p.Parent.Controllers[sn]
+	//if !exist {
+	//	// SN对应控制器不存在
+	//	return errors.New(ERR_CVI3_NOT_FOUND)
+	//}
+	//
+	//c := v.(*TighteningController)
+	//
+	//var t controller.ToolConfig
+	//
+	//var toolExist = false
+	//
+	//for _, t = range c.cfg.Tools {
+	//	if t.SerialNO == tool_sn {
+	//		toolExist = true
+	//		break
+	//	}
+	//}
+	//
+	//if !toolExist {
+	//	return errors.New(fmt.Sprintf(ERR_CVI3_NOT_FOUND+" tool serial number:%s", tool_sn))
+	//}
+	//
+	//if c.Status() == controller.STATUS_OFFLINE {
+	//	// 控制器离线
+	//	return errors.New(ERR_CVI3_OFFLINE)
+	//}
+	//
+	//// 使能控制
+	//err := c.ToolControl(enable, t.ToolChannel)
+	//if err != nil {
+	//	// 控制器请求失败
+	//	return err
+	//}
 
 	return nil
 
@@ -487,5 +486,5 @@ func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 func (p *Service) TryCreateMaintenance(info toolInfoCNT) error {
 	return nil
 	//i := audiVW2OPToolInfo(ino)
-	//return p.Odoo.TryCreateMaintenance(info)
+	//return p.backendService.CreateMaintenance(info)
 }

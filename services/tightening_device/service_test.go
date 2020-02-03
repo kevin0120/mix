@@ -24,7 +24,7 @@ func getHttpClient() *resty.Client {
 
 func wsTest(msg *wsnotify.WSMsg) {
 	http := getHttpClient()
-	resp, err := http.R().SetBody(msg).Put("http://127.0.0.1:8082/rush/v1/WS-test")
+	resp, err := http.R().SetBody(msg).Put("http://127.0.0.1:8082/rush/v1/ws-test")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -35,7 +35,7 @@ func wsTest(msg *wsnotify.WSMsg) {
 func enableTool(controllerSN string, toolSN string, enable bool) {
 	wsTest(&wsnotify.WSMsg{
 		SN:   0,
-		Type: WS_TOOL_ENABLE,
+		Type: wsnotify.WS_TOOL_ENABLE,
 		Data: ToolControl{
 			ControllerSN: controllerSN,
 			ToolSN:       toolSN,
@@ -47,7 +47,7 @@ func enableTool(controllerSN string, toolSN string, enable bool) {
 func setPSet(controllerSN string, toolSN string, pset int) {
 	wsTest(&wsnotify.WSMsg{
 		SN:   0,
-		Type: WS_TOOL_PSET,
+		Type: wsnotify.WS_TOOL_PSET,
 		Data: PSetSet{
 			ControllerSN: controllerSN,
 			ToolSN:       toolSN,
@@ -58,7 +58,7 @@ func setPSet(controllerSN string, toolSN string, pset int) {
 
 func Test_SetPSet(t *testing.T) {
 	controllerSN := "w1"
-	toolSN := "w1"
+	toolSN := "xx4443"
 	pset := 4
 
 	enableTool(controllerSN, toolSN, true)

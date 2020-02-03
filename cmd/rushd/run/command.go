@@ -92,7 +92,7 @@ func (cmd *Command) Run(args ...string) error {
 	cmd.Diag.RushStarting(cmd.Version, cmd.Branch, cmd.Commit)
 	cmd.Diag.GoVersion()
 
-	// Write the PID file.
+	// IOWrite the PID file.
 	if err := cmd.writePIDFile(options.PIDFile); err != nil {
 		return fmt.Errorf("write pid file: %s", err)
 	}
@@ -214,14 +214,14 @@ func (cmd *Command) ParseConfig(path string) (*server.Config, error) {
 var usage = `usage: run [flags]
 run starts the Rush server.
         -config <path>
-                          Set the path to the configuration file.
+                          SetupHandlers the path to the configuration file.
         -hostname <name>
                           Override the hostname, the 'hostname' configuration
                           option will be overridden.
         -pidfile <path>
-                          Write process ID to a file.
+                          IOWrite process ID to a file.
         -log-file <path>
-                          Write logs to a file.
+                          IOWrite logs to a file.
         -log-level <level>
                           Sets the log level. One of debug,info,error.
 `

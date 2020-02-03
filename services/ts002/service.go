@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/context"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
@@ -16,23 +18,24 @@ type Service struct {
 	configValue atomic.Value
 	diag        Diagnostic
 	httpd       IHttpService
-	nfc         INFCService
 
 	validator *validator.Validate
 
 	mesAPI *MesAPI
 
-	IO               IIOService
-	TighteningDevice *tightening_device.Service
+	io            IIOService
+	tightening    ITightening
+	dispatcherBus IDispatcher
 }
 
-func NewService(c Config, d Diagnostic, h IHttpService, n INFCService, io IIOService) *Service {
+func NewService(c Config, d Diagnostic, h IHttpService, io IIOService, tightening ITightening, dispatcher IDispatcher) *Service {
 	ss := &Service{
-		diag:      d,
-		httpd:     h,
-		nfc:       n,
-		IO:        io,
-		validator: validator.New(),
+		diag:          d,
+		httpd:         h,
+		io:            io,
+		tightening:    tightening,
+		dispatcherBus: dispatcher,
+		validator:     validator.New(),
 	}
 
 	ss.configValue.Store(c)
@@ -54,10 +57,13 @@ func (s *Service) ensureValidator() *validator.Validate {
 	return cc
 }
 
-func (s *Service) registerNFCHandler() {
-	if s.nfc != nil {
-		s.nfc.RegisterNFCDispatcher(s.onNFCData)
-	}
+func (s *Service) initDispatcherRegisters() {
+
+	// 接收读卡器数据
+	s.dispatcherBus.Register(dispatcherbus.DispatcherReaderData, utils.CreateDispatchHandlerStruct(s.onNFCData))
+
+	// 接收拧紧结果
+	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
 }
 
 func (s *Service) Open() error {
@@ -70,7 +76,6 @@ func (s *Service) Open() error {
 		s.diag.Error("Open Error", err)
 		return err
 	}
-	s.registerNFCHandler()
 
 	if mes, err := NewMesAPI(c.MesApiConfig, s.diag); err != nil {
 		s.diag.Error("Open NewMesAPI Error", err)
@@ -79,7 +84,7 @@ func (s *Service) Open() error {
 		s.mesAPI = mes
 	}
 
-	s.TighteningDevice.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.onTighteningResult)
+	s.initDispatcherRegisters()
 
 	go s.doHealthCheck()
 
@@ -140,7 +145,7 @@ func (s *Service) validateRequestPayload(req interface{}) error {
 }
 
 func (s *Service) ioONDuration(sn string, idx int, duration time.Duration) {
-	if err := s.ioDoAction(sn, idx, io.OUTPUT_STATUS_ON); err != nil {
+	if err := s.ioDoAction(sn, idx, io.OutputStatusOn); err != nil {
 		s.diag.Error("Write ON Error", err)
 		return
 	}
@@ -149,7 +154,7 @@ func (s *Service) ioONDuration(sn string, idx int, duration time.Duration) {
 	for {
 		select {
 		case <-ticker.C:
-			if err := s.IO.Write(sn, uint16(idx), io.OUTPUT_STATUS_OFF); err != nil {
+			if err := s.io.Write(sn, uint16(idx), io.OutputStatusOff); err != nil {
 				s.diag.Error("Write OFF Error", err)
 			}
 			return
@@ -158,8 +163,8 @@ func (s *Service) ioONDuration(sn string, idx int, duration time.Duration) {
 }
 
 func (s *Service) ioDoAction(sn string, idx int, status uint16) error {
-	if err := s.IO.Write(sn, uint16(idx), status); err != nil {
-		e := errors.Wrapf(err, "Write IO Serial Number: %s, Idx: %d Error", sn, idx)
+	if err := s.io.Write(sn, uint16(idx), status); err != nil {
+		e := errors.Wrapf(err, "Write io Serial Number: %s, Idx: %d Error", sn, idx)
 		s.diag.Error("Write ON Error", e)
 		return err
 	}
@@ -183,7 +188,7 @@ func (s *Service) alarmControl(req *RushAlarmReq) error {
 	for _, IOIdx := range iList {
 		idx := IOIdx / 8 //IO模块索引
 		rr := IOIdx % 8  // 真实IO的位数
-		sn := s.IO.GetIOSerialNumberByIdx(idx)
+		sn := s.io.GetIOSerialNumberByIdx(idx)
 		go s.ioONDuration(sn, rr, time.Duration(c.IOAlarmLast))
 	}
 
@@ -199,7 +204,7 @@ func (s *Service) psetControl(req *RushPSetReq) error {
 		return err
 	}
 
-	return s.TighteningDevice.Api.ToolPSetByIP(&tightening_device.PSetSet{
+	return s.tightening.ToolPSetByIP(&tightening_device.PSetSet{
 		WorkorderID: 0,
 		PSet:        req.PSet,
 		IP:          req.ToolID,
@@ -228,7 +233,7 @@ func (s *Service) ioControl(req *RushIOControlReq) error {
 	for _, IOIdx := range iList {
 		idx := IOIdx / 8 //IO模块索引
 		rr := IOIdx % 8  // 真实IO的位数
-		sn := s.IO.GetIOSerialNumberByIdx(idx)
+		sn := s.io.GetIOSerialNumberByIdx(idx)
 		if err := s.ioDoAction(sn, rr, mapMESStatusIO[req.Status]); err != nil {
 			return err
 		}
@@ -290,8 +295,8 @@ func (s *Service) onNFCData(data interface{}) {
 	for _, IOIdx := range iList {
 		idx := IOIdx / 8 //IO模块索引
 		rr := IOIdx % 8  // 真实IO的位数
-		sn := s.IO.GetIOSerialNumberByIdx(idx)
-		err := s.IO.Write(sn, uint16(rr), io.OUTPUT_STATUS_ON)
+		sn := s.io.GetIOSerialNumberByIdx(idx)
+		err := s.io.Write(sn, uint16(rr), io.OutputStatusOn)
 		if err != nil {
 			s.diag.Error(fmt.Sprintf("Locker Control Error SN:%s Output:%d", sn, rr), err)
 		}

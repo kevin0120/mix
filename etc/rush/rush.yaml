@@ -8,6 +8,26 @@ logging:
   level: DEBUG
   max_age: 3000h
   rotate: 24h
+broker:
+  connect-urls:
+#    - nats://192.168.4.203:4222
+#    - nats://192.168.4.203:4223
+#    - nats://192.168.4.203:4224
+    - nats://127.0.0.1:4222
+    - nats://127.0.0.1:4223
+    - nats://127.0.0.1:4224
+  enable: true
+  provider: nats
+  connect-options:
+    name: Dummy Server
+    token: Dummy Token
+  name: 31a0def7-785c-4f43-ba19-1736a2e8b47c
+grpc:
+  enable: false
+  address: 127.0.0.1:9093
+  workers: 2
+transport:
+  provider: broker
 httpd:
   bind-address: :8082
   log-enabled: true
@@ -33,59 +53,36 @@ minio:
   secure: false
   reupload_interval: 1s
 aiis:
-  urls:
-  - http://127.0.0.1:9092
-  headers:
-    Content-Type: application/json
-  result_push_url: /aiis/v1/operation.results/%d
-  push_method: PUT
-  timeout: 6s
-  push_interval: 5s
-  max_retry: 3
-  ws_result_route: /aiis/v1/ws/results
-  result_upload_inteval: 2s
-  grpc_server: 127.0.0.1:9093
+  enable: true
+  timeout: 5s
+  ws_result_route: ws://127.0.0.1/aiis/v1/ws/results
+  result_upload_inteval: 5s
   keep_alive: 3s
   recheck: false
-  mesopenworkurl: http://127.0.0.1:8080/workorders/%s/start
-  mesfinishworkurl: http://127.0.0.1:8080/workorders/%s/finish
 odoo:
   urls:
-  - http://127.0.0.1:8069
-  timeout: 8s
+    - http://127.0.0.1:8069
+  timeout: 10ms
   interval: 1s
   max_retry: 3
-  workers: 8
+  workers: 1
   endpoints:
-  - name: getWorkorder
-#    path: /api/v1/mrp.workorders?code=%s&limit=1&order=production_date
-    path: /ts002/workorders?code=%s&limit=1&order=production_date
-    headers:
-    method: GET
-  - name: getGun
-    path: /api/v1/guns?serial=%s
-    headers:
-    method: GET
-  - name: createMO
-    path: /api/v1/mrp.productions
-    headers:
-    method: POST
-  - name: tryCreateMaintenance
-    path: /api/v1/maintenance/requests/try
-    headers:
-    method: POST
+    - name: test
+      path: /api/v1/test
+      headers:
+        Content-Type: application/json
+      method: GET
 
 websocket:
   route: /rush/v1/ws
-  read_buf_size: 10000000
-  write_buf_size: 10000000
-  workcenter: TA-01L
+  read_buf_size: 65535
+  write_buf_size: 65535
 
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_hardware
-  db_user: odoo
-  db_pwd: odoo
+  db_name: rush_ts002
+  db_user: admin
+  db_pwd: admin
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -99,20 +96,16 @@ audi/vw:
   version: 21
 
 openprotocol:
-  keep_alive_period: 10s
-  read_buf: 65535
-  req_time_out: 300ms
   skip_jobs:
   - 250
   - 240
-  io_trigger: 7
 
   # 0:vin 1:id2 2:id3 3:id4
   data_index: 2
   vin_index:
     - 0
     - 1
-
+    -
   tool_info_period: 10h
   default_mode: pset
 
@@ -123,7 +116,7 @@ io:
   enable: true
   flash_inteval: 1s
   ios:
-    - sn: 1
+    - sn: 11
       model: MOXA_E1212
       address: 192.168.3.250:502
     - sn: 2
@@ -134,13 +127,13 @@ io:
 #      address: 192.168.3.252:502
 
 reader:
-  enable: true
+  enable: false
 
 device:
   enable: true
 
 # 协议类型: Audi/VW, OpenProtocol
-# 支持型号: ModelDesoutterCvi3, ModelDesoutterDeltaWrench
+# 支持型号: ModelDesoutterCvi3, ModelDesoutterCvi2, ModelDesoutterDeltaWrench, ModelDesoutterConnect
 tightening_device:
   enable: true
   devices:
@@ -173,42 +166,27 @@ tightening_device:
 #      protocol: Audi/VW
 #      endpoint: tcp://127.0.0.1:4700
 
-#    - model: MODEL_DESOUTTER_DELTA_WRENCH
-#      protocol: OpenProtocol
-#      endpoint: tcp://192.168.0.222:4545
-#      sn: 0001
+    - model: ModelDesoutterCvi3
+      protocol: OpenProtocol
+      sn: 3
+      tools:
+        - sn: 3001
+          channel: 1
+          endpoint: tcp://192.168.3.23:4546
+        - sn: 3002
+          channel: 51
+          endpoint: tcp://192.168.3.23:4545
 
-
-# 协议类型: Audi/VW, OpenProtocol
-broker:
-  enable: false
-  connect-urls:
-    - nats://192.168.4.203:4222
-    - nats://192.168.4.203:4223
-    - nats://192.168.4.203:4224
-  connect-options:
-    name: Dummy Server
-    token: Dummy Token
-  provider: nats
-controller_service:
-  enable: false
-  workers: 1
-  controllers:
-#    - serial_no: 0001
-#      protocol: OpenProtocol
-#      remote_ip: 192.168.1.101
-#      port: 4546
-#      channel: 51
-#
-#    - serial_no: 27231800455
-#      protocol: Audi/VW
-#      remote_ip: 192.168.5.212
-#      port: 4700
-#      tools:
-#      - gun_serial: 15C92257 5.7.1
-#        channel: 1
-#      - gun_serial: 18G53917 5.8.2
-#        channel: 2
+    - model: ModelDesoutterConnect
+      protocol: OpenProtocol
+      sn: 4
+      tools:
+        - sn: 4001
+          channel: 51
+          endpoint: tcp://192.168.3.100:4545
+        - sn: 4002
+          channel: 52
+          endpoint: tcp://192.168.3.100:4546
 
 ts002:
   enable: false

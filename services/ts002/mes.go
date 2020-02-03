@@ -14,8 +14,8 @@ import (
 )
 
 var mapMESStatusIO = map[string]uint16{
-	"on":  io.OUTPUT_STATUS_ON,
-	"off": io.OUTPUT_STATUS_OFF,
+	"on":  io.OutputStatusOn,
+	"off": io.OutputStatusOff,
 }
 
 var mapMeasureResult = map[string]string{

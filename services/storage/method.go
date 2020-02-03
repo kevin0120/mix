@@ -3,66 +3,9 @@ package storage
 import (
 	"encoding/json"
 	"github.com/go-xorm/xorm"
-	"github.com/masami10/rush/typeDef"
-	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"time"
 )
-
-// TS004 国轩通过扫码创建工单
-func (s *Service) ts004CreateDummyWorkOrderFromTrackCode(trackCode string) []byte {
-	operation, err := s.getLastOperation()
-	if err != nil {
-		s.diag.Error("createDummyWorkOrderFromTrackCode Fetch Last Operation", err)
-		return nil
-	}
-	work := Workorders{
-		Code:                  utils.GenerateID(),
-		Status:                WORKORDER_STATUS_TODO,
-		Date_planned_start:    time.Now(),
-		Date_planned_complete: time.Now().Add(time.Duration(5 * 24 * time.Hour)), //当前时间后堆5天
-		Product_code:          operation.ProductType,                             // 此字段找到产品图片
-		WorkcenterCode:        operation.WorkcenterCode,
-	}
-
-	var operationPoints []typeDef.RoutingOperationPoint
-
-	if err := json.Unmarshal([]byte(operation.Points), &operationPoints); err != nil {
-		s.diag.Error("createDummyWorkOrderFromTrackCode Unmarshal Tightening Point Error", err)
-		return nil
-	}
-
-	payload := typeDef.StepTighteningPayload{
-		TighteningTotal: len(operationPoints),
-		TighteningPoint: operationPoints,
-	}
-
-	var d []byte
-
-	if d, err = json.Marshal(payload); err != nil {
-		s.diag.Error("createDummyWorkOrderFromTrackCode Marsh Tightening Step Payload", err)
-		return nil
-	}
-	// todo: 创建工步进行传递
-	_ = Steps{
-		Name:           operation.Tigntening_step_ref,
-		Step:           string(d),
-		Code:           operation.Tigntening_step_ref,
-		Testtype:       "tightening",
-		ImageRef:       operation.Tigntening_step_ref, // 根据此字段找到作业的图片
-		FailureMessage: "Tightening Fail",
-		Skippable:      false,
-		Undoable:       true,
-		Status:         STEP_STATUS_READY,
-	}
-
-	out, err := json.Marshal(work)
-	if err != nil {
-		s.diag.Error("createDummyWorkOrderFromTrackCode Marshal Error", err)
-		return nil
-	}
-	return out
-}
 
 //參考文檔
 //https://github.com/go-xorm/xorm/blob/master/README_CN.md
@@ -70,7 +13,7 @@ func (s *Service) ts004CreateDummyWorkOrderFromTrackCode(trackCode string) []byt
 
 func (s *Service) WorkorderSync(work *Workorders) (string, error) {
 
-	err := s.validate.Struct(work)
+	err := s.validator.Struct(work)
 	if err != nil {
 		return "", errors.Wrapf(err, "loss workorder-steps information")
 	}
@@ -79,7 +22,7 @@ func (s *Service) WorkorderSync(work *Workorders) (string, error) {
 	defer session.Close()
 	session.Begin()
 
-	roll, err := s.DeleteWorkAndStep(session, work.Code, work.Unique_Num)
+	roll, err := s.DeleteWorkAndStep(session, work.Code, work.UniqueNum)
 	if roll {
 		session.Rollback()
 		return "", errors.Wrapf(err, "本地已有更新版本号对应的工单")
@@ -123,17 +66,25 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		return "", err
 	}
 
+	workcenterBody, _ := json.Marshal(workPayload.Workcenter)
+	var wc WorkCenterPayload
+	if err := json.Unmarshal(workcenterBody, &wc); err != nil {
+		return "", err
+	}
+
 	wp, err := json.Marshal(workPayload)
 
 	workorder1 := Workorders{
-		Workorder:             string(wp),
-		Code:                  work.Code,
-		Track_code:            work.Track_code,
-		Product_code:          work.Product_code,
-		Status:                "todo",
-		Date_planned_start:    work.Date_planned_start,
-		Date_planned_complete: work.Date_planned_complete,
-		Unique_Num:            work.Unique_Num,
+		Code:                work.Code,
+		TrackCode:           work.TrackCode,
+		ProductCode:         work.ProductCode,
+		DatePlannedStart:    work.DatePlannedStart,
+		DatePlannedComplete: work.DatePlannedComplete,
+		UniqueNum:           work.UniqueNum,
+		Workorder:           string(wp),
+		WorkcenterCode:      wc.Code,
+
+		Status: "todo",
 	}
 
 	var workorderMap map[string]interface{}
@@ -154,7 +105,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		var sp []byte
 		err = json.Unmarshal(stepString, &msg)
 
-		if msg.Testtype == "tightening" {
+		if msg.TestType == "tightening" {
 			err = json.Unmarshal(stepString, &stepTightening)
 			sp, _ = json.Marshal(stepTightening)
 		} else {
@@ -163,11 +114,8 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		}
 
 		step := Steps{
-			WorkorderID:    workorder1.Id,
-			Step:           string(sp),
 			ImageRef:       msg.ImageRef,
-			Testtype:       msg.Testtype,
-			Status:         "ready",
+			TestType:       msg.TestType,
 			Code:           msg.Code,
 			Sequence:       msg.Sequence,
 			FailureMessage: msg.FailureMessage,
@@ -181,6 +129,10 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 			ToleranceMax:   msg.ToleranceMax,
 			Target:         msg.Target,
 			ConsumeProduct: msg.ConsumeProduct,
+			WorkorderID:    workorder1.Id,
+			Step:           string(sp),
+
+			Status: "ready",
 		}
 
 		workorder1.Steps = append(workorder1.Steps, step)
@@ -216,7 +168,7 @@ func (s *Service) WorkorderOut(order string, workorderID int64) (interface{}, er
 		stepOut := strucToMap(step[i])
 		stepOut["payload"] = stepMap
 
-		if step[i].Testtype != "tightening" {
+		if step[i].TestType != "tightening" {
 			delete(stepOut, "tightening_image_by_step_code")
 			steps = append(steps, stepOut)
 			continue
@@ -232,7 +184,7 @@ func (s *Service) WorkorderOut(order string, workorderID int64) (interface{}, er
 	workOrderOut["steps"] = steps
 	workOrderOut["payload"] = map2
 
-	image2, _ := s.findOrderPicture(workorder.Product_code)
+	image2, _ := s.findOrderPicture(workorder.ProductCode)
 	workOrderOut["product_type_image"] = image2
 	//delete(workOrderOut,"product_code")
 	//rr, _ := json.Marshal(workOrderOut)
@@ -335,21 +287,21 @@ func (s *Service) findStepPicture(ref string) (string, error) {
 }
 
 func (s *Service) findOrderPicture(ref string) (string, error) {
-	var ro RoutingOperations
-	ss := s.eng.Alias("r").Where("r.product_type = ?", ref).Limit(1)
-	_, e := ss.Get(&ro)
-	if e != nil {
-		return "", e
+	ro, err := s.GetRoutingOperationViaProductTypeCode(ref)
+	if err != nil {
+		err := errors.Errorf("GetRoutingOperationViaProductTypeCode: %s Fail", ref)
+		s.diag.Error("findOrderPicture", err)
+		return "", err
 	}
 	return ro.ProductTypeImage, nil
 }
 
-func (s *Service) getLastOperation() (*RoutingOperations, error) {
+func (s *Service) GetRoutingOperationViaProductTypeCode(ProductType string) (*RoutingOperations, error) {
 	var ro RoutingOperations
-	ss := s.eng.Alias("r").OrderBy("id desc").Limit(1)
+	ss := s.eng.Alias("r").Where("r.product_type = ?", ProductType).Limit(1)
 	_, e := ss.Get(&ro)
 	if e != nil {
-		return nil, e
+		return nil, errors.Errorf("Operation For Product Type Code: %s Is Not Existed", ProductType)
 	}
 	return &ro, nil
 }

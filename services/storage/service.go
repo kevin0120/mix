@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"time"
 )
 
@@ -25,7 +25,7 @@ type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
 	eng         *xorm.Engine
-	validate    *validator.Validate
+	validator   *validator.Validate
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -35,7 +35,7 @@ func NewService(c Config, d Diagnostic) *Service {
 	}
 
 	s.configValue.Store(c)
-	s.validate = validator.New()
+	s.validator = validator.New()
 
 	return s
 }
@@ -90,8 +90,8 @@ func (s *Service) Open() error {
 
 	_, err = engine.IsTableExist("guns")
 	if err == nil {
-		if err := engine.Sync2(new(Guns)); err != nil {
-			return errors.Wrapf(err, "Create Table Guns fail")
+		if err := engine.Sync2(new(Tools)); err != nil {
+			return errors.Wrapf(err, "Create Table Tools fail")
 		}
 	}
 
@@ -119,8 +119,9 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 	s.diag.Close()
-
-	s.eng.Close()
+	if s.eng != nil {
+		s.eng.Close()
+	}
 
 	s.diag.Closed()
 
@@ -149,20 +150,6 @@ func (s *Service) Store(data interface{}) error {
 	return nil
 }
 
-func (s *Service) FindResultsByWorkorder(workorder_id int64) ([]Results, error) {
-	var results []Results
-
-	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", workorder_id).OrderBy("r.seq")
-
-	e := ss.Find(&results)
-
-	if e != nil {
-		return results, e
-	} else {
-		return results, nil
-	}
-}
-
 func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Results, error) {
 	var results []Results
 
@@ -177,10 +164,10 @@ func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Re
 	}
 }
 
-func (s *Service) ListUnuploadResults() ([]Results, error) {
+func (s *Service) ListUnUploadResults() ([]Results, error) {
 	var results []Results
 
-	ss := s.eng.Alias("r").Where("r.has_upload = ?", false)
+	ss := s.eng.Alias("r").Where("r.has_upload = ?", false).And("r.curve_file != ?", "")
 
 	e := ss.Find(&results)
 
@@ -191,52 +178,25 @@ func (s *Service) ListUnuploadResults() ([]Results, error) {
 	}
 }
 
-func (s *Service) CurveExist(curve *Curves) (bool, error) {
+func (s *Service) GetTool(serial string) (Tools, error) {
 
-	has, err := s.eng.Exist(&Curves{ResultID: curve.ResultID, Count: curve.Count})
-	if err != nil {
-		return false, err
-	} else {
-		return has, nil
-	}
-}
+	var tools Tools
 
-func (s *Service) GetCurve(curve *Curves) (interface{}, error) {
-
-	var rt_curve Curves
-
-	rt, err := s.eng.Alias("c").Where("c.result_id = ?", curve.ResultID).And("c.count = ?", curve.Count).Get(&rt_curve)
+	rt, err := s.eng.Alias("g").Where("g.serial = ?", serial).Get(&tools)
 
 	if err != nil {
-		return nil, err
+		return tools, err
 	} else {
 		if !rt {
-			return nil, nil
+			return tools, errors.New("found gun failed")
 		} else {
-			return rt_curve, nil
+			return tools, nil
 		}
 	}
 }
 
-func (s *Service) GetGun(serial string) (Guns, error) {
-
-	var rt_gun Guns
-
-	rt, err := s.eng.Alias("g").Where("g.serial = ?", serial).Get(&rt_gun)
-
-	if err != nil {
-		return rt_gun, err
-	} else {
-		if !rt {
-			return rt_gun, errors.New("found gun failed")
-		} else {
-			return rt_gun, nil
-		}
-	}
-}
-
-func (s *Service) UpdateTool(gun *Guns) error {
-	g, err := s.GetGun(gun.Serial)
+func (s *Service) UpdateTool(gun *Tools) error {
+	g, err := s.GetTool(gun.Serial)
 	if err == nil {
 		// update
 		_, err := s.eng.Id(g.Id).Update(gun)
@@ -253,11 +213,6 @@ func (s *Service) UpdateTool(gun *Guns) error {
 
 	return nil
 
-}
-
-func (s *Service) CreateResult(result *Results) error {
-	_, err := s.eng.Insert(result)
-	return err
 }
 
 func (s *Service) GetOperation(id int64, model string) (RoutingOperations, error) {
@@ -419,29 +374,6 @@ func (s *Service) GetResultByID(id int64) (*Results, error) {
 	}
 }
 
-func (s *Service) GetResult(resultId int64, count int) (Results, error) {
-	var err error
-
-	result := Results{}
-
-	var rt bool
-	if count == 0 {
-		rt, err = s.eng.Alias("r").Where("r.x_result_id = ?", resultId).Limit(1).Get(&result)
-	} else {
-		rt, err = s.eng.Alias("r").Where("r.x_result_id = ?", resultId).And("r.count = ?", count).Limit(1).Get(&result)
-	}
-
-	if err != nil {
-		return result, err
-	} else {
-		if !rt {
-			return result, errors.New("result does not exist")
-		} else {
-			return result, nil
-		}
-	}
-}
-
 func (s *Service) ListWorkorders(hmi_sn string, workcenterCode string, status string) ([]Workorders, error) {
 	var workorders []Workorders
 
@@ -458,23 +390,7 @@ func (s *Service) ListWorkorders(hmi_sn string, workcenterCode string, status st
 	return workorders, err
 }
 
-//
-//func (s *Service) GetStep(id int64) (Steps, error) {
-//	var step Steps
-//	rt, err := s.eng.Alias("s").Where(fmt.Sprintf("s.id = ?", id), id).Get(&step)
-//
-//	if err != nil {
-//		return step, err
-//	} else {
-//		if !rt {
-//			return step, errors.New("step does not exist")
-//		} else {
-//			return step, nil
-//		}
-//	}
-//}
-
-func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
+func (s *Service) GetWorkOrder(id int64, raw bool) (Workorders, error) {
 
 	var workorder Workorders
 
@@ -560,20 +476,6 @@ func (s *Service) FindNextWorkorder(hmi_sn string, workcenter_code string) (Work
 		}
 	}
 }
-
-//func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
-//	sql := "update `results` set has_upload = ? where x_result_id = ?"
-//
-//	r, err := s.eng.Exec(sql, upload, r_id)
-//
-//	id, _ := r.RowsAffected()
-//	if err != nil {
-//
-//		return id, errors.Wrapf(err, "Update result upload status fail for id : %d", id)
-//	} else {
-//		return id, nil
-//	}
-//}
 
 func (s *Service) UpdateWorkorderUserID(id int64, userID int64) error {
 	sql := "update `workorders` set user_id = ? where id = ?"
@@ -702,8 +604,6 @@ func (s *Service) InitWorkorderForJob(workorder_id int64) error {
 	} else {
 		return nil
 	}
-
-	return nil
 }
 
 func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
@@ -834,38 +734,23 @@ func (s *Service) GetRoutingOperations(name string, model string, step string) (
 	}
 }
 
-func (s *Service) GetRoutingOperationViaProductTypeCode(productTypeCode string) (*RoutingOperations, error) {
+func (s *Service) FindRoutingOperations(workcenter_code string, cartype string, job int) (RoutingOperations, error) {
 
-	var ros RoutingOperations
-	// 工艺作业是按工位下发的,在当前工位看到的既是本工位的工艺信息
-	ss := s.eng.Alias("r").Where("r.product_type = ?", productTypeCode)
+	var ros []RoutingOperations
 
-	has, e := ss.Get(&ros) //自动增加 limit 1 限制
+	ss := s.eng.Alias("r").Where("r.workcenter_code = ?", workcenter_code).And("r.product_type = ? or r.job = ?", cartype, job)
 
-	if e != nil {
-		return nil, e
-	}
-	if !has {
-		return nil, errors.New("GetRoutingOperationViaProductTypeCode: Operation Is Not Found")
-	}
-	return &ros, nil
-}
-
-func (s *Service) FindRoutingOperations(workCenterCode string, cartype string, job int) (*RoutingOperations, error) {
-
-	var ros RoutingOperations
-
-	ss := s.eng.Alias("r").Where("r.workcenter_code = ?", workCenterCode).And("r.product_type = ? or r.job = ?", cartype, job)
-
-	has, e := ss.Get(&ros)
+	e := ss.Find(&ros)
 
 	if e != nil {
-		return nil, e
+		return RoutingOperations{}, e
+	} else {
+		if len(ros) > 0 {
+			return ros[0], nil
+		} else {
+			return RoutingOperations{}, errors.New("result not found")
+		}
 	}
-	if !has {
-		return nil, errors.New("GetRoutingOperationViaProductTypeCode: Operation Is Not Found")
-	}
-	return &ros, nil
 }
 
 func (s *Service) FindLocalResults(hmi_sn string, limit int) ([]ResultsWorkorders, error) {
@@ -906,18 +791,6 @@ func (s *Service) IsMultiResult(workorderID int64, batch string) bool {
 		}
 	}
 }
-
-//func (s *Service) UpdateResultTriggerTime(trigger_type string, trigger_time time.Time, controller_sn string) error {
-//
-//	sql := fmt.Sprintf("update `controllers` set %s = ? where controller_sn = ?", trigger_type, trigger_time)
-//	_, err := s.eng.Exec(sql, controller_sn)
-//
-//	if err != nil {
-//		return err
-//	} else {
-//		return nil
-//	}
-//}
 
 func (s *Service) GetController(sn string) (interface{}, error) {
 
@@ -1014,7 +887,7 @@ func (s *Service) Workorders(par []byte) ([]Workorders, error) {
 	err = q.Find(&rt)
 
 	for i := 0; i < len(rt); i++ {
-		rt[i].Product_type_image, err = s.findOrderPicture(rt[i].Product_code)
+		rt[i].ProductTypeImage, err = s.findOrderPicture(rt[i].ProductCode)
 	}
 
 	if err != nil {
@@ -1039,7 +912,7 @@ func (s *Service) Steps(workorderID int64) ([]Steps, error) {
 }
 
 func (s *Service) WorkorderStep(workorderID int64) (*WorkorderStep, error) {
-	workorder, err := s.GetWorkorder(workorderID, true)
+	workorder, err := s.GetWorkOrder(workorderID, true)
 	if err != nil {
 		return nil, err
 	}
@@ -1078,7 +951,7 @@ func (s *Service) DeleteWorkAndStep(ss *xorm.Session, code string, uniqueNum int
 	if !bool {
 		return false, nil
 	}
-	if workorder.Unique_Num > uniqueNum {
+	if workorder.UniqueNum > uniqueNum {
 		return true, nil
 	}
 	sql1 := "delete from `workorders` where id = ?"
@@ -1352,4 +1225,34 @@ func (s *Service) ClearToolResultAndCurve(toolSN string) error {
 	}
 
 	return nil
+}
+
+func (s *Service) GetWorkorderByCode(code string) (*Workorders, error) {
+	order := Workorders{}
+	rt, err := s.eng.Alias("w").Where("w.code = ?", code).Limit(1).Get(&order)
+
+	if err != nil {
+		return nil, err
+	} else {
+		if !rt {
+			return nil, errors.New("Workorder Does Not Exist")
+		} else {
+			return &order, nil
+		}
+	}
+}
+
+func (s *Service) GetStepByCode(code string) (*Steps, error) {
+	step := Steps{}
+	rt, err := s.eng.Alias("s").Where("s.code = ?", code).Limit(1).Get(&step)
+
+	if err != nil {
+		return nil, err
+	} else {
+		if !rt {
+			return nil, errors.New("Step Does Not Exist")
+		} else {
+			return &step, nil
+		}
+	}
 }

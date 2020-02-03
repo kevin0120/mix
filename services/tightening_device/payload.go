@@ -7,18 +7,15 @@ import (
 )
 
 const (
-	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported"
-	TIGHTENING_ERR_UNKNOWN       = "Error Unknown"
+	TIGHTENING_OPENPROTOCOL = "OpenProtocol"
+	TIGHTENING_AUDIVW       = "Audi/VW"
 )
-
 const (
-	DISPATCH_RESULT            = "DISPATCH_RESULT"
-	DISPATCH_CURVE             = "DISPATCH_CURVE"
-	DISPATCH_IO                = "DISPATCH_IO"
-	DISPATCH_CONTROLLER_STATUS = "DISPATCH_CONTROLLER_STATUS"
-	DISPATCH_TOOL_STATUS       = "DISPATCH_TOOL_STATUS"
-	DISPATCH_CONTROLLER_ID     = "DISPATCH_CONTROLLER_ID"
-	DISPATCH_NEW_TOOL          = "DISPATCH_NEW_TOOL"
+	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported "
+	TIGHTENING_ERR_UNKNOWN       = "Error Unknown "
+	TIGHTENING_ERR_TIMEOUT       = "Timeout "
+
+	TIGHTENING_CONTROLLER_IO_SN_FORMAT = "%s_io"
 )
 
 const (
@@ -36,38 +33,15 @@ const (
 	STRATEGY_AK2 = "AK2"
 )
 
-const (
-	IO_STATUS_ON       = "on"
-	IO_STATUS_OFF      = "off"
-	IO_STATUS_FLASHING = "flashing"
-)
-
 // type
 const (
 	TIGHTENING_DEVICE_TYPE_CONTROLLER = "controller"
 	TIGHTENING_DEVICE_TYPE_TOOL       = "tool"
 	MODE_PSET                         = "pset"
 	MODE_JOB                          = "job"
-)
-
-const (
-	WS_TIGHTENING_DEVICE = "WS_TIGHTENING_DEVICE"
-
-	WS_TOOL_JOB         = "WS_TOOL_JOB"
-	WS_TOOL_PSET        = "WS_TOOL_PSET"
-	WS_TOOL_RESULT      = "WS_TOOL_RESULT"
-	WS_TOOL_ENABLE      = "WS_TOOL_ENABLE"
-	WS_TOOL_MODE_SELECT = "WS_TOOL_MODE_SELECT"
-	WS_TOOL_PSET_LIST   = "WS_TOOL_PSET_LIST"
-	WS_TOOL_PSET_DETAIL = "WS_TOOL_PSET_DETAIL"
-	WS_TOOL_JOB_LIST    = "WS_TOOL_JOB_LIST"
-	WS_TOOL_JOB_DETAIL  = "WS_TOOL_JOB_DETAIL"
-
-	WS_TIGHTENING_RESULT             = "WS_TIGHTENING_RESULT"
-	WS_TIGHTENING_CONTROLLER_STATUS  = "WS_TIGHTENING_CONTROLLER_STATUS"
-	WS_TIGHTENING_CONTROLLER_IO      = "WS_TIGHTENING_CONTROLLER_IO"
-	WS_TIGHTENING_CONTROLLER_BARCODE = "WS_TIGHTENING_CONTROLLER_BARCODE"
-	WS_TIGHTENING_TOOL_STATUS        = "WS_TIGHTENING_TOOL_STATUS"
+	RESULT_PASS                       = "pass"
+	RESULT_FAIL                       = "fail"
+	RESULT_EXCEPTION                  = "exception"
 )
 
 type PSetDefine struct {
@@ -78,7 +52,7 @@ type PSetDefine struct {
 	Ma       float64 `json:"MA"`
 	Wp       float64 `json:"W+"`
 	Wm       float64 `json:"W-"`
-	Wa       float64 `json:"WS"`
+	Wa       float64 `json:"notifyService"`
 }
 
 type ResultValue struct {
@@ -92,40 +66,10 @@ type ControllerOutput struct {
 	Status   string `json:"status"`
 }
 
-type TighteningResult struct {
-
-	// 控制器序列号
-	ControllerSN string `json:"controller_sn"`
+type BaseResult struct {
 
 	// 工具序列号
 	ToolSN string `json:"tool_sn"`
-
-	// 工具通道号
-	ChannelID int
-
-	// 收到时间
-	UpdateTime time.Time `json:"update_time"`
-
-	// job号
-	Job int `json:"job"`
-
-	// pset号
-	PSet int `json:"pset"`
-
-	// 批次信息
-	Batch string `json:"batch"`
-
-	// 当前拧紧次数
-	Count int `json:"count"`
-
-	// 当前点位次序
-	Seq int `json:"seq"`
-
-	// 当前点位次序
-	GroupSeq int `json:"group_seq"`
-
-	// 拧紧ID
-	TighteningID string `json:"tightening_id"`
 
 	// 实际结果
 	MeasureResult string `json:"measure_result"`
@@ -138,6 +82,47 @@ type TighteningResult struct {
 
 	// 实际耗时
 	MeasureTime float64 `json:"measure_time"`
+
+	// 批次信息
+	Batch string `json:"batch"`
+
+	// 当前点位次序
+	Seq int `json:"seq"`
+
+	// 当前点位次序
+	GroupSeq int `json:"group_seq"`
+
+	// 当前拧紧次数
+	Count int `json:"count"`
+}
+
+type JobInfo struct {
+
+	// job号
+	Job int `json:"job"`
+}
+
+type TighteningResult struct {
+	BaseResult
+	JobInfo
+
+	// 控制器序列号
+	ControllerSN string `json:"controller_sn"`
+
+	// 错误代码
+	ErrorCode string `json:"errorCode"`
+
+	// 工具通道号
+	ChannelID int
+
+	// 收到时间
+	UpdateTime time.Time `json:"update_time"`
+
+	// pset号
+	PSet int `json:"pset"`
+
+	// 拧紧ID
+	TighteningID string `json:"tightening_id"`
 
 	// 拧紧策略
 	Strategy string `json:"strategy"`
@@ -231,6 +216,10 @@ type TighteningCurve struct {
 	TighteningCurveContent
 }
 
+func NewTighteningCurve() *TighteningCurve {
+	return &TighteningCurve{}
+}
+
 func (c *TighteningCurve) ToDBCurve() *storage.Curves {
 	curveContent, _ := json.Marshal(c.TighteningCurveContent)
 
@@ -285,22 +274,9 @@ type JobStep struct {
 	Socket    int    `json:"socket"`
 }
 
-//type TighteningControllerStatus struct {
-//	ControllerSN string `json:"controller_sn"`
-//	Status       string `json:"status"`
-//}
-//
-//type TighteningToolStatus struct {
-//	ToolSN string `json:"tool_sn"`
-//	Status string `json:"status"`
-//}
-
-//type TighteningControllerInput struct {
-//	ControllerSN string `json:"controller_sn"`
-//	Inputs       string `json:"inputs"`
-//}
-//
-//type TighteningBarcode struct {
-//	ControllerSN string `json:"controller_sn"`
-//	Barcode      string `json:"barcode"`
-//}
+type ToolMaintenanceInfo struct {
+	ToolSN               string `json:"serial_no"`
+	ControllerSN         string `json:"controller_sn"`
+	TotalTighteningCount int    `json:"times"`
+	CountSinLastService  int    `json:"sin_last_service"`
+}

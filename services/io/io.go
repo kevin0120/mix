@@ -2,37 +2,16 @@ package io
 
 import (
 	"fmt"
-	"github.com/kataras/iris/core/errors"
-	"github.com/masami10/rush/services/device"
 	"sync"
 	"time"
+
+	"github.com/masami10/rush/services/device"
+	"github.com/pkg/errors"
 )
-
-const (
-	IO_STATUS_ONLINE  = "online"
-	IO_STATUS_OFFLINE = "offline"
-
-	IO_TYPE_INPUT  = "input"
-	IO_TYPE_OUTPUT = "output"
-
-	IO_MODBUSTCP = "modbustcp"
-)
-
-type IONotify interface {
-	OnStatus(sn string, status string)
-	OnIOStatus(sn string, t string, status string)
-}
-
-type IO interface {
-	Status() string
-	Start() error
-	Stop() error
-	Read() (string, string, error)
-	Write(uint16, uint16) error
-}
 
 type IOModule struct {
-	cfg    ConfigIO
+	device.BaseDevice
+	config ConfigIO
 	client IO
 
 	flashInterval time.Duration
@@ -43,23 +22,56 @@ type IOModule struct {
 	diag          Diagnostic
 }
 
-func (s *IOModule) Start(srv *Service) error {
+func NewIOModule(flashInterval time.Duration, conf ConfigIO, d Diagnostic, service *Service) *IOModule {
+	s := &IOModule{
+		diag:          d,
+		config:        conf,
+		flashInterval: flashInterval,
+		opened:        false,
+		flashes:       map[uint16]uint16{},
+		closing:       make(chan struct{}, 1),
+	}
+	s.BaseDevice = device.CreateBaseDevice(device.BaseDeviceTypeScanner, d, service)
+	return s
+}
 
-	s.flashes = map[uint16]uint16{}
-	s.closing = make(chan struct{}, 1)
-	s.mtx = sync.Mutex{}
+func (s *IOModule) SetIONotify(notify IONotify) {}
 
-	vendor := VENDOR_MODELS[s.cfg.Model]
-	switch vendor.Type() {
-	case IO_MODBUSTCP:
-		s.client = &ModbusTcp{
-			cfg:    s.cfg,
-			notify: srv,
-			vendor: vendor,
+func (s *IOModule) SetSerialNumber(sn string) {
+	s.BaseDevice.SetSerialNumber(sn)
+	s.config.SN = sn
+}
+
+func (s *IOModule) getIONotifyService() IONotify {
+	return s.BaseDevice.GetParentService().(IONotify)
+}
+
+func (s *IOModule) WillStart() error {
+	if vendor, ok := VendorModels[s.config.Model]; !ok {
+		return errors.Errorf("Model: %s Is Not Support", s.config.Model)
+	} else {
+		switch vendor.Type() {
+		case IoModbustcp:
+			s.client = &ModbusTcp{
+				cfg:    s.config,
+				notify: s.getIONotifyService(),
+				vendor: vendor,
+			}
+		default:
+			return errors.New(fmt.Sprintf("invalid model type: %s", s.config.Model))
 		}
+	}
 
-	default:
-		return errors.New(fmt.Sprintf("invalid model type: %s", s.cfg.Model))
+	return s.BaseDevice.WillStart()
+}
+
+func (s *IOModule) Start() error {
+	if err := s.BaseDevice.Start(); err != nil {
+		return err
+	}
+
+	if err := s.WillStart(); err != nil {
+		return err
 	}
 
 	go s.flashProc()
@@ -85,34 +97,34 @@ func (s *IOModule) Status() string {
 	return s.client.Status()
 }
 
-func (s *IOModule) Read() (string, string, error) {
-	return s.client.Read()
+func (s *IOModule) IORead() (string, string, error) {
+	return s.client.IORead()
 }
 
-func (s *IOModule) Write(index uint16, status uint16) error {
+func (s *IOModule) IOWrite(index uint16, status uint16) error {
 	switch status {
-	case OUTPUT_STATUS_OFF:
+	case OutputStatusOff:
 		// 从flash列表删除
 		s.removeFlash(index)
-	case OUTPUT_STATUS_FLASH:
+	case OutputStatusFlash:
 		// 加入flash列表
 		s.addFlash(index)
 		return nil
 	}
 
-	return s.client.Write(index, status)
+	return s.client.IOWrite(index, status)
 }
 
 func (s *IOModule) DeviceType() string {
 	return "io"
 }
 
-func (s *IOModule) Children() map[string]device.IDevice {
-	return map[string]device.IDevice{}
+func (s *IOModule) Children() map[string]device.IBaseDevice {
+	return map[string]device.IBaseDevice{}
 }
 
 func (s *IOModule) Data() interface{} {
-	inputs, outputs, err := s.Read()
+	inputs, outputs, err := s.IORead()
 	if err != nil {
 		return nil
 	}
@@ -124,7 +136,7 @@ func (s *IOModule) Data() interface{} {
 }
 
 func (s *IOModule) Config() interface{} {
-	vendor := VENDOR_MODELS[s.cfg.Model]
+	vendor := VendorModels[s.config.Model]
 
 	return IoConfig{
 		InputNum:  vendor.Cfg().InputNum,
@@ -155,7 +167,7 @@ func (s *IOModule) getFlashes() map[uint16]uint16 {
 
 func (s *IOModule) flashProc() {
 
-	status := OUTPUT_STATUS_OFF
+	status := OutputStatusOff
 	flag := -1
 	for {
 		select {
@@ -166,9 +178,9 @@ func (s *IOModule) flashProc() {
 
 			flashes := s.getFlashes()
 			for _, v := range flashes {
-				err := s.Write(v, uint16(status))
+				err := s.IOWrite(v, uint16(status))
 				if err != nil {
-					s.diag.Error("Write Failed", err)
+					s.diag.Error("IOWrite Failed", err)
 				}
 			}
 
