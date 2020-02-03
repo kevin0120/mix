@@ -3,13 +3,13 @@
     'name': "sanyi_enhanced",
 
     'summary': """
-        TS011""",
+        TS005""",
 
     'description': """
-        TS011
+        TS005
     """,
 
-    'author': "My Company",
+    'author': "Saturn",
     'website': "http://www.yourcompany.com",
 
     # Categories can be used to filter modules in modules listing
@@ -24,6 +24,7 @@
     # always loaded
     'data': [
         'views/mrp_workcenter_views.xml',
-        'views/maintenance_views.xml'
+        'views/maintenance_views.xml',
+        'views/quality_views.xml'
     ]
 }
