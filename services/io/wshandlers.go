@@ -54,6 +54,7 @@ func (s *Service) OnWSIOContact(c websocket.Connection, msg *wsnotify.WSMsg) {
 
 	wsMsg := wsnotify.GenerateWSMsg(msg.SN, wsnotify.WS_IO_CONTACT, IoContact{
 		Src:     device.BaseDeviceTypeIO,
+		SN:      ioContact.SN,
 		Inputs:  inputs,
 		Outputs: outputs,
 	})
