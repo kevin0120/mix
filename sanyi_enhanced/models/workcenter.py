@@ -5,7 +5,7 @@ from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 import requests as Requests
 from requests import ConnectionError, RequestException
-
+import json
 from odoo.addons.sa_base.models.mrp_worksegment import DELETE_ALL_MASTER_WROKORDERS_API
 
 WORKCENTERS_BASE_INFO_API = '/rush/v1/mrp.workcenter/base_info'
@@ -19,7 +19,7 @@ class MrpWorkCenter(models.Model):
     @api.one
     def _delete_workcenter_all(self, url):
         try:
-            ret = Requests.delete(url, headers={'Content-Type': 'application/json'}, timeout=1)
+            ret = Requests.delete(url, headers={'Content-Type': 'application/json'}, timeout=5)
             if ret.status_code == 200:
                 self.env.user.notify_info(u'删除工位信息成功')
                 return True
@@ -51,26 +51,28 @@ class MrpWorkCenter(models.Model):
     @api.one
     def _get_workcenter_data(self):
 
+        tools = self.package_equipments_info()
         data = {
             'code': self.code,
-            'tools': self.package_equipments_info()
+            'tools': tools[0] if len(tools) > 0 else None
         }
         return data
 
     @api.one
     def _do_sync_workcenter(self, url):
-        data = self._get_workcenter_data()
+        wc = self._get_workcenter_data()
+        data = wc[0] if len(wc) > 0 else None
         try:
-            ret = Requests.post(url, headers={'Content-Type': 'application/json'}, data=data, timeout=2)
+            ret = Requests.post(url, headers={'Content-Type': 'application/json'}, data=json.dumps(data), timeout=2)
             if ret.status_code == 200:
-                self.env.user.notify_info(u'删除工位信息成功')
+                self.env.user.notify_info(u'同步工位信息成功')
                 return True
         except ConnectionError as e:
-            self.env.user.notify_warning(u'删除工位信息失败, 错误原因:{0}'.format(str(e)))
-            raise ValidationError(u'删除工位信息失败, 错误原因:{0}'.format(str(e)))
+            self.env.user.notify_warning(u'同步工位信息失败, 错误原因:{0}'.format(str(e)))
+            raise ValidationError(u'同步工位信息失败, 错误原因:{0}'.format(str(e)))
         except RequestException as e:
-            self.env.user.notify_warning(u'删除工位信息失败, 错误原因:{0}'.format(str(e)))
-            raise ValidationError(u'删除工位信息失败, 错误原因:{0}'.format(str(e)))
+            self.env.user.notify_warning(u'同步工位信息失败, 错误原因:{0}'.format(str(e)))
+            raise ValidationError(u'同步工位信息失败, 错误原因:{0}'.format(str(e)))
         return False
 
     @api.multi
