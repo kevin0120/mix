@@ -234,10 +234,10 @@ class ControllerProgram(models.Model):
     control_mode = fields.Selection([('pset', 'Parameter Set'), ('job', 'Assembly Process')],
                                     default='pset', string='Control Mode For Tightening')
 
-    @api.onchange('code', 'strategy')
-    def _onchange_code_style(self):
-        for program in self:
-            program.name = u"{0}({1})".format(program.code, program.strategy)
+    # @api.onchange('code', 'strategy')
+    # def _onchange_code_style(self):
+    #     for program in self:
+    #         program.name = u"{0}({1})".format(program.code, program.strategy)
 
     @api.model
     def create(self, vals):
