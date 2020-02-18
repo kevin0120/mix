@@ -49,6 +49,7 @@ class MrpRoutingWorkcenter(models.Model):
                     'norm_torque': point.norm,
                     'norm_angle': point.norm_degree,
                     'pset': point.program_id.code if point.program_id else False,
+                    'pset_name': point.program_id.name if point.program_id else "",
                     'consu_product_id': point.product_id.id if point.product_id.id else 0,
                     'nut_no': point.name,  # 螺栓编号为拧紧点上的名称
                 })

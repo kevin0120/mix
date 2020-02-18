@@ -53,6 +53,7 @@ class MrpWorkCenter(models.Model):
 
         tools = self.package_equipments_info()
         data = {
+            'name': self.name,
             'code': self.code,
             'tools': tools[0] if len(tools) > 0 else None
         }
