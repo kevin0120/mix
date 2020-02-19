@@ -44,7 +44,7 @@ class MrpRoutingWorkcenter(models.Model):
                     'offset_x': point.x_offset,
                     'offset_y': point.y_offset,
                     'max_redo_times': point.max_redo_times,
-                    'tool_sn': '',  # 默认模式下这里传送的枪的序列号是空字符串
+                    'tool_sn': point.tool_id.serial_no if point.tool_id else "",
                     'controller_sn': '',
                     'norm_torque': point.norm,
                     'norm_angle': point.norm_degree,
