@@ -19,8 +19,8 @@ _logger = logging.getLogger(__name__)
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
 
-    @api.multi
-    def _push_mrp_routing_workcenter(self, url):
+    @api.one
+    def package_operaions(self):
         self.ensure_one()
         operation_id = self
         bom_ids = self.env['mrp.bom'].search([('routing_id.sa_operation_ids', 'in', operation_id.ids)])
@@ -28,12 +28,13 @@ class MrpRoutingWorkcenter(models.Model):
             _logger.debug("_push_mrp_routing_workcenter, BOM:{0}".format(pprint.pformat(bom_ids.ids, indent=4)))
             msg = "Can Not Found MRP BOM Within The Operation:{0}".format(operation_id.name)
             _logger.error(msg)
-            raise ValidationError(msg)
+            return None
         tightening_step_ids = operation_id.sa_step_ids.filtered(lambda step: step.test_type == 'tightening')
         if not tightening_step_ids:
             msg = "Can Not Found Tightening Step For Operation:{0}".format(operation_id.name)
             _logger.error(msg)
-            raise ValidationError(msg)
+            return None
+        rt = []
         for tightening_step_id in tightening_step_ids:
             _points = []
             operation_point_ids = tightening_step_id.operation_point_ids
@@ -74,16 +75,25 @@ class MrpRoutingWorkcenter(models.Model):
                                                                         bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
                     "points": _points
                 }
-                try:
-                    ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'},
-                                       timeout=1)
-                    if ret.status_code == 200:
-                        # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
-                        self.env.user.notify_info(u'下发工艺成功')
-                except ConnectionError as e:
-                    self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
-                except RequestException as e:
-                    self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+
+                rt.append(val)
+        return rt
+
+    @api.multi
+    def _push_mrp_routing_workcenter(self, url):
+        val = self.package_operaions()
+        operaions = val[0] if len(val) > 0 else None
+        for op in operaions:
+            try:
+                ret = Requests.put(url, data=json.dumps(op), headers={'Content-Type': 'application/json'},
+                                   timeout=1)
+                if ret.status_code == 200:
+                    # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
+                    self.env.user.notify_info(u'下发工艺成功')
+            except ConnectionError as e:
+                self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+            except RequestException as e:
+                self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
 
         return True
 

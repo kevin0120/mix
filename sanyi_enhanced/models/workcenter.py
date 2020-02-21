@@ -7,6 +7,7 @@ import requests as Requests
 from requests import ConnectionError, RequestException
 import json
 from odoo.addons.sa_base.models.mrp_worksegment import DELETE_ALL_MASTER_WROKORDERS_API
+from odoo.addons.sa_base.models.mrp_bom import MASTER_ROUTING_API
 
 WORKCENTERS_BASE_INFO_API = '/rush/v1/mrp.workcenter/base_info'
 
@@ -116,13 +117,47 @@ class MrpWorkCenter(models.Model):
                     _logger.error(
                         "Sync Operation Fail. Can Not Found Connect Info For WorkCenter: {0}".format(center.name))
                     continue
-                delete_all_endpoint = 'http://{0}:{1}{2}'.format(connect.ip, connect.port,
-                                                                 DELETE_ALL_MASTER_WROKORDERS_API)
-                center._delete_workcenter_all_opertaions(delete_all_endpoint)
-                operations = operation_obj_sudo.search([('workcenter_id', '=', center.id)])
-                for operation in operations:
-                    operation.button_send_mrp_routing_workcenter()
+                # delete_all_endpoint = 'http://{0}:{1}{2}'.format(connect.ip, connect.port,
+                #                                                  DELETE_ALL_MASTER_WROKORDERS_API)
+                #center._delete_workcenter_all_opertaions(delete_all_endpoint)
+                if self.type == "rework":
+                    # 返修工位
+                    self.send_related_operations()
+                else:
+                    operations = operation_obj_sudo.search([('workcenter_id', '=', center.id)])
+                    for operation in operations:
+                        operation.button_send_mrp_routing_workcenter()
             return True
         except Exception as e:
             _logger.error("button_sync_operations Error", e)
             raise e
+
+    @api.multi
+    def send_related_operations(self):
+        vals = []
+        workcenters = self.env['mrp.workcenter'].search([('qc_workcenter_id', '=', self.id)])
+        operation_obj_sudo = self.env['mrp.routing.workcenter'].sudo()
+        for wc in workcenters:
+            operations = operation_obj_sudo.search([('workcenter_id', '=', wc.id)])
+            for operation in operations:
+                op = operation.package_operaions()
+                val = op[0] if len(op) > 0 else None
+                if not val is None:
+                    vals.extend(val)
+
+        connects = self.get_workcenter_masterpc_http_connect()
+        if not len(connects):
+            _logger.error(
+                "Can Not Found MasterPC Connect Info For Work Center:{0}".format(self.name))
+            return
+        connect = connects[0]
+        url = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_ROUTING_API)
+        try:
+            ret = Requests.put(url, data=json.dumps(vals), headers={'Content-Type': 'application/json'},
+                               timeout=3)
+            if ret.status_code == 200:
+                self.env.user.notify_info(u'下发工艺成功')
+        except ConnectionError as e:
+            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+        except RequestException as e:
+            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))

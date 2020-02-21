@@ -11,6 +11,11 @@
                     <button string="Sync Work Center Info" type="object" name="button_sync_workcenter"
                             class="oe_highlight"/>
                 </xpath>
+
+                <xpath expr="//field[@name='qc_workcenter_id']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('type','=','rework')], 'required':
+                        [('type','=','operate')]}</attribute>
+                </xpath>
             </field>
 
         </record>
