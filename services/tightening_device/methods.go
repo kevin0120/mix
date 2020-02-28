@@ -150,6 +150,9 @@ func (s *Service) ToolPSetBatchSet(req *PSetBatchSet) error {
 }
 
 func (s *Service) ToolPSetSet(req *PSetSet) error {
+	var orderid int64
+	var stepid int64
+
 	if req == nil {
 		return errors.New("Req Is Nil")
 	}
@@ -179,22 +182,26 @@ func (s *Service) ToolPSetSet(req *PSetSet) error {
 
 	order, err := s.storageService.GetWorkorderByCode(req.WorkorderCode)
 	if err != nil {
-		return err
+		s.diag.Error("PSet Batch Set Failed", err)
+	}else{
+		orderid=order.Id
 	}
 
 	step, err := s.storageService.GetStepByCode(req.StepCode)
 	if err != nil {
-		return err
+		s.diag.Error("PSet Batch Set Failed", err)
+	}else{
+		stepid=step.Id
 	}
 
 	_ = s.storageService.UpdateTool(&storage.Tools{
 		Serial:             req.ToolSN,
-		CurrentWorkorderID: order.Id,
+		CurrentWorkorderID: orderid,
 		Seq:                int(req.Sequence),
 		Count:              req.Count,
 		UserID:             req.UserID,
 		Total:              req.Total,
-		StepID:             step.Id,
+		StepID:             stepid,
 	})
 
 	return tool.SetPSet(req.PSet)

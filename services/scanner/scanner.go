@@ -78,6 +78,7 @@ func NewScanner(channel string, d Diagnostic, dev USBDevice, service *Service) *
 
 	s := &Scanner{devInfo: di, diag: d, usbDevice: dev, debounceTrigger: false, init: true}
 	s.BaseDevice = device.CreateBaseDevice(device.BaseDeviceTypeScanner, d, service)
+	s.BaseDevice.SetSerialNumber(service.config().EntityLabel)
 	return s
 }
 
