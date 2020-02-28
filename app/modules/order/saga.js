@@ -95,7 +95,7 @@ function onNewScanner({ scanner }) {
     // TODO: filter scanner input
     scanner.Enable();
     scanner.addListener(
-      (input, state) => !workingOrder(state.order),
+      (input, state) => !workingOrder(state.order) && !state.manual?.working,
       input => orderActions.tryViewCode(input.data)
     );
   } catch (e) {

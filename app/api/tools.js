@@ -41,8 +41,9 @@ export function jobApi(toolSN: string = '', ControllerSN: string = '', stepID: n
   });
 }
 
-export function getPestListApi(toolSN): Promise<any> {
+export function getPestListApi(toolSN, ControllerSN): Promise<any> {
   return rushSendApi('WS_TOOL_PSET_LIST', {
+    controller_sn: ControllerSN,
     tool_sn: toolSN
   });
 }

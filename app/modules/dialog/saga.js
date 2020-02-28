@@ -1,4 +1,4 @@
-import { take, put, fork } from 'redux-saga/effects';
+import { take, put, fork,cancel } from 'redux-saga/effects';
 import actions  from './action';
 import { DIALOG } from './constants';
 import type { tDialogConfig } from './interface/typeDef';
@@ -9,8 +9,11 @@ export default function* root() {
     while (true) {
       const action = yield take(DIALOG.SHOW);
       const { config } = action;
-      yield fork(showDialog, action);
+      const work =yield fork(showDialog, action);
       yield take(DIALOG.CLOSE);
+      if (work) {
+        yield cancel(work);
+      }
       yield fork(handleClose, config);
     }
   } catch (e) {
@@ -21,10 +24,10 @@ export default function* root() {
 const dialogActions = {
   *[DIALOG.BUTTON](config: tDialogConfig, { idx }) {
     try {
-      yield put(actions.dialogClose());
       if (config?.buttons?.[idx]?.action) {
         yield put(config.buttons[idx].action);
       }
+      yield put(actions.dialogClose());
     } catch (e) {
       CommonLog.lError(e);
     }

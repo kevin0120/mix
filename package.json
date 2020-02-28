@@ -283,6 +283,7 @@
     "i18next-browser-languagedetector": "^2.2.3",
     "i18next-xhr-backend": "^1.5.1",
     "jsmodbus": "^3.0.0",
+    "keypad-easy": "^1.0.5",
     "lodash-es": "^4.17.15",
     "moment": "^2.24.0",
     "notistack": "^0.9.6",

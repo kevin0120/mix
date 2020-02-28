@@ -26,6 +26,7 @@ const defaultConfigs = {
   },
   pages: {
     app: {
+      manual: ['user', 'admin'],
       working: ['user', 'admin'],
       // viewer: ['user', 'admin'],
       // order: ['user', 'admin'],
@@ -123,7 +124,7 @@ const defaultConfigs = {
   system: {
     workcenter: {
       // code: '1',
-      workcenterType: 'normal', // 'normal', 'rework'
+      workcenterType: 'rework', // 'normal', 'rework'
       rework_workcenter: 'qrk',
       hardware: {
         scanner: {
