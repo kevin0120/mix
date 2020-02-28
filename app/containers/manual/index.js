@@ -76,7 +76,7 @@ class Manualpage extends React.Component<Props>{
   removeActiveInput = () => {
     this.setState({
       inputName: "",
-      input:"",
+      // input:"",
     });
   };
 
@@ -84,7 +84,7 @@ class Manualpage extends React.Component<Props>{
   onChangeInput = event => {
     const input = event.target.value;
     this.setState({ input });
-    this.keyboard.setInput(input);
+    this.keyboard.keyboard.setInput(input);
   };
 
   render() {
@@ -127,7 +127,7 @@ class Manualpage extends React.Component<Props>{
         {this.state.inputName.length !== 0 ? (
         <div className={`counter ${styles.counter5}`} data-tid="counter">
           <Keyboard
-            keyboardRef={r => (this.keyboard = r)}
+            ref={r => (this.keyboard = r)}
             onChange={this.onChange}
             onKeyPress={this.onKeyPress}
             layoutName={this.state.layoutName}
