@@ -55,7 +55,12 @@ func (s *Service) OnWS_TOOL_PSET(c websocket.Connection, msg *wsnotify.WSMsg) {
 	var req PSetSet
 	_ = json.Unmarshal(byteData, &req)
 
-	_ = s.ToolPSetSet(&req)
+	err := s.ToolPSetSet(&req)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
+		return
+	}
 
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""), s.diag)
 }
@@ -82,6 +87,8 @@ func (s *Service) OnWS_TOOL_PSET_LIST(c websocket.Connection, msg *wsnotify.WSMs
 	_ = json.Unmarshal(byteData, &req)
 
 	psetList, err := s.GetToolPSetList(&req)
+	//psetList= append(append(psetList, 1), 2)
+	//err= nil
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
 		return
