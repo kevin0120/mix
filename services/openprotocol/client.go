@@ -140,7 +140,11 @@ func (c *clientContext) procHandleRecv() {
 					break
 				} else {
 					// 找到结束字符，结合缓冲进行处理
-					targetBuf := append(handleRecvBuf[0:writeOffset], buf[readOffset:readOffset+index]...)
+					targetBuf := buf[readOffset:readOffset+index]
+					if writeOffset > 0 {
+						targetBuf = append(handleRecvBuf[0:writeOffset], targetBuf...)
+					}
+
 					if len(buf) == 1 && index == 0 {
 						targetBuf = handleRecvBuf[0:writeOffset]
 					}
