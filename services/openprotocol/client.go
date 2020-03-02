@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -54,8 +55,10 @@ type clientContext struct {
 	tempResultCurve   *tightening_device.TighteningCurve
 	requestChannel    chan uint32
 	sequence          *utils.Sequence
+	receiveBuf        chan []byte
 
 	closing chan struct{}
+	closinghandleRecv chan struct{}
 
 	diag          Diagnostic
 	clientHandler IClientHandler
@@ -104,6 +107,67 @@ func (c *clientContext) handlePackageOPPayload(src []byte) error {
 	}
 
 	return nil
+}
+
+func (c *clientContext) procHandleRecv() {
+	c.receiveBuf = make(chan []byte, BufferSize)
+	handleRecvBuf := make([]byte, BufferSize)
+	lenBuf := len(handleRecvBuf)
+	var writeOffset = 0
+
+	for {
+		select {
+		case buf := <-c.receiveBuf:
+			// 处理接收缓冲
+			var readOffset = 0
+			var index = 0
+
+			for {
+				if readOffset >= len(buf) {
+					break
+				}
+				index = bytes.IndexByte(buf[readOffset:], OpTerminal)
+				if index == -1 {
+					// 没有结束字符,放入缓冲等待后续处理
+					restBuf := buf[readOffset:]
+					if writeOffset+len(restBuf) > lenBuf {
+						c.diag.Error("full", errors.New("full"))
+						break
+					}
+
+					copy(handleRecvBuf[writeOffset:writeOffset+len(restBuf)], restBuf)
+					writeOffset += len(restBuf)
+					break
+				} else {
+					// 找到结束字符，结合缓冲进行处理
+					targetBuf := buf[readOffset:readOffset+index]
+					if writeOffset > 0 {
+						targetBuf = append(handleRecvBuf[0:writeOffset], targetBuf...)
+					}
+
+					if len(buf) == 1 && index == 0 {
+						targetBuf = handleRecvBuf[0:writeOffset]
+					}
+
+					err := c.handlePackageOPPayload(targetBuf)
+					if err != nil {
+						//数据需要丢弃
+						c.diag.Error("handlePackageOPPayload Error", err)
+						c.diag.Debug(fmt.Sprintf("procHandleRecv Raw Msg:%s", string(buf)))
+						c.diag.Debug(fmt.Sprintf("procHandleRecv Rest Msg:%s writeOffset:%d readOffset:%d index:%d", string(handleRecvBuf), writeOffset, readOffset, index))
+					}
+
+					writeOffset = 0
+					readOffset += index + 1
+				}
+			}
+
+		case <-c.closinghandleRecv:
+			c.diag.Debug("procHandleRecv Exit")
+			return
+		}
+
+	}
 }
 
 func (c *clientContext) procWrite() {
@@ -176,11 +240,11 @@ func (c *clientContext) Read(conn net.Conn) {
 		if err := conn.Close(); err != nil {
 			c.diag.Error("Client Close Error ", err)
 		}
+
+		c.closinghandleRecv <- struct{}{}
 	}()
 
 	buf := make([]byte, BufferSize)
-	readBuf := []byte{0}
-	writeOffset := 0
 
 	for {
 		if err := conn.SetReadDeadline(time.Now().Add(c.params.KeepAlivePeriod * time.Duration(c.params.MaxKeepAliveCheck)).Add(1 * time.Second)); err != nil {
@@ -188,7 +252,7 @@ func (c *clientContext) Read(conn net.Conn) {
 			break
 		}
 
-		_, err := conn.Read(readBuf)
+		n, err := conn.Read(buf)
 		if err != nil {
 			c.diag.Error("Failed ", err)
 			c.handleStatus(device.BaseDeviceStatusOffline)
@@ -198,20 +262,7 @@ func (c *clientContext) Read(conn net.Conn) {
 		}
 
 		c.updateKeepAliveCount(0)
-
-		if readBuf[0] == OpTerminal {
-			// 完整
-			err := c.handlePackageOPPayload(buf[0:writeOffset])
-			if err != nil {
-				c.diag.Error("handlePackageOPPayload Error", err)
-			}
-
-			writeOffset = 0
-		} else {
-			// 不完整，放入缓存
-			buf[writeOffset] = readBuf[0]
-			writeOffset += 1
-		}
+		c.receiveBuf <- buf[0:n]
 
 	}
 }
@@ -302,6 +353,8 @@ func (c *clientContext) connect() {
 	c.handleStatus(device.BaseDeviceStatusOnline)
 	c.clientHandler.HandleStatus(c.sn, device.BaseDeviceStatusOnline)
 	c.clientHandler.UpdateToolStatus(c.sn, device.BaseDeviceStatusOnline)
+	c.closinghandleRecv = make(chan struct{}, 1)
+	go c.procHandleRecv()
 
 	time.Sleep(100 * time.Millisecond)
 	if err := c.startComm(); err != nil {
