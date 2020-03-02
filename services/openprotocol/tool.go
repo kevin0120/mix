@@ -331,6 +331,7 @@ func (s *TighteningTool) onResult(result interface{}) {
 
 	// 分发结果
 	tighteningResult.ID = dbResult.Id
+	tighteningResult.ScannerCode = dbTool.ScannerCode
 	s.controller.doDispatch(dispatcherbus.DispatcherResult, tighteningResult)
 }
 

@@ -69,7 +69,7 @@ func (c *WrenchController) CreateIO() tightening_device.ITighteningIO {
 func (c *WrenchController) OpenProtocolParams() *openprotocol.OpenProtocolParams {
 	return &openprotocol.OpenProtocolParams{
 		MaxKeepAliveCheck: 3,
-		MaxReplyTime:      3 * time.Second,
+		MaxReplyTime:      10 * time.Second,
 		KeepAlivePeriod:   5 * time.Second,
 	}
 }

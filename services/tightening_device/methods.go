@@ -47,6 +47,7 @@ type PSetSet struct {
 	Total         int    `json:"total"`
 	IP            string `json:"ip"`
 	PointID       string `json:"point_id"`
+	ScannerCode   string `json:"scanner_code"`
 }
 
 func (s *PSetSet) Validate() error {
@@ -202,6 +203,7 @@ func (s *Service) ToolPSetSet(req *PSetSet) error {
 		UserID:             req.UserID,
 		Total:              req.Total,
 		StepID:             stepid,
+		ScannerCode:        req.ScannerCode,
 	})
 
 	return tool.SetPSet(req.PSet)
