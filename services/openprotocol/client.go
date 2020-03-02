@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -54,8 +55,10 @@ type clientContext struct {
 	tempResultCurve   *tightening_device.TighteningCurve
 	requestChannel    chan uint32
 	sequence          *utils.Sequence
+	receiveBuf        chan []byte
 
 	closing chan struct{}
+	closinghandleRecv chan struct{}
 
 	diag          Diagnostic
 	clientHandler IClientHandler
@@ -237,11 +240,11 @@ func (c *clientContext) Read(conn net.Conn) {
 		if err := conn.Close(); err != nil {
 			c.diag.Error("Client Close Error ", err)
 		}
+
+		c.closinghandleRecv <- struct{}{}
 	}()
 
 	buf := make([]byte, BufferSize)
-	readBuf := []byte{0}
-	writeOffset := 0
 
 	for {
 		if err := conn.SetReadDeadline(time.Now().Add(c.params.KeepAlivePeriod * time.Duration(c.params.MaxKeepAliveCheck)).Add(1 * time.Second)); err != nil {
@@ -249,7 +252,7 @@ func (c *clientContext) Read(conn net.Conn) {
 			break
 		}
 
-		_, err := conn.Read(readBuf)
+		n, err := conn.Read(buf)
 		if err != nil {
 			c.diag.Error("Failed ", err)
 			c.handleStatus(device.BaseDeviceStatusOffline)
@@ -259,20 +262,7 @@ func (c *clientContext) Read(conn net.Conn) {
 		}
 
 		c.updateKeepAliveCount(0)
-
-		if readBuf[0] == OpTerminal {
-			// 完整
-			err := c.handlePackageOPPayload(buf[0:writeOffset])
-			if err != nil {
-				c.diag.Error("handlePackageOPPayload Error", err)
-			}
-
-			writeOffset = 0
-		} else {
-			// 不完整，放入缓存
-			buf[writeOffset] = readBuf[0]
-			writeOffset += 1
-		}
+		c.receiveBuf <- buf[0:n]
 
 	}
 }
@@ -363,6 +353,8 @@ func (c *clientContext) connect() {
 	c.handleStatus(device.BaseDeviceStatusOnline)
 	c.clientHandler.HandleStatus(c.sn, device.BaseDeviceStatusOnline)
 	c.clientHandler.UpdateToolStatus(c.sn, device.BaseDeviceStatusOnline)
+	c.closinghandleRecv = make(chan struct{}, 1)
+	go c.procHandleRecv()
 
 	time.Sleep(100 * time.Millisecond)
 	if err := c.startComm(); err != nil {
