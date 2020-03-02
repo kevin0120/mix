@@ -1,4 +1,4 @@
-import { take, put, fork,delay,cancel,call,takeEvery,select} from 'redux-saga/effects';
+import { take, put, fork,delay,cancel,call,takeEvery,select,takeLatest} from 'redux-saga/effects';
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import { MANUAL as manual, start, close, getresult ,selectTool,selectPset,setData} from './action';
@@ -17,7 +17,7 @@ import notifierActions from '../Notifier/action';
 export default function* root() {
   try {
     yield takeEvery(manual.CANCEL,initManual);
-    yield takeEvery(manual.TIGHTENING,oK);
+    yield takeLatest(manual.TIGHTENING,oK);
     while (true) {
       yield take(manual.START);
       const work =yield fork(manualWork);
@@ -66,7 +66,8 @@ function* oK() {
           0,
           // retryTimes,
           0,
-          '手动工单'
+          '手动工单',
+          manual?.scanner
         );
         if (set.data.result === 0) {
           const msg1 = `pset设置成功, 工具：${manual?.tool}`;

@@ -96,6 +96,15 @@ class Manualpage extends React.Component<Props>{
     pset,
     result
   } = this.props;
+
+  let result1: Array<string>;
+
+  if (result.length>15){
+    result1  = result.slice(result.length-16,result.length)
+  } else {
+    result1  = result
+  }
+
     return (
       <div className={styles.backGround}>
         <div className={styles.backButton} data-tid="backButton">
@@ -105,7 +114,7 @@ class Manualpage extends React.Component<Props>{
         </div>
 
         <div className={`counter ${styles.counter}`} data-tid="counter">
-          {JSON.stringify(result)}
+          {JSON.stringify(result1)}
         </div>
 
         <div className={`counter ${styles.counter1}`} data-tid="counter">
