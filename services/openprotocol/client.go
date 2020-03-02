@@ -144,11 +144,7 @@ func (c *clientContext) procHandleRecv() {
 					if writeOffset > 0 {
 						targetBuf = append(handleRecvBuf[0:writeOffset], targetBuf...)
 					}
-
-					if len(buf) == 1 && index == 0 {
-						targetBuf = handleRecvBuf[0:writeOffset]
-					}
-
+					
 					err := c.handlePackageOPPayload(targetBuf)
 					if err != nil {
 						//数据需要丢弃

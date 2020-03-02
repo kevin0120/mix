@@ -356,9 +356,6 @@ func (s *TighteningTool) onCurve(curve interface{}) {
 }
 
 func (s *TighteningTool) UpdateStatus(status string) {
-	if status == s.Status() {
-		return
-	}
 
 	s.BaseDevice.UpdateStatus(status)
 	toolStatus := []device.Status{{
