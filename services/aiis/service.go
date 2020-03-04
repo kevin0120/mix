@@ -237,6 +237,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 
 	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
 	aiisResult.Stage = result.Stage
+	aiisResult.ScannerCode = result.ScannerCode
 
 	switch result.Result {
 	case tightening_device.RESULT_OK:

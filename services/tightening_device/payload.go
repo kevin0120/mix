@@ -203,6 +203,7 @@ func (r *TighteningResult) ToDBResult() *storage.Results {
 		Batch:        r.Batch,
 		UserID:       r.UserID,
 		NutNo:        r.NutNo,
+		ScannerCode:  r.ScannerCode,
 	}
 }
 

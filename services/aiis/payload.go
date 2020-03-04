@@ -68,6 +68,8 @@ type PublishResult struct {
 	WorkorderName  string `json:"workorder_name"`
 
 	Payload string `json:"payload"`
+
+	ScannerCode string `json:"scanner_code"`
 }
 
 type CURObject struct {
