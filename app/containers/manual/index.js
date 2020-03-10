@@ -5,6 +5,8 @@ import { bindActionCreators } from 'redux';
 import Keyboard from 'react-simple-keyboard';
 import styles from './Counter.css';
 import * as CounterActions from '../../modules/manual/action';
+import Grid from '../../modules/manual/saga';
+import { array } from 'prop-types';
 
 type Props = {
   start: () => void,
@@ -99,11 +101,29 @@ class Manualpage extends React.Component<Props>{
 
   let result1: Array<string>;
 
-  if (result.length>15){
-    result1  = result.slice(result.length-16,result.length)
+  let result2 = new Array(0);
+
+  if (result.length>10){
+    result1  = result.slice(result.length-11,result.length);
   } else {
-    result1  = result
+    result1  = result;
   }
+
+  result1.map( t =>{
+     // const obj = JSON.parse(t);
+     const dic = {"工具序列号":t.tool_sn,
+       "结果":t.measure_result,
+       "扭矩":t.measure_torque,
+       "角度":t.measure_angle,
+       "时间":t.measure_time,
+       "条码":t.scanner_code,
+     };
+     // const f1 = JSON.stringify(dic);
+     return  result2.push(dic);
+  }
+  )
+
+
 
     return (
       <div className={styles.backGround}>
@@ -113,8 +133,14 @@ class Manualpage extends React.Component<Props>{
           </Link>
         </div>
 
-        <div className={`counter ${styles.counter}`} data-tid="counter">
-          {JSON.stringify(result1)}
+        <div className={`counter ${styles.counterGroup}`} data-tid="counter">
+
+          {result2.map(t =>
+            <div className={`counter ${styles.counter}`} data-tid="counter">
+              {JSON.stringify(t)}
+            </div>
+        )}
+
         </div>
 
         <div className={`counter ${styles.counter1}`} data-tid="counter">
@@ -143,6 +169,11 @@ class Manualpage extends React.Component<Props>{
           />
         </div>
           ) : null}
+
+        <div className={`counter ${styles.counter6}`} data-tid="counter">
+          拧紧结果:
+        </div>
+
         <div className={styles.btnGroup}>
 
           <button
