@@ -856,6 +856,7 @@ type AlarmStatus struct {
 
 type CurveBody struct {
 	ToolChannelNumber int    `start:"3"  end:"4"`
+	TimeString        string `start:"12"  end:"25"`
 	TorqueString      string `start:"28"  end:"41"`
 	AngleString       string `start:"44"  end:"57"`
 	MeasurePoints     int    `start:"60"  end:"63"`

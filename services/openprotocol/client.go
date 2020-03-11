@@ -57,7 +57,7 @@ type clientContext struct {
 	sequence          *utils.Sequence
 	receiveBuf        chan []byte
 
-	closing chan struct{}
+	closing           chan struct{}
 	closinghandleRecv chan struct{}
 
 	diag          Diagnostic
@@ -140,11 +140,11 @@ func (c *clientContext) procHandleRecv() {
 					break
 				} else {
 					// 找到结束字符，结合缓冲进行处理
-					targetBuf := buf[readOffset:readOffset+index]
+					targetBuf := buf[readOffset : readOffset+index]
 					if writeOffset > 0 {
 						targetBuf = append(handleRecvBuf[0:writeOffset], targetBuf...)
 					}
-					
+
 					err := c.handlePackageOPPayload(targetBuf)
 					if err != nil {
 						//数据需要丢弃
