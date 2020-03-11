@@ -28,6 +28,7 @@ const defaultConfigs = {
     app: {
       manual: ['user', 'admin'],
       working: ['user', 'admin'],
+      manualwork: ['user', 'admin'],
       // viewer: ['user', 'admin'],
       // order: ['user', 'admin'],
       preference: {

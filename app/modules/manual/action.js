@@ -1,4 +1,9 @@
 // @flow
+export const TIMELINE_STORY = {
+  NEW: 'TIMELINE_STORY_NEW',
+  CLEAR: 'TIMELINE_STORY_CLEAR'
+};
+
 export const MANUAL = {
   START: 'MANUAL_START',
   CLOSE: 'MANUAL_CLOSE',
@@ -12,6 +17,12 @@ export const MANUAL = {
   GETRESULT:'GET_RESULT',
   DIDMOUNT: 'DID_MOUNT',
 };
+
+export function clearStories() {
+  return {
+    type: TIMELINE_STORY.CLEAR
+  };
+}
 
 export function didMount() {
   return {

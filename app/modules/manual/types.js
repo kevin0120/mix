@@ -6,7 +6,8 @@ export type StateType = {
   scanner: string,
   tool: string,
   pset: number,
-  working: boolean
+  working: boolean,
+  timeline: object
 };
 export type counterStateType = {
   +counter: Object
@@ -18,7 +19,9 @@ export type Action = {
   +ControllerSN: string,
   +tool: string,
   +pset: number,
-  result: any
+  +result: any,
+  +story: object
+
 };
 
 export type GetState = () => counterStateType;

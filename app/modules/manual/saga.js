@@ -13,6 +13,8 @@ import dialogActions from '../dialog/action';
 
 import type { IDevice } from '../device/IDevice';
 import notifierActions from '../Notifier/action';
+import { addNewStory, STORY_TYPE } from './timeline';
+
 
 export default function* root() {
   try {
@@ -113,6 +115,14 @@ function* oK() {
 
 function* initManual() {
   try{
+
+    yield call(
+      addNewStory,
+      STORY_TYPE.PASS,
+      `结果 成功`,
+      `T=５０Nm A=２３°`
+    );
+
   yield put(close());
   yield delay(300);
   yield put(start());

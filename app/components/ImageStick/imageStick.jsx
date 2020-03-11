@@ -18,7 +18,7 @@ import { keyframes } from '@emotion/core';
 import Image from './Image';
 import popoverStyles from '../../common/jss/popoverStyles';
 
-import { OPERATION_STATUS, OPERATION_RESULT } from '../../modules/operation/model';
+import { OPERATION_STATUS, OPERATION_RESULT } from '../../containers/working/operations';
 
 import Card from '../Card/Card';
 import imagesStyles from '../../common/jss/imagesStyles';

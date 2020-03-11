@@ -1,5 +1,5 @@
 // @flow
-import { MANUAL} from './action';
+import { MANUAL,TIMELINE_STORY} from './action';
 import type { StateType, Action } from './types';
 
 const configs = {
@@ -8,7 +8,8 @@ const configs = {
   controllerSN:'',
   tool: '',
   pset: 0,
-  result:[]
+  result:[],
+  timeline:[]
 }
 
 export default function (state: StateType = configs, action: Action) {
@@ -25,7 +26,20 @@ export default function (state: StateType = configs, action: Action) {
       return { ...state, working: false};
     case MANUAL.DIDMOUNT:
       return { ...state, result: []};
+    case TIMELINE_STORY.NEW:
+      return { ...state, timeline: NewStory(state.timeline, action.story)};
+    case TIMELINE_STORY.CLEAR:
+      return { ...state, timeline: ClearStory()};
     default:
       return state;
   }
+}
+
+
+export function NewStory(state, story) {
+  return [story, ...state];
+}
+
+export function ClearStory() {
+  return [];
 }
