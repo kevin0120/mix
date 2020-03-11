@@ -53,9 +53,11 @@ class MrpWorkCenter(models.Model):
     def _get_workcenter_data(self):
 
         tools = self.package_equipments_info()
+        line = self.worksegment_id.workassembly_id.code if self.worksegment_id else ''
         data = {
             'name': self.name,
             'code': self.code,
+            'line': line,
             'tools': tools[0] if len(tools) > 0 else None
         }
         return data
