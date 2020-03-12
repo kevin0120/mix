@@ -200,9 +200,9 @@ export default function withKeyboard(SubComponents: AbstractComponent<any, any>,
                   display={{
                     '{bksp}': '⌫'
                   }}
-                  buttonTheme={[
-                    buttonsThemes[layoutType] || {}
-                  ]}
+                  buttonTheme={layoutType && buttonsThemes[layoutType]?[
+                    buttonsThemes[layoutType]
+                  ]:[]}
                 />
               </div>
             </Dialog> : null}
