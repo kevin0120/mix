@@ -494,10 +494,10 @@ class ConnectedWorking extends React.Component {
 
   openManualDiag = (e, input, t) => {
     e.preventDefault();
-    const { keyboardInput} = this.props;
+    const { keyboardInput, newData:dispatchNewData} = this.props;
     keyboardInput({
       onSubmit: text => {
-        newData(text);
+        dispatchNewData(text);
       },
       text: e.target.value,
       title: t(`Operation.Input.${input}`),

@@ -26,7 +26,7 @@ const defaultConfigs = {
   },
   pages: {
     app: {
-      manual: ['user', 'admin'],
+      // manual: ['user', 'admin'],
       working: ['user', 'admin'],
       manualwork: ['user', 'admin'],
       // viewer: ['user', 'admin'],

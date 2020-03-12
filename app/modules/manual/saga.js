@@ -94,19 +94,19 @@ function* oK() {
       }
     }
 
+    if (manual.scanner!=='') {
+      yield call(tool?.Enable || (() => {
+        CommonLog.lError(
+          `tool ${tool?.Name}: no such tool or tool cannot be enabled.`
+        );
+      }));
 
-    yield call(tool?.Enable || (() => {
-      CommonLog.lError(
-        `tool ${tool?.Name}: no such tool or tool cannot be enabled.`
-      );
-    }));
 
-
-    result =tool.addListener(
-      () => true,
-      input => getresult(input.data)
-    )
-
+      result = tool.addListener(
+        () => true,
+        input => getresult(input.data)
+      )
+    }
 
   }catch (e) {
     console.error(e);
