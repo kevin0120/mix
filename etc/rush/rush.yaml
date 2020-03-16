@@ -110,21 +110,28 @@ openprotocol:
   default_mode: pset
 
 scanner:
-  enable: false
+  enable: true
+  entity_label: COM4
 #  entity_label: 3118:2305
 io:
   enable: true
   flash_inteval: 1s
   ios:
-    - sn: 11
-      model: MOXA_E1212
-      address: 192.168.3.250:502
+#    - sn: 13
+#      model: MOXA_E1212
+#      address: 192.168.3.251:502
 #    - sn: 2
 #      model: MOXA_E1212
 #      address: 192.168.127.202:502
 #    - sn: 3
 #      model: MOXA_E1242
 #      address: 192.168.127.203:502
+    - sn: 11
+      model: MOXA_E1210
+      address: 192.168.3.240:502
+    - sn: 12
+      model: MOXA_E1211
+      address: 192.168.3.241:502
 
 reader:
   enable: false
@@ -145,21 +152,21 @@ tightening_device:
 #          endpoint: tcp://192.168.3.25:4545
 #          channel: 1
 
-    - model: ModelDesoutterDeltaWrench
-      protocol: OpenProtocol
-      sn: 2
-      tools:
-        - sn: 2001
-          endpoint: tcp://192.168.0.26:4545
-          channel: 1
+#    - model: ModelDesoutterDeltaWrench
+#      protocol: OpenProtocol
+#      sn: 2
+#      tools:
+#        - sn: 2001
+#          endpoint: tcp://192.168.0.26:4545
+#          channel: 1
 
 #    - model: ModelDesoutterCvi3
 #      protocol: OpenProtocol
 #      sn: 3
 #      tools:
-#        - sn: 3001
-#          channel: 1
-#          endpoint: tcp://192.168.3.23:4546
+##        - sn: 3001
+##          channel: 1
+##          endpoint: tcp://192.168.3.23:4546
 #        - sn: 3002
 #          channel: 51
 #          endpoint: tcp://192.168.3.23:4545

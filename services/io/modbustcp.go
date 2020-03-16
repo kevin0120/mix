@@ -98,7 +98,7 @@ func (s *ModbusTcp) formatIO(results []byte, num uint16) string {
 	resultLen := int(num / 8)
 	for i := 0; i < resultLen; i++ {
 		strIO := strconv.FormatUint(uint64(results[i]), 2)
-		format := fmt.Sprintf("%%0%ds", num)
+		format := fmt.Sprintf("%%0%ds", 8)
 		strIO = fmt.Sprintf(format, strIO)
 		rt += utils.ReverseString(strIO)
 	}
@@ -120,28 +120,32 @@ func (s *ModbusTcp) IORead() (string, string, error) {
 	}
 
 	// input status
-	switch s.vendor.Cfg().InputReadType {
-	case ReadTypeDiscretes:
-		result, err = client.ReadDiscreteInputs(s.vendor.Cfg().InputAddress, s.vendor.Cfg().InputNum)
-	}
+	if s.vendor.Cfg().InputNum > 0 {
+		switch s.vendor.Cfg().InputReadType {
+		case ReadTypeDiscretes:
+			result, err = client.ReadDiscreteInputs(s.vendor.Cfg().InputAddress, s.vendor.Cfg().InputNum)
+		}
 
-	if err != nil {
-		return inputs, outputs, err
-	}
+		if err != nil {
+			return inputs, outputs, err
+		}
 
-	inputs = s.formatIO(result, s.vendor.Cfg().InputNum)
+		inputs = s.formatIO(result, s.vendor.Cfg().InputNum)
+	}
 
 	// output status
-	switch s.vendor.Cfg().OutputReadType {
-	case ReadTypeCoils:
-		result, err = client.ReadCoils(s.vendor.Cfg().OutputAddress, s.vendor.Cfg().OutputNum)
-	}
+	if s.vendor.Cfg().OutputNum > 0 {
+		switch s.vendor.Cfg().OutputReadType {
+		case ReadTypeCoils:
+			result, err = client.ReadCoils(s.vendor.Cfg().OutputAddress, s.vendor.Cfg().OutputNum)
+		}
 
-	if err != nil {
-		return inputs, outputs, err
-	}
+		if err != nil {
+			return inputs, outputs, err
+		}
 
-	outputs = s.formatIO(result, s.vendor.Cfg().OutputNum)
+		outputs = s.formatIO(result, s.vendor.Cfg().OutputNum)
+	}
 
 	if s.inputs.Load().(string) != inputs {
 		s.inputs.Store(inputs)
