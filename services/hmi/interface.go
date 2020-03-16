@@ -36,6 +36,7 @@ type IStorageService interface {
 	UpdateOrderData(order *storage.Workorders) (*storage.Workorders, error)
 	GetWorkorderByCode(code string) (*storage.Workorders, error)
 	GetStepByCode(code string) (*storage.Steps, error)
+	FindLocalResults(hmi_sn string, limit int) ([]storage.ResultsWorkorders, error)
 }
 
 type IBackendService interface {

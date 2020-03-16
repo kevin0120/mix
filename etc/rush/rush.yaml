@@ -105,26 +105,33 @@ openprotocol:
   vin_index:
     - 0
     - 1
-    -
   tool_info_period: 10h
   default_mode: pset
 
 scanner:
   enable: false
+  entity_label: COM4
 #  entity_label: 3118:2305
+
 io:
   enable: true
   flash_inteval: 1s
   ios:
-    - sn: 11
-      model: MOXA_E1212
-      address: 192.168.3.250:502
+#    - sn: 13
+#      model: MOXA_E1212
+#      address: 192.168.3.251:502
     - sn: 2
       model: MOXA_E1212
       address: 192.168.3.251:502
 #    - sn: 3
 #      model: MOXA_E1242
 #      address: 192.168.3.252:502
+    - sn: 11
+      model: MOXA_E1210
+      address: 192.168.3.240:502
+    - sn: 12
+      model: MOXA_E1211
+      address: 192.168.3.241:502
 
 reader:
   enable: false

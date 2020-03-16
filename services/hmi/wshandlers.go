@@ -6,7 +6,10 @@ import (
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
+	"strings"
+	"time"
 )
 
 // 请求获取工单列表
@@ -207,4 +210,59 @@ func (s *Service) OnWSOrderDetailByCode(c websocket.Connection, msg *wsnotify.WS
 
 	body, _ := json.Marshal(wsnotify.GenerateWSMsg(msg.SN, msg.Type, w))
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body), s.diag)
+}
+
+func (s *Service) OnWSLocalResults(c websocket.Connection, msg *wsnotify.WSMsg) {
+	byteData, _ := json.Marshal(msg.Data)
+	req := WSLocalResults{}
+	err := json.Unmarshal(byteData, &req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
+		return
+	}
+
+	results, err := s.storageService.FindLocalResults(req.HmiSN, req.Limit)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		return
+	}
+
+	filters := strings.Join(req.Filters, ",")
+	rt := []LocalResults{}
+	sr := tightening_device.ResultValue{}
+	for _, v := range results {
+		stime := v.Results.UpdateTime.Format("2006-01-02 15:04:05")
+		dt, _ := time.Parse("2006-01-02 15:04:05", stime)
+
+		_ = json.Unmarshal([]byte(v.ResultValue), &sr)
+
+		lr := LocalResults{
+			HmiSN:        filterValue(filters, "hmi_sn", v.HMISN),
+			Vin:          filterValue(filters, "vin", v.Vin),
+			ControllerSN: filterValue(filters, "controller_sn", v.ControllerSN),
+			ToolSN:       filterValue(filters, "tool_sn", v.ToolSN),
+			Result:       filterValue(filters, "result", v.Result),
+			Torque:       filterValue(filters, "torque", sr.Mi),
+			Angle:        filterValue(filters, "angle", sr.Wi),
+			Spent:        filterValue(filters, "spent", sr.Ti),
+			TimeStamp:    filterValue(filters, "timestamp", dt.Local()),
+			Batch:        filterValue(filters, "batch", v.Batch),
+			VehicleType:  filterValue(filters, "vehicle_type", v.MO_Model),
+			JobID:        filterValue(filters, "job_id", v.JobID),
+			PSetID:       filterValue(filters, "pset_id", v.PSet),
+		}
+
+		rt = append(rt, lr)
+	}
+
+	body, _ := json.Marshal(wsnotify.GenerateWSMsg(msg.SN, msg.Type, rt))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(body), s.diag)
+}
+
+func filterValue(filters string, key string, value interface{}) interface{} {
+	if filters == "" || strings.Contains(filters, key) {
+		return value
+	}
+
+	return nil
 }
