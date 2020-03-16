@@ -19,10 +19,8 @@ import Viewer from './viewer';
 import Layout from './appLayout';
 import WorkingTemplate from './workingTemplate';
 import OperationList from './OperationList';
-import Manual from './manual';
 import WorkingManual from './working';
 
-import ResultInput from '../components/ResultInput';
 // import HomePage from './home';
 import Net from './config/Net';
 import IO from './config/Io';
@@ -50,14 +48,6 @@ const pages = {
     title: 'main.home',
     icon: icons.Home,
     color: colors.indigo[shade],
-    '/manual': {
-      title: 'main.manual',
-      component: Manual,
-      icon: icons.BrightnessAutoSharp,
-      color: colors.cyan[shade],
-      image: WorkingImg,
-      exact: true
-    },
     '/manualwork': {
       title: 'main.manual',
       component: WorkingManual,
