@@ -8,6 +8,7 @@ export type StateType = {
   pset: number,
   working: boolean,
   timeline: object
+  resultIn: Result
 };
 export type counterStateType = {
   +counter: Object
@@ -20,9 +21,22 @@ export type Action = {
   +tool: string,
   +pset: number,
   +result: any,
-  +story: object
+  +story: object,
+  +resultIn: Result
 
 };
+
+export type State = {
+  niu: number,
+  jao: number,
+  ok: string
+};
+
+export type Result = {
+  result: State,
+  sucess: boolean
+};
+
 
 export type GetState = () => counterStateType;
 

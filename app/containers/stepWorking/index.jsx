@@ -15,6 +15,7 @@ import { ORDER_STATUS } from '../../modules/order/constants';
 import logo from '../../../resources/imgs/logo.jpg';
 import { stepWorkingNS } from './local';
 import { withI18n } from '../../i18n';
+import { clickPoint } from '../../modules/manual/action';
 
 const mapState = (state, props) => {
   const vOrder = orderSelectors.viewingOrder(state.order);
@@ -25,12 +26,15 @@ const mapState = (state, props) => {
   };
 };
 
-const mapDispatch = {};
+const mapDispatch = {
+  clickPoint
+};
 
 type Props = {
   status: ?tOrderStatus,
   name: ?string,
-  code: ?string
+  code: ?string,
+  clickPoint: () => void
 };
 
 const statusMap = classes => ({
@@ -43,7 +47,7 @@ const statusMap = classes => ({
   [ORDER_STATUS.FAIL]: classes.statusFail
 });
 
-function StepWorking({ status, code }: Props): Node {
+function StepWorking({ status, code,clickPoint}: Props): Node {
   const classes = makeStyles(styles.layout)();
 
   type tNodeHook = [Node, ((Node => Node) | Node) => void];
@@ -81,7 +85,7 @@ function StepWorking({ status, code }: Props): Node {
               description={description}
             />
           </Paper>
-          <div className={classes.rightContainer}>
+          <div className={classes.rightContainer}  onClick={clickPoint}>
             <Paper square className={classes.stepperContainer}>
               <StepperContainer />
             </Paper>

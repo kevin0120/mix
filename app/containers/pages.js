@@ -21,6 +21,8 @@ import WorkingTemplate from './workingTemplate';
 import OperationList from './OperationList';
 import Manual from './manual';
 import WorkingManual from './working';
+
+import ResultInput from '../components/ResultInput';
 // import HomePage from './home';
 import Net from './config/Net';
 import IO from './config/Io';

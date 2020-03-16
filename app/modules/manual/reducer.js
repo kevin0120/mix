@@ -30,6 +30,8 @@ export default function (state: StateType = configs, action: Action) {
       return { ...state, timeline: NewStory(state.timeline, action.story)};
     case TIMELINE_STORY.CLEAR:
       return { ...state, timeline: ClearStory()};
+    case MANUAL.RESULTINPUT:
+      return { ...state, resultIn: action.resultIn};
     default:
       return state;
   }

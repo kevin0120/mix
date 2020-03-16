@@ -1,4 +1,6 @@
 // @flow
+import type { Result } from './types';
+
 export const TIMELINE_STORY = {
   NEW: 'TIMELINE_STORY_NEW',
   CLEAR: 'TIMELINE_STORY_CLEAR'
@@ -16,7 +18,24 @@ export const MANUAL = {
   SETDATA:'SET_DATA',
   GETRESULT:'GET_RESULT',
   DIDMOUNT: 'DID_MOUNT',
+  RESULTINPUT:'RESULT_INPUT',
+  CLICKPOINT:'CLICK_POINT',
 };
+
+export function clickPoint () {
+  return {
+    type: MANUAL.CLICKPOINT
+  };
+}
+
+
+
+export function resultInput(resultIn: Result) {
+  return {
+    type: MANUAL.RESULTINPUT,
+    resultIn
+  };
+}
 
 export function clearStories() {
   return {

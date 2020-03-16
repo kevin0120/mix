@@ -1,7 +1,7 @@
 import { take, put, fork,delay,cancel,call,takeEvery,select,takeLatest} from 'redux-saga/effects';
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
-import { MANUAL as manual, start, close, getresult ,selectTool,selectPset,setData} from './action';
+import { MANUAL, start, close, getresult, selectTool, selectPset, setData } from './action';
 import { CommonLog } from '../../common/utils';
 import { tNS } from '../../i18n';
 import { reworkDialogConstants as dia, reworkNS } from '../reworkPattern/constants';
@@ -14,22 +14,92 @@ import dialogActions from '../dialog/action';
 import type { IDevice } from '../device/IDevice';
 import notifierActions from '../Notifier/action';
 import { addNewStory, STORY_TYPE } from './timeline';
+import ResultInput from '../../components/ResultInput';
+import type { tDeviceSN } from '../device/typeDef';
+import type { tResult, tResultStatus } from '../step/screwStep/interface/typeDef';
 
 
 export default function* root() {
   try {
-    yield takeEvery(manual.CANCEL,initManual);
-    yield takeLatest(manual.TIGHTENING,oK);
+    yield takeEvery(MANUAL.CANCEL,initManual);
+    yield takeLatest(MANUAL.TIGHTENING,oK);
+    yield takeEvery(MANUAL.CLICKPOINT,manualResult);
+    yield takeEvery(MANUAL.RESULTINPUT,recieveResult);
+
     while (true) {
-      yield take(manual.START);
+      yield take(MANUAL.START);
       const work =yield fork(manualWork);
-      yield take(manual.CLOSE);
+      yield take(MANUAL.CLOSE);
       if (work) {
         yield cancel(work);
       }
     }
   } catch (e) {
     CommonLog.lError(e);
+  }
+}
+
+function* recieveResult(action) {
+  try{
+
+    if (action.resultIn?.sucess){
+      const r ={
+        tool_sn:"xx0011",
+        results:[{
+          tool_sn: "xx0011",
+          seq: 1,
+          group_seq: 1,
+          measure_time: 1,
+          measure_torque: action.resultIn?.result?.niu,
+          measure_angle: action.resultIn?.result?.jao,
+          measure_result: action.resultIn.result?.ok,
+          batch: '0',
+          count: 0}
+        ]
+      }
+
+      const tool = getDevice(r.tool_sn);
+      if (tool) {
+        yield call(tool.doDispatch, [r]);
+      } else {
+        CommonLog.lError('invalid tool', {
+          sn: r.tool_sn
+        });
+      }
+
+
+    }
+
+
+  }catch (e) {
+    console.error(e);
+  }
+}
+
+function* manualResult() {
+  try{
+    const buttons = [
+      {
+        label: "取消",
+        color: 'info',
+        action: dialogActions.dialogClose()
+      },
+      {
+        label: "完成",
+        color: 'success',
+        action: dialogActions.dialogClose()
+      }
+    ];
+
+    yield put(
+      dialogActions.dialogShow({
+        buttons,
+        title: `请输入拧紧结果`,
+        content: (<ResultInput/>)
+      })
+    );
+  }catch (e) {
+    console.error(e);
   }
 }
 
@@ -42,7 +112,7 @@ function* oK() {
     const  {manual} = state;
     const tool = getDevice(manual?.tool);
 
-    if (result !==null) {
+    if (result !==null&& typeof result !== 'undefined') {
       tool.removeListener(result);
     }
 
@@ -105,7 +175,29 @@ function* oK() {
       result = tool.addListener(
         () => true,
         input => getresult(input.data)
+
       )
+
+      while (true){
+      const action= yield take(MANUAL.GETRESULT);
+
+      if (action.result[0]?.measure_result==="NOK"){
+        yield call(
+          addNewStory,
+          STORY_TYPE.FAIL,
+          `结果 失败`,
+          `T=${action.result[0]?.measure_torque}Nm A=${action.result[0]?.measure_angle}° Tool=${action.result[0]?.tool_sn} Scanner=${action.result[0]?.scanner_code}`
+        );
+
+      } else {
+        yield call(
+          addNewStory,
+          STORY_TYPE.PASS,
+          `结果 成功`,
+          `T=${action.result[0]?.measure_torque}Nm A=${action.result[0]?.measure_angle}° Tool=${action.result[0]?.tool_sn} Scanner=${action.result[0]?.scanner_code}`
+        );
+      }
+      }
     }
 
   }catch (e) {
@@ -115,14 +207,6 @@ function* oK() {
 
 function* initManual() {
   try{
-
-    yield call(
-      addNewStory,
-      STORY_TYPE.PASS,
-      `结果 成功`,
-      `T=５０Nm A=２３°`
-    );
-
   yield put(close());
   yield delay(300);
   yield put(start());
@@ -174,7 +258,7 @@ function* manualWork() {
         </Grid>)}
       </Grid>)
     }));
-    const { tool } = yield take(manual.SELECT_TOOL,);
+    const { tool } = yield take(MANUAL.SELECT_TOOL,);
     // this._tools = [tool];
     // this._forceTool = tool;
     yield put(dialogActions.dialogClose());
@@ -196,13 +280,13 @@ function* manualWork() {
         </Grid>)}
       </Grid>)
     }));
-    const { pset } = yield take(manual.SELECT_PSET);
+    const { pset } = yield take(MANUAL.SELECT_PSET);
     // this._forcePset = pset;
     yield put(dialogActions.dialogClose());
 
     yield put(setData(ControllerSN,tool.serialNumber,pset));
 
-    }
+  }
    catch (e) {
     CommonLog.lError(e);
   }

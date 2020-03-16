@@ -423,14 +423,14 @@ TurnPaper: {
     height: '100%',
     width: '100%',
     position: 'relative',
-    background: '#212121'
+    background: '#E5F0FA'
 },
 RetryPaper: {
   textAlign: 'center',
     height: '100%',
     width: '100%',
     position: 'relative',
-    background: '#212121'
+    background: '#E5F0FA'
 },
 RightDescription: {
   fontSize: '2vh',
@@ -467,8 +467,7 @@ type Props = {
   clearStories: () => void,
   scanner: string,
   tool: string,
-  pset: number,
-  result: Array<string>
+  pset: number
 };
 
 class ConnectedWorking extends React.Component {
@@ -489,8 +488,6 @@ class ConnectedWorking extends React.Component {
     this.props.close();
     this.props.clearStories();
   }
-
-
 
   openManualDiag = (e, input, t) => {
     e.preventDefault();
@@ -514,13 +511,10 @@ class ConnectedWorking extends React.Component {
       logo,
       tool,
       pset,
-      result,
       manualCancel,
       manualTightening
     } = this.props;
 
-    const batch = '0/0';
-    const redoBatch = '0/0';
 
     return (
       <I18n ns="translations">
@@ -576,34 +570,29 @@ class ConnectedWorking extends React.Component {
               <Grid item xs={6} style={{ height: '15%' }}>
                 <Paper className={classes.TurnPaper}>
                   <div className={classes.CutDownContainer}>
-                    <div style={{
-                      height: '20%',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      display: 'flex',
-                      flexDirection: 'column'
-                    }}>
-                      <p className={classes.RightDescription} onClick={manualCancel}>
+                      <button
+                        className={styles.btn}
+                        onClick={manualCancel}
+                        data-tclass="btn"
+                        type="button"
+                      >
                         选择工具
-                      </p>
-                    </div>
+                      </button>
+
                   </div>
                 </Paper>
               </Grid>
               <Grid item xs={6} style={{ height: '15%' }}>
                 <Paper className={classes.RetryPaper}>
                   <div className={classes.CutDownContainer}>
-                    <div style={{
-                      height: '20%',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      display: 'flex',
-                      flexDirection: 'column'
-                    }}>
-                      <p className={classes.RightDescription}　onClick={manualTightening}>
+                      <button
+                        className={styles.btn}
+                        onClick={manualTightening}
+                        data-tclass="btn"
+                        type="button"
+                      >
                         开始作业
-                      </p>
-                    </div>
+                      </button>
                   </div>
                 </Paper>
               </Grid>

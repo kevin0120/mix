@@ -214,6 +214,8 @@ function* doingState(config) {
     const { controllerMode, jobID } = this._data;
     let isFirst = true; // job只设置一次，记录状态
 
+    // let test = true; // job只设置一次，记录状态
+
 
     while (true) {
       switch (workCenterMode) {
@@ -237,6 +239,12 @@ function* doingState(config) {
             (p: ClsOperationPoint) => p.isFinalFail
           );
           yield call([this, byPassPoint], finalFailPoints);
+
+          // if (test){
+          // yield  put(screwStepActions.byPassSpecPoint());
+          //   test=false;
+          // }
+
           const newActivePoints = this._pointsManager.start();
           this._pointsToActive = newActivePoints.filter(p =>
             this._pointsToActive.every(pp => pp.sequence !== p.sequence)
