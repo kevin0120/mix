@@ -80,7 +80,7 @@ websocket:
 
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_dev
+  db_name: rush_ts002
   db_user: admin
   db_pwd: admin
   max_connection: 60
@@ -105,14 +105,14 @@ openprotocol:
   vin_index:
     - 0
     - 1
-    -
   tool_info_period: 10h
   default_mode: pset
 
 scanner:
-  enable: true
+  enable: false
   entity_label: COM4
 #  entity_label: 3118:2305
+
 io:
   enable: true
   flash_inteval: 1s

@@ -319,7 +319,7 @@ func XML2Result(result *CVI3Result, rr *tightening_device.TighteningResult) {
 
 	//rr.TighteningID = result.PRC_SST.PAR.FAS.GRP.TIP.TID
 	//rr.Controller_SN = result.PRC_SST.PAR.SN
-	//rr.GunSN = result.PRC_SST.PAR.FAS.GRP.TIP.ToolSN
+	//rr.ToolSN = result.PRC_SST.PAR.FAS.GRP.TIP.ToolSN
 	//rr.Result = result.PRC_SST.PAR.Result
 	//if rr.Result == "IO" {
 	//	rr.Result = storage.RESULT_OK
