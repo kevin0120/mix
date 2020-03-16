@@ -94,6 +94,9 @@ type BaseResult struct {
 
 	// 当前拧紧次数
 	Count int `json:"count"`
+
+
+	ScannerCode string  `json:"scanner_code"`
 }
 
 type JobInfo struct {
@@ -200,6 +203,7 @@ func (r *TighteningResult) ToDBResult() *storage.Results {
 		Batch:        r.Batch,
 		UserID:       r.UserID,
 		NutNo:        r.NutNo,
+		ScannerCode:  r.ScannerCode,
 	}
 }
 

@@ -294,6 +294,7 @@ func (s *TighteningTool) onResult(result interface{}) {
 
 	tighteningResult := result.(tightening_device.TighteningResult)
 	dbTool, err := s.controller.ProtocolService.storageService.GetTool(s.cfg.SN)
+	tighteningResult.ScannerCode = dbTool.ScannerCode
 	if err == nil && dbTool.CurrentWorkorderID != 0 {
 		if s.Mode() == tightening_device.MODE_JOB {
 			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.CurrentWorkorderID)
@@ -331,6 +332,7 @@ func (s *TighteningTool) onResult(result interface{}) {
 
 	// 分发结果
 	tighteningResult.ID = dbResult.Id
+	tighteningResult.ScannerCode = dbTool.ScannerCode
 	s.controller.doDispatch(dispatcherbus.DispatcherResult, tighteningResult)
 }
 

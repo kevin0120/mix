@@ -123,6 +123,7 @@ type Results struct {
 	TighteningID       string    `xorm:"varchar(128) 'tightening_id'"`
 	CurveFile          string    `xorm:"varchar(256) 'curve_file'"`
 	// payload字段
+	ScannerCode string `xorm:"varchar(256) 'scanner_code'"`
 }
 
 type ResultsWorkorders struct {
@@ -162,6 +163,7 @@ type Tools struct {
 	UserID             int64  `xorm:"bigint 'user_id'"`
 	StepID             int64  `xorm:"bigint 'step_id'"`
 	PointID            string `xorm:"varchar(128) 'point_id'"`
+	ScannerCode        string `xorm:"varchar(128) 'scanner_code'"`
 }
 
 type RoutingOperations struct {
