@@ -66,7 +66,7 @@ const styles = theme=>({
 });
 
 const mapStateToProps = (state, ownProps) => ({
-  masterpcUrl: state.connections.masterpc,
+  masterpcUrl: state.setting.system.connections.rush,
   hmiSn: state.setting.page.odooConnection.hmiSn.value,
   controllerMode: state.setting.operationSettings.controllerMode,
   ...ownProps
