@@ -10,6 +10,10 @@ export const ORDER_STATUS = Object.freeze({
   FAIL: 'fail'
 });
 
+export const RESULT_WS_TYPES = Object.freeze({
+  LIST: 'WS_LOCAL_RESULTS'
+});
+
 // rush type
 export const ORDER_WS_TYPES = Object.freeze({
   LIST: 'WS_ORDER_LIST',

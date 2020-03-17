@@ -1,67 +1,69 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
-import { connect } from 'react-redux';
-import ReactTable from 'react-table';
+import { connect } from "react-redux";
+import ReactTable from "react-table";
 
-import Divider from '@material-ui/core/Divider';
+import Divider from "@material-ui/core/Divider";
 
-import { I18n } from 'react-i18next';
+import { I18n } from "react-i18next";
 
-import SweetAlert from 'react-bootstrap-sweetalert';
-import Assignment from '@material-ui/icons/Assignment';
-import Dvr from '@material-ui/icons/Dvr';
-import List from '@material-ui/core/List';
-import withStyles from '@material-ui/core/styles/withStyles';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import isURL from 'validator/lib/isURL';
-import Input from '@material-ui/core/Input';
-import Alert from '../../components/Alert';
-import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
+import SweetAlert from "react-bootstrap-sweetalert";
+import Assignment from "@material-ui/icons/Assignment";
+import Dvr from "@material-ui/icons/Dvr";
+import List from "@material-ui/core/List";
+import withStyles from "@material-ui/core/styles/withStyles";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import isURL from "validator/lib/isURL";
+import Input from "@material-ui/core/Input";
+import Alert from "../../components/Alert";
+import sweetAlertStyle from "../../common/jss/views/sweetAlertStyle";
 
 // @material-ui/core components
 // @material-ui/icons
 // core components
-import GridContainer from '../../components/Grid/GridContainer';
-import GridItem from '../../components/Grid/GridItem';
-import Button from '../../components/CustomButtons/Button';
-import Card from '../../components/Card/Card';
-import CardBody from '../../components/Card/CardBody';
-import CardIcon from '../../components/Card/CardIcon';
-import CardHeader from '../../components/Card/CardHeader';
+import GridContainer from "../../components/Grid/GridContainer";
+import GridItem from "../../components/Grid/GridItem";
+import Button from "../../components/CustomButtons/Button";
+import Card from "../../components/Card/Card";
+import CardBody from "../../components/Card/CardBody";
+import CardIcon from "../../components/Card/CardIcon";
+import CardHeader from "../../components/Card/CardHeader";
 
-import { CommonLog, defaultClient } from '../../common/utils';
-import withKeyboard from '../../components/Keyboard';
-import CustomReactTable from '../../components/CustomReactTable';
+import { CommonLog, defaultClient } from "../../common/utils";
+import withKeyboard from "../../components/Keyboard";
+import CustomReactTable from "../../components/CustomReactTable";
+import { rushSendApi } from "../../api/rush";
+import { RESULT_WS_TYPES } from "../../modules/order/constants";
 
-const lodash = require('lodash');
-const dayjs = require('dayjs');
+const lodash = require("lodash");
+const dayjs = require("dayjs");
 
-const styles = theme=>({
+const styles = theme => ({
   ...sweetAlertStyle(theme),
   root: {
     flexGrow: 1,
     zIndex: 1,
-    height: '100%',
-    overflowY: 'auto',
-    position: 'relative',
-    display: 'flex',
-    width: '100%'
+    height: "100%",
+    overflowY: "auto",
+    position: "relative",
+    display: "flex",
+    width: "100%"
   },
   cardIconTitle: {
     ...theme.title.card,
-    marginTop: '15px',
-    marginBottom: '0px'
+    marginTop: "15px",
+    marginBottom: "0px"
   },
   InputRoot: {
-    width: '100%',
-    height: '36px',
-    overflow: 'hidden'
+    width: "100%",
+    height: "36px",
+    overflow: "hidden"
   },
   InputInput: {
-    width: '100%',
-    height: '100%'
+    width: "100%",
+    height: "100%"
   }
 });
 
@@ -78,17 +80,22 @@ function requestData(masterpcUrl, hmiSN) {
   const url = `${masterpcUrl}/rush/v1/local-results`;
   if (!isURL(url, { require_protocol: true })) {
     return new Promise(() => {
-      throw new Error('conn is Error!');
+      throw new Error("conn is Error!");
     });
   }
   return defaultClient.get(url, {
     params: {
       hmi_sn: hmiSN,
       filters:
-        'vin,job_id,pset_id,batch,torque,angle,spent,timestamp,vehicle_type,result',
+        "vin,job_id,pset_id,batch,torque,angle,spent,timestamp,vehicle_type,result",
       limit: 500
     }
   });
+}
+
+export function requestDataResult(hmiSN): Promise<any> {
+  const filters = ["vin,job_id,pset_id,batch,torque,angle,spent,timestamp,vehicle_type,result"];
+  return rushSendApi(RESULT_WS_TYPES.LIST, { hmi_sn: hmiSN, filters });
 }
 
 class Result extends React.Component {
@@ -107,11 +114,10 @@ class Result extends React.Component {
   }
 
   fetchData() {
-    const { masterpcUrl, hmiSn } = this.props;
-    requestData(masterpcUrl, hmiSn)
+    const { hmiSn } = this.props;
+    requestDataResult(hmiSn)
       .then(res => {
-        const statusCode = res.status;
-        if (statusCode === 200) {
+        if (!lodash.isNil(res.data)) {
           this.setState({
             data: res.data.map((item, key) => ({
               id: key,
@@ -166,9 +172,9 @@ class Result extends React.Component {
     const { classes, controllerMode } = this.props;
     const { data, isShow, selectObj } = this.state;
 
-    let pgAccessor = 'job_id';
-    if (controllerMode === 'pset') {
-      pgAccessor = 'pset_id';
+    let pgAccessor = "job_id";
+    if (controllerMode === "pset") {
+      pgAccessor = "pset_id";
     }
 
     const Msg = selectObj ? (
@@ -208,7 +214,7 @@ class Result extends React.Component {
         </List>
       </div>
     ) : (
-      ' '
+      " "
     );
 
     return (
@@ -223,7 +229,7 @@ class Result extends React.Component {
                       <Assignment/>
                     </CardIcon>
                     <h4 className={classes.cardIconTitle}>
-                      {t('main.resultQuery')}
+                      {t("main.resultQuery")}
                     </h4>
                   </CardHeader>
                   <CardBody>
@@ -234,12 +240,12 @@ class Result extends React.Component {
                       filterable
                       columns={[
                         {
-                          Header: 'VIN',
-                          accessor: 'vin',
+                          Header: "VIN",
+                          accessor: "vin",
                           filterMethod: (filter, row) => lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(this.state.vinFilter || '')
-                            ),
+                            lodash.toUpper(row[filter.id]),
+                            lodash.toUpper(this.state.vinFilter || "")
+                          ),
                           Filter: ({ filter, onChange }) => (
                             <Input
                               onClick={() => {
@@ -250,8 +256,8 @@ class Result extends React.Component {
                                     });
                                   },
                                   text: this.state.vinFilter,
-                                  title: 'VIN',
-                                  label: 'VIN'
+                                  title: "VIN",
+                                  label: "VIN"
                                 });
                               }}
                               classes={{
@@ -259,17 +265,17 @@ class Result extends React.Component {
                                 input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.vinFilter || ''}
+                              value={this.state.vinFilter || ""}
                             />
                           )
                         },
                         {
-                          Header: '车型',
-                          accessor: 'vehicle_type',
+                          Header: "车型",
+                          accessor: "vehicle_type",
                           filterMethod: (filter, row) => lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(this.state.vehicleTypeFilter || '')
-                            ),
+                            lodash.toUpper(row[filter.id]),
+                            lodash.toUpper(this.state.vehicleTypeFilter || "")
+                          ),
                           Filter: ({ filter, onChange }) => (
                             <Input
                               onClick={() => {
@@ -283,8 +289,8 @@ class Result extends React.Component {
                                     );
                                   },
                                   text: this.state.vehicleTypeFilter,
-                                  title: '车型',
-                                  label: '车型'
+                                  title: "车型",
+                                  label: "车型"
                                 });
                               }}
                               classes={{
@@ -292,18 +298,18 @@ class Result extends React.Component {
                                 input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.vehicleTypeFilter || ''}
+                              value={this.state.vehicleTypeFilter || ""}
                             />
                           )
                         },
                         {
-                          Header: '程序号',
+                          Header: "程序号",
                           accessor: pgAccessor,
                           sortable: false,
                           filterMethod: (filter, row) => lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(this.state.jobIdFilter || '')
-                            ),
+                            lodash.toUpper(row[filter.id]),
+                            lodash.toUpper(this.state.jobIdFilter || "")
+                          ),
                           Filter: ({ filter, onChange }) => (
                             <Input
                               onClick={() => {
@@ -314,8 +320,8 @@ class Result extends React.Component {
                                     });
                                   },
                                   text: this.state.jobIdFilter,
-                                  title: '程序号',
-                                  label: '程序号'
+                                  title: "程序号",
+                                  label: "程序号"
                                 });
                               }}
                               classes={{
@@ -323,43 +329,43 @@ class Result extends React.Component {
                                 input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.jobIdFilter || ''}
+                              value={this.state.jobIdFilter || ""}
                             />
                           )
                         },
                         {
-                          Header: '扭矩(N·M)',
-                          accessor: 'torque',
+                          Header: "扭矩(N·M)",
+                          accessor: "torque",
                           sortable: true,
                           filterable: false
                         },
                         {
-                          Header: '角度(Deg)',
-                          accessor: 'angle',
+                          Header: "角度(Deg)",
+                          accessor: "angle",
                           sortable: false,
                           filterable: false
                         },
                         {
-                          Header: '结果',
-                          accessor: 'result',
+                          Header: "结果",
+                          accessor: "result",
                           sortable: true,
                           filterable: false
                         },
                         {
-                          Header: '耗时(ms)',
-                          accessor: 'spent',
+                          Header: "耗时(ms)",
+                          accessor: "spent",
                           sortable: true,
                           filterable: false
                         },
                         {
-                          Header: '批次',
-                          accessor: 'batch',
+                          Header: "批次",
+                          accessor: "batch",
                           sortable: false,
                           filterable: false
                         },
                         {
-                          Header: '拧紧时间',
-                          accessor: 'timestamp',
+                          Header: "拧紧时间",
+                          accessor: "timestamp",
                           filterable: false
                           // filterMethod: (filter, row) =>
                           //   lodash.includes(
@@ -368,8 +374,8 @@ class Result extends React.Component {
                           //   )
                         },
                         {
-                          Header: '动作',
-                          accessor: 'actions',
+                          Header: "动作",
+                          accessor: "actions",
                           sortable: false,
                           filterable: false
                         }
@@ -391,8 +397,8 @@ class Result extends React.Component {
               onCancel={this.handleClose}
               confirmBtnCssClass={`${classes.button} ${classes.success}`}
               cancelBtnCssClass={`${classes.button} ${classes.danger}`}
-              confirmBtnText={t('Common.Yes')}
-              cancelBtnText={t('Common.No')}
+              confirmBtnText={t("Common.Yes")}
+              cancelBtnText={t("Common.No")}
               showCancel
             >
               {Msg}
