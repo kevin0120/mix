@@ -1,6 +1,7 @@
 import { take, put, fork,delay,cancel,call,takeEvery,select,takeLatest} from 'redux-saga/effects';
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
+import type { Saga } from 'redux-saga';
 import { MANUAL, start, close, getresult, selectTool, selectPset, setData } from './action';
 import { CommonLog } from '../../common/utils';
 import { tNS } from '../../i18n';
@@ -15,15 +16,12 @@ import type { IDevice } from '../device/IDevice';
 import notifierActions from '../Notifier/action';
 import { addNewStory, STORY_TYPE } from './timeline';
 import ResultInput from '../../components/ResultInput';
-import type { tDeviceSN } from '../device/typeDef';
-import type { tResult, tResultStatus } from '../step/screwStep/interface/typeDef';
-
+import type { tAction } from '../reworkPattern/interface/typeDef';
 
 export default function* root() {
   try {
     yield takeEvery(MANUAL.CANCEL,initManual);
     yield takeLatest(MANUAL.TIGHTENING,oK);
-    yield takeEvery(MANUAL.CLICKPOINT,manualResult);
     yield takeEvery(MANUAL.RESULTINPUT,recieveResult);
 
     while (true) {
@@ -76,7 +74,10 @@ function* recieveResult(action) {
   }
 }
 
-function* manualResult() {
+export function* manualResult(action: tAction = {}): Saga<void>  {
+  console.log('请手动输入拧紧结果');
+  const { order, step, point } = action;
+  console.log(order,step,point);
   try{
     const buttons = [
       {

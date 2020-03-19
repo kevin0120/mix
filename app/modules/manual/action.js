@@ -19,7 +19,6 @@ export const MANUAL = {
   GETRESULT:'GET_RESULT',
   DIDMOUNT: 'DID_MOUNT',
   RESULTINPUT:'RESULT_INPUT',
-  CLICKPOINT:'CLICK_POINT',
 };
 
 export function clickPoint () {

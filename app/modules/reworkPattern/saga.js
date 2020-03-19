@@ -1,5 +1,5 @@
 // @flow
-import { call, put, race, select, take, takeEvery } from 'redux-saga/effects';
+import { call, put, race, select, take, takeEvery,fork } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import type { tAction } from './interface/typeDef';
@@ -12,6 +12,7 @@ import notifierActions from '../Notifier/action';
 import actions from './action';
 import { workModes } from '../workCenterMode/constants';
 import { workingOrder } from '../order/selector';
+import { manualResult } from '../manual/saga';
 
 function* tryRework(action: tAction = {}): Saga<void> {
   try {
@@ -101,6 +102,7 @@ export default function* reworkPatternRoot(): Saga<void> {
   while (true) {
     try {
       const action = yield take(REWORK_PATTERN.TRY_REWORK);
+      yield fork(manualResult,action);
       yield race([
         call(tryRework, action),
         take(REWORK_PATTERN.CANCEL_REWORK)
