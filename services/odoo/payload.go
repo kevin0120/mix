@@ -36,3 +36,11 @@ type OdooWorkorder struct {
 
 type OdooStep struct {
 }
+
+type OdooUser struct {
+	Status     string `json:"status"`
+	Name       string `json:"name"`
+	ImageSmall string `json:"image_small"`
+	Login      string `json:"login"`
+	UUID       string `json:"uuid"`
+}

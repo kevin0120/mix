@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/dispatcherbus"
+	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
@@ -265,4 +266,23 @@ func filterValue(filters string, key string, value interface{}) interface{} {
 	}
 
 	return nil
+}
+
+func (s *Service) OnWSAuthUID(c websocket.Connection, msg *wsnotify.WSMsg) {
+	byteData, _ := json.Marshal(msg.Data)
+	req := reader.ReaderUID{}
+	err := json.Unmarshal(byteData, &req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
+		return
+	}
+
+	user, err := s.backendService.GetUserByUID(req.UID)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		return
+	}
+
+	body, _ := json.Marshal(wsnotify.GenerateWSMsg(msg.SN, msg.Type, user))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(body), s.diag)
 }
