@@ -137,6 +137,7 @@ func (s *Service) setupWSRequestHandlers() {
 		wsnotify.WS_ORDER_STEP_UPDATE:      s.OnWSOrderStepUpdate,
 		wsnotify.WS_ORDER_STEP_DATA_UPDATE: s.OnWSOrderStepDataUpdate,
 		wsnotify.WS_ORDER_DETAIL_BY_CODE:   s.OnWSOrderDetailByCode,
+		wsnotify.WS_LOCAL_RESULTS:          s.OnWSLocalResults,
 	})
 }
 

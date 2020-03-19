@@ -12,6 +12,10 @@ const (
 	ProductHoneyWell = 2305
 	VendorDataLogic  = 1529
 	ProductDataLogic = 8714
+
+	// Zebra DS8178 windows下请安装CDC驱动
+	VendorZebra  = 1504
+	ProductZebra = 4608
 )
 
 const (
@@ -86,6 +90,8 @@ func (d *DeviceInfo) updateDeviceService() error {
 		d.DeviceService = &commonHoneywellScanner{}
 	case VendorDataLogic:
 		d.DeviceService = &commonDataLogicScanner{}
+	case VendorZebra:
+		d.DeviceService = &commonZebraScanner{}
 	default:
 		return errors.New("updateDeviceService Fail")
 	}
@@ -269,4 +275,74 @@ func (v *commonUSBSerialScanner) Close() error {
 func (v *commonUSBSerialScanner) Read(buf []byte) (int, error) {
 	d := v.dev.(*serial.Port)
 	return d.Read(buf)
+}
+
+type commonZebraScanner struct {
+	dev        USBDevice
+	cfg        *USBConfig
+	Interface  *USBInterface
+	InEndpoint *USBInEndpoint
+}
+
+func (v *commonZebraScanner) NewReader(dev USBDevice) error {
+	v.dev = dev
+	if runtime.GOOS != "windows" {
+		dev := dev.(*gousb.Device)
+		cfg, err := dev.Config(1)
+		if err != nil {
+			return err
+		}
+		v.cfg = cfg
+		intf, err := cfg.Interface(0, 0)
+		if err != nil {
+			return err
+		}
+		v.Interface = intf
+		epIn, err := intf.InEndpoint(2)
+		if err != nil {
+			return err
+		}
+		v.InEndpoint = epIn
+
+		return nil
+	}
+	return nil
+}
+
+func (v *commonZebraScanner) Read(buf []byte) (int, error) {
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Read(buf)
+	} else {
+		// unix and linux
+		if v.InEndpoint == nil {
+			return 0, errors.New("not Reader")
+		}
+		return v.InEndpoint.Read(buf)
+	}
+}
+
+func (v *commonZebraScanner) Close() error {
+	var err error
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Close()
+	} else {
+		d := v.dev.(*gousb.Device)
+		if v.Interface != nil {
+			v.Interface.Close()
+		}
+		if v.cfg != nil {
+			err = v.cfg.Close()
+		}
+		if err := d.Close(); err != nil {
+			return err
+		}
+	}
+	return err
+
+}
+
+func (v *commonZebraScanner) Parse(buf []byte) (string, error) {
+	return commonParse(buf)
 }
