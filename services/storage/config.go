@@ -19,7 +19,7 @@ type Config struct {
 
 func NewConfig() Config {
 	return Config{
-		Enable:       false,
+		Enable:       true,
 		Url:          "127.0.0.1:5432",
 		DBName:       "dbname",
 		User:         "user",

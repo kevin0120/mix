@@ -80,7 +80,6 @@ websocket:
   write_buf_size: 65535
 
 storage:
-  enable: false
   db_url: 127.0.0.1:5432
   db_name: rush_hardware
   db_user: odoo
@@ -111,7 +110,7 @@ openprotocol:
   default_mode: pset
 
 scanner:
-  enable: true
+  enable: false
   entity_label: 3118:2305
 io:
   enable: false
@@ -134,9 +133,6 @@ io:
       address: 192.168.3.241:502
 
 reader:
-  enable: false
-
-hmi:
   enable: false
 
 device:

@@ -19,7 +19,7 @@ type Config struct {
 
 func NewConfig() Config {
 	return Config{
-		Enable:      false,
+		Enable:      true,
 		URL:         "127.0.0.1:9000",
 		Bucket:      "bucket",
 		Access:      "access",
