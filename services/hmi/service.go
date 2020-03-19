@@ -36,13 +36,13 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ns INotifyService, httpd 
 
 	s := &Service{
 		diag:           d,
-		configValue:    c,
 		dispatcherBus:  dp,
 		notifyService:  ns,
 		httpd:          httpd,
 		backendService: backend,
 		storageService: storage,
 	}
+	s.configValue.Store(c)
 
 	s.setupWSRequestHandlers()
 	s.setupTestInterface()

@@ -89,7 +89,7 @@ func handleMid7410LastCurve(c *TighteningController, pkg *handlerPkg) error {
 			client.tempResultCurve.CUR_W = client.tempResultCurve.CUR_W[0:curve.MeasurePoints]
 		}
 
-		client.tempResultCurve.GenerateTimeCurveByCoef(int(timeCoefficient * 1000))
+		client.tempResultCurve.GenerateTimeCurveByCoef(float32(timeCoefficient * 1000))
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
 		tool, err := c.getInstance().GetToolViaChannel(curve.ToolChannelNumber)

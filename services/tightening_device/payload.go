@@ -220,9 +220,9 @@ type TighteningCurve struct {
 	TighteningCurveContent
 }
 
-func (s *TighteningCurve) GenerateTimeCurveByCoef(coef int) {
+func (s *TighteningCurve) GenerateTimeCurveByCoef(coef float32) {
 	for k, _ := range s.CUR_M {
-		s.CUR_T = append(s.CUR_T, (k+1)*coef)
+		s.CUR_T = append(s.CUR_T, float32(k+1)*coef)
 	}
 }
 
@@ -248,7 +248,7 @@ type TighteningCurveContent struct {
 
 	CUR_M []float64 `json:"cur_m"`
 	CUR_W []float64 `json:"cur_w"`
-	CUR_T []int     `json:"cur_t"`
+	CUR_T []float32 `json:"cur_t"`
 }
 
 type PSetDetail struct {

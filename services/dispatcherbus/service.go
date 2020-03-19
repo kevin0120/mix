@@ -53,7 +53,9 @@ func (s *Service) getDispatcher(name string) (*utils.Dispatcher, error) {
 
 	d, exist := s.dispatchers[name]
 	if !exist {
-		return nil, errors.New("Dispatcher Not Found")
+		s.dispatchers[name] = utils.CreateDispatcher(utils.DefaultDispatcherBufLen)
+		d = s.dispatchers[name]
+		d.Start()
 	}
 
 	return d, nil
