@@ -85,7 +85,7 @@ class MrpRoutingWorkcenter(models.Model):
                    default_sa_operation_ids=[(4, ids[0], None)], default_operation_id=self.id,
                    default_test_type_id=test_type_id)
         action.update({'context': ctx})
-        action['domain'] = [('sa_operation_ids', 'in', self.ids)]
+        action['domain'] = [('sa_operation_ids', 'in', self.ids), ('test_type', '!=', 'tightening_point')]
         action['name'] = _("Work Steps")
         return action
 
