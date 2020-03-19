@@ -126,7 +126,7 @@ class QualityPoint(models.Model):
     def name_get(self):
         res = []
         for point in self:
-            res.append((point.id, _('[%s] %s') % (point.operation_id.name, point.name)))
+            res.append((point.id, _('[%s] %s') % (point.title, point.name)))
         return res
 
     @api.onchange('operation_id')
