@@ -16,7 +16,7 @@ broker:
     - nats://127.0.0.1:4222
     - nats://127.0.0.1:4223
     - nats://127.0.0.1:4224
-  enable: true
+  enable: false
   provider: nats
   connect-options:
     name: Dummy Server
@@ -46,6 +46,7 @@ httpd:
     - 'OPTIONS'
 
 minio:
+  enable: false
   url: 127.0.0.1:9000
   bucket: curves
   access: minio
@@ -53,7 +54,7 @@ minio:
   secure: false
   reupload_interval: 1s
 aiis:
-  enable: true
+  enable: false
   timeout: 5s
   ws_result_route: ws://127.0.0.1/aiis/v1/ws/results
   result_upload_inteval: 5s
@@ -79,6 +80,7 @@ websocket:
   write_buf_size: 65535
 
 storage:
+  enable: false
   db_url: 127.0.0.1:5432
   db_name: rush_ts002
   db_user: admin
@@ -114,7 +116,7 @@ scanner:
 #  entity_label: 3118:2305
 
 io:
-  enable: true
+  enable: false
   flash_inteval: 1s
   ios:
 #    - sn: 13
@@ -134,6 +136,9 @@ io:
       address: 192.168.3.241:502
 
 reader:
+  enable: false
+
+hmi:
   enable: false
 
 device:

@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/utils"
+	"go.uber.org/atomic"
 
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/device"
@@ -19,6 +20,7 @@ import (
 
 type Service struct {
 	diag           Diagnostic
+	configValue    atomic.Value
 	storageService IStorageService
 	httpd          HTTPService
 	backendService IBackendService
@@ -30,10 +32,11 @@ type Service struct {
 	wsnotify.WSRequestHandlers
 }
 
-func NewService(d Diagnostic, dp Dispatcher, ns INotifyService, httpd HTTPService, backend IBackendService, storage IStorageService) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher, ns INotifyService, httpd HTTPService, backend IBackendService, storage IStorageService) *Service {
 
 	s := &Service{
 		diag:           d,
+		configValue:    c,
 		dispatcherBus:  dp,
 		notifyService:  ns,
 		httpd:          httpd,
@@ -47,7 +50,14 @@ func NewService(d Diagnostic, dp Dispatcher, ns INotifyService, httpd HTTPServic
 	return s
 }
 
+func (s *Service) config() Config {
+	return s.configValue.Load().(Config)
+}
+
 func (s *Service) Open() error {
+	if !s.config().Enable {
+		return nil
+	}
 
 	s.initDispatcherRegisters()
 
