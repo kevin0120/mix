@@ -77,7 +77,7 @@
                     </group>
                     <group>
                         <group name="Work Steps">
-                            <field name="sa_step_ids" widget="many2many_tags" readonly="1"/>
+                            <field name="sa_step_ids" widget="many2many_tags"/>
                         </group>
                     </group>
                     <notebook>

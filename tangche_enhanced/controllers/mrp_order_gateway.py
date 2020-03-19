@@ -199,6 +199,8 @@ def convert_ts002_order(env, vals):
         #     [('workcenter_id.id', '=', ts.id)]).filtered(lambda r: bom.routing_id in r.sa_routing_ids)
 
         mrw = bom.routing_id.sa_operation_ids.filtered(lambda r: r.workcenter_id.id == ts.id)
+        if not mrw:
+            continue
         _steps = pack_step_payload(env, mrw.sa_step_ids)
         vals = {
             'code': code,
