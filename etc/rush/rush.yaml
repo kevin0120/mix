@@ -63,7 +63,7 @@ aiis:
 odoo:
   urls:
     - http://127.0.0.1:8069
-  timeout: 10ms
+  timeout: 8s
   interval: 1s
   max_retry: 3
   workers: 1
@@ -139,7 +139,7 @@ reader:
   enable: false
 
 hmi:
-  enable: false
+  enable: true
 
 device:
   enable: true

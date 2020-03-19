@@ -2,6 +2,7 @@ package hmi
 
 import (
 	"github.com/masami10/rush/services/httpd"
+	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/utils"
 )
@@ -41,6 +42,7 @@ type IStorageService interface {
 
 type IBackendService interface {
 	GetWorkorder(hmiSn string, workcenterCode, code string) ([]byte, error)
+	GetUserByUID(uid string) (*odoo.OdooUser, error)
 }
 
 type HTTPService interface {

@@ -330,3 +330,21 @@ func (s *Service) onToolMaintenance(data interface{}) {
 		s.diag.Error("Create Maintenance Failed ", err)
 	}
 }
+
+func (s *Service) GetUserByUID(uid string) (*OdooUser, error) {
+	r := s.httpClient.R()
+	url := fmt.Sprintf("%s/api/v1/res.users/%s", s.Config().Urls[0], uid)
+	resp, err := r.Get(url)
+
+	user := OdooUser{}
+	if err != nil {
+		return nil, err
+	} else {
+		if resp.StatusCode() != http.StatusOK {
+			return nil, errors.New(string(resp.Body()))
+		} else {
+			_ = json.Unmarshal(resp.Body(), &user)
+			return &user, nil
+		}
+	}
+}
