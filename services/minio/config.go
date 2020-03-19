@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	Enable      bool          `yaml:"enable"`
 	URL         string        `yaml:"url"`
 	Bucket      string        `yaml:"bucket"`
 	Access      string        `yaml:"access"`
@@ -18,6 +19,7 @@ type Config struct {
 
 func NewConfig() Config {
 	return Config{
+		Enable:      false,
 		URL:         "127.0.0.1:9000",
 		Bucket:      "bucket",
 		Access:      "access",

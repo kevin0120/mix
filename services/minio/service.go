@@ -42,6 +42,10 @@ func NewService(c Config, d Diagnostic, db IStorageService) *Service {
 }
 
 func (s *Service) Open() error {
+	if !s.config().Enable {
+		return nil
+	}
+
 	err := s.initClient()
 	if err != nil {
 		return err

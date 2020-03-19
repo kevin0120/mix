@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/grpc"
+	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/reader"
@@ -70,6 +71,8 @@ type Config struct {
 
 	Device device.Config `yaml:"device"`
 
+	Hmi hmi.Config `yaml:"hmi"`
+
 	TS002 ts002.Config `yaml:"ts002"`
 
 	Commander command.Commander `yaml:"-"`
@@ -100,6 +103,7 @@ func NewConfig() *Config {
 	c.Broker = broker.NewConfig()
 	c.Grpc = grpc.NewConfig()
 	c.Transport = transport.NewConfig()
+	c.Hmi = hmi.NewConfig()
 	c.TS002 = ts002.NewConfig()
 
 	return c
@@ -186,6 +190,10 @@ func (c *Config) Validate() error {
 
 	if err := c.Transport.Validate(); err != nil {
 		return errors.Wrap(err, "transport")
+	}
+
+	if err := c.Hmi.Validate(); err != nil {
+		return errors.Wrap(err, "hmi")
 	}
 
 	if err := c.TS002.Validate(); err != nil {

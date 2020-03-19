@@ -46,6 +46,10 @@ func (s *Service) Config() Config {
 
 func (s *Service) Open() error {
 	c := s.Config()
+	if !c.Enable {
+		return nil
+	}
+
 	info := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
 		c.User,
 		c.Password,
