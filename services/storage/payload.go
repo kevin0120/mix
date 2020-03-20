@@ -90,3 +90,13 @@ type StepTighteningPayload struct {
 	TighteningTotal int           `json:"tightening_total"`
 	TighteningPoint []interface{} `json:"tightening_points"`
 }
+
+type TighteningStep struct {
+	TighteningPoints []StepComsume `json:"tightening_points"`
+}
+
+type StepComsume struct {
+	Seq      int    `json:"sequence"`
+	GroupSeq int    `json:"group_sequence"`
+	NutNo    string `json:"nut_no"`
+}

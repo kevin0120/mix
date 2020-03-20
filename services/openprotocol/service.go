@@ -19,20 +19,18 @@ type Service struct {
 	name        string
 
 	storageService IStorageService
-	backendService IBackendService
 
 	tightening_device.ITighteningProtocol
 	vendors map[string]IOpenProtocolController
 }
 
-func NewService(c Config, d Diagnostic, vendors map[string]IOpenProtocolController, db IStorageService, backend IBackendService) *Service {
+func NewService(c Config, d Diagnostic, vendors map[string]IOpenProtocolController, db IStorageService) *Service {
 
 	s := &Service{
 		name:           tightening_device.TIGHTENING_OPENPROTOCOL,
 		diag:           d,
 		vendors:        vendors,
 		storageService: db,
-		backendService: backend,
 	}
 
 	s.configValue.Store(c)

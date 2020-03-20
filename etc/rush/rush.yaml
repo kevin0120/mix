@@ -80,7 +80,7 @@ websocket:
   write_buf_size: 65535
 
 storage:
-  enable: false
+  enable: true
   db_url: 127.0.0.1:5432
   db_name: rush_ts002
   db_user: admin

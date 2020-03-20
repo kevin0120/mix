@@ -15,6 +15,7 @@ type Diagnostic interface {
 
 type IStorageService interface {
 	UpdateTool(guns *storage.Tools) error
+	GetTool(serial string) (storage.Tools, error)
 	GetWorkorderByCode(code string) (*storage.Workorders, error)
 	GetStepByCode(code string) (*storage.Steps, error)
 }
@@ -101,4 +102,6 @@ type ITighteningTool interface {
 
 	// 追溯信息设置
 	TraceSet(str string) error
+
+	Mode() string
 }

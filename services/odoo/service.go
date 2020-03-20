@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
-	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
@@ -288,29 +287,6 @@ func (s *Service) TryCreateMaintenance(body interface{}) error {
 
 	}
 	return err
-}
-
-func (s *Service) GetConsumeBySeqInStep(step *storage.Steps, seq int) (*StepComsume, error) {
-	if step == nil {
-		return nil, errors.New("Step Is Nil")
-	}
-
-	ts := TighteningStep{}
-	if err := json.Unmarshal([]byte(step.Step), &ts); err != nil {
-		return nil, err
-	}
-
-	if len(ts.TighteningPoints) == 0 {
-		return nil, errors.New("Consumes Is Empty")
-	}
-
-	for k, v := range ts.TighteningPoints {
-		if v.Seq == seq {
-			return &ts.TighteningPoints[k], nil
-		}
-	}
-
-	return nil, errors.New("Consume Not Found")
 }
 
 func (s *Service) doDispatch(name string, data interface{}) {

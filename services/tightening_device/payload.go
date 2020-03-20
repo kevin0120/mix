@@ -2,6 +2,7 @@ package tightening_device
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/masami10/rush/services/storage"
 	"time"
 )
@@ -159,6 +160,25 @@ type TighteningResult struct {
 
 	// 结果id
 	ID int64 `json:"id"`
+
+	// 工作模式
+	Mode string `json:"mode"`
+}
+
+func (r *TighteningResult) ValidateSet() error {
+	if r.Count <= 0 {
+		return errors.New("Count Should Be Greater Than 0 ")
+	}
+
+	if r.MeasureResult != RESULT_OK && r.MeasureResult != RESULT_NOK {
+		return errors.New("MeasureResult Error ")
+	}
+
+	if r.MeasureTorque <= 0 {
+		return errors.New("MeasureTorque Should Be Greater Than 0 ")
+	}
+
+	return nil
 }
 
 func (r *TighteningResult) ToDBResult() *storage.Results {

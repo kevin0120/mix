@@ -1260,3 +1260,73 @@ func (s *Service) GetStepByCode(code string) (*Steps, error) {
 		}
 	}
 }
+
+// seq, count
+func (s *Service) CalBatch(workorderID int64) (int, int) {
+	result, err := s.FindTargetResultForJobManual(workorderID)
+	if err != nil {
+		return 1, 1
+	}
+
+	if result.Result == RESULT_OK {
+		return result.GroupSeq + 1, 1
+	} else {
+		return result.GroupSeq, result.Count + 1
+	}
+}
+
+func (s *Service) PatchResultFromDB(result *Results, mode string) error {
+	dbTool, err := s.GetTool(result.ToolSN)
+	if err == nil && dbTool.CurrentWorkorderID != 0 {
+
+		if mode == "job" {
+			result.Seq, result.Count = s.CalBatch(dbTool.CurrentWorkorderID)
+		} else {
+			result.Seq = dbTool.Seq
+			result.Count = dbTool.Count
+		}
+
+		result.WorkorderID = dbTool.CurrentWorkorderID
+		result.UserID = dbTool.UserID
+		result.Batch = fmt.Sprintf("%d/%d", result.Seq, dbTool.Total)
+
+		dbStep, err := s.GetStep(dbTool.StepID)
+		if err != nil {
+			s.diag.Error("Get Step Failed", err)
+			return err
+		}
+
+		consume, err := s.GetConsumeBySeqInStep(&dbStep, result.Seq)
+		if err != nil {
+			s.diag.Error("Get Consume Failed", err)
+			return err
+		}
+
+		result.NutNo = consume.NutNo
+	}
+
+	return nil
+}
+
+func (s *Service) GetConsumeBySeqInStep(step *Steps, seq int) (*StepComsume, error) {
+	if step == nil {
+		return nil, errors.New("Step Is Nil")
+	}
+
+	ts := TighteningStep{}
+	if err := json.Unmarshal([]byte(step.Step), &ts); err != nil {
+		return nil, err
+	}
+
+	if len(ts.TighteningPoints) == 0 {
+		return nil, errors.New("Consumes Is Empty")
+	}
+
+	for k, v := range ts.TighteningPoints {
+		if v.Seq == seq {
+			return &ts.TighteningPoints[k], nil
+		}
+	}
+
+	return nil, errors.New("Consume Not Found")
+}

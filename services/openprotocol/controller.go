@@ -271,20 +271,6 @@ func (c *TighteningController) handleResult(result tightening_device.TighteningR
 	return nil
 }
 
-// seq, count
-func (c *TighteningController) calBatch(workorderID int64) (int, int) {
-	result, err := c.ProtocolService.storageService.FindTargetResultForJobManual(workorderID)
-	if err != nil {
-		return 1, 1
-	}
-
-	if result.Result == storage.RESULT_OK {
-		return result.GroupSeq + 1, 1
-	} else {
-		return result.GroupSeq, result.Count + 1
-	}
-}
-
 func (c *TighteningController) Start() error {
 	if c.opened.Load() {
 		return nil

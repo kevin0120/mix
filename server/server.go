@@ -248,7 +248,7 @@ func (s *Server) appendOpenProtocolService() {
 
 	c := s.config.OpenProtocol
 	d := s.DiagService.NewOpenProtocolHandler()
-	srv := openprotocol.NewService(c, d, vendors.OpenProtocolVendors, s.StorageService, s.OdooService)
+	srv := openprotocol.NewService(c, d, vendors.OpenProtocolVendors, s.StorageService)
 
 	s.OpenprotocolService = srv
 
