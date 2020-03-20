@@ -1,5 +1,5 @@
 // @flow
-import { call, put, race, select, take, takeEvery,fork } from 'redux-saga/effects';
+import { call, put, race, select, take, takeEvery, fork } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import type { tAction } from './interface/typeDef';
@@ -102,11 +102,15 @@ export default function* reworkPatternRoot(): Saga<void> {
   while (true) {
     try {
       const action = yield take(REWORK_PATTERN.TRY_REWORK);
-      yield fork(manualResult,action);
-      yield race([
-        call(tryRework, action),
-        take(REWORK_PATTERN.CANCEL_REWORK)
-      ]);
+      const mode = yield select(s => s.workCenterMode);
+      if (mode === workModes.normWorkCenterMode) {
+        yield fork(manualResult, action);
+      } else {
+        yield race([
+          call(tryRework, action),
+          take(REWORK_PATTERN.CANCEL_REWORK)
+        ]);
+      }
     } catch (e) {
       CommonLog.lError(`switchWorkCenterModeRoot Error: ${e.toString()}`);
     }
