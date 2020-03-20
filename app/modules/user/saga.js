@@ -35,6 +35,8 @@ import type {
 import { CommonLog } from '../../common/utils';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
 import ClsReader from '../device/reader/ClsReader';
+import ioModel from '../io';
+import { ioOutputGroups } from '../io/constants';
 
 const DummyUserName = 'DummyUser';
 
@@ -67,6 +69,7 @@ function* authenticate(action) {
         yield put(loginSuccess(userInfo));
         const newState = yield select();
         if (!/\/app/.test(newState.router.location.pathname)) {
+          yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: true }));
           yield put(push('/app'));
         }
       }
@@ -106,6 +109,7 @@ function* authenticate(action) {
         yield put(loginSuccess(userInfo));
         const newState = yield select();
         if (!/\/app/.test(newState.router.location.pathname)) {
+          yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: true }));
           yield put(push('/app'));
         }
       }
@@ -131,6 +135,7 @@ function* logout(action: tAuthLogout): Saga<void> {
     remove(deepUsers, i => i.uuid === uuid); // 尝试删除，确认是否要跳转到登录页面
     if (deepUsers.length === 0) {
       // 回到登录页面
+      yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: false }));
       yield put(push('/pages/login'));
     }
     yield put(logoutSuccess(userInfo));
@@ -197,6 +202,7 @@ function* loginLocal(action) {
     }
     if (!isNil(userInfo)) {
       yield put(loginSuccess(userInfo));
+      yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: true }));
       yield put(push('/app'));
     }
   } catch (e) {

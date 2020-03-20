@@ -14,14 +14,16 @@ const defaultConfigs = {
       inputs: {
         [ioInputs.resetKey]: 0,
         [ioInputs.byPass]: 1,
-        [ioInputs.modeSelect]: 2
+        [ioInputs.modeSelect]: 2,
       },
       outputs: {
         [ioOutputs.white]: 0,
         [ioOutputs.yellow]: 1,
         [ioOutputs.green]: 2,
-        [ioOutputs.red]: 3
-      }
+        [ioOutputs.red]: 3,
+        [ioOutputs.unlock]: 4
+
+}
     }
   },
   pages: {
@@ -215,7 +217,7 @@ const defaultConfigs = {
     reportFinish: false // 报完工
   },
   debugSettings:{
-    disableOrderTriggerLimit: true
+    disableOrderTriggerLimit: false
   }
 };
 
