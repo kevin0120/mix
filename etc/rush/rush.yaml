@@ -14,9 +14,9 @@ broker:
 #    - nats://192.168.4.203:4222
 #    - nats://192.168.4.203:4223
 #    - nats://192.168.4.203:4224
-    - nats://10.1.1.77:4222
-    - nats://10.1.1.77:4223
-    - nats://10.1.1.77:4224
+    - nats://127.0.0.1:4222
+    - nats://127.0.0.1:4223
+    - nats://127.0.0.1:4224
   enable: true
   provider: nats
   connect-options:
@@ -47,7 +47,7 @@ httpd:
     - 'OPTIONS'
 
 minio:
-  enable: false
+  enable: true
   url: 127.0.0.1:9000
   bucket: curves
   access: minio
@@ -81,10 +81,10 @@ websocket:
   write_buf_size: 65535
 
 storage:
-  db_url: 192.168.3.127:5432
-  db_name: rush
-  db_user: postgres
-  db_pwd: admin
+  db_url: 10.1.1.68:5432
+  db_name: rush_hardware
+  db_user: odoo
+  db_pwd: odoo
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h

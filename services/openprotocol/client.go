@@ -21,8 +21,19 @@ const (
 	MaxProc     = 3
 )
 
+var midsWithSeq = []string{
+	MID_0002_START_ACK,
+	MID_0065_OLD_DATA,
+	MID_0013_PSET_DETAIL_REPLY,
+	MID_0011_PSET_LIST_REPLY,
+	MID_0031_JOB_LIST_REPLY,
+	MID_0033_JOB_DETAIL_REPLY,
+	MID_0004_CMD_ERR,
+	MID_0005_CMD_OK,
+}
+
 type IClientHandler interface {
-	handleMsg(pkg *handlerPkg) error
+	handleMsg(pkg *handlerPkg, context *clientContext) error
 	HandleStatus(sn string, status string)
 	GetVendorMid(mid string) (string, error)
 	UpdateToolStatus(sn string, status string)
@@ -195,7 +206,7 @@ func (c *clientContext) procHandle() {
 	for {
 		select {
 		case pkg := <-c.handlerBuf:
-			err := c.clientHandler.handleMsg(&pkg)
+			err := c.clientHandler.handleMsg(&pkg, c)
 			if err != nil {
 				c.diag.Error("Open IProtocol handleMsg Fail", err)
 			}
