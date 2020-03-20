@@ -64,7 +64,7 @@
         # 'demo/test_demo.xml',  # 测试数据
         # 'demo/group_tool_demo.xml',  # 测试数据
         'demo/ts002_test_demo.xml',  # 测试数据
-        'demo/ts002_group_tool_demo.xml',  # 测试数据
+        # 'demo/ts002_group_tool_demo.xml',  # 测试数据
     ],
     'demo': [
 
