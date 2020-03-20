@@ -304,7 +304,13 @@ func (s *TighteningTool) onResult(result interface{}) {
 	}
 
 	// 分发结果
+	tighteningResult.WorkorderID = dbResult.WorkorderID
+	tighteningResult.UserID = dbResult.UserID
+	tighteningResult.Batch = dbResult.Batch
 	tighteningResult.ID = dbResult.Id
+	tighteningResult.Count = dbResult.Count
+	tighteningResult.Seq = dbResult.Seq
+	tighteningResult.GroupSeq = dbResult.GroupSeq
 	s.controller.doDispatch(dispatcherbus.DispatcherResult, tighteningResult)
 }
 
