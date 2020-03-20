@@ -293,39 +293,12 @@ func (s *TighteningTool) onResult(result interface{}) {
 	}
 
 	tighteningResult := result.(tightening_device.TighteningResult)
-	dbTool, err := s.controller.ProtocolService.storageService.GetTool(s.cfg.SN)
-	tighteningResult.ScannerCode = dbTool.ScannerCode
-	if err == nil && dbTool.CurrentWorkorderID != 0 {
-		if s.Mode() == tightening_device.MODE_JOB {
-			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.CurrentWorkorderID)
-		} else {
-			tighteningResult.Seq = dbTool.Seq
-			tighteningResult.Count = dbTool.Count
-		}
-
-		tighteningResult.WorkorderID = dbTool.CurrentWorkorderID
-		tighteningResult.UserID = dbTool.UserID
-		tighteningResult.Batch = fmt.Sprintf("%d/%d", tighteningResult.Seq, dbTool.Total)
-
-		dbStep, err := s.controller.ProtocolService.storageService.GetStep(dbTool.StepID)
-		if err != nil {
-			s.diag.Error("Get Step Failed", err)
-			return
-		}
-
-		consume, err := s.controller.ProtocolService.backendService.GetConsumeBySeqInStep(&dbStep, tighteningResult.Seq)
-		if err != nil {
-			s.diag.Error("Get Consume Failed", err)
-			return
-		}
-
-		tighteningResult.NutNo = consume.NutNo
-	}
-
+	tighteningResult.Mode = s.Mode()
 	dbResult := tighteningResult.ToDBResult()
+	_ = s.controller.ProtocolService.storageService.PatchResultFromDB(dbResult, s.Mode())
 
 	// 尝试获取最近一条没有对应结果的曲线并更新, 同时缓存结果
-	err = s.controller.ProtocolService.storageService.UpdateIncompleteCurveAndSaveResult(dbResult)
+	err := s.controller.ProtocolService.storageService.UpdateIncompleteCurveAndSaveResult(dbResult)
 	if err != nil {
 		s.diag.Error("Handle Result With Curve Failed", err)
 	}

@@ -94,28 +94,12 @@ type StepTighteningPayload struct {
 	TighteningPoint []interface{} `json:"tightening_points"`
 }
 
-type StartRequest struct {
-	WIPORDERNO    interface{} `json:"WIPORDERNO"`    //订单号
-	WIPORDERTYPE  interface{} `json:"WIPORDERTYPE"`  //订单类型
-	OPRSEQUENCENO interface{} `json:"OPRSEQUENCENO"` //工序
-	UPDATEON      interface{} `json:"UPDATEON"`      //操作时间
-	UPDATEBY      interface{} `json:"UPDATEBY"`      //操作人
-	LOCATION      interface{} `json:"LOCATION"`      //台位
-	DEVICE        interface{} `json:"DEVICE"`        //设备
-	RESOURCEGROUP interface{} `json:"RESOURCEGROUP"` //班组
-	SKILL         interface{} `json:"SKILL"`         //技能
-	RESOURCENAME  interface{} `json:"RESOURCENAME"`  //人员
+type TighteningStep struct {
+	TighteningPoints []StepComsume `json:"tightening_points"`
 }
 
-type FinishedRequest struct {
-	WIPORDERNO    interface{} `json:"WIPORDERNO"`    //订单号
-	WIPORDERTYPE  interface{} `json:"WIPORDERTYPE"`  //订单类型
-	OPRSEQUENCENO interface{} `json:"OPRSEQUENCENO"` //工序
-	UPDATEON      interface{} `json:"UPDATEON"`      //操作时间
-	UPDATEBY      interface{} `json:"UPDATEBY"`      //操作人
-	LOCATION      interface{} `json:"LOCATION"`      //台位
-	DEVICE        interface{} `json:"DEVICE"`        //设备
-	RESOURCEGROUP interface{} `json:"RESOURCEGROUP"` //班组
-	SKILL         interface{} `json:"SKILL"`         //技能
-	RESOURCENAME  interface{} `json:"RESOURCENAME"`  //人员
+type StepComsume struct {
+	Seq      int    `json:"sequence"`
+	GroupSeq int    `json:"group_sequence"`
+	NutNo    string `json:"nut_no"`
 }

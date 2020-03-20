@@ -2,7 +2,6 @@ package openprotocol
 
 import (
 	"github.com/masami10/rush/services/dispatcherbus"
-	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 )
@@ -24,10 +23,7 @@ type IStorageService interface {
 	GetStep(id int64) (storage.Steps, error)
 	UpdateIncompleteCurveAndSaveResult(result *storage.Results) error
 	UpdateIncompleteResultAndSaveCurve(curve *storage.Curves) error
-}
-
-type IBackendService interface {
-	GetConsumeBySeqInStep(step *storage.Steps, seq int) (*odoo.StepComsume, error)
+	PatchResultFromDB(result *storage.Results, mode string) error
 }
 
 type IOpenProtocolController interface {

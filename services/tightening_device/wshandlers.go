@@ -3,6 +3,7 @@ package tightening_device
 import (
 	"encoding/json"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/wsnotify"
 )
 
@@ -140,4 +141,37 @@ func (s *Service) OnWS_TOOL_JOB_DETAIL(c websocket.Connection, msg *wsnotify.WSM
 	}
 
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateWSMsg(msg.SN, msg.Type, jobDetail), s.diag)
+}
+
+func (s *Service) OnWS_TOOL_RESULT_SET(c websocket.Connection, msg *wsnotify.WSMsg) {
+	byteData, _ := json.Marshal(msg.Data)
+
+	var result TighteningResult
+	_ = json.Unmarshal(byteData, &result)
+
+	if err := result.ValidateSet(); err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
+		return
+	}
+
+	tool, err := s.getTool(result.ControllerSN, result.ToolSN)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()), s.diag)
+		return
+	}
+
+	dbTool, err := s.storageService.GetTool(result.ToolSN)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, err.Error()), s.diag)
+		return
+	}
+
+	dbTool.Count = result.Count
+	if err := s.storageService.UpdateTool(&dbTool); err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -4, err.Error()), s.diag)
+		return
+	}
+
+	s.doDispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherResult), result)
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""), s.diag)
 }
