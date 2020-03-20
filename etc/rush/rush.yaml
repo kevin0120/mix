@@ -1,6 +1,7 @@
 hostname: localhost
 data_dir: /home/gubin/.rush
-serial_no: 1qaz2wsx
+# 如果是手动模式，请在此处配置工位代码
+serial_no: TA2-26L-01
 doc_path: ./etc/rush/api.json
 logging:
 #  file: ./logs/%Y%m%d.log
@@ -13,10 +14,10 @@ broker:
 #    - nats://192.168.4.203:4222
 #    - nats://192.168.4.203:4223
 #    - nats://192.168.4.203:4224
-    - nats://127.0.0.1:4222
-    - nats://127.0.0.1:4223
-    - nats://127.0.0.1:4224
-  enable: false
+    - nats://10.1.1.77:4222
+    - nats://10.1.1.77:4223
+    - nats://10.1.1.77:4224
+  enable: true
   provider: nats
   connect-options:
     name: Dummy Server
@@ -54,7 +55,7 @@ minio:
   secure: false
   reupload_interval: 1s
 aiis:
-  enable: false
+  enable: true
   timeout: 5s
   ws_result_route: ws://127.0.0.1/aiis/v1/ws/results
   result_upload_inteval: 5s
@@ -80,10 +81,10 @@ websocket:
   write_buf_size: 65535
 
 storage:
-  db_url: 127.0.0.1:5432
-  db_name: rush_hardware
-  db_user: odoo
-  db_pwd: odoo
+  db_url: 192.168.3.127:5432
+  db_name: rush
+  db_user: postgres
+  db_pwd: admin
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -113,7 +114,7 @@ scanner:
   enable: false
   entity_label: 3118:2305
 io:
-  enable: false
+  enable: true
   flash_inteval: 1s
   ios:
     - sn: 1234567

@@ -95,8 +95,7 @@ type BaseResult struct {
 	// 当前拧紧次数
 	Count int `json:"count"`
 
-
-	ScannerCode string  `json:"scanner_code"`
+	ScannerCode string `json:"scanner_code"`
 }
 
 type JobInfo struct {

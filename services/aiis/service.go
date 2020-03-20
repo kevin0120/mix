@@ -27,9 +27,11 @@ type Service struct {
 	toolsRegistered atomic.Bool
 
 	closing chan struct{}
+
+	workcenterCode string
 }
 
-func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs ITransportService, ns INotifyService) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs ITransportService, ns INotifyService, sn string) *Service {
 	s := &Service{
 		diag:           d,
 		dispatcherBus:  dp,
@@ -37,6 +39,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher, ss IStorageService, bs IT
 		closing:        make(chan struct{}, 1),
 		storageService: ss,
 		notifyService:  ns,
+		workcenterCode: sn,
 	}
 	s.toolsRegistered.Store(false)
 
@@ -187,14 +190,35 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 	}
 
 	dbWorkorder, err := s.storageService.GetWorkOrder(result.WorkorderID, true)
-	if err != nil {
-		return aiisResult, err
+	if err == nil {
+		//s.diag.Error("Workorder Not Found")
+		aiisResult.Payload = dbWorkorder.Payload
+		aiisResult.WorkorderID = dbWorkorder.WorkorderID
+		aiisResult.MoAssemblyline = dbWorkorder.MO_AssemblyLine
+		aiisResult.MoEquipemntname = dbWorkorder.MO_EquipemntName
+		aiisResult.MoFactoryname = dbWorkorder.MO_FactoryName
+		aiisResult.MoPin = dbWorkorder.MO_Pin
+		aiisResult.MoPinCheckCode = dbWorkorder.MO_Pin_check_code
+		aiisResult.MoYear = dbWorkorder.MO_Year
+		aiisResult.MoLnr = dbWorkorder.MO_Lnr
+		aiisResult.MoModel = dbWorkorder.ProductCode
+		aiisResult.Vin = dbWorkorder.TrackCode
+		aiisResult.WorkorderName = dbWorkorder.Code
+		aiisResult.Mode = dbWorkorder.Mode
+		aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
+		aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
+
+		aiisResult.UserID = result.UserID
+	} else {
+		aiisResult.WorkcenterCode = s.workcenterCode
+		aiisResult.UserID = 1
+		aiisResult.Vin = result.ScannerCode
 	}
 
-	aiisResult.Payload = dbWorkorder.Payload
+	//aiisResult.Payload = dbWorkorder.Payload
 	aiisResult.CURObjects = append(aiisResult.CURObjects, CURObject{OP: result.Count, File: fmt.Sprintf("%s_%s.json", result.ToolSN, result.TighteningID)})
 	aiisResult.ID = result.Id
-	aiisResult.WorkorderID = dbWorkorder.WorkorderID
+
 	aiisResult.ControlDate = result.UpdateTime.Format(time.RFC3339)
 	aiisResult.MeasureDegree = resultValue.Wi
 	aiisResult.MeasureResult = strings.ToLower(result.Result)
@@ -210,34 +234,18 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 	aiisResult.PsetWMin = psetDefine.Wm
 	aiisResult.PsetWTarget = psetDefine.Wa
 	aiisResult.PsetWThreshold = 1
-	aiisResult.UserID = result.UserID
 	aiisResult.Seq = result.Seq
 
-	aiisResult.MoAssemblyline = dbWorkorder.MO_AssemblyLine
-	aiisResult.MoEquipemntname = dbWorkorder.MO_EquipemntName
-	aiisResult.MoFactoryname = dbWorkorder.MO_FactoryName
-	aiisResult.MoPin = dbWorkorder.MO_Pin
-	aiisResult.MoPinCheckCode = dbWorkorder.MO_Pin_check_code
-	aiisResult.MoYear = dbWorkorder.MO_Year
-	aiisResult.MoLnr = dbWorkorder.MO_Lnr
 	aiisResult.MoNutno = result.NutNo
-	aiisResult.MoModel = dbWorkorder.ProductCode
 	aiisResult.Batch = result.Batch
-	aiisResult.Vin = dbWorkorder.TrackCode
-	aiisResult.WorkorderName = dbWorkorder.Code
-	aiisResult.Mode = dbWorkorder.Mode
+
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"
 
 	aiisResult.NutID = result.ConsuProductID
-
-	aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
 	aiisResult.ToolSN = result.ToolSN
 	aiisResult.ControllerSN = result.ControllerSN
-
-	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
 	aiisResult.Stage = result.Stage
-	aiisResult.ScannerCode = result.ScannerCode
 
 	switch result.Result {
 	case tightening_device.RESULT_OK:
