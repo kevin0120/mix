@@ -1303,6 +1303,7 @@ func (s *Service) PatchResultFromDB(result *Results, mode string) error {
 		}
 
 		result.NutNo = consume.NutNo
+		result.ScannerCode = dbTool.ScannerCode
 	}
 
 	return nil
