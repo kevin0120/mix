@@ -136,7 +136,9 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 		for _, err := range e.GetErrors() {
 			if err != nil {
 				fmt.Println(err.Error())
-				if strings.Contains(err.Error(), "tid_tool") {
+				if strings.Contains(err.Error(), "tid_tool") ||
+					strings.Contains(err.Error(), "tid_track_no_gun") ||
+					strings.Contains(err.Error(), "tid_wo_gun") {
 					continue
 				}
 				return err
