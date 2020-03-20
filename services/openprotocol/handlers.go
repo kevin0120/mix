@@ -51,8 +51,7 @@ func handleMid9999Alive(c *TighteningController, pkg *handlerPkg) error {
 
 func handleMid0002StartAck(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
-	seq := <-client.requestChannel
-	client.response.update(seq, request_errors["00"])
+	client.response.update(pkg.Seq, request_errors["00"])
 
 	go c.processSubscribeControllerInfo(pkg.SN)
 
@@ -130,8 +129,7 @@ func handleMid0065OldData(c *TighteningController, pkg *handlerPkg) error {
 		return err
 	}
 
-	seq := <-client.requestChannel
-	client.response.update(seq, resultData.ToTighteningResult())
+	client.response.update(pkg.Seq, resultData.ToTighteningResult())
 
 	return nil
 }
@@ -144,8 +142,7 @@ func handleMid0013PsetDetailReply(c *TighteningController, pkg *handlerPkg) erro
 		return err
 	}
 
-	seq := <-client.requestChannel
-	client.response.update(seq, psetDetail)
+	client.response.update(pkg.Seq, psetDetail)
 
 	return nil
 }
@@ -159,8 +156,7 @@ func handleMid0011PsetListReply(c *TighteningController, pkg *handlerPkg) error 
 		return err
 	}
 
-	seq := <-client.requestChannel
-	client.response.update(seq, psetList)
+	client.response.update(pkg.Seq, psetList)
 
 	return nil
 }
@@ -174,8 +170,7 @@ func handleMid0031JobListReply(c *TighteningController, pkg *handlerPkg) error {
 		return err
 	}
 
-	seq := <-client.requestChannel
-	client.response.update(seq, jobList)
+	client.response.update(pkg.Seq, jobList)
 
 	return nil
 }
@@ -188,8 +183,7 @@ func handleMid0033JobDetailReply(c *TighteningController, pkg *handlerPkg) error
 		return err
 	}
 
-	seq := <-client.requestChannel
-	client.response.update(seq, jobDetaill)
+	client.response.update(pkg.Seq, jobDetaill)
 
 	return nil
 }
@@ -199,8 +193,7 @@ func handleMid0004CmdErr(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
 	errCode := pkg.Body[4:6]
 
-	seq := <-client.requestChannel
-	client.response.update(seq, request_errors[errCode])
+	client.response.update(pkg.Seq, request_errors[errCode])
 
 	return nil
 }
@@ -208,8 +201,7 @@ func handleMid0004CmdErr(c *TighteningController, pkg *handlerPkg) error {
 // 请求成功
 func handleMid0005CmdOk(c *TighteningController, pkg *handlerPkg) error {
 	client := c.getClient(pkg.SN)
-	seq := <-client.requestChannel
-	client.response.update(seq, request_errors["00"])
+	client.response.update(pkg.Seq, request_errors["00"])
 
 	return nil
 }

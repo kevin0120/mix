@@ -46,7 +46,7 @@ httpd:
     - 'OPTIONS'
 
 minio:
-  enable: false
+  enable: true
   url: 127.0.0.1:9000
   bucket: curves
   access: minio

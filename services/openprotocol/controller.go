@@ -21,6 +21,7 @@ type handlerPkg struct {
 	SN     string
 	Header OpenProtocolHeader
 	Body   string
+	Seq    uint32
 }
 
 type TighteningController struct {
@@ -238,12 +239,16 @@ func (c *TighteningController) CurveDataDecoding(original []byte, torqueCoeffici
 	return
 }
 
-func (c *TighteningController) handleMsg(pkg *handlerPkg) error {
+func (c *TighteningController) handleMsg(pkg *handlerPkg, context *clientContext) error {
 	c.ProtocolService.diag.Debug(fmt.Sprintf("OpenProtocol Recv %s: %s%s\n", pkg.SN, pkg.Header.Serialize(), pkg.Body))
 
 	handler, err := GetMidHandler(pkg.Header.MID)
 	if err != nil {
 		return err
+	}
+
+	if utils.ArrayContains(midsWithSeq, pkg.Header.MID) {
+		pkg.Seq = <-context.requestChannel
 	}
 
 	return handler(c, pkg)
