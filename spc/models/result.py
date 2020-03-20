@@ -129,7 +129,7 @@ class OperationResult(models.HyperModel):
 
     batch = fields.Char('Batch')  # 批次信息
 
-    tightening_id = fields.Integer('TighteningID')
+    tightening_id = fields.Char('TighteningID')
 
     _sql_constraints = [('tid_tool_uniq', 'unique(tool_id, tightening_id,time)',
                          'Per Screw Gun tightening ID Tracking Number must different')]
@@ -148,7 +148,7 @@ class OperationResult(models.HyperModel):
                                                    pset_w_min numeric, pset_w_target numeric,
                                                    quality_state varchar, exception_reason varchar, sent boolean,
                                                    batch varchar,
-                                                   order_no varchar, nut_serial_no varchar, r_tightening_id integer,
+                                                   order_no varchar, nut_serial_no varchar, r_tightening_id varchar,
                                                    vin_code varchar, vehicle_type varchar, gun_sn varchar)
   returns BIGINT as
 $$

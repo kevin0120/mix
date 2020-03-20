@@ -22,7 +22,7 @@ class OperationResult(models.HyperModel):
                                                    pset_w_min numeric, pset_w_target numeric, lacking varchar,
                                                    quality_state varchar, exception_reason varchar, sent boolean,
                                                    batch varchar,
-                                                   order_id bigint, nut_serial_no varchar, r_tightening_id integer,
+                                                   order_id bigint, nut_serial_no varchar, r_tightening_id varchar,
                                                    vin_code varchar, vehicle_type varchar, gun_sn varchar)
   returns BIGINT as
 $$
