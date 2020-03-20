@@ -1,10 +1,14 @@
 package tightening_device
 
 import (
+	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/wsnotify"
+	uuid "github.com/satori/go.uuid"
+	"time"
 )
 
 func (s *Service) OnWS_TOOL_MODE_SELECT(c websocket.Connection, msg *wsnotify.WSMsg) {
@@ -172,6 +176,8 @@ func (s *Service) OnWS_TOOL_RESULT_SET(c websocket.Connection, msg *wsnotify.WSM
 		return
 	}
 
+	result.TighteningID = fmt.Sprintf("%d", binary.BigEndian.Uint32(uuid.NewV4().Bytes()))
+	result.UpdateTime = time.Now()
 	s.doDispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherResult), result)
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""), s.diag)
 }
