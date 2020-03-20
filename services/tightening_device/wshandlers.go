@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/wsnotify"
+	"time"
 )
 
 func (s *Service) OnWS_TOOL_MODE_SELECT(c websocket.Connection, msg *wsnotify.WSMsg) {
@@ -148,6 +149,8 @@ func (s *Service) OnWS_TOOL_RESULT_SET(c websocket.Connection, msg *wsnotify.WSM
 
 	var result TighteningResult
 	_ = json.Unmarshal(byteData, &result)
+	//手动输入时间以rush收到为准
+	result.UpdateTime=time.Now()
 
 	if err := result.ValidateSet(); err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()), s.diag)
