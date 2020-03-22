@@ -22,11 +22,6 @@ function* tryRework(action: tAction = {}): Saga<void> {
     const { workCenterMode } = yield select();
     const wOrder = yield select(s => workingOrder(s.order));
 
-    if (true){
-      yield put(notifierActions.enqueueSnackbar('Info', '当前尚未加入拧紧结果手动输入权限控制功能!'));
-      canRework = false;
-    }
-
     if (canRework){
     if (workCenterMode !== workModes.reworkWorkCenterMode) {
       yield put(notifierActions.enqueueSnackbar('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!'));
@@ -110,18 +105,23 @@ export default function* reworkPatternRoot(): Saga<void> {
   while (true) {
     try {
       const action = yield take(REWORK_PATTERN.TRY_REWORK);
+      const mode = yield select(s => s.workCenterMode);
+      if (mode === workModes.normWorkCenterMode) {
+        yield put(notifierActions.enqueueSnackbar('Info', '当前尚未加入拧紧结果手动输入权限控制功能!'));
 
-      if (manual !==null&& typeof manual !== 'undefined'){
-        yield cancel(manual);
+        if (manual !==null&& typeof manual !== 'undefined'){
+          yield cancel(manual);
+        }
+        manual =yield fork(manualResult,action);
+
+      } else {
+        yield race([
+          call(tryRework, action),
+          take(REWORK_PATTERN.CANCEL_REWORK)
+        ]);
       }
-      manual =yield fork(manualResult,action);
-      yield race([
-        call(tryRework, action),
-        take(REWORK_PATTERN.CANCEL_REWORK)
-      ]);
     } catch (e) {
       CommonLog.lError(`switchWorkCenterModeRoot Error: ${e.toString()}`);
     }
   }
 }
-
