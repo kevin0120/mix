@@ -1,5 +1,5 @@
 // @flow
-import { call, put, race, select, take, takeEvery,fork } from 'redux-saga/effects';
+import { call, put, race, select, take, takeEvery,fork,cancel } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import type { tAction } from './interface/typeDef';
@@ -21,6 +21,13 @@ function* tryRework(action: tAction = {}): Saga<void> {
     let canRework = true;         // check if point can rework
     const { workCenterMode } = yield select();
     const wOrder = yield select(s => workingOrder(s.order));
+
+    if (true){
+      yield put(notifierActions.enqueueSnackbar('Info', '当前尚未加入拧紧结果手动输入权限控制功能!'));
+      canRework = false;
+    }
+
+    if (canRework){
     if (workCenterMode !== workModes.reworkWorkCenterMode) {
       yield put(notifierActions.enqueueSnackbar('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!'));
       canRework = false;
@@ -37,7 +44,7 @@ function* tryRework(action: tAction = {}): Saga<void> {
       yield put(notifierActions.enqueueSnackbar('Error', '此拧紧点不具备返工条件!'));
       canRework = false;
     }
-
+    }
     if (canRework) {
       const btnCancel = {
         label: tNS(dia.cancel, reworkNS),
@@ -92,6 +99,7 @@ function* doRework(action = {}): Saga<void> {
   }
 }
 
+let manual
 
 export default function* reworkPatternRoot(): Saga<void> {
   try {
@@ -102,7 +110,11 @@ export default function* reworkPatternRoot(): Saga<void> {
   while (true) {
     try {
       const action = yield take(REWORK_PATTERN.TRY_REWORK);
-      yield fork(manualResult,action);
+
+      if (manual !==null&& typeof manual !== 'undefined'){
+        yield cancel(manual);
+      }
+      manual =yield fork(manualResult,action);
       yield race([
         call(tryRework, action),
         take(REWORK_PATTERN.CANCEL_REWORK)

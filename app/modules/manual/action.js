@@ -19,7 +19,15 @@ export const MANUAL = {
   GETRESULT:'GET_RESULT',
   DIDMOUNT: 'DID_MOUNT',
   RESULTINPUT:'RESULT_INPUT',
+  INPUTOK:'INPUT_OK'
 };
+
+export function inputOk1(){
+  return{
+  type: MANUAL.INPUTOK
+  }
+}
+
 
 export function clickPoint () {
   return {

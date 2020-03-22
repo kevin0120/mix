@@ -46,7 +46,8 @@ export class ClsOperationPoint {
       && this._results.filter(r => r.measure_result === RESULT_STATUS.nok)
         .length >= this._point.max_redo_times
       && this._results.slice(-1)[0].measure_result === RESULT_STATUS.nok
-    );
+    ) || this._results.filter(r => r.count=== this._point.max_redo_times && r.measure_result=== RESULT_STATUS.nok)
+      .length >0;
   }
 
   get isPass(): boolean {
