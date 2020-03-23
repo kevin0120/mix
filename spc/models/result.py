@@ -134,7 +134,7 @@ class OperationResult(models.HyperModel):
     _sql_constraints = [('tid_tool_uniq', 'unique(tool_id, tightening_id,time)',
                          'Per Screw Gun tightening ID Tracking Number must different')]
 
-# FIXME: 无工单模式存储过程
+    # FIXME: 无工单模式存储过程
     def init(self):
         self.env.cr.execute("""
             CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
@@ -172,6 +172,9 @@ DECLARE
   r_measure_result     varchar;
   r_expect_order_id    BIGINT  = null;
 BEGIN
+    select me.id, me.workcenter_id into r_gun_id, r_workcenter_id
+  from public.maintenance_equipment me, public.mrp_workcenter wc
+  where me.serial_no = gun_sn; /*永远获取真实的拧紧工具*/
   case pset_strategy
     when 'LN'
       then r_measure_result = 'lsn';
@@ -247,10 +250,9 @@ BEGIN
            tp.cou_pid,
            tp.cou_program_code,
            tp.cou_program_id,
-           tp.cou_workcenter_id,
            tp.cou_qcp_id,
            tp.operation_point_id
-           into r_product_id, r_consu_product_id,r_job, r_program_id, r_workcenter_id,r_qcp_id,r_operation_point_id
+           into r_product_id, r_consu_product_id,r_job, r_program_id,r_qcp_id,r_operation_point_id
     from (select sqp.product_id   cou_pid,
                  sqp.operation_id cou_opd,
                  op.routing_id    cou_routing_id,
