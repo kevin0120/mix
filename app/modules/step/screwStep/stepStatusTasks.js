@@ -280,7 +280,7 @@ function* doingState(config) {
         controllerMode,
         isFirst
       );
-      if (successCounts > 0) {
+      if (successCounts > 0 || activeConfigs.length === 0) {
         results = yield call(
           [this, getResult],
           resultChannel
