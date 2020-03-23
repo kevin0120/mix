@@ -214,9 +214,6 @@ function* doingState(config) {
     const { controllerMode, jobID } = this._data;
     let isFirst = true; // job只设置一次，记录状态
 
-    // let test = true; // job只设置一次，记录状态
-
-
     while (true) {
       switch (workCenterMode) {
         case workModes.reworkWorkCenterMode: {
@@ -277,15 +274,19 @@ function* doingState(config) {
           controllerModeId: cModeId
         };
       });
-      yield call([this, setTools],
+      let results = [];
+      const successCounts = yield call([this, setTools],
         activeConfigs,
         controllerMode,
         isFirst
       );
-      const results = yield call(
-        [this, getResult],
-        resultChannel
-      );
+      if (successCounts > 0) {
+        results = yield call(
+          [this, getResult],
+          resultChannel
+        );
+      }
+
       this._pointsToActive = [];
 
       this._newInactivePoints = this._pointsManager.newResult(results);

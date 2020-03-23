@@ -46,8 +46,12 @@ export class ClsOperationPoint {
       && this._results.filter(r => r.measure_result === RESULT_STATUS.nok)
         .length >= this._point.max_redo_times
       && this._results.slice(-1)[0].measure_result === RESULT_STATUS.nok
-    ) || this._results.filter(r => r.count=== this._point.max_redo_times && r.measure_result=== RESULT_STATUS.nok)
-      .length >0;
+    ) || (
+      this._results.filter(r => r.count === this._point.max_redo_times && r.measure_result === RESULT_STATUS.nok)
+        .length > 0
+    ) ||(
+      this._bypass
+    );
   }
 
   get isPass(): boolean {
@@ -120,6 +124,7 @@ export class ClsOperationPoint {
     this._bypass = status;
     if (status) {
       this.setActive(false);
+      this._status = POINT_STATUS.ERROR;
     }
   }
 
@@ -154,7 +159,7 @@ export class ClsOperationPoint {
     this._results.push(r);
 
     this._parseStatus(r);
-    if(this._isActive){
+    if (this._isActive) {
       this._parseActive(r);
       if (!this._isActive) {
         return this;

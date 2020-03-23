@@ -1,4 +1,4 @@
-import { all, call, fork } from 'redux-saga/effects';
+import { all, call } from 'redux-saga/effects';
 import { controllerModes } from './constants';
 import controllerModeTasks from './controllerModeTasks';
 import { CommonLog } from '../../../common/utils';
@@ -15,13 +15,20 @@ export function* setTools(activeConfigs, controllerMode, isFirst) {
     throw new Error(`未识别的控制器模式:${controllerMode}`);
   }
   try {
-    const effects = activeConfigs.map(c => {
+    let successCount = 0;
+    for (const c of activeConfigs) {
       const { point, tool, controllerModeId } = c;
-      return call([this, setSingleTool], controllerMode, point, tool, controllerModeId);
-    });
-    yield all(effects);
+      successCount += yield call([this, setSingleTool], controllerMode, point, tool, controllerModeId);
+    }
+    return successCount;
+    // const effects = activeConfigs.map(c => {
+    //
+    //   return
+    // });
+    // yield all(effects);
   } catch (e) {
     CommonLog.lError(e);
+    // throw e;
   }
 }
 
@@ -29,12 +36,12 @@ function* setSingleTool(controllerMode, point, tool, controllerModeId) {
   try {
     yield call([this, controllerModeTasks[controllerMode]], point.point, tool, controllerModeId);
     yield call(tool?.Enable || (() => {
-      CommonLog.lError(
+      throw new Error(
         `tool ${tool?.Name}: no such tool or tool cannot be enabled.`
       );
     }));
+    return 1;
   } catch (e) {
-    CommonLog.lError(e);
     yield call([this, byPassPoint], [point],
       call([this, setSingleTool], controllerMode, point, tool, controllerModeId)
     );
@@ -42,6 +49,7 @@ function* setSingleTool(controllerMode, point, tool, controllerModeId) {
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)
     }));
+    return 0;
   }
 }
 
