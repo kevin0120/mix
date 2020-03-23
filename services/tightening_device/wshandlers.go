@@ -175,6 +175,7 @@ func (s *Service) OnWS_TOOL_RESULT_SET(c websocket.Connection, msg *wsnotify.WSM
 	}
 
 	result.TighteningID = uuid.NewV4().String()
+		//手动输入时间以rush收到为准
 	result.UpdateTime = time.Now()
 	s.doDispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DispatcherResult), result)
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""), s.diag)

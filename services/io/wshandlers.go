@@ -59,6 +59,7 @@ func (s *Service) OnWSIOContact(c websocket.Connection, msg *wsnotify.WSMsg) {
 		Outputs: outputs,
 	})
 
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsMsg, s.diag)
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_IO, wsMsg, s.diag)
 }
 
