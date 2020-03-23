@@ -13,6 +13,12 @@ import actions from './action';
 import { workModes } from '../workCenterMode/constants';
 import { workingOrder } from '../order/selector';
 import { manualResult } from '../manual/saga';
+import { getDevice } from '../deviceManager/devices';
+import ClsIOModule from '../device/io/ClsIOModule';
+import { ioDirection, ioTriggerMode } from '../device/io/constants';
+import setting from '../setting/reducer';
+import { ioContactApi } from '../../api/io';
+import { MATERIAL_STEP } from '../step/materialStep/action';
 
 function* tryRework(action: tAction = {}): Saga<void> {
   try {
@@ -94,7 +100,9 @@ function* doRework(action = {}): Saga<void> {
   }
 }
 
-let manual
+let manual;
+let newBool;
+
 
 export default function* reworkPatternRoot(): Saga<void> {
   try {
@@ -106,13 +114,31 @@ export default function* reworkPatternRoot(): Saga<void> {
     try {
       const action = yield take(REWORK_PATTERN.TRY_REWORK);
       const mode = yield select(s => s.workCenterMode);
-      if (mode === workModes.normWorkCenterMode) {
-        yield put(notifierActions.enqueueSnackbar('Info', '当前尚未加入拧紧结果手动输入权限控制功能!'));
 
-        if (manual !==null&& typeof manual !== 'undefined'){
-          yield cancel(manual);
+      // 手动输入拧紧结果的权限控制
+      const { adminKey } = yield select(s => s.setting);
+      // const confirmIO = getDevice(adminKey.io_sn);
+      // if (!(confirmIO instanceof ClsIOModule)) {
+      //   throw new Error(`io module (${adminKey.io_sn}) not found`);
+      // }
+      // const input = confirmIO.getPort(ioDirection.input, adminKey.input);
+
+      try {
+      const value=yield call((ioContactApi: Function), adminKey.io_sn);
+      newBool = ClsIOModule.bitString2Boolean(value.data?.inputs[adminKey.input])
+      } catch (e) {
+        CommonLog.lError(`ioContactApi Error: ${e.toString()}`);
+      }
+
+      if (mode === workModes.normWorkCenterMode) {
+        if (newBool || !adminKey.enable){
+          if (manual !==null&& typeof manual !== 'undefined'){
+            yield cancel(manual);
+          }
+          manual =yield fork(manualResult,action);
+        } else {
+          yield put(notifierActions.enqueueSnackbar('Warn', '当前工作状态无法进行手动输入结果!请检查钥匙开关是否打开'));
         }
-        manual =yield fork(manualResult,action);
 
       } else {
         yield race([

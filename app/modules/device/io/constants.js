@@ -31,6 +31,7 @@ export const ioTriggerMode = Object.freeze({
   falling: 'falling',
   // high:'high',
   // low:'low',
+  status:'status',
   change: 'change'
 });
 

@@ -26,6 +26,12 @@ const defaultConfigs = {
 }
     }
   },
+
+  adminKey:{
+    enable:false,
+    io_sn:'11',
+    input:3
+  },
   pages: {
     app: {
       // manual: ['user', 'admin'],
