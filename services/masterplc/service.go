@@ -239,7 +239,7 @@ func (s *Service) HandleProcess() {
 
 			// 处理曲线
 			if strings.Contains(msg, XML_RESULT_KEY) {
-				curveFile := fmt.Sprintf("masterplc_%d.json", opResult.TighteningId)
+				curveFile := fmt.Sprintf("masterplc_%s.json", opResult.TighteningId)
 				cur := storage.CURObject{
 					File: curveFile,
 					OP:   1,

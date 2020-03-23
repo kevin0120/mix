@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   latest:
-    image: "linshenqi/aiis"
+    image: "linshenqi/aiis:dev-0.1.1"
     ports:
       - "9092:9092"
       - "9093:9093"

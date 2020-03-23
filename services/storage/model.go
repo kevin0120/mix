@@ -160,7 +160,7 @@ type OperationResult struct {
 	Batch           string      `json:"batch"`
 	Mode            string      `json:"mode"`
 	ControllerSN    string      `json:"controller_sn"`
-	TighteningId    int64       `json:"tightening_id"`
+	TighteningId    string       `json:"tightening_id"`
 	ToolSN          string      `json:"tool_sn"`
 	WorkcenterCode  string      `json:"workcenter_code"`
 	NutID           int64       `json:"consu_product_id"`

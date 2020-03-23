@@ -342,7 +342,7 @@ func XML2Result(result *CVI3Result, rr *storage.OperationResult) {
 
 	rr.ID = 0
 
-	rr.TighteningId = result.PRC_SST.PAR.FAS.GRP.TIP.TID
+	rr.TighteningId = fmt.Sprintf("%d", result.PRC_SST.PAR.FAS.GRP.TIP.TID)
 
 	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
 

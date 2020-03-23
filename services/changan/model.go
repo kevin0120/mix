@@ -27,5 +27,5 @@ type TighteningResults struct {
 	Mode           string
 	Vin            string
 	Cartype        string
-	TighteningId   int64
+	TighteningId   string
 }
