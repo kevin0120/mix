@@ -1,37 +1,18 @@
 // @flow
 
-import {
-  take,
-  put,
-  call,
-  fork,
-  select,
-  takeEvery,
-  all
-} from 'redux-saga/effects';
+import { all, call, fork, put, select, take, takeEvery } from 'redux-saga/effects';
 
 import type { Saga } from 'redux-saga';
 
 import { push } from 'connected-react-router';
 
-import { isNil, some, cloneDeep, find, isUndefined, remove } from 'lodash-es';
+import { cloneDeep, find, isNil, isUndefined, remove, some } from 'lodash-es';
 import status from 'http-status';
 import { getUserInfo } from '../../api/user';
 
-import {
-  loginRequestUuid,
-  loginSuccess,
-  logoutSuccess,
-  USER,
-  userNewReader
-} from './action';
+import { loginRequestUuid, loginSuccess, logoutSuccess, USER, userNewReader } from './action';
 import notifierActions from '../Notifier/action';
-import type {
-  tUser,
-  tAuthRespData,
-  tAuthInfo,
-  tAuthLogout
-} from './interface/typeDef';
+import type { tAuthInfo, tAuthLogout, tAuthRespData, tUser } from './interface/typeDef';
 import { CommonLog } from '../../common/utils';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
 import ClsReader from '../device/reader/ClsReader';
@@ -39,6 +20,29 @@ import ioModel from '../io';
 import { ioOutputGroups } from '../io/constants';
 
 const DummyUserName = 'DummyUser';
+
+function* doLogin(userInfo: tUser) {
+  try {
+    // const userInfo: tUser = {
+    //   uid: id,
+    //   name,
+    //   uuid,
+    //   avatar,
+    //   role
+    // };
+    yield put(loginSuccess(userInfo));
+    const newState = yield select();
+    if (!/\/app/.test(newState.router.location.pathname)) {
+      yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: true }));
+      yield put(push('/app'));
+    }
+  } catch (e) {
+    CommonLog.lError(
+      `login Workflow User Authentication Error: ${e.toString()}`
+    );
+    yield put(notifierActions.enqueueSnackbar('Error', e));
+  }
+}
 
 function* authenticate(action) {
   try {
@@ -66,12 +70,7 @@ function* authenticate(action) {
           avatar,
           role: 'admin'
         };
-        yield put(loginSuccess(userInfo));
-        const newState = yield select();
-        if (!/\/app/.test(newState.router.location.pathname)) {
-          yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: true }));
-          yield put(push('/app'));
-        }
+        yield call(doLogin, userInfo);
       }
     } else if (name && password) {
       const { setting, users } = state;
@@ -106,15 +105,25 @@ function* authenticate(action) {
           avatar,
           role: 'admin'
         };
-        yield put(loginSuccess(userInfo));
-        const newState = yield select();
-        if (!/\/app/.test(newState.router.location.pathname)) {
-          yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: true }));
-          yield put(push('/app'));
-        }
+        yield call(doLogin, userInfo);
       }
     }
   } catch (e) {
+    const { code } = e;
+    if (code === 'ECONNABORTED') {
+      CommonLog.lError(
+        `连接失败，离线登陆中...`
+      );
+      const { uuid } = action;
+      yield call(doLogin, {
+        uid: uuid,
+        name: uuid,
+        uuid,
+        avatar:'',
+        role: 'admin'
+      });
+      return;
+    }
     CommonLog.lError(
       `login Workflow User Authentication Error: ${e.toString()}`
     );
@@ -152,7 +161,7 @@ const loginMethodMap = {
 };
 
 interface ILocalUser {
-  [key: string]: tUser;
+  [key: string]: tUser
 }
 
 function* loginLocal(action) {
