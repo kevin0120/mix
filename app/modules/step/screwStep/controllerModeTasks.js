@@ -52,12 +52,6 @@ export default {
           );
           break;
         } catch (e) {
-          const msg = `pset失败，${e.message}, 工具：${tool?.serialNumber}`;
-          yield put(
-            notifierActions.enqueueSnackbar('Error', msg, {
-              at: 'controllerModes.pset'
-            })
-          );
           if (retry === retries) {
             throw e;
           }

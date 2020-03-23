@@ -150,7 +150,10 @@ export class HttpClient {
       axiosRetry(this.instance, {
         retries: 2,
         retryDelay: exponentialDelay,
-        retryCondition: err => err.message.indexOf('200') === -1
+        // retryCondition: err => {
+        //   console.log(err);
+        //   return err.message.indexOf('200') === -1
+        // }
       });
       return this.instance;
     }
