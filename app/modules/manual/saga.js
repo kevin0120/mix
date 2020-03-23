@@ -76,8 +76,7 @@ export default function* root() {
 
 export function* manualResult(action: tAction = {}): Saga<void>  {
   console.log('请手动输入拧紧结果');
-  const { order, step, point } = action;
-  console.log(order,step,point);
+  const { point } = action;
   try{
     if (point.isActive) {
       const buttons = [
@@ -112,6 +111,7 @@ export function* manualResult(action: tAction = {}): Saga<void>  {
             at: '输入结果'
           })
         );
+        return
       }
 
       yield put(
