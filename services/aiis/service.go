@@ -11,7 +11,6 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
-	"strconv"
 	"strings"
 )
 
@@ -239,7 +238,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (PublishResult, er
 	aiisResult.MoNutno = result.NutNo
 	aiisResult.Batch = result.Batch
 
-	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
+	aiisResult.TighteningId = result.TighteningID
 	aiisResult.Lacking = "normal"
 
 	aiisResult.NutID = result.ConsuProductID

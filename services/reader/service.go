@@ -54,7 +54,6 @@ func (s *Service) Open() error {
 
 	if err := s.dispatcherBus.Create(dispatcherBus.DispatcherReaderData, utils.DefaultDispatcherBufLen); err != nil {
 		s.diag.Error("Create DispatcherReaderData Failed", err)
-		return err
 	}
 
 	err := s.dispatcherBus.Start(dispatcherBus.DispatcherReaderData)
