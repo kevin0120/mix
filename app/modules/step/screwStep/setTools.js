@@ -60,13 +60,13 @@ export function* disableTools(pointsToDisable) {
 function* disableSingleTool(point) {
   try {
     yield call(getDevice(point.toolSN)?.Disable || (() => {
-      CommonLog.lError(
+      throw new Error(
         `tool ${point.toolSN}: no such tool or tool cannot be disabled.`
       );
     }));
   } catch (e) {
     CommonLog.lError(e);
-    yield call([this, byPassPoint], [point], call([this, disableSingleTool], point));
+    // yield call([this, byPassPoint], [point], call([this, disableSingleTool], point));
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)

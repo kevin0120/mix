@@ -125,7 +125,8 @@ export class ClsOrderOperationPoints {
       return points.concat(g.points);
     }, []).filter(p => !p.isPass);
     // 工具未被占用的点
-    const occupiedTools = getDevicesByType(deviceType.tool).filter(t => t.isEnable).map(t => t.serialNumber);
+    const occupiedTools = this.points.filter(p=>p.isActive).map(p=>p.toolSN);
+    // const occupiedTools = getDevicesByType(deviceType.tool).filter(t => t.isEnable).map(t => t.serialNumber);
     console.warn(occupiedTools, allPoints);
     return allPoints.filter(p => {
       if (occupiedTools.find(t => t === p.toolSN)) {
