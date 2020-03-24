@@ -30,6 +30,12 @@ export function* byPassPoint(finalFailPoints, retry = false) {
               action: screwStepActions.bypassRetry()
             }] : []),
             {
+              label: 'Common.Manual',
+              color: 'info',
+              // action: reworkActions.tryRework(null, null, finalFailPoints[0])
+              action: { type: SCREW_STEP.MANUAL }
+            },
+            {
               label: 'Screw.Next',
               color: 'warning',
               action: screwStepActions.byPassSpecPoint()
@@ -40,10 +46,11 @@ export function* byPassPoint(finalFailPoints, retry = false) {
           content: `${this.failureMsg}`
         })
       );
-      const { retry: doRetry,bypass, fail } = yield race({
+      const { retry: doRetry, bypass, fail, manual } = yield race({
         bypass: take(SCREW_STEP.BYPASS_SPEC_POINT),
         retry: take(SCREW_STEP.BYPASS_RETRY),
-        fail: take(SCREW_STEP.CONFIRM_FAIL_SPEC_POINT)
+        fail: take(SCREW_STEP.CONFIRM_FAIL_SPEC_POINT),
+        manual: take(SCREW_STEP.MANUAL)
       });
       if (fail) {
         yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '拧紧失败' })); // 失败退出
@@ -53,6 +60,11 @@ export function* byPassPoint(finalFailPoints, retry = false) {
       }
       if (doRetry) {
         yield retry;
+      }
+      if (manual) {
+        // yield take()]
+        console.log('manual');
+        return;
       }
     }
   } catch (e) {
