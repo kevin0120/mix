@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-17 07:27+0000\n"
-"PO-Revision-Date: 2020-01-17 07:27+0000\n"
+"POT-Creation-Date: 2020-03-27 10:47+0000\n"
+"PO-Revision-Date: 2020-03-27 10:47+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -39,7 +39,7 @@ msgstr "<i class=\"fa fa-envelope-o\"/>&amp;nbsp;"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_form
 msgid "<span attrs=\"{'invisible': [('measure_frequency_type', '=', 'all')]}\">Every</span>"
-msgstr "<span attrs=\"{'invisible': [('measure_frequency_type', '=', 'all')]}\">Every</span>"
+msgstr "<span attrs=\"{'invisible': [('measure_frequency_type', '=', 'all')]}\">所有</span>"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_form
@@ -140,7 +140,7 @@ msgstr "检测"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_check_count
 msgid "Check count"
-msgstr "检测总计"
+msgstr "检测个数"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_tree
@@ -208,7 +208,7 @@ msgstr "控制人"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_point_id
 msgid "Control Point"
-msgstr "质量控制点"
+msgstr "控制点"
 
 #. module: quality
 #: model:ir.ui.menu,name:quality.menu_quality_control_points
@@ -223,7 +223,7 @@ msgstr "控制类型"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_action_corrective
 msgid "Corrective Action"
-msgstr "Corrective Action"
+msgstr "纠正行动"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_form
@@ -285,9 +285,9 @@ msgid "Default Values"
 msgstr "默认值"
 
 #. module: quality
-#: model:ir.model.fields,help:quality.field_sa_quality_point_test_type_id_3722
+#: model:ir.model.fields,help:quality.field_sa_quality_point_test_type_id_3720
 msgid "Defines the type of the quality control point."
-msgstr "Defines the type of the quality control point."
+msgstr "定义质量控制点的类型."
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_form
@@ -370,7 +370,7 @@ msgstr "收缩"
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_measure_frequency_type
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_measure_frequency_unit_value
 msgid "Frequency"
-msgstr "频率"
+msgstr "检测频率"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_search
@@ -491,6 +491,7 @@ msgstr "最大冗余"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_measure
+#: model:sa.quality.point.test_type,name:quality.test_type_measure
 msgid "Measure"
 msgstr "测量"
 
@@ -502,7 +503,7 @@ msgstr "测量成功"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_measure_frequency_unit
 msgid "Measure frequency unit"
-msgstr "Measure frequency unit"
+msgstr "测量频率单位"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_form
@@ -644,6 +645,11 @@ msgid "Pass"
 msgstr "通过"
 
 #. module: quality
+#: model:sa.quality.point.test_type,name:quality.test_type_passfail
+msgid "Pass - Fail"
+msgstr "(通过/失败)工步"
+
+#. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_search
 #: selection:sa.quality.check,quality_state:0
 msgid "Passed"
@@ -657,7 +663,7 @@ msgstr "等待中的检查"
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_measure_frequency_value
 msgid "Percentage"
-msgstr "Percentage"
+msgstr "百分比"
 
 #. module: quality
 #: selection:sa.quality.point,measure_frequency_type:0
@@ -702,6 +708,11 @@ msgstr "预防行动"
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_form
 msgid "Preventive Actions"
 msgstr "预防行动"
+
+#. module: quality
+#: model:sa.quality.point.test_type,name:quality.test_type_print_label
+msgid "Print label"
+msgstr "打印标签"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_priority
@@ -902,6 +913,16 @@ msgid "Reference"
 msgstr "参照"
 
 #. module: quality
+#: model:sa.quality.point.test_type,name:quality.test_type_register_byproducts
+msgid "Register By-products"
+msgstr "扫码"
+
+#. module: quality
+#: model:sa.quality.point.test_type,name:quality.test_type_register_consumed_materials
+msgid "Register Consumed Materials"
+msgstr "拣货"
+
+#. module: quality
 #: model:ir.ui.menu,name:quality.menu_quality_reporting
 msgid "Reporting"
 msgstr "报告"
@@ -923,7 +944,7 @@ msgstr "根本原因"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_point_view_form
 msgid "SPC"
-msgstr "SPC"
+msgstr "过程控制分析(SPC)"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_alert_stage_sequence
@@ -937,7 +958,12 @@ msgid "Settings"
 msgstr "设置"
 
 #. module: quality
-#: model:ir.model.fields,field_description:quality.field_sa_quality_alert_stage_id_3871
+#: model:sa.quality.point.test_type,name:quality.test_type_video
+msgid "Show a Video"
+msgstr "显示视频"
+
+#. module: quality
+#: model:ir.model.fields,field_description:quality.field_sa_quality_alert_stage_id_3869
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_search
 msgid "Stage"
 msgstr "阶段"
@@ -963,7 +989,12 @@ msgid "Tags"
 msgstr "标签"
 
 #. module: quality
-#: model:ir.model.fields,field_description:quality.field_sa_quality_alert_team_id_3849
+#: model:sa.quality.point.test_type,name:quality.test_type_picture
+msgid "Take a Picture"
+msgstr "拍照"
+
+#. module: quality
+#: model:ir.model.fields,field_description:quality.field_sa_quality_alert_team_id_3847
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_team_id
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_team_id
 msgid "Team"
@@ -983,10 +1014,15 @@ msgstr "技术名称"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_check_test_type_id
-#: model:ir.model.fields,field_description:quality.field_sa_quality_point_test_type_id_3722
+#: model:ir.model.fields,field_description:quality.field_sa_quality_point_test_type_id_3720
 #: model:ir.ui.view,arch_db:quality.quality_point_view_search
 msgid "Test Type"
 msgstr "测试类型"
+
+#. module: quality
+#: model:sa.quality.point.test_type,name:quality.test_type_text
+msgid "Text"
+msgstr "文本提示"
 
 #. module: quality
 #: model:ir.model.fields,help:quality.field_sa_quality_alert_team_alias_model_id
@@ -1014,9 +1050,19 @@ msgid "The quality user uses the quality process"
 msgstr "质检用户使用质检过程"
 
 #. module: quality
+#: model:sa.quality.point.test_type,name:quality.test_type_tightening_point
+msgid "Tightening Point"
+msgstr "拧紧点"
+
+#. module: quality
+#: model:sa.quality.point.test_type,name:quality.test_type_tightening
+msgid "Tightening Work Step"
+msgstr "拧紧工步"
+
+#. module: quality
 #: model:ir.model.fields,field_description:quality.field_sa_quality_point_title
 msgid "Title"
-msgstr "标题"
+msgstr "称谓"
 
 #. module: quality
 #: selection:sa.quality.check,quality_state:0
