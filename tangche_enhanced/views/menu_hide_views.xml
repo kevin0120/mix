@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <delete model="ir.ui.menu" id="sa_base.menu_mrp_step_form_action"/>
+        <!--<delete model="ir.ui.menu" id="sa_base.menu_mrp_step_form_action"/>-->
     </data>
 </odoo>
 

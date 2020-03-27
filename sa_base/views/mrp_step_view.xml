@@ -39,7 +39,7 @@
         <field name="res_model">sa.quality.point</field>
         <field name="view_mode">tree,form,kanban</field>
         <field name="search_view_id" ref="sa_mrp_step_search_view"/>
-        <field name="domain">[('picking_type_code', '=', 'mrp_operation')]</field>
+        <field name="domain">[('picking_type_code', '=', 'mrp_operation'),('test_type', '!=', 'tightening_point')]</field>
         <field name="view_ids"
                eval="[(5, 0, 0),
                       (0, 0, {'view_mode': 'tree', 'view_id': ref('sa_base.sa_mrp_step_view_tree_inherit')}),

@@ -372,7 +372,7 @@ def _convert_orders_info(env, values):
 
         resp = post_order_2_masterpc(master_url, [payload])
         result_list.append(resp)
-    if all(result_list):
+    if not all(result_list):
         msg = 'TS002 Post WorkOrder To MasterPC Fail'
         return sa_fail_response(msg=msg)
     msg = "Tightening System Create Work Order Success"
