@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-20 01:46+0000\n"
-"PO-Revision-Date: 2020-01-20 01:46+0000\n"
+"POT-Creation-Date: 2020-03-27 10:37+0000\n"
+"PO-Revision-Date: 2020-03-27 10:37+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -736,14 +736,14 @@ msgid "Group By..."
 msgstr "分组..."
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_4029
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_4027
 msgid "Group Sequence for Multi Spindle"
-msgstr "拧紧组序列"
+msgstr "拧紧组序列(多轴)"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_4033
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_4031
 msgid "Group id"
-msgstr "拧紧组"
+msgstr "拧紧点组"
 
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_hmi
@@ -1433,7 +1433,7 @@ msgstr "程序设置(Pset)"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_program_id
 msgid "Program id"
-msgstr "Program id"
+msgstr "程序号(pset)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_proposal_key_num
@@ -1472,7 +1472,7 @@ msgstr "质量检查工位"
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_parent_qcp_id
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_qcp_id
 msgid "Quality Control Point(Tightening Work Step)"
-msgstr "Quality Control Point(Tightening Work Step)"
+msgstr "拧紧点(拧紧工步)"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_sa_quality_point
@@ -1822,7 +1822,7 @@ msgid "Team"
 msgstr "团队"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4242
+#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4240
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_technical_name
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_test_type
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_test_type
@@ -1925,7 +1925,7 @@ msgstr "拧紧轴"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_tool_id
 msgid "Tightening Tool(Gun/Wrench)"
-msgstr "Tightening Tool(Gun/Wrench)"
+msgstr "拧紧工具(拧紧枪/扳手)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_group_tool_tool_id
@@ -1946,7 +1946,7 @@ msgstr "拧紧工步图片"
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_Wrench
 msgid "Tightening Wrench"
-msgstr "Tightening Wrench"
+msgstr "拧紧扳手"
 
 #. module: sa_base
 #: selection:controller.program,strategy:0
@@ -1997,7 +1997,7 @@ msgstr "扭矩/角度 拧紧"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_production_filter_inherit
 msgid "Track Number"
-msgstr "追踪码"
+msgstr "追踪号(VIN/序列号)"
 
 #. module: sa_base
 #: selection:product.template,sa_type:0
@@ -2234,7 +2234,7 @@ msgstr "工段"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 msgid "Work Sheet(PDF)"
-msgstr "Work Sheet(PDF)"
+msgstr "作业指导书(PDF)"
 
 #. module: sa_base
 #: model:ir.ui.menu,name:sa_base.menu_mrp_worksite_form
@@ -2243,6 +2243,7 @@ msgstr "工段"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_step_action
+#: model:ir.ui.menu,name:sa_base.menu_mrp_step_form_action
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_step_search_view
 msgid "Work Step"
@@ -2382,6 +2383,11 @@ msgid "un auto operation point inherit(default)"
 msgstr "un auto operation point inherit(default)"
 
 #. module: sa_base
+#: model:ir.model,name:sa_base.model_work_step_operation_rel
+msgid "work.step.operation.rel"
+msgstr "work.step.operation.rel"
+
+#. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_x_offset
 msgid "x axis offset from left(%)"
 msgstr "x方向拧紧点偏移(%)"
@@ -2445,11 +2451,6 @@ msgstr "测试masterpc2"
 #: model:maintenance.equipment,name:sa_base.masterpc_2
 msgid "测试masterpc3"
 msgstr "测试masterpc3"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.controller_1
-msgid "测试控制器2(connector)"
-msgstr "测试控制器2(connector)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_program_id

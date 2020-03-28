@@ -172,7 +172,6 @@ def convert_ts002_order(env, vals):
         LOCATION = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('LOCATION')
         SKILL = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('SKILLS').get('SKILL')
 
-
         OPRSEQUENCENO = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('OPRSEQUENCENO')
         MOMDISPOSITIONS = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMDISPOSITIONS').get(
             'MOMDISPOSITION')
@@ -294,7 +293,7 @@ def package_workcenter_location_data(workcenter_id, val):
     for loc in workcenter_locations:
         data = {
             'product_code': loc.product_id.default_code if loc.product_id else False,
-            'equipment_sn': loc.equipment_id.serial_no if loc.equipment_id else False,
+            'equipment_sn': loc.equipment_id.serial_no if loc.equipment_id else False,  # IO模块
             'io_output': loc.io_output,
             'io_input': loc.io_input
         }
@@ -372,7 +371,7 @@ def _convert_orders_info(env, values):
 
         resp = post_order_2_masterpc(master_url, [payload])
         result_list.append(resp)
-    if all(result_list):
+    if not all(result_list):
         msg = 'TS002 Post WorkOrder To MasterPC Fail'
         return sa_fail_response(msg=msg)
     msg = "Tightening System Create Work Order Success"

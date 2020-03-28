@@ -24,6 +24,7 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
+        'views/maintenance_views.xml',
         'views/mrp_workcenter.xml',
         'views/mrp_production_views.xml',
         'views/mrp_workorder_views.xml',
@@ -32,6 +33,7 @@
         'views/mrp_routing_views.xml',
         'views/menu_hide_views.xml',
         'demo/demo.xml',
+        'data/quality_data.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

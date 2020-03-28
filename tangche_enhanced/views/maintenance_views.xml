@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="tangche_maintenance_equipment_view_form_inherit" model="ir.ui.view">
+            <field name="name">tangche_maintenance_equipment_view_form_inherit</field>
+            <field name="model">maintenance.equipment</field>
+            <field name="inherit_id" ref="sa_base.sa_maintenance_equipment_view_form_inherit"/>
+            <field name="arch" type="xml">
+                <field name="location_id" position="replace">
+                    <field name="location_id" context="{'default_workcenter_id': workcenter_id}"
+                           domain="[('workcenter_id', '=', workcenter_id)]"
+                           attrs="{'invisible': [('workcenter_id', '=', False)], 'required': [('category_name', 'in', ['tightening_gun','tightening_wrench']),('workcenter_id', '!=', False)]}"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>
