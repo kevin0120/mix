@@ -34,7 +34,7 @@ function* enteringState(config) {
       throw new Error(
         `ScrewStepPayload Is Empty! code: ${
           this._id
-        }, Payload: ${JSON.stringify(payload)}`
+          }, Payload: ${JSON.stringify(payload)}`
       );
     }
     const points = payload.tightening_points;
@@ -186,7 +186,7 @@ function* doingState(config) {
     const { reworkConfig } = config || {};
     const { workCenterMode } = yield select();
     let redoPointClsObj = null;
-
+    let _controlsToActive = [];
     switch (workCenterMode) {
       case workModes.reworkWorkCenterMode: {
         const { point } = reworkConfig;
@@ -196,7 +196,7 @@ function* doingState(config) {
           redoPointClsObj = this.points.find(p => !p.noRedo);
         }
         if (redoPointClsObj) {
-          this._pointsToActive = [redoPointClsObj.start(true)];
+          _controlsToActive = [redoPointClsObj.start(true)];
         }
         break;
       }
@@ -217,7 +217,7 @@ function* doingState(config) {
     while (true) {
       switch (workCenterMode) {
         case workModes.reworkWorkCenterMode: {
-          if (this._pointsToActive && this._pointsToActive.length > 0) {
+          if (_controlsToActive && _controlsToActive.length > 0) {
             break;
           }
           const canRedoPoint = this.points.find(p => !p.noRedo);
@@ -242,10 +242,7 @@ function* doingState(config) {
           //   test=false;
           // }
 
-          const newActivePoints = this._pointsManager.start();
-          this._pointsToActive = newActivePoints.filter(p =>
-            this._pointsToActive.every(pp => pp.sequence !== p.sequence)
-          );
+          _controlsToActive = this._pointsManager.start();
           if (
             this._pointsManager.isFailed &&
             this._pointsManager.points.filter(p => p.isActive).length === 0
@@ -265,29 +262,31 @@ function* doingState(config) {
         tightening_points: this._pointsManager.points.map(p => p.data)
       }));
 
-      const activeConfigs = this._pointsToActive.map(p => {
-        const cModeId = controllerMode === controllerModes.job ? jobID : this._forcePset || p.pset;
-        const tool = this._forceTool || getDevice(p.toolSN);
+      // set force pset & tool
+      const activeControls = _controlsToActive.map(c => {
+        const cModeId = controllerMode === controllerModes.job ? jobID : this._forcePset || c.controllerModeId;
+        const tool = this._forceTool || getDevice(c.toolSN);
         return {
-          point: p,
+          ...c,
           tool,
           controllerModeId: cModeId
         };
       });
+
       let results = [];
       const successCounts = yield call([this, setTools],
-        activeConfigs,
+        activeControls,
         controllerMode,
         isFirst
       );
-      if (successCounts > 0 || activeConfigs.length === 0) {
+      if (successCounts > 0 || activeControls.length === 0) {
         results = yield call(
           [this, getResult],
           resultChannel
         );
       }
 
-      this._pointsToActive = [];
+      _controlsToActive = [];
 
       this._newInactivePoints = this._pointsManager.newResult(results);
       // disable tools before bypass point
@@ -380,7 +379,6 @@ function* clearStepData() {
       this._tools = [];
       this._listeners = [];
     }
-    this._pointsToActive = [];
 
     CommonLog.Info('tools cleared', {
       at: `screwStep(${String((this: IWorkable)._code)})._onLeave`

@@ -56,7 +56,7 @@ export function* byPassPoint(finalFailPoints, retry = false) {
         yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '拧紧失败' })); // 失败退出
       }
       if (bypass) {
-        this._pointsManager.byPassPoint(finalFailPoints);
+        this._pointsManager.byPassControls(finalFailPoints);
       }
       if (doRetry) {
         yield retry;

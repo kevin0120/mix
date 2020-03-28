@@ -23,6 +23,9 @@ export default {
   [s.text]: {
     component: TextStep
   },
+  [s.promiscuousTightening]: {
+    component: ScrewStep
+  },
   [s.screw]: {
     component: ScrewStep
   },

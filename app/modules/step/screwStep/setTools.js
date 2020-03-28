@@ -4,10 +4,8 @@ import controllerModeTasks from './controllerModeTasks';
 import { CommonLog } from '../../../common/utils';
 import type { tScrewStepData } from './interface/typeDef';
 import { getDevice } from '../../deviceManager/devices';
-import { byPassPoint } from './byPassPoint';
 
-
-export function* setTools(activeConfigs, controllerMode, isFirst) {
+export function* setTools(activeControls, controllerMode, isFirst) {
   if (controllerMode === controllerModes.job && !isFirst) {
     return;
   }
@@ -16,25 +14,20 @@ export function* setTools(activeConfigs, controllerMode, isFirst) {
   }
   try {
     let successCount = 0;
-    for (const c of activeConfigs) {
-      const { point, tool, controllerModeId } = c;
-      successCount += yield call([this, setSingleTool], controllerMode, point, tool, controllerModeId);
+    for (const c of activeControls) {
+      successCount += yield call([this, setSingleTool], controllerMode, c);
     }
     return successCount;
-    // const effects = activeConfigs.map(c => {
-    //
-    //   return
-    // });
-    // yield all(effects);
   } catch (e) {
     CommonLog.lError(e);
     // throw e;
   }
 }
 
-function* setSingleTool(controllerMode, point, tool, controllerModeId) {
+function* setSingleTool(controllerMode, singleControl) {
   try {
-    yield call([this, controllerModeTasks[controllerMode]], point.point, tool, controllerModeId);
+    const { sequence, tool, controllerModeId } = singleControl;
+    yield call([this, controllerModeTasks[controllerMode]], sequence, tool, controllerModeId);
     yield call(tool?.Enable || (() => {
       throw new Error(
         `tool ${tool?.Name}: no such tool or tool cannot be enabled.`
@@ -42,9 +35,6 @@ function* setSingleTool(controllerMode, point, tool, controllerModeId) {
     }));
     return 1;
   } catch (e) {
-    yield call([this, byPassPoint], [point],
-      call([this, setSingleTool], controllerMode, point, tool, controllerModeId)
-    );
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)
@@ -66,7 +56,6 @@ function* disableSingleTool(point) {
     }));
   } catch (e) {
     CommonLog.lError(e);
-    // yield call([this, byPassPoint], [point], call([this, disableSingleTool], point));
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)

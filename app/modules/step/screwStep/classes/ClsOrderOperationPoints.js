@@ -1,7 +1,7 @@
 // @flow
 import { isNil } from 'lodash-es';
 import { CommonLog } from '../../../../common/utils';
-import type { tPoint, tResult, tScrewStepPayload } from '../interface/typeDef';
+import type { tControl, tPoint, tResult, tScrewStepPayload } from '../interface/typeDef';
 import { ClsOperationPointGroup } from './ClsOperationPointGroup';
 import { ClsOperationPoint } from './ClsOperationPoint';
 import { getDevicesByType } from '../../../deviceManager/devices';
@@ -10,6 +10,12 @@ import { deviceType } from '../../../deviceManager/constants';
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOrderOperationPoints {
   _groups: { [groupSeq: number]: ClsOperationPointGroup } = {};
+
+  get activeConfigs(){
+    return this.points.filter(p=>p.isActive).reduce((configs, p)=>{
+      return configs.concat(p.configs)
+    },[]);
+  }
 
   constructor(points: Array<tPoint>) {
     // const ret: boolean = ClsOrderOperationPoints.validatePayload(p);
@@ -119,22 +125,27 @@ export class ClsOrderOperationPoints {
     return newInactivePoints;
   }
 
-  start(): Array<ClsOperationPoint> {
+  start(): Array<tControl> {
     // 所有可被最先开始的的组内的点
     const allPoints = this.nextActiveGroups().reduce((points, g) => {
       return points.concat(g.points);
     }, []).filter(p => !p.isPass);
+
+
+    let activeControls = [];
+    this.points.filter(p => p.isActive).forEach(p => {
+      activeControls = activeControls.concat(p.controls);
+    });
+
     // 工具未被占用的点
-    const occupiedTools = this.points.filter(p=>p.isActive).map(p=>p.toolSN);
-    // const occupiedTools = getDevicesByType(deviceType.tool).filter(t => t.isEnable).map(t => t.serialNumber);
-    console.warn(occupiedTools, allPoints);
-    return allPoints.filter(p => {
-      if (occupiedTools.find(t => t === p.toolSN)) {
+    return [].concat(...allPoints.filter(p => {
+      // todo : 有一把工具占用就无法拧紧这个点？
+      if (activeControls.find(c => p.toolSNs.find(t => c.toolSN === t) && c.controllerModeId !== p.pset)) {
         return false;
       }
-      occupiedTools.push(p.toolSN);
+      activeControls = activeControls.concat(p.controls);
       return true;
-    }).map(p => p.start()).filter(p => !!p);
+    }).map(p => p.start())).filter(c => !!c);
   }
 
   stop() {
@@ -143,15 +154,11 @@ export class ClsOrderOperationPoints {
     });
   }
 
-  byPassPoint(points: Array<ClsOperationPoint> | number) {
-    points.forEach(p => {
-      if (p instanceof ClsOperationPoint) {
-        p.setBypass(true);
-      } else if (typeof p === 'number') {
-        const point = this.points.find(pp => pp.sequence === p);
-        if (point) {
-          point.setBypass(true);
-        }
+  byPassControls(controls) {
+    controls.forEach(c => {
+      const point = this.points.find(pp => pp.sequence === c.sequence);
+      if (point) {
+        point.setBypass(true);
       }
     });
   }

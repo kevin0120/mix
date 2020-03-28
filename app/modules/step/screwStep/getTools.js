@@ -2,7 +2,12 @@ import type { tPoint } from './interface/typeDef';
 import { getDevice } from '../../deviceManager/devices';
 
 export function getTools(points: Array<tPoint>) {
-  const toolSnSet = new Set(points.map(p => p.tightening_tool));
+  const toolSnSet = new Set(points.reduce((tools, p) => {
+    if(p.tightening_tools){
+      return tools.concat(...p.tightening_tools)
+    }
+    return tools.push(p.tightening_tool)
+  },[]));
   const lostTool = [];
   const tools = [];
   [...toolSnSet].forEach(t => {

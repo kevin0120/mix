@@ -2,7 +2,7 @@
 
 // NOTE: 拧紧点key定义,如果此点为key，此点必须拧紧结束同时此组的结果到达拧紧关键点个数才能进入下个拧紧组
 import { POINT_STATUS, RESULT_STATUS } from '../constants';
-import type { tPoint, tPointStatus, tResult } from '../interface/typeDef';
+import type { tControl, tPoint, tPointStatus, tResult } from '../interface/typeDef';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOperationPoint {
@@ -11,8 +11,12 @@ export class ClsOperationPoint {
 
   constructor(p: tPoint) {
     this._point = p;
-    this._toolSN = p.tightening_tool;
     this._results = [];
+    if (p.tightening_tools) {
+      this._toolSNs = p.tightening_tools;
+      return;
+    }
+    this._toolSNs = [p.tightening_tool];
   }
 
   _point: tPoint;
@@ -21,10 +25,18 @@ export class ClsOperationPoint {
     return this._point;
   }
 
-  _toolSN: string;
+  _toolSNs: Array<string>;
 
-  get toolSN(): string {
-    return this._toolSN;
+  get toolSNs(): string {
+    return this._toolSNs;
+  }
+
+  get controls(): tControl {
+    return this._toolSNs.map(t => ({
+      sequence: this.sequence,
+      toolSN: t,
+      controllerModeId: this.pset
+    }));
   }
 
   _isActive: boolean = false;
@@ -49,7 +61,7 @@ export class ClsOperationPoint {
     ) || (
       this._results.filter(r => r.count === this._point.max_redo_times && r.measure_result === RESULT_STATUS.nok)
         .length > 0
-    ) ||(
+    ) || (
       this._bypass
     );
   }
@@ -130,13 +142,13 @@ export class ClsOperationPoint {
 
   start(forceStart) {
     if (this.isActive) {
-      return null;
+      return [];
     }
     if (forceStart || !this.isPass) {
       this.setActive(true);
-      return this;
+      return this.controls;
     }
-    return null;
+    return [];
   }
 
   toString(): string {

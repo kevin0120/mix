@@ -11,14 +11,13 @@ import type { IDevice } from '../../device/IDevice';
 
 // pset/job模式
 export default {
-  * [controllerModes.pset](point: tPoint, tool, pset): Saga<void> {
+  * [controllerModes.pset](sequence, tool, pset): Saga<void> {
     try {
       const sData: tScrewStepData = this.data;
       const stepCode = this.code;
       // const { retryTimes } = sData;
       const { points } = this._pointsManager;
       const userIDs: Array<number> = yield select(s => s.users.map(u => u.uid));
-      const { sequence } = point;
       if (!tool) {
         throw new Error(`未指定工具`);
       }
@@ -45,7 +44,6 @@ export default {
             userIDs,
             pset,
             sequence,
-            // retryTimes,
             total,
             workorderCode,
             ''
@@ -70,7 +68,7 @@ export default {
     }
   },
 
-  * [controllerModes.job](point, tool, jobID): Saga<void> {
+  * [controllerModes.job](sequence, tool, jobID): Saga<void> {
     try {
       const stepId = this._id;
       const userIDs: Array<number> = yield select(s => s.users.map(u => u.uid));

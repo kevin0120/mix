@@ -12,8 +12,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     isValid: boolean = false;
 
-    _orderOperationPoints: ClsOrderOperationPoints;
-
     _pointsToActive = [];
 
     _listeners = [];
