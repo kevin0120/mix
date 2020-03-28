@@ -148,7 +148,12 @@ export class ClsOrderOperationPoints {
     // 工具未被占用的点
     return [].concat(...allPoints.filter(p => {
       // todo : 有一把工具占用就无法拧紧这个点？
-      if (activeControls.find(c => p.toolSNs.find(t => c.toolSN === t) && c.controllerModeId !== p.pset)) {
+      if (activeControls.find(c => {
+        if(p.point.tightening_tools){
+          return p.toolSNs.find(t => c.toolSN === t) && c.controllerModeId !== p.pset
+        }
+        return p.toolSNs.find(t => c.toolSN === t)
+      })) {
         return false;
       }
       activeControls = activeControls.concat(p.controls);

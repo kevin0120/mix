@@ -6,7 +6,7 @@ export function getTools(points: Array<tPoint>) {
     if(p.tightening_tools){
       return tools.concat(...p.tightening_tools)
     }
-    return tools.push(p.tightening_tool)
+    return tools.concat(p.tightening_tool)
   },[]));
   const lostTool = [];
   const tools = [];
