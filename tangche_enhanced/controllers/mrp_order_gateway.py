@@ -122,6 +122,8 @@ def pack_step_payload(env, consum_lines):
     payloads = []
 
     type_tightening_id = env.ref('quality.test_type_tightening').id
+    type_promiscuous_tightening_id = env.ref('tangche_enhanced.test_type_tightening_promiscuous').id
+
     type_tightening_point_id = env.ref('quality.test_type_tightening_point').id
     for idx, step in enumerate(consum_lines.filtered(lambda t: t.test_type_id.id != type_tightening_point_id)):
         ts = {
@@ -139,7 +141,7 @@ def pack_step_payload(env, consum_lines):
             "target": step.norm,
         }
         ts.update({'tightening_image_by_step_code': step.name or step.ref})
-        if step.test_type_id.id == type_tightening_id:
+        if step.test_type_id.id == type_tightening_id or step.test_type_id.id == type_promiscuous_tightening_id:
             val = package_tightening_points(step.operation_point_ids)
             ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
             ts.update({'tightening_total': len(step.operation_point_ids)})  # 将拧紧点的包包裹进去
