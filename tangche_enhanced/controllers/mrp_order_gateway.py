@@ -92,9 +92,10 @@ def package_tightening_points(tightening_points):
         tool_ids = tp.tightening_tool_ids if tp.tightening_tool_ids else []  # 混杂模式工具列表永远是拧紧点定义上的工具列表
         if not tool_id:
             _logger.error('Can Not Found Tool:{0}'.format(tp.name or tp.code))
+
         val = {
             'tightening_tool': tool_id.serial_no if tool_id else False,
-            'tightening_tools': [tool.serial_no for tool in tool_ids],  # 混杂拧紧模式使用字段，无效值为空列表
+            'tightening_tools': [tool.tool_id.serial_no for tool in tool_ids],  # 混杂拧紧模式使用字段，无效值为空列表
             'x': tp.x_offset,
             'y': tp.y_offset,
             'pset': pset,
