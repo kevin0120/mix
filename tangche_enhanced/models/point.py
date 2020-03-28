@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 
 class OperationPoints(models.Model):
@@ -8,11 +9,31 @@ class OperationPoints(models.Model):
 
     socket = fields.Many2one('product.product', domain=[('sa_type', '=', 'socket')])
 
+    parent_test_type = fields.Char('Parent Test Type', related='parent_qcp_id.test_type')
+
+    # @api.model
+    # def default_get(self, fields):
+    #     res = super(OperationPoints, self).default_get(fields)
+    #     parent_test_type = self.env.context.get('default_parent_test_type')
+    #     if parent_test_type:
+    #         res.update({'parent_test_type': parent_test_type})
+    #     return res
+
     @api.onchange('product_id')
     def onchange_product_id(self):
         for point in self:
             if point.product_id.socket:
                 point.socket = point.product_id.socket
+
+    @api.constrains('tightening_tool_ids')
+    def _constraint_tightening_tool_ids(self):
+        parent_test_type = self.env.context.get('parent_test_type', False)
+        for point in self:
+            if not point.tightening_tool_ids or parent_test_type == 'promiscuous_tightening':
+                continue
+            workcenter_ids = set(point.tightening_tool_ids.mapped('workcenter_id').ids)
+            if len(workcenter_ids) != len(point.tightening_tool_ids):
+                raise ValidationError(u'不能对同一个拧紧点选择同一个工位上的拧紧工具')
 
     @api.model
     def default_get(self, fields):

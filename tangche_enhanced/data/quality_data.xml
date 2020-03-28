@@ -1,0 +1,9 @@
+<odoo>
+    <data noupdate="1">
+
+        <record id="test_type_tightening_promiscuous" model="sa.quality.point.test_type">
+            <field name="name">Promiscuous Tightening Work Step</field>
+            <field name="technical_name">promiscuous_tightening</field>
+        </record>
+    </data>
+</odoo>

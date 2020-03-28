@@ -23,16 +23,51 @@
                     </attribute>
                 </field>
 
-                <xpath expr="//page[@name='qcp_tightening_point']//field[@name='tightening_tool_ids']"
-                       position="replace">
+                <xpath expr="//field[@name='operation_point_ids']" position="attributes">
+                    <attribute name="context">
+                        {'default_parent_qcp_id': active_id, 'search_parent_step_ids': [active_id],
+                        'default_parent_test_type':
+                        test_type }
+                    </attribute>
+                </xpath>
+                <xpath expr="//page[@name='qcp_tightening_point']//field[@name='sequence']"
+                       position="before">
+                    <field name="parent_test_type" groups="base.group_no_one"/>
+                </xpath>
+                <xpath expr="//page[@name='qcp_tightening_point']"
+                       position="attributes">
+                    <attribute name="attrs">
+                        {'invisible': [('test_type','not in',['promiscuous_tightening', 'tightening'])]}
+                    </attribute>
+                </xpath>
+                <xpath expr="//page[@name='tightening_pic']"
+                       position="attributes">
+                    <attribute name="attrs">
+                        {'invisible': [('test_type','not in',['promiscuous_tightening', 'tightening'])],
+                        'required': [('test_type','in',['promiscuous_tightening', 'tightening'])]}
+                    </attribute>
+                </xpath>
+                <xpath expr="//page[@name='qcp_tightening_point_group']"
+                       position="attributes">
+                    <attribute name="attrs">
+                        {'invisible': [('test_type','not in',['promiscuous_tightening', 'tightening'])]}
+                    </attribute>
+                </xpath>
 
+                <xpath expr="//page[@name='qcp_tightening_point']//field[@name='tightening_tool_ids']"
+                       position="attributes">
+                    <attribute name="attrs">{'invisible': [('parent_test_type','=','tightening')], 'required':
+                        [('parent_test_type','=','promiscuous_tightening')]}
+                    </attribute>
                 </xpath>
                 <xpath expr="//page[@name='qcp_tightening_point']//field[@name='product_id']"
                        position="after">
                     <field name="socket" options="{'no_create_edit': True,'no_open': True}"/>
                 </xpath>
                 <xpath expr="//page[@name='qcp_tightening_point']//field[@name='tool_id']" position="attributes">
-                    <attribute name="required">1</attribute>
+                    <attribute name="attrs">{'invisible': [('parent_test_type','=','promiscuous_tightening')], 'required':
+                        [('parent_test_type','=','tightening')]}
+                    </attribute>
                 </xpath>
             </field>
         </record>
