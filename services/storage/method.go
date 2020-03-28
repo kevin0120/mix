@@ -104,7 +104,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		var sp []byte
 		err = json.Unmarshal(stepString, &msg)
 
-		if msg.TestType == "tightening" {
+		if msg.TestType == "tightening" || msg.TestType == "promiscuous_tightening" {
 			err = json.Unmarshal(stepString, &stepTightening)
 			sp, _ = json.Marshal(stepTightening)
 		} else {
