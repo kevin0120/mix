@@ -43,15 +43,15 @@ function* setSingleTool(controllerMode, singleControl) {
   }
 }
 
-export function* disableTools(pointsToDisable) {
-  yield all(pointsToDisable.map(p => call([this, disableSingleTool], p)));
+export function* disableTools(controls) {
+  yield all(controls.map(c => call([this, disableSingleTool], c)));
 }
 
-function* disableSingleTool(point) {
+function* disableSingleTool(control) {
   try {
-    yield call(getDevice(point.toolSN)?.Disable || (() => {
+    yield call(getDevice(control.toolSN)?.Disable || (() => {
       throw new Error(
-        `tool ${point.toolSN}: no such tool or tool cannot be disabled.`
+        `tool ${control.toolSN}: no such tool or tool cannot be disabled.`
       );
     }));
   } catch (e) {

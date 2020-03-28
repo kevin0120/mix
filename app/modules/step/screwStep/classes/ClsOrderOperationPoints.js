@@ -11,10 +11,10 @@ import { deviceType } from '../../../deviceManager/constants';
 export class ClsOrderOperationPoints {
   _groups: { [groupSeq: number]: ClsOperationPointGroup } = {};
 
-  get activeConfigs(){
-    return this.points.filter(p=>p.isActive).reduce((configs, p)=>{
-      return configs.concat(p.configs)
-    },[]);
+  get activeControls() {
+    return this.points.filter(p => p.isActive).reduce((controls, p) => {
+      return controls.concat(p.controls);
+    }, []);
   }
 
   constructor(points: Array<tPoint>) {
@@ -111,18 +111,26 @@ export class ClsOrderOperationPoints {
   }
 
   newResult(results: Array<tResult>) {
-    let newInactivePoints: Array<?ClsOperationPoint> = [];
+    let newInactiveControls: Array<?ClsOperationPoint> = [];
     results.forEach(r => {
-      const { seq } = r;
-      const group = this.getGroupByPointSequence(seq);
-      if (!group) {
+      const { tool_sn } = r;
+      const controls = this.activeControls.filter(c => c.toolSN === tool_sn);
+
+      const pointSeqs = [...new Set(controls.map(c => c.sequence))].sort();
+
+      if (!pointSeqs.length > 0) {
         return;
       }
-      const inactivePoints = group.newResult(r);
-      newInactivePoints = newInactivePoints.concat(inactivePoints);
+      const firstSeq = pointSeqs.shift();
+      const point = this.points.find(p => p.sequence === firstSeq);
+      point.newResult(r);
+      if (pointSeqs.length > 0) {
+        return;
+      }
+      newInactiveControls = newInactiveControls.concat(...controls);
     });
 
-    return newInactivePoints;
+    return newInactiveControls;
   }
 
   start(): Array<tControl> {

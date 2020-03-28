@@ -288,9 +288,9 @@ function* doingState(config) {
 
       _controlsToActive = [];
 
-      this._newInactivePoints = this._pointsManager.newResult(results);
+      const _newInactiveControls = this._pointsManager.newResult(results);
       // disable tools before bypass point
-      yield call([this, disableTools], this._newInactivePoints);
+      yield call([this, disableTools], _newInactiveControls);
       yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
         ...data,
         tightening_points: this._pointsManager.points.map(p => p.data)
