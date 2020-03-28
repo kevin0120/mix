@@ -54,3 +54,16 @@ type RushIOControlReq struct {
 type RushCardInfoReq struct {
 	CardCode string `json:"cardCode" validate:"required"`
 }
+
+// odoo equipment
+type Equipment struct {
+	EquipmentSN string   `json:"equipment_sn"`
+	Location    Location `json:"location"`
+	Type        string   `json:"type"`
+}
+
+type Location struct {
+	EquipmentSN string `json:"equipment_sn"`
+	Input       int    `json:"io_input"`
+	Output      int    `json:"io_output"`
+}

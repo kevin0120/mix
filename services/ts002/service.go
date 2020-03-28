@@ -1,6 +1,7 @@
 package ts002
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/context"
@@ -8,6 +9,7 @@ import (
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"
@@ -26,25 +28,42 @@ type Service struct {
 	io            IIOService
 	tightening    ITightening
 	dispatcherBus IDispatcher
+	storage       IStorage
+
+	// websocket请求处理器
+	wsnotify.WSRequestHandlers
 }
 
-func NewService(c Config, d Diagnostic, h IHttpService, io IIOService, tightening ITightening, dispatcher IDispatcher) *Service {
-	ss := &Service{
+func NewService(c Config, d Diagnostic, h IHttpService, io IIOService, tightening ITightening, dispatcher IDispatcher, stroage IStorage) *Service {
+	s := &Service{
 		diag:          d,
 		httpd:         h,
 		io:            io,
 		tightening:    tightening,
 		dispatcherBus: dispatcher,
+		storage:       stroage,
 		validator:     validator.New(),
 	}
 
-	ss.configValue.Store(c)
+	s.configValue.Store(c)
 
-	return ss
+	s.setupWSRequestHandlers()
+
+	return s
 }
 
 func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
+}
+
+func (s *Service) setupWSRequestHandlers() {
+	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
+		Diag: s.diag,
+	}
+
+	s.SetupHandlers(wsnotify.WSRequestHandlerMap{
+		wsnotify.WS_TOOL_ENABLE: s.OnWS_TOOL_ENABLE,
+	})
 }
 
 func (s *Service) ensureValidator() *validator.Validate {
@@ -59,11 +78,14 @@ func (s *Service) ensureValidator() *validator.Validate {
 
 func (s *Service) initDispatcherRegisters() {
 
-	// 接收读卡器数据
-	s.dispatcherBus.Register(dispatcherbus.DispatcherReaderData, utils.CreateDispatchHandlerStruct(s.onNFCData))
+	// 注册websocket请求
+	s.dispatcherBus.Register(dispatcherbus.DispatcherWsNotify, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
 
-	// 接收拧紧结果
-	s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
+	// 接收读卡器数据
+	//s.dispatcherBus.Register(dispatcherbus.DispatcherReaderData, utils.CreateDispatchHandlerStruct(s.onNFCData))
+	//
+	//// 接收拧紧结果
+	//s.dispatcherBus.Register(dispatcherbus.DispatcherResult, utils.CreateDispatchHandlerStruct(s.onTighteningResult))
 }
 
 func (s *Service) Open() error {
@@ -86,7 +108,7 @@ func (s *Service) Open() error {
 
 	s.initDispatcherRegisters()
 
-	go s.doHealthCheck()
+	//go s.doHealthCheck()
 
 	return nil
 }
@@ -131,6 +153,8 @@ func (s *Service) addTS002HTTPHandlers() error {
 	s.addNewHTTPHandler("PUT", "/alarm", s.putAlarmReq)
 	s.addNewHTTPHandler("PUT", "/pset", s.putPSetReq)
 	s.addNewHTTPHandler("PUT", "/io", s.putIOReq)
+
+	s.addNewHTTPHandler("PUT", "/equipments/sync", s.putSyncEquipments)
 
 	return nil
 }
@@ -301,4 +325,19 @@ func (s *Service) onNFCData(data interface{}) {
 			s.diag.Error(fmt.Sprintf("Locker Control Error SN:%s Output:%d", sn, rr), err)
 		}
 	}
+}
+
+func (s *Service) saveEquipments(equipments []Equipment) error {
+	for _, v := range equipments {
+		if v.Type != "tightening_gun" && v.Type != "tightening_wrench" {
+			continue
+		}
+
+		body, _ := json.Marshal(v.Location)
+		if err := s.storage.UpdateToolLocation(v.EquipmentSN, string(body)); err != nil {
+			s.diag.Error("UpdateToolLocation Failed", err)
+		}
+	}
+
+	return nil
 }

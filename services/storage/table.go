@@ -164,6 +164,7 @@ type Tools struct {
 	StepID             int64  `xorm:"bigint 'step_id'"`
 	PointID            string `xorm:"varchar(128) 'point_id'"`
 	ScannerCode        string `xorm:"varchar(128) 'scanner_code'"`
+	Location           string `xorm:"text 'location'"`
 }
 
 type RoutingOperations struct {

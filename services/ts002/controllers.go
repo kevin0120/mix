@@ -69,3 +69,19 @@ func ErrResponse(ctx iris.Context, respCode int, errCode string, errMsg string) 
 	body, _ := json.Marshal(errResp)
 	_, _ = ctx.Write(body)
 }
+
+// 接收odoo下发的同步设备信息
+func (s *Service) putSyncEquipments(ctx iris.Context) {
+	req := []Equipment{}
+	if err := ctx.ReadJSON(&req); err != nil {
+		ErrResponse(ctx, iris.StatusBadRequest, string(iris.StatusBadRequest), err.Error())
+		return
+	}
+
+	if err := s.saveEquipments(req); err != nil {
+		ErrResponse(ctx, iris.StatusBadRequest, string(iris.StatusBadRequest), err.Error())
+		return
+	}
+
+	ctx.StatusCode(iris.StatusOK)
+}

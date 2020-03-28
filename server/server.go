@@ -193,7 +193,7 @@ func (s *Server) GetServiceByName(name string) Service {
 func (s *Server) appendTS002Service(projectCode string) {
 	c := s.config.TS002
 	d := s.DiagService.NewCustomizeHandler(projectCode)
-	srv := ts002.NewService(c, d, s.HTTPDService, s.IOService, s.TighteningDeviceService, s.DispatcherBusService)
+	srv := ts002.NewService(c, d, s.HTTPDService, s.IOService, s.TighteningDeviceService, s.DispatcherBusService, s.StorageService)
 
 	s.TS002Service = srv
 	s.AppendService(projectCode, srv)

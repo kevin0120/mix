@@ -29,3 +29,8 @@ type IDispatcher interface {
 type ITightening interface {
 	ToolPSetByIP(req *tightening_device.PSetSet) error
 }
+
+type IStorage interface {
+	UpdateToolLocation(toolSN string, location string) error
+	GetToolLocation(toolSN string) (string, error)
+}
