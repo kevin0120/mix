@@ -27,11 +27,17 @@ class OperationPoints(models.Model):
 
     @api.constrains('tightening_tool_ids')
     def _constraint_tightening_tool_ids(self):
-        parent_test_type = self.env.context.get('parent_test_type', False)
+        context_parent_test_type = self.env.context.get('parent_test_type', False)
         for point in self:
-            if not point.tightening_tool_ids or parent_test_type == 'promiscuous_tightening':
+            parent_test_type = point.parent_test_type or context_parent_test_type
+            if not point.tightening_tool_ids:
                 continue
             workcenter_ids = set(point.tightening_tool_ids.mapped('workcenter_id').ids)
+            if parent_test_type == 'promiscuous_tightening':
+                if len(workcenter_ids) != 1:
+                    raise ValidationError(u'混杂模式下的拧紧工具必须是同一工位的')
+                else:
+                    continue
             if len(workcenter_ids) != len(point.tightening_tool_ids):
                 raise ValidationError(u'不能对同一个拧紧点选择同一个工位上的拧紧工具')
 

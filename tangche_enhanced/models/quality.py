@@ -7,7 +7,6 @@ from odoo.exceptions import ValidationError
 class QualityPoint(models.Model):
     _inherit = "sa.quality.point"
 
-
     @api.constrains('sa_operation_ids')
     def _ts002_constrain_operation_ids(self):
         for step in self:
