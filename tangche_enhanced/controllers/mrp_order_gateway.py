@@ -86,13 +86,15 @@ def package_tightening_points(tightening_points):
         if isinstance(tp.program_id.code, str):
             pset = int(tp.program_id.code)
         if ltp._name == 'mrp.wo.consu.line':
-            tool_id = ltp.tool_id if ltp.tool_id else None
+            tool_id = ltp.tool_id if ltp.tool_id else None  # 工单检测点上的工具
         else:
             tool_id = tp.tool_id if tp.tool_id else None
+        tool_ids = tp.tightening_tool_ids if tp.tightening_tool_ids else []  # 混杂模式工具列表永远是拧紧点定义上的工具列表
         if not tool_id:
             _logger.error('Can Not Found Tool:{0}'.format(tp.name or tp.code))
         val = {
             'tightening_tool': tool_id.serial_no if tool_id else False,
+            'tightening_tools': [tool.serial_no for tool in tool_ids],  # 混杂拧紧模式使用字段，无效值为空列表
             'x': tp.x_offset,
             'y': tp.y_offset,
             'pset': pset,
@@ -120,6 +122,8 @@ def pack_step_payload(env, consum_lines):
     payloads = []
 
     type_tightening_id = env.ref('quality.test_type_tightening').id
+    type_promiscuous_tightening_id = env.ref('tangche_enhanced.test_type_tightening_promiscuous').id
+
     type_tightening_point_id = env.ref('quality.test_type_tightening_point').id
     for idx, step in enumerate(consum_lines.filtered(lambda t: t.test_type_id.id != type_tightening_point_id)):
         ts = {
@@ -137,7 +141,7 @@ def pack_step_payload(env, consum_lines):
             "target": step.norm,
         }
         ts.update({'tightening_image_by_step_code': step.name or step.ref})
-        if step.test_type_id.id == type_tightening_id:
+        if step.test_type_id.id == type_tightening_id or step.test_type_id.id == type_promiscuous_tightening_id:
             val = package_tightening_points(step.operation_point_ids)
             ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
             ts.update({'tightening_total': len(step.operation_point_ids)})  # 将拧紧点的包包裹进去
