@@ -1331,3 +1331,23 @@ func (s *Service) GetConsumeBySeqInStep(step *Steps, seq int) (*StepComsume, err
 
 	return nil, errors.New("Consume Not Found")
 }
+
+func (s *Service) UpdateToolLocation(toolSN string, location string) error {
+	tool, err := s.GetTool(toolSN)
+	if err != nil {
+		return err
+	}
+
+	tool.Location = location
+	_, err = s.eng.Id(tool.Id).Update(tool)
+	return err
+}
+
+func (s *Service) GetToolLocation(toolSN string) (string, error) {
+	tool, err := s.GetTool(toolSN)
+	if err != nil {
+		return "", err
+	}
+
+	return tool.Location, nil
+}

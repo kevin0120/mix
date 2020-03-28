@@ -82,9 +82,9 @@ websocket:
 
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_hardware
-  db_user: odoo
-  db_pwd: odoo
+  db_name: rush_ts002
+  db_user: admin
+  db_pwd: admin
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -117,21 +117,21 @@ io:
   enable: true
   flash_inteval: 1s
   ios:
-    - sn: 1234567
+    - sn: 11
       model: MOXA_E1212
       address: 192.168.3.250:502
-    - sn: 22
-      model: MOXA_E1212
-      address: 192.168.3.251:502
+#    - sn: 22
+#      model: MOXA_E1212
+#      address: 192.168.3.251:502
 #    - sn: 3
 #      model: MOXA_E1242
 #      address: 192.168.3.252:502
-    - sn: 11
-      model: MOXA_E1210
-      address: 192.168.3.240:502
-    - sn: 12
-      model: MOXA_E1211
-      address: 192.168.3.241:502
+#    - sn: 11
+#      model: MOXA_E1210
+#      address: 192.168.3.240:502
+#    - sn: 12
+#      model: MOXA_E1211
+#      address: 192.168.3.241:502
 
 reader:
   enable: false
@@ -164,27 +164,27 @@ tightening_device:
       protocol: OpenProtocol
       sn: 3
       tools:
-        - sn: xx4443
+        - sn: xx0011
           channel: 1
           endpoint: tcp://192.168.3.23:4546
-        - sn: xx0011
+        - sn: xx0022
           channel: 51
           endpoint: tcp://192.168.3.23:4545
 #
-#    - model: ModelDesoutterConnect
-#      protocol: OpenProtocol
-#      sn: 4
-#      tools:
-#        - sn: 4001
-#          channel: 51
-#          endpoint: tcp://192.168.3.100:4545
+    - model: ModelDesoutterConnect
+      protocol: OpenProtocol
+      sn: 4
+      tools:
+        - sn: xx0033
+          channel: 52
+          endpoint: tcp://192.168.3.100:4546
 #        - sn: 4002
 #          channel: 52
 #          endpoint: tcp://192.168.3.100:4546
 ##
 
 ts002:
-  enable: false
+  enable: true
 
   # 柜锁控制（当收刷卡登录成功时，控制相关IO输出）
   io_locker:
