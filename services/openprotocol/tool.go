@@ -311,6 +311,9 @@ func (s *TighteningTool) onResult(result interface{}) {
 	tighteningResult.Count = dbResult.Count
 	tighteningResult.Seq = dbResult.Seq
 	tighteningResult.GroupSeq = dbResult.GroupSeq
+
+	tighteningResult.ScannerCode = dbResult.ScannerCode
+
 	s.controller.doDispatch(dispatcherbus.DispatcherResult, tighteningResult)
 }
 
