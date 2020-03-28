@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-17 01:42+0000\n"
-"PO-Revision-Date: 2020-01-17 01:42+0000\n"
+"POT-Creation-Date: 2020-03-28 05:27+0000\n"
+"PO-Revision-Date: 2020-03-28 05:27+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -26,7 +26,7 @@ msgstr "套筒"
 #: model:ir.actions.act_window,name:tangche_enhanced.product_product_action_carriage
 #: model:ir.ui.view,arch_db:tangche_enhanced.product_search_form_view_sa
 msgid "Carriage"
-msgstr "车辆"
+msgstr "车架"
 
 #. module: tangche_enhanced
 #: model:ir.actions.act_window,help:tangche_enhanced.product_product_action_socket
@@ -67,27 +67,32 @@ msgstr "下载工单"
 #. module: tangche_enhanced
 #: model:ir.ui.view,arch_db:tangche_enhanced.sa_mrp_production_form_inherit
 msgid "Download Workorders"
-msgstr "Download Workorders"
+msgstr "下发工单"
 
 #. module: tangche_enhanced
 #: model:ir.model.fields,field_description:tangche_enhanced.field_mrp_workcenter_loc_io_input
 msgid "IO Input For Picking Confirm"
-msgstr "IO Input For Picking Confirm"
+msgstr "确认IO输入端口"
 
 #. module: tangche_enhanced
 #: model:ir.model.fields,field_description:tangche_enhanced.field_mrp_workcenter_loc_io_output
 msgid "IO Output For Picking Indicate"
-msgstr "IO Output For Picking Indicate"
+msgstr "指示IO输出端口"
 
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_mrp_production
 msgid "Manufacturing Order"
-msgstr "Manufacturing Order"
+msgstr "生产订单"
+
+#. module: tangche_enhanced
+#: model:ir.model.fields,field_description:tangche_enhanced.field_operation_point_parent_test_type
+msgid "Parent Test Type"
+msgstr "父工步类型"
 
 #. module: tangche_enhanced
 #: sql_constraint:mrp.routing.workcenter:0
 msgid "Per Routing only has one unique Routing Work Center!"
-msgstr "Per Routing only has one unique Routing Work Center!"
+msgstr "每条工艺路线只能包含有唯一的作业!"
 
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_product_product
@@ -103,7 +108,12 @@ msgstr "产品模板"
 #: code:addons/tangche_enhanced/models/program.py:16
 #, python-format
 msgid "Program: {0} Code: {1} Must Be Integer!!!"
-msgstr "Program: {0} Code: {1} Must Be Integer!!!"
+msgstr "程序号: {0} 代码: {1} 必须是整数!!!"
+
+#. module: tangche_enhanced
+#: model:sa.quality.point.test_type,name:tangche_enhanced.test_type_tightening_promiscuous
+msgid "Promiscuous Tightening Work Step"
+msgstr "混杂拧紧工步"
 
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_sa_quality_point
@@ -113,7 +123,7 @@ msgstr "质量点"
 #. module: tangche_enhanced
 #: model:ir.model.fields,field_description:tangche_enhanced.field_mrp_workcenter_loc_equipment_id
 msgid "Remote IO Module For Control"
-msgstr "Remote IO Module For Control"
+msgstr "IO模块"
 
 #. module: tangche_enhanced
 #: model:ir.model.fields,field_description:tangche_enhanced.field_operation_point_socket
@@ -122,14 +132,9 @@ msgid "Socket"
 msgstr "套筒"
 
 #. module: tangche_enhanced
-#: sql_constraint:mrp.workcenter.loc:0
-msgid "The Equipment With Input Must be unique!"
-msgstr "The Equipment With Input Must be unique!"
-
-#. module: tangche_enhanced
-#: sql_constraint:mrp.workcenter.loc:0
-msgid "The Equipment With Output Must be unique!"
-msgstr "The Equipment With Output Must be unique!"
+#: model:ir.ui.view,arch_db:tangche_enhanced.tangche_mrp_workcenter_form_view
+msgid "Sync Equipments"
+msgstr "同步工位设备"
 
 #. module: tangche_enhanced
 #: model:ir.actions.act_window,help:tangche_enhanced.product_product_action_carriage
@@ -145,7 +150,7 @@ msgstr "The product form contains information to simplify the sale\n"
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_operation_point
 msgid "Tightening Operation Point"
-msgstr "Tightening Operation Point"
+msgstr "拧紧点"
 
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_mrp_workcenter
@@ -156,7 +161,7 @@ msgstr "工作中心"
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_mrp_workcenter_loc
 msgid "Work Center Location For Picking Component"
-msgstr "Work Center Location For Picking Component"
+msgstr "工作中心位置"
 
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_mrp_routing_workcenter
@@ -180,9 +185,10 @@ msgstr "你需要定义一个产品,不管它是你提供给客户的产成品,�
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_operation_result
 msgid "operation.result"
-msgstr "作业结果"
+msgstr "operation.result"
 
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_workorder_push
 msgid "workorder.push"
 msgstr "workorder.push"
+
