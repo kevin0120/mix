@@ -74,9 +74,9 @@ class MrpWorkCenter(models.Model):
         for equipment in equipment_ids:
             loc = equipment.location_id
             d = {
-                'equipment_sn': equipment.serial_no if equipment else False,  # 拧紧工具,
+                'equipment_sn': equipment.serial_no if equipment else '',  # 拧紧工具,
                 'location': {
-                    'equipment_sn': loc.equipment_id.serial_no if loc.equipment_id else False,  # IO模块
+                    'equipment_sn': loc.equipment_id.serial_no if loc.equipment_id else '',  # IO模块
                     'io_output': loc.io_output,
                     'io_input': loc.io_input
                 },
