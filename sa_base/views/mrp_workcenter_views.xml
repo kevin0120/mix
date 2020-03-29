@@ -85,8 +85,8 @@
                                     <tree string="Equipments">
                                         <field name="name"/>
                                         <field name="technician_user_id"/>
-                                        <field name="category_id" groups="base.group_no_one"/>
-                                        <field name="category_name" string="Equipment Category"/>
+                                        <field name="category_id" string="Equipment Category"/>
+                                        <field name="category_name" string="Equipment Category" groups="base.group_no_one"/>
                                         <field name="mtbf"/>
                                         <field name="mttr"/>
                                         <field name="estimated_next_failure" string="Est. Next Failure"/>

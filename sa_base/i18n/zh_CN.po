@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-28 05:36+0000\n"
-"PO-Revision-Date: 2020-03-28 05:36+0000\n"
+"POT-Creation-Date: 2020-03-29 07:31+0000\n"
+"PO-Revision-Date: 2020-03-29 07:31+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -117,7 +117,7 @@ msgstr "装配线名称"
 #. module: sa_base
 #: selection:controller.program,control_mode:0
 msgid "Assembly Process"
-msgstr "拧紧程序"
+msgstr "装配过程(job)"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_form_inherit_mrp
@@ -132,7 +132,7 @@ msgstr "资产类别"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 msgid "Audit Log"
-msgstr "审查日志"
+msgstr "修改日志"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
@@ -184,7 +184,7 @@ msgstr "BOM用来定义成品所需的原材料的列表；通过制造订单或
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_product_product_active_bom_line_ids
 msgid "BoM Lines"
-msgstr "BoM行"
+msgstr "物料清单行"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_bolt_number
@@ -195,12 +195,12 @@ msgstr "螺栓编号"
 #. module: sa_base
 #: selection:product.template,sa_type:0
 msgid "Bolt Socket"
-msgstr "Bolt Socket"
+msgstr "螺栓套筒"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_socket
 msgid "Bolt Socket No"
-msgstr "Bolt Socket No"
+msgstr "螺栓套筒"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_bom_line_id
@@ -227,7 +227,7 @@ msgstr "取消"
 #. module: sa_base
 #: model:ir.ui.menu,name:sa_base.menu_mrp_vehicle_form
 msgid "Carriage"
-msgstr "Carriage"
+msgstr "转向架"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_maintenance_equipment_view_form_inherit
@@ -237,7 +237,7 @@ msgstr "类别"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_check_count
 msgid "Check count"
-msgstr "Check count"
+msgstr "检测点总数"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_child_ids
@@ -380,7 +380,7 @@ msgstr "连接数"
 #. module: sa_base
 #: selection:product.template,sa_type:0
 msgid "Consumable Component"
-msgstr "Consumable Component"
+msgstr "耗材"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_product_id
@@ -988,7 +988,7 @@ msgstr "最大作业时间(秒)"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_tolerance_max
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_tolerance_max
 msgid "Max Tolerance"
-msgstr "Max Tolerance"
+msgstr "最大冗余"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_measure
@@ -1025,7 +1025,7 @@ msgstr "消息"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_tolerance_min
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_tolerance_min
 msgid "Min Tolerance"
-msgstr "Min Tolerance"
+msgstr "最小冗余"
 
 #. module: sa_base
 #: model:ir.model.fields,help:sa_base.field_maintenance_equipment_connection_unitid
@@ -1045,7 +1045,7 @@ msgstr "ModbusTCP"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workassembly_search
 msgid "Mrp Assembly Line"
-msgstr "MRP组装线"
+msgstr "组装线"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_loc_workcenter_id
@@ -1062,7 +1062,7 @@ msgstr "MRP 工作中心"
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workcenter_search_inherit
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_worksegment_search
 msgid "Mrp Worksegment"
-msgstr "MRP工段"
+msgstr "工段"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_factory_name
@@ -1186,7 +1186,7 @@ msgstr "Operate"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_dispatch_mrp_workorder_workcenter_id
 msgid "Operate In Work Center"
-msgstr "Operate In Work Center"
+msgstr "生产作业"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_picking_id
@@ -1260,7 +1260,7 @@ msgstr "作业"
 #. module: sa_base
 #: selection:controller.program,control_mode:0
 msgid "Parameter Set"
-msgstr "Parameter Set"
+msgstr "pset"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_parent_id
@@ -1504,7 +1504,7 @@ msgstr "数量"
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_RFID
 msgid "RFID"
-msgstr "RFID"
+msgstr "射频识别模块(RFID)"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_bom_form_view
