@@ -156,7 +156,7 @@ export function* manualResult(action: tAction = {}): Saga<void>  {
               measure_result: manual.resultIn?.result?.ok.toUpperCase(),
               measure_torque: parseFloat(manual.resultIn?.result?.niu),
               measure_angle: parseFloat(manual.resultIn?.result?.jao),
-              count: point.max_redo_times,
+              count: point.max_redo_times+1,
             },
           )
 

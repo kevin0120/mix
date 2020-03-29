@@ -4,10 +4,11 @@ import type { Saga } from 'redux-saga';
 import { isNil } from 'lodash-es';
 import { controllerModes } from './constants';
 import notifierActions from '../../Notifier/action';
-import type { tPoint, tScrewStepData } from './interface/typeDef';
+import type { tScrewStepData } from './interface/typeDef';
 import { jobApi, psetApi } from '../../../api/tools';
 import { workingOrder } from '../../order/selector';
 import type { IDevice } from '../../device/IDevice';
+import { stepTypeKeys } from '../constants';
 
 // pset/job模式
 export default {
@@ -46,7 +47,8 @@ export default {
             sequence,
             total,
             workorderCode,
-            ''
+            '',
+            this.type === stepTypeKeys.screw ? 3 : 0
           );
           break;
         } catch (e) {

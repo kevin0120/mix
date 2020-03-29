@@ -193,7 +193,7 @@ function* workOnOrder({ order, config }: { order: IOrder }) {
   try {
 
     yield race([
-      call(order.run, ORDER_STATUS.TODO, config),
+      call(order.run, order.status || ORDER_STATUS.TODO, config),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
     yield put(orderActions.orderDidFinish());

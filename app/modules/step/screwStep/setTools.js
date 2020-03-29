@@ -4,6 +4,7 @@ import controllerModeTasks from './controllerModeTasks';
 import { CommonLog } from '../../../common/utils';
 import type { tScrewStepData } from './interface/typeDef';
 import { getDevice } from '../../deviceManager/devices';
+import { byPassPoint } from './byPassPoint';
 
 export function* setTools(activeControls, controllerMode, isFirst) {
   if (controllerMode === controllerModes.job && !isFirst) {
@@ -14,7 +15,14 @@ export function* setTools(activeControls, controllerMode, isFirst) {
   }
   try {
     let successCount = 0;
-    for (const c of activeControls) {
+    const distinctControls = [];
+    activeControls.forEach(c => {
+      const { toolSN } = c;
+      if (!distinctControls.find(cc => cc.toolSN === toolSN)) {
+        distinctControls.push(c);
+      }
+    });
+    for (const c of distinctControls) {
       successCount += yield call([this, setSingleTool], controllerMode, c);
     }
     return successCount;
@@ -35,6 +43,9 @@ function* setSingleTool(controllerMode, singleControl) {
     }));
     return 1;
   } catch (e) {
+    yield call([this, byPassPoint], [singleControl],
+      call([this, setSingleTool], controllerMode, singleControl)
+    );
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)

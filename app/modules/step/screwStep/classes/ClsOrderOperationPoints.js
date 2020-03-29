@@ -4,18 +4,10 @@ import { CommonLog } from '../../../../common/utils';
 import type { tControl, tPoint, tResult, tScrewStepPayload } from '../interface/typeDef';
 import { ClsOperationPointGroup } from './ClsOperationPointGroup';
 import { ClsOperationPoint } from './ClsOperationPoint';
-import { getDevicesByType } from '../../../deviceManager/devices';
-import { deviceType } from '../../../deviceManager/constants';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOrderOperationPoints {
   _groups: { [groupSeq: number]: ClsOperationPointGroup } = {};
-
-  get activeControls() {
-    return this.points.filter(p => p.isActive).reduce((controls, p) => {
-      return controls.concat(p.controls);
-    }, []);
-  }
 
   constructor(points: Array<tPoint>) {
     // const ret: boolean = ClsOrderOperationPoints.validatePayload(p);
@@ -26,9 +18,15 @@ export class ClsOrderOperationPoints {
     //   // return;
     // }
     // const { points } = p;
-    points.forEach((point: tPoint) => {
+    points.sort((p1, p2) => p1.sequence - p2.sequence).forEach((point: tPoint) => {
       this._appendNewOperationPoint(point);
     });
+  }
+
+  get activeControls() {
+    return this.points.filter(p => p.isActive).reduce((controls, p) => {
+      return controls.concat(p.controls);
+    }, []);
   }
 
   get operationGroups(): { [groupSeq: number]: ClsOperationPointGroup } {
@@ -113,17 +111,22 @@ export class ClsOrderOperationPoints {
   newResult(results: Array<tResult>) {
     let newInactiveControls: Array<?ClsOperationPoint> = [];
     results.forEach(r => {
-      const { tool_sn } = r;
+      const { tool_sn, seq } = r;
       const controls = this.activeControls.filter(c => c.toolSN === tool_sn);
 
       const pointSeqs = [...new Set(controls.map(c => c.sequence))].sort();
 
       if (!pointSeqs.length > 0) {
+        const point = this.points.find(p => p.sequence === seq);
+        point.newResult(r);
         return;
       }
-      const firstSeq = pointSeqs.shift();
+      const firstSeq = pointSeqs[0];
       const point = this.points.find(p => p.sequence === firstSeq);
-      point.newResult(r);
+      const inactive = point.newResult(r);
+      if (inactive) {
+        pointSeqs.shift();
+      }
       if (pointSeqs.length > 0) {
         return;
       }
@@ -149,10 +152,10 @@ export class ClsOrderOperationPoints {
     return [].concat(...allPoints.filter(p => {
       // todo : 有一把工具占用就无法拧紧这个点？
       if (activeControls.find(c => {
-        if(p.point.tightening_tools){
-          return p.toolSNs.find(t => c.toolSN === t) && c.controllerModeId !== p.pset
+        if (p.point.tightening_tools && p.point.tightening_tools.length > 0) {
+          return p.toolSNs.find(t => c.toolSN === t) && c.controllerModeId !== p.pset;
         }
-        return p.toolSNs.find(t => c.toolSN === t)
+        return p.toolSNs.find(t => c.toolSN === t);
       })) {
         return false;
       }

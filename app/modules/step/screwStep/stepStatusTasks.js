@@ -187,6 +187,7 @@ function* doingState(config) {
     const { workCenterMode } = yield select();
     let redoPointClsObj = null;
     let _controlsToActive = [];
+    let _newInactiveControls = [];
     switch (workCenterMode) {
       case workModes.reworkWorkCenterMode: {
         const { point } = reworkConfig;
@@ -232,8 +233,8 @@ function* doingState(config) {
           break;
         }
         case workModes.normWorkCenterMode: {
-          const finalFailPoints = (this._newInactivePoints || []).filter(
-            (p: ClsOperationPoint) => p.isFinalFail
+          const finalFailPoints = (_newInactiveControls || []).filter(
+            (c) => this.points.find(p=>p.sequence===c.sequence)?.isFinalFail
           );
           yield call([this, byPassPoint], finalFailPoints);
 
@@ -288,7 +289,7 @@ function* doingState(config) {
 
       _controlsToActive = [];
 
-      const _newInactiveControls = this._pointsManager.newResult(results);
+      _newInactiveControls = this._pointsManager.newResult(results);
       // disable tools before bypass point
       yield call([this, disableTools], _newInactiveControls);
       yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({

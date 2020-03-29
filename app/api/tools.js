@@ -13,7 +13,7 @@ export function toolEnableApi(toolSN: string, ControllerSN: string = '', enable:
 
 export function psetApi(toolSN: string = '', ControllerSN: string = '', stepCode: number, userIDs: Array<number>,
                         pset: string, sequence: number,
-                        total: number, workorderCode: number, scannerCode: string = ''): Promise<any> {
+                        total: number, workorderCode: number, scannerCode: string = '', batch = 0, count = 1): Promise<any> {
   let psetNum = pset;
   if (typeof pset === 'string') {
     psetNum = parseInt(pset, 10);
@@ -26,9 +26,10 @@ export function psetApi(toolSN: string = '', ControllerSN: string = '', stepCode
     total,
     pset: psetNum,
     sequence,
-    // count,
     workorder_code: workorderCode,
     scanner_code: scannerCode,
+    batch,
+    count
   });
 }
 

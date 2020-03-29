@@ -12,7 +12,7 @@ export class ClsOperationPoint {
   constructor(p: tPoint) {
     this._point = p;
     this._results = [];
-    if (p.tightening_tools) {
+    if (p.tightening_tools && p.tightening_tools.length > 0) {
       this._toolSNs = p.tightening_tools;
       return;
     }
@@ -52,6 +52,10 @@ export class ClsOperationPoint {
   }
 
   get isFinalFail(): boolean {
+    // 一个点绑定多把工具时
+    if(this.controls && this.controls.length>1){
+      return false;
+    }
     // 结果的长度已经达到最大重试次数，同时最后一条结果为fail
     return (
       this._point.max_redo_times >= 0
@@ -59,7 +63,7 @@ export class ClsOperationPoint {
         .length >= this._point.max_redo_times
       && this._results.slice(-1)[0].measure_result === RESULT_STATUS.nok
     ) || (
-      this._results.filter(r => r.count === this._point.max_redo_times && r.measure_result === RESULT_STATUS.nok)
+      this._results.filter(r => r.count > this._point.max_redo_times && r.measure_result === RESULT_STATUS.nok)
         .length > 0
     ) || (
       this._bypass

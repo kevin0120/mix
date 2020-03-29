@@ -7,12 +7,12 @@ import { SCREW_STEP } from './constants';
 import { orderActions } from '../../order/action';
 import { STEP_STATUS } from '../constants';
 
-export function* byPassPoint(finalFailPoints, retry = false) {
+export function* byPassPoint(controls, retry = false) {
   try {
-    const n: string = finalFailPoints
-      .map((p: ClsOperationPoint) => p.point.nut_no)
+    const n: string = controls
+      .map((c) => c.sequence)
       .join(',');
-    if (finalFailPoints.length > 0) {
+    if (controls.length > 0) {
       CommonLog.Debug('Show Next Point By Pass Diag');
       yield put(
         dialogActions.dialogShow({
@@ -56,7 +56,7 @@ export function* byPassPoint(finalFailPoints, retry = false) {
         yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '拧紧失败' })); // 失败退出
       }
       if (bypass) {
-        this._pointsManager.byPassControls(finalFailPoints);
+        this._pointsManager.byPassControls(controls);
       }
       if (doRetry) {
         yield retry;
