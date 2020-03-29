@@ -2,9 +2,9 @@ package storage
 
 import (
 	"encoding/json"
-	"github.com/go-xorm/xorm"
 	"github.com/pkg/errors"
 	"time"
+	"xorm.io/xorm"
 )
 
 //參考文檔

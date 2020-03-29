@@ -103,16 +103,16 @@ func (s *Service) setupWSRequestHandlers() {
 	}
 
 	s.SetupHandlers(wsnotify.WSRequestHandlerMap{
-		wsnotify.WS_TOOL_MODE_SELECT: s.OnWS_TOOL_MODE_SELECT,
-		wsnotify.WS_TOOL_ENABLE:      s.OnWS_TOOL_ENABLE,
-		wsnotify.WS_TOOL_JOB:         s.OnWS_TOOL_JOB,
-		wsnotify.WS_TOOL_PSET:        s.OnWS_TOOL_PSET,
-		wsnotify.WS_TOOL_PSET_BATCH:  s.OnWS_TOOL_PSET_BATCH,
-		wsnotify.WS_TOOL_PSET_LIST:   s.OnWS_TOOL_PSET_LIST,
-		wsnotify.WS_TOOL_PSET_DETAIL: s.OnWS_TOOL_PSET_DETAIL,
-		wsnotify.WS_TOOL_JOB_LIST:    s.OnWS_TOOL_JOB_LIST,
-		wsnotify.WS_TOOL_JOB_DETAIL:  s.OnWS_TOOL_JOB_DETAIL,
-		wsnotify.WS_TOOL_RESULT_SET:  s.OnWS_TOOL_RESULT_SET,
+		wsnotify.WS_TOOL_MODE_SELECT:       s.OnWS_TOOL_MODE_SELECT,
+		wsnotify.WS_TOOL_ENABLE:            s.OnWS_TOOL_ENABLE,
+		wsnotify.WS_TOOL_JOB:               s.OnWS_TOOL_JOB,
+		wsnotify.WS_TOOL_PSET:              s.OnWS_TOOL_PSET,
+		wsnotify.WS_TOOL_PSET_BATCH:        s.OnWS_TOOL_PSET_BATCH,
+		wsnotify.WS_TOOL_PSET_LIST:         s.OnWS_TOOL_PSET_LIST,
+		wsnotify.WS_TOOL_PSET_DETAIL:       s.OnWS_TOOL_PSET_DETAIL,
+		wsnotify.WS_TOOL_JOB_LIST:          s.OnWS_TOOL_JOB_LIST,
+		wsnotify.WS_TOOL_JOB_DETAIL:        s.OnWS_TOOL_JOB_DETAIL,
+		wsnotify.WS_TOOL_RESULT_MANUAL_SET: s.OnWS_TOOL_RESULT_MANUAL_SET,
 	})
 }
 
