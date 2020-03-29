@@ -138,7 +138,8 @@ func (s *Service) OnWS_TOOL_JOB_DETAIL(c websocket.Connection, msg *wsnotify.WSM
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateWSMsg(msg.SN, msg.Type, jobDetail), s.diag)
 }
 
-func (s *Service) OnWS_TOOL_RESULT_SET(c websocket.Connection, msg *wsnotify.WSMsg) {
+//手动回补填写结果
+func (s *Service) OnWS_TOOL_RESULT_MANUAL_SET(c websocket.Connection, msg *wsnotify.WSMsg) {
 	byteData, _ := json.Marshal(msg.Data)
 
 	var result TighteningResult
@@ -162,6 +163,10 @@ func (s *Service) OnWS_TOOL_RESULT_SET(c websocket.Connection, msg *wsnotify.WSM
 	}
 
 	dbTool.Count = result.Count
+	//fixme: xorm 无法设置0的情况
+	if result.Count <= 0 {
+		dbTool.Count = 1
+	}
 	if err := s.storageService.UpdateTool(&dbTool); err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -4, err.Error()), s.diag)
 		return

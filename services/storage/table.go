@@ -156,7 +156,7 @@ type Tools struct {
 	Serial             string `xorm:"varchar(128) 'serial'"`
 	CurrentWorkorderID int64  `xorm:"bigint 'workorder_id'"` //当前正在进行的工单
 	Seq                int    `xorm:"bigint 'sequence'"`
-	Count              int    `xorm:"int 'count'"`
+	Count              int    `xorm:"int 'count'"` //fixme: xorm 无法设置为0
 	Total              int    `xorm:"int 'total'"`
 	Mode               string `xorm:"varchar(128) 'mode'"`
 	UserID             int64  `xorm:"bigint 'user_id'"`

@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"go.uber.org/atomic"
 	"time"
+	"xorm.io/xorm"
 )
 
 type Diagnostic interface {
@@ -203,7 +203,7 @@ func (s *Service) UpdateTool(gun *Tools) error {
 	g, err := s.GetTool(gun.Serial)
 	if err == nil {
 		// update
-		_, err := s.eng.Id(g.Id).Update(gun)
+		_, err := s.eng.ID(g.Id).Update(gun)
 		if err != nil {
 			return err
 		}

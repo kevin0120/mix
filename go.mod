@@ -16,9 +16,9 @@ require (
 	github.com/go-ini/ini v1.46.0 // indirect
 	github.com/go-log/log v0.2.0 // indirect
 	github.com/go-playground/validator/v10 v10.0.1
-	github.com/go-xorm/xorm v0.7.6
 	github.com/goburrow/modbus v0.1.0
 	github.com/goburrow/serial v0.1.0 // indirect
+	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/gousb v0.0.0-20190812193832-18f4c1d8a750
 	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/gorilla/websocket v1.4.1
@@ -71,4 +71,5 @@ require (
 	gopkg.in/ini.v1 v1.46.0 // indirect
 	gopkg.in/resty.v1 v1.12.0
 	gopkg.in/yaml.v2 v2.2.2
+	xorm.io/xorm v1.0.1
 )

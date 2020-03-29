@@ -43,7 +43,8 @@ type PSetSet struct {
 	UserID        int64  `json:"user_id"`
 	PSet          int    `json:"pset"`
 	Sequence      uint   `json:"sequence"`
-	Count         int    `json:"count"`
+	Count         int    `json:"count"` //拧紧结果计数，发送请求时应该不传递
+	Batch         int    `json:"batch"`
 	Total         int    `json:"total"`
 }
 
@@ -161,12 +162,11 @@ func (s *Service) ToolPSetSet(req *PSetSet) error {
 	if err != nil {
 		return err
 	}
-
 	if err := s.ToolPSetBatchSet(&PSetBatchSet{
 		ControllerSN: req.ControllerSN,
 		ToolSN:       req.ToolSN,
 		PSet:         req.PSet,
-		Batch:        1,
+		Batch:        req.Batch,
 	}); err != nil {
 		s.diag.Error("PSet Batch Set Failed", err)
 	}
