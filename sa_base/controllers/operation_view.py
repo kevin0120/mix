@@ -68,6 +68,8 @@ class OperationView(http.Controller):
             current_points = env['operation.point'].search([('parent_qcp_id', '=', operation_id)])
             points_map = {i.id: i for i in current_points}
 
+            context = {'default_parent_test_type': operation.test_type}
+
             for val in points:
                 point_id = env['operation.point'].search([('parent_qcp_id', '=', operation_id),
                                                           ('sequence', '=', val['sequence'])])
@@ -80,10 +82,10 @@ class OperationView(http.Controller):
                         'y_offset': val['y_offset'],
                         'product_id': env.ref('sa_base.product_product_screw_default').id  # 获取默认螺栓
                     })
-                    env['operation.point'].create(val)
+                    env['operation.point'].with_context(context).create(val)
                 else:
                     # 更新
-                    point_id.write(val)
+                    point_id.with_context(context).write(val)
                     if points_map.has_key(point_id.id):
                         del points_map[point_id.id]
 
@@ -116,6 +118,9 @@ class OperationView(http.Controller):
             current_points = env['operation.point'].search([('parent_qcp_id', '=', operation_id)])
             points_map = {i.id: i for i in current_points}
 
+            context = {'default_parent_test_type': operation.test_type}
+
+
             for val in points:
                 point_id = env['operation.point'].search([('parent_qcp_id', '=', operation_id),
                                                           ('sequence', '=', val['sequence'])])
@@ -129,12 +134,12 @@ class OperationView(http.Controller):
                         'y_offset': val['y_offset'],
                         'product_id': env.ref('sa_base.product_product_screw_default').id  # 获取默认螺栓
                     })
-                    ret = env['operation.point'].create(val)
+                    ret = env['operation.point'].with_context(context).create(val)
                     if not ret:
                         _logger.error("Create Operation Point Fail, Vals: {0}".format(pprint.pformat(val, indent=4)))
                 else:
                     # 更新
-                    ret = point_id.write(val)
+                    ret = point_id.with_context(context).write(val)
                     if not ret:
                         _logger.error(u'Update Operation Point Fail, vals: {0}'.format(pprint.pformat(val, indent=4)))
                     if point_id.id in points_map:
