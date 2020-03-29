@@ -110,6 +110,9 @@ export class ClsOrderOperationPoints {
 
   newResult(results: Array<tResult>) {
     let newInactiveControls: Array<?ClsOperationPoint> = [];
+    if(this.activeControls.length===0){
+      this.start();
+    }
     results.forEach(r => {
       const { tool_sn, seq } = r;
       const controls = this.activeControls.filter(c => c.toolSN === tool_sn);

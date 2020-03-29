@@ -48,7 +48,7 @@ export default {
             total,
             workorderCode,
             '',
-            this.type === stepTypeKeys.screw ? 3 : 0
+            this.type === stepTypeKeys.screw ? 1 : 0
           );
           break;
         } catch (e) {
