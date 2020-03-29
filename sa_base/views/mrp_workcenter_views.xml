@@ -42,7 +42,7 @@
                             </group>
                             <group>
                                 <field name="code"/>
-                                <field name="sequence" />
+                                <field name="sequence"/>
                                 <field name="type" required="1"/>
                                 <field name="user_ids" widget="many2many_tags"/>
                                 <field name="calendar_id" groups="base.group_system"/>
@@ -67,14 +67,12 @@
                                             %
                                         </div>
                                     </group>
-                                    <group>
-                                        <group string="Work Area" name="segment">
-                                            <field name="worksegment_id"
-                                                   options="{'no_create_edit': True , 'no_open': True}"/>
-                                            <field name="qc_workcenter_id"
-                                                   options="{'no_create_edit': True , 'no_open': True}"
-                                                   domain="[('type','=','rework')]"/>
-                                        </group>
+                                    <group string="Work Area" name="segment">
+                                        <field name="worksegment_id"
+                                               options="{'no_create_edit': True , 'no_open': True}"/>
+                                        <field name="qc_workcenter_id"
+                                               options="{'no_create_edit': True , 'no_open': True}"
+                                               domain="[('type','=','rework')]"/>
                                     </group>
                                 </group>
                                 <separator string="Description"/>
@@ -86,7 +84,8 @@
                                         <field name="name"/>
                                         <field name="technician_user_id"/>
                                         <field name="category_id" string="Equipment Category"/>
-                                        <field name="category_name" string="Equipment Category" groups="base.group_no_one"/>
+                                        <field name="category_name" string="Equipment Category"
+                                               groups="base.group_no_one"/>
                                         <field name="mtbf"/>
                                         <field name="mttr"/>
                                         <field name="estimated_next_failure" string="Est. Next Failure"/>
@@ -94,8 +93,10 @@
                                 </field>
                             </page>
                             <page name="workcenter_place" string="Places(Component)">
-                                <field name="sa_workcenter_loc_ids" widget="one2many_list" context="{'default_workcenter_id':active_id}">
-                                    <tree name="workcenter_loc" string="Component Places Within Work Center" editable="bottom" edit="1" create="1" delete="1">
+                                <field name="sa_workcenter_loc_ids" widget="one2many_list"
+                                       context="{'default_workcenter_id':active_id}">
+                                    <tree name="workcenter_loc" string="Component Places Within Work Center"
+                                          editable="bottom" edit="1" create="1" delete="1">
                                         <field name="product_id" options="{'no_create_edit': True , 'no_open': True}"/>
                                         <field name="workcenter_id" readonly="1"/>
                                     </tree>
@@ -151,7 +152,6 @@
                 </tree>
             </field>
         </record>
-
 
 
         <record id="sa_mrp_workcenter_group_form_view" model="ir.ui.view">

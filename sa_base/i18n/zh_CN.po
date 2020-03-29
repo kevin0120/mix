@@ -2007,7 +2007,7 @@ msgstr "追踪号(VIN/序列号)"
 #. module: sa_base
 #: selection:product.template,sa_type:0
 msgid "Train Carriage"
-msgstr "Train Carriage"
+msgstr "转向架"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_type
