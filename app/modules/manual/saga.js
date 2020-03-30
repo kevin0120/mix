@@ -18,6 +18,7 @@ import notifierActions from '../Notifier/action';
 import { addNewStory, STORY_TYPE } from './timeline';
 import ResultInput from '../../components/ResultInput';
 import type { tAction } from '../reworkPattern/interface/typeDef';
+import reworkActions from '../reworkPattern/action';
 
 
 export default function* root() {
@@ -83,7 +84,7 @@ export function* manualResult(action: tAction = {}): Saga<void>  {
         {
           label: "取消",
           color: 'info',
-          action: dialogActions.dialogClose()
+          action: reworkActions.cancelRework()
         },
         {
           label: "完成",

@@ -28,13 +28,12 @@ export function* byPassPoint(controls, retry = false) {
               label: 'Common.Retry',
               color: 'info',
               action: screwStepActions.bypassRetry()
-            }] : []),
-            {
+            }, {
               label: 'Common.Manual',
               color: 'info',
               // action: reworkActions.tryRework(null, null, finalFailPoints[0])
               action: { type: SCREW_STEP.MANUAL }
-            },
+            }] : []),
             {
               label: 'Screw.Next',
               color: 'warning',
