@@ -1,7 +1,6 @@
 // @flow
 import { ioInputs, ioOutputs } from '../../modules/io/constants';
 
-
 const defaultConfigs = {
   version: 'v0.1',
   // appName: '智能装配系统-终端',
@@ -14,7 +13,7 @@ const defaultConfigs = {
       inputs: {
         [ioInputs.resetKey]: 0,
         [ioInputs.byPass]: 1,
-        [ioInputs.modeSelect]: 2,
+        [ioInputs.modeSelect]: 2
       },
       outputs: {
         [ioOutputs.white]: 0,
@@ -22,15 +21,14 @@ const defaultConfigs = {
         [ioOutputs.green]: 2,
         [ioOutputs.red]: 3,
         [ioOutputs.unlock]: 4
-
-}
+      }
     }
   },
 
-  adminKey:{
-    enable:false,
-    io_sn:'11',
-    input:3
+  adminKey: {
+    enable: false,
+    io_sn: '11',
+    input: 3
   },
   pages: {
     app: {
@@ -41,7 +39,7 @@ const defaultConfigs = {
       // order: ['user', 'admin'],
       preference: ['admin'],
       event: ['admin'],
-      result: ['admin'],
+      result: ['admin']
       // curve: ['user', 'admin'],
       // help: ['user', 'admin']
     },
@@ -51,29 +49,36 @@ const defaultConfigs = {
   },
   authorization: {
     localUsers: {
-      userName: {
-        password: 'password',
+      // userName: {
+      //   password: 'password',
+      //   role: 'admin',
+      //   uid: '1',
+      //   uuid: '1',
+      //   avatar: ''
+      // },
+      admin: {
+        password: 'admin',
         role: 'admin',
         uid: '1',
         uuid: '1',
         avatar: ''
-      },
-      ming: {
-        password: '123',
-        role: 'user',
-        uid: 'XiaoMing',
-        uuid: '87d1c74e9000',
-        avatar: ''
-      },
-      hong: {
-        password: '123',
-        role: 'user',
-        uid: 'XiaoHong',
-        uuid: '677e0f4f9000',
-        avatar: ''
       }
+      // ming: {
+      //   password: '123',
+      //   role: 'user',
+      //   uid: 'XiaoMing',
+      //   uuid: '87d1c74e9000',
+      //   avatar: ''
+      // },
+      // hong: {
+      //   password: '123',
+      //   role: 'user',
+      //   uid: 'XiaoHong',
+      //   uuid: '677e0f4f9000',
+      //   avatar: ''
+      // }
     },
-    verify: 'online',//'online'
+    verify: 'online', // 'online'
     maxUsers: 0 // 0:no limit
   },
 
@@ -217,7 +222,7 @@ const defaultConfigs = {
     reportStart: false, // 报开工
     reportFinish: false // 报完工
   },
-  debugSettings:{
+  debugSettings: {
     disableOrderTriggerLimit: false
   }
 };
