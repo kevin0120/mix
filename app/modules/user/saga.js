@@ -68,7 +68,7 @@ function* authenticate(action) {
           name: respName,
           uuid: respUUID,
           avatar,
-          role: 'admin'
+          role: 'user'
         };
         yield call(doLogin, userInfo);
       }
@@ -103,7 +103,7 @@ function* authenticate(action) {
           name: respName,
           uuid: respUUID,
           avatar,
-          role: 'admin'
+          role: 'user'
         };
         yield call(doLogin, userInfo);
       }
@@ -120,7 +120,7 @@ function* authenticate(action) {
         name: uuid,
         uuid,
         avatar:'',
-        role: 'admin'
+        role: 'user'
       });
       return;
     }

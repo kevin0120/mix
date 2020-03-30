@@ -39,14 +39,9 @@ const defaultConfigs = {
       manualwork: ['user', 'admin'],
       // viewer: ['user', 'admin'],
       // order: ['user', 'admin'],
-      preference: {
-        Net: ['user', 'admin'],
-        IO: ['user', 'admin'],
-        Connect: ['user', 'admin'],
-        help: ['user', 'admin']
-      },
-      event: ['user', 'admin'],
-      result: ['user', 'admin'],
+      preference: ['admin'],
+      event: ['admin'],
+      result: ['admin'],
       // curve: ['user', 'admin'],
       // help: ['user', 'admin']
     },
@@ -65,14 +60,14 @@ const defaultConfigs = {
       },
       ming: {
         password: '123',
-        role: 'admin',
+        role: 'user',
         uid: 'XiaoMing',
         uuid: '87d1c74e9000',
         avatar: ''
       },
       hong: {
         password: '123',
-        role: 'admin',
+        role: 'user',
         uid: 'XiaoHong',
         uuid: '677e0f4f9000',
         avatar: ''
@@ -119,8 +114,8 @@ const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        // value: 'http://192.168.4.42:8069/api/v1',
-        value: 'http://127.0.0.1:8069/api/v1',
+        value: 'http://192.168.4.42:8069/api/v1',
+        // value: 'http://127.0.0.1:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {

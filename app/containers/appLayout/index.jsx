@@ -70,15 +70,19 @@ function AppLayout(
                   display: 'flex',
                   flexDirection: 'row',
                   justifyContent: 'space-between',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  flex:1
                 }}>
-                  {u.name}
+                  <span style={{flex:1,textOverflow: 'ellipsis', overflow:'hidden'}}>
+                    {u.name}
+                  </span>
                   <Button
                     color="warning"
                     size="md"
                     regular
                     variant="contained"
                     onClick={() => logout(u.uuid)}
+                    style={{right:0}}
                   >
                     <Typography variant="body1">
                       {t('Common.Logout')}
