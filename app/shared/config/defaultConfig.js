@@ -37,7 +37,13 @@ const defaultConfigs = {
       manualwork: ['user', 'admin'],
       // viewer: ['user', 'admin'],
       // order: ['user', 'admin'],
-      preference: ['admin'],
+      preference: {
+        __role: ['admin'],
+        Net: ['user', 'admin'],
+        IO: ['user', 'admin'],
+        Connect: ['user', 'admin'],
+        help: ['user', 'admin']
+      },
       event: ['admin'],
       result: ['admin']
       // curve: ['user', 'admin'],
