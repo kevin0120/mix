@@ -1,7 +1,7 @@
 // @flow
 
 import type { Node } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Menu } from '@material-ui/icons';
@@ -20,8 +20,9 @@ import modelViewerActions from '../../modules/modelViewer/action';
 import type { IOrder } from '../../modules/order/interface/IOrder';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 import PDFViewer from '../../components/PDFViewer';
+import { defaultClient } from '../../common/utils';
 
-const demoPDF = 'http://www.pdf995.com/samples/pdf.pdf';
+// const demoPDF = 'http://www.pdf995.com/samples/pdf.pdf';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -110,9 +111,9 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   const modelsData =
     (viewingOrder &&
       viewingOrder.payload &&
-      viewingOrder.payload.models &&
-      viewingOrder.payload.models.map(m => [
-        m.name,
+      viewingOrder.payload.products &&
+      viewingOrder.payload.products.map(m => [
+        m.code,
         m.desc,
         withI18n(
           t => (
@@ -128,6 +129,18 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
         )
       ])) ||
     [];
+
+  const [pdfUrl, setPdfUrl] = useState('');
+
+  const url = viewingOrder?.payload?.worksheet?.url;
+  useEffect(() => {
+    defaultClient
+      .get()
+      .then(resp => {
+        setPdfUrl(resp.request._redirectable._currentUrl);
+      });
+  }, [url]);
+
   const modelsTableDialog = {
     maxWidth: 'md',
     buttons: [
@@ -156,7 +169,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       color: 'warning'
     }],
     title: tNS(trans.viewFile, stepWorkingNS),
-    content: <PDFViewer file={demoPDF} page={0}/>
+    content: <PDFViewer file={url}/>
   };
 
   return withI18n(
