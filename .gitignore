@@ -1,0 +1,11 @@
+build
+tivan
+.vagrant
+/rush
+.idea
+*~
+*#
+bin
+*.log
+*.orig
+.scannerwork

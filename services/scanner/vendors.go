@@ -1,0 +1,348 @@
+package scanner
+
+import (
+	"errors"
+	"github.com/google/gousb"
+	"github.com/tarm/serial"
+	"runtime"
+)
+
+const (
+	VendorHoneyWell  = 3118
+	ProductHoneyWell = 2305
+	VendorDataLogic  = 1529
+	ProductDataLogic = 8714
+
+	// Zebra DS8178 windows下请安装CDC驱动
+	VendorZebra  = 1504
+	ProductZebra = 4608
+)
+
+const (
+	KeyShift    = 2
+	IndexTarget = 2
+	IndexShift  = 0
+)
+
+var keymap = map[byte][]string{
+	4:  {"a", "A"},
+	5:  {"b", "B"},
+	6:  {"c", "C"},
+	7:  {"d", "D"},
+	8:  {"e", "E"},
+	9:  {"f", "F"},
+	10: {"g", "G"},
+	11: {"h", "H"},
+	12: {"i", "I"},
+	13: {"j", "J"},
+	14: {"k", "K"},
+	15: {"l", "L"},
+	16: {"m", "M"},
+	17: {"n", "N"},
+	18: {"o", "O"},
+	19: {"p", "P"},
+	20: {"q", "Q"},
+	21: {"r", "R"},
+	22: {"s", "S"},
+	23: {"t", "T"},
+	24: {"u", "U"},
+	25: {"v", "V"},
+	26: {"w", "W"},
+	27: {"x", "X"},
+	28: {"y", "Y"},
+	29: {"z", "Z"},
+	30: {"1", "!"},
+	31: {"2", "@"},
+	32: {"3", "#"},
+	33: {"4", "$"},
+	34: {"5", "%"},
+	35: {"6", "^"},
+	36: {"7", "&"},
+	37: {"8", "*"},
+	38: {"9", "("},
+	39: {"0", ")"},
+	51: {";", ":"},
+	53: {"`", "~"},
+	45: {"-", "_"},
+	46: {"=", "+"},
+	47: {"[", "{"},
+	48: {"]", "}"},
+	52: {"'", "\""},
+	54: {",", "<"},
+	55: {".", ">"},
+	56: {"/", "?"},
+}
+
+type commonHoneywellScanner struct {
+	dev        USBDevice
+	cfg        *USBConfig
+	Interface  *USBInterface
+	InEndpoint *USBInEndpoint
+}
+
+func (d *DeviceInfo) updateDeviceService() error {
+	if runtime.GOOS == "windows" {
+		d.DeviceService = &commonUSBSerialScanner{}
+		return nil
+	}
+	switch d.VendorID {
+	case VendorHoneyWell:
+		d.DeviceService = &commonHoneywellScanner{}
+	case VendorDataLogic:
+		d.DeviceService = &commonDataLogicScanner{}
+	case VendorZebra:
+		d.DeviceService = &commonZebraScanner{}
+	default:
+		return errors.New("updateDeviceService Fail")
+	}
+	return nil
+}
+
+func (v *commonHoneywellScanner) NewReader(dev USBDevice) error {
+	v.dev = dev
+	if runtime.GOOS != "windows" {
+		dev := dev.(*gousb.Device)
+		cfg, err := dev.Config(1)
+		if err != nil {
+			return err
+		}
+		v.cfg = cfg
+		intf, err := cfg.Interface(0, 0)
+		if err != nil {
+			return err
+		}
+		v.Interface = intf
+		epIn, err := intf.InEndpoint(4)
+		if err != nil {
+			return err
+		}
+		v.InEndpoint = epIn
+
+		return nil
+	}
+
+	return nil
+}
+
+//func (v *commonHoneywellScanner) Debounce() (time.Duration, time.Duration) {
+//	return 300 * time.Millisecond, 300 * time.Millisecond
+//}
+
+func (v *commonHoneywellScanner) Read(buf []byte) (int, error) {
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Read(buf)
+	} else {
+		if v.InEndpoint == nil {
+			return 0, errors.New("not Reader")
+		}
+		return v.InEndpoint.Read(buf)
+	}
+
+}
+
+func (v *commonHoneywellScanner) Close() error {
+	var err error
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		err = d.Close()
+	} else {
+		d := v.dev.(*gousb.Device)
+		if v.Interface != nil {
+			v.Interface.Close()
+		}
+		if v.cfg != nil {
+			err = v.cfg.Close()
+		}
+		if err := d.Close(); err != nil {
+			return err
+		}
+	}
+	return err
+}
+
+func commonParse(buf []byte) (string, error) {
+	v := buf[IndexTarget]
+	if v == 0 || keymap[v] == nil {
+		return "", errors.New("invalid byte")
+	}
+
+	str := keymap[v][0]
+	if buf[IndexShift] == KeyShift {
+		str = keymap[v][1]
+	}
+
+	return str, nil
+}
+
+func (v *commonHoneywellScanner) Parse(buf []byte) (string, error) {
+	//fmt.Println(buf)
+	return commonParse(buf)
+}
+
+type commonDataLogicScanner struct {
+	dev        USBDevice
+	cfg        *USBConfig
+	Interface  *USBInterface
+	InEndpoint *USBInEndpoint
+}
+
+type commonUSBSerialScanner struct {
+	dev USBDevice
+}
+
+func (v *commonDataLogicScanner) NewReader(dev USBDevice) error {
+	v.dev = dev
+	if runtime.GOOS != "windows" {
+		dev := dev.(*gousb.Device)
+		cfg, err := dev.Config(1)
+		if err != nil {
+			return err
+		}
+		v.cfg = cfg
+		intf, err := cfg.Interface(0, 0)
+		if err != nil {
+			return err
+		}
+		v.Interface = intf
+		epIn, err := intf.InEndpoint(2)
+		if err != nil {
+			return err
+		}
+		v.InEndpoint = epIn
+
+		return nil
+	}
+	return nil
+}
+
+func (v *commonDataLogicScanner) Read(buf []byte) (int, error) {
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Read(buf)
+	} else {
+		// unix and linux
+		if v.InEndpoint == nil {
+			return 0, errors.New("not Reader")
+		}
+		return v.InEndpoint.Read(buf)
+	}
+}
+
+func (v *commonDataLogicScanner) Close() error {
+	var err error
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Close()
+	} else {
+		d := v.dev.(*gousb.Device)
+		if v.Interface != nil {
+			v.Interface.Close()
+		}
+		if v.cfg != nil {
+			err = v.cfg.Close()
+		}
+		if err := d.Close(); err != nil {
+			return err
+		}
+	}
+	return err
+
+}
+
+func (v *commonDataLogicScanner) Parse(buf []byte) (string, error) {
+	return commonParse(buf)
+}
+
+//func (v *commonDataLogicScanner) Debounce() (time.Duration, time.Duration) {
+//	return 300 * time.Millisecond, 300 * time.Millisecond
+//}
+
+func (v *commonUSBSerialScanner) NewReader(d USBDevice) error {
+	v.dev = d
+	return nil
+}
+
+func (v *commonUSBSerialScanner) Parse(buf []byte) (string, error) {
+	return string(buf), nil
+}
+
+func (v *commonUSBSerialScanner) Close() error {
+	d := v.dev.(*serial.Port)
+	return d.Close()
+}
+
+func (v *commonUSBSerialScanner) Read(buf []byte) (int, error) {
+	d := v.dev.(*serial.Port)
+	return d.Read(buf)
+}
+
+type commonZebraScanner struct {
+	dev        USBDevice
+	cfg        *USBConfig
+	Interface  *USBInterface
+	InEndpoint *USBInEndpoint
+}
+
+func (v *commonZebraScanner) NewReader(dev USBDevice) error {
+	v.dev = dev
+	if runtime.GOOS != "windows" {
+		dev := dev.(*gousb.Device)
+		cfg, err := dev.Config(1)
+		if err != nil {
+			return err
+		}
+		v.cfg = cfg
+		intf, err := cfg.Interface(0, 0)
+		if err != nil {
+			return err
+		}
+		v.Interface = intf
+		epIn, err := intf.InEndpoint(2)
+		if err != nil {
+			return err
+		}
+		v.InEndpoint = epIn
+
+		return nil
+	}
+	return nil
+}
+
+func (v *commonZebraScanner) Read(buf []byte) (int, error) {
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Read(buf)
+	} else {
+		// unix and linux
+		if v.InEndpoint == nil {
+			return 0, errors.New("not Reader")
+		}
+		return v.InEndpoint.Read(buf)
+	}
+}
+
+func (v *commonZebraScanner) Close() error {
+	var err error
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Close()
+	} else {
+		d := v.dev.(*gousb.Device)
+		if v.Interface != nil {
+			v.Interface.Close()
+		}
+		if v.cfg != nil {
+			err = v.cfg.Close()
+		}
+		if err := d.Close(); err != nil {
+			return err
+		}
+	}
+	return err
+
+}
+
+func (v *commonZebraScanner) Parse(buf []byte) (string, error) {
+	return commonParse(buf)
+}

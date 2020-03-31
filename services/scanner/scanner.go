@@ -1,0 +1,271 @@
+package scanner
+
+import (
+	"github.com/bep/debounce"
+	"github.com/google/gousb"
+	"github.com/masami10/rush/services/device"
+	"github.com/pkg/errors"
+	"go.uber.org/atomic"
+	"runtime"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const (
+	ScannerOpenItv       = 500 * time.Millisecond
+	ScannerBufLen        = 256
+	ScannerStatusOnline  = "online"
+	ScannerStatusOffline = "offline"
+)
+
+type DeviceService interface {
+	Parse([]byte) (string, error)
+
+	NewReader(d USBDevice) error
+
+	Read([]byte) (int, error)
+
+	Close() error
+}
+
+type DeviceInfo struct {
+	VendorID  ID
+	ProductID ID
+	Channel   string //evdev(linux/mac）or COM(win)
+	diag      Diagnostic
+	DeviceService
+}
+
+func NewDevice(channel string, d Diagnostic) *DeviceInfo {
+	ret := &DeviceInfo{
+		Channel: channel,
+		diag:    d,
+	}
+	if runtime.GOOS != "windows" {
+		var vid, pid int64
+		ls := strings.Split(channel, ":")
+		if len(ls) != 2 {
+			return ret
+		}
+		vid, _ = strconv.ParseInt(ls[0], 10, 16)
+		pid, _ = strconv.ParseInt(ls[1], 10, 16)
+		ret.VendorID = ID(vid)
+		ret.ProductID = ID(pid)
+	}
+
+	return ret
+}
+
+type Notify interface {
+	OnStatus(string, string)
+	OnRecv(string, string)
+}
+
+type Scanner struct {
+	device.BaseDevice // 基类
+	devInfo           *DeviceInfo
+	usbDevice         USBDevice // maybe gousb, or serial
+	diag              Diagnostic
+	status            atomic.Value
+	debounced         func(f func())
+	debounceTrigger   bool
+	init              bool
+}
+
+func NewScanner(channel string, d Diagnostic, dev USBDevice, service *Service) *Scanner {
+	di := NewDevice(channel, d)
+
+	s := &Scanner{devInfo: di, diag: d, usbDevice: dev, debounceTrigger: false, init: true}
+	s.BaseDevice = device.CreateBaseDevice(device.BaseDeviceTypeScanner, d, service)
+	s.BaseDevice.SetSerialNumber(service.config().EntityLabel)
+	return s
+}
+
+func (s *Scanner) DoOnDeviceStatus(symbol string, status string) error {
+	return s.BaseDevice.DoOnDeviceStatus(s.Channel(), status)
+}
+
+func (s *Scanner) Start() error {
+	if err := s.BaseDevice.Start(); err != nil {
+		return err
+	}
+	go s.manage()
+	return nil
+}
+
+func (s *Scanner) Stop() error {
+	return s.close()
+}
+
+func (s *Scanner) Channel() string {
+	return s.devInfo.Channel
+}
+
+func (s *Scanner) getVIDPID() (ID, ID) {
+	di := s.devInfo
+	if di == nil {
+		return 0, 0
+	}
+	return di.VendorID, di.ProductID
+}
+
+func (s *Scanner) open() (USBDevice, error) {
+	di := s.devInfo
+	if di == nil {
+		return nil, errors.New("DeviceInfo is Empty")
+	}
+	label := s.Channel()
+	if label == "" {
+		return nil, errors.New("BaseDevice Info Label is Empty\n")
+	}
+	if runtime.GOOS != "windows" {
+		// 通过 gousb 创建vid, pid
+		vid, pid := s.getVIDPID()
+		if vid == 0 || pid == 0 {
+			return nil, errors.New("BaseDevice Info is Empty\n")
+		}
+		d := s.usbDevice.(*gousb.Device)
+		if d == nil {
+			return nil, errors.New("BaseDevice is Empty\n")
+		}
+		err := d.SetAutoDetach(true)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err := di.updateDeviceService(); err != nil {
+		return nil, err
+	}
+	if err := di.NewReader(s.usbDevice); err != nil {
+		s.diag.Error("Scanner Open Error", err)
+		return nil, err
+	}
+
+	return s.usbDevice, nil
+}
+
+func (s *Scanner) close() error {
+	d := s.usbDevice
+	if d == nil {
+		return nil
+	}
+	di := s.devInfo
+	if di != nil {
+		if err := di.Close(); err != nil {
+			return err
+		}
+	}
+	s.usbDevice = nil
+	s.devInfo = nil
+	return nil
+}
+
+func (s *Scanner) manage() {
+	for {
+		if s.Status() == ScannerStatusOffline {
+			_ = s.connect()
+		}
+		if s.Status() == ScannerStatusOnline {
+			s._recv()
+		}
+		time.Sleep(ScannerOpenItv)
+	}
+}
+
+func (s *Scanner) connect() error {
+	d, err := s.open()
+	if err == nil {
+		// tightening_device online
+		s.usbDevice = d
+		s.BaseDevice.OnDeviceStatus(device.BaseDeviceStatusOnline)
+	}
+	return err
+}
+
+func (s *Scanner) recv() error {
+	//ctx := gousb.NewContext()
+	//defer ctx.Close()
+	d, err := s.open()
+	if err == nil {
+		// tightening_device online
+		s.usbDevice = d
+		s.BaseDevice.OnDeviceStatus(device.BaseDeviceStatusOnline)
+		s._recv() //阻塞接收数据
+		return nil
+	} else {
+		return err
+	}
+}
+
+func (s *Scanner) resetDebounce() {
+	if s.init {
+		s.init = false
+	}
+
+	s.debounceTrigger = false
+}
+
+func (s *Scanner) triggerDebounce() {
+	if !s.debounceTrigger {
+		//debInit, debCommon := s.devInfo.Debounce()
+		//deb := debCommon
+		//if s.init {
+		//	deb = debInit
+		//}
+
+		s.debounced = debounce.New(100 * time.Millisecond)
+		s.debounceTrigger = true
+	}
+}
+
+func (s *Scanner) _recv() {
+	buf := make([]byte, ScannerBufLen)
+	di := s.devInfo
+	if di == nil {
+		return
+	}
+
+	strRecv := ""
+	for {
+		n, err := di.Read(buf)
+		if err != nil {
+			s.diag.Error("IORead Fail", err)
+			// tightening_device offline
+			s.BaseDevice.OnDeviceStatus(device.BaseDeviceStatusOffline)
+			return
+		}
+
+		if s.devInfo == nil {
+			s.diag.Error("Recv Fail, Plz init tightening_device info first",
+				errors.Errorf("Scanner: %s ", s.Channel()))
+			continue
+		}
+
+		if n > 0 {
+			s.triggerDebounce()
+			str, err := s.devInfo.Parse(buf[0:n])
+			if err == nil {
+				strRecv += str
+			}
+
+			s.debounced(func() {
+				if strRecv != "" {
+					if err := s.BaseDevice.OnDeviceRecv(strRecv); err != nil {
+						s.diag.Error("OnDeviceRecv Error", err)
+					}
+					s.resetDebounce()
+					strRecv = ""
+				}
+			})
+		}
+	}
+}
+
+func (s *Scanner) Data() interface{} {
+	return nil
+}
+
+func (s *Scanner) Config() interface{} {
+	return nil
+}
