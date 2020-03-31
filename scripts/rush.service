@@ -1,0 +1,18 @@
+# If you modify this, please also make sure to edit init.sh
+
+[Unit]
+Description=Time series data processing engine.
+Documentation=https://github.com/masami10/rush
+After=network.target
+
+[Service]
+User=rush
+Group=rush
+LimitNOFILE=65536
+EnvironmentFile=-/etc/default/rush
+ExecStart=/usr/bin/rushd -config /etc/rush/rush.yaml $RUSH_OPTS
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

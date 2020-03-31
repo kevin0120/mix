@@ -1,0 +1,204 @@
+package server
+
+import (
+	"fmt"
+	"github.com/masami10/rush/command"
+	"github.com/masami10/rush/services/broker"
+	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/diagnostic"
+	"github.com/masami10/rush/services/grpc"
+	"github.com/masami10/rush/services/hmi"
+	"github.com/masami10/rush/services/httpd"
+	"github.com/masami10/rush/services/io"
+	"github.com/masami10/rush/services/reader"
+	"github.com/masami10/rush/services/scanner"
+	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/transport"
+	"github.com/masami10/rush/services/ts002"
+	"github.com/masami10/rush/utils"
+	"os"
+	"os/user"
+	"path/filepath"
+
+	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/minio"
+	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/openprotocol"
+	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
+	"github.com/pkg/errors"
+)
+
+type Config struct {
+	Hostname string `yaml:"hostname"`
+	DataDir  string `yaml:"data_dir"`
+	SN       string `yaml:"serial_no"`
+
+	DocPath string `yaml:"doc_path"`
+
+	Logging diagnostic.Config `yaml:"logging"`
+
+	HTTP httpd.Config `yaml:"httpd"`
+
+	Minio minio.Config `yaml:"minio"`
+
+	Aiis aiis.Config `yaml:"aiis"`
+
+	WSNotify wsnotify.Config `yaml:"websocket"`
+
+	Odoo odoo.Config `yaml:"odoo"`
+
+	Storage storage.Config `yaml:"storage"`
+
+	AudiVW audi_vw.Config `yaml:"audi/vw"`
+
+	OpenProtocol openprotocol.Config `yaml:"openprotocol"`
+
+	Scanner scanner.Config `yaml:"scanner"`
+
+	IO io.Config `yaml:"io"`
+
+	Broker broker.Config `yaml:"broker"`
+
+	Grpc grpc.Config `yaml:"grpc"`
+
+	Transport transport.Config `yaml:"transport"`
+
+	Reader reader.Config `yaml:"reader"`
+
+	TighteningDevice tightening_device.Config `yaml:"tightening_device"`
+
+	Device device.Config `yaml:"device"`
+
+	Hmi hmi.Config `yaml:"hmi"`
+
+	TS002 ts002.Config `yaml:"ts002"`
+
+	Commander command.Commander `yaml:"-"`
+}
+
+func NewConfig() *Config {
+	sn := utils.GenerateID()
+	c := &Config{
+		Hostname:  "localhost",
+		SN:        sn,
+		Commander: command.ExecCommander,
+	}
+
+	c.HTTP = httpd.NewConfig()
+	c.Minio = minio.NewConfig()
+	c.Aiis = aiis.NewConfig()
+	c.WSNotify = wsnotify.NewConfig()
+	c.Storage = storage.NewConfig()
+	c.Logging = diagnostic.NewConfig()
+	c.AudiVW = audi_vw.NewConfig()
+	c.OpenProtocol = openprotocol.NewConfig()
+	c.Odoo = odoo.NewConfig()
+	c.Scanner = scanner.NewConfig()
+	c.IO = io.NewConfig()
+	c.Reader = reader.NewConfig()
+	c.TighteningDevice = tightening_device.NewConfig()
+	c.Device = device.NewConfig()
+	c.Broker = broker.NewConfig()
+	c.Grpc = grpc.NewConfig()
+	c.Transport = transport.NewConfig()
+	c.Hmi = hmi.NewConfig()
+	c.TS002 = ts002.NewConfig()
+
+	return c
+}
+
+func NewDemoConfig() (*Config, error) {
+	c := NewConfig()
+
+	var homeDir string
+	// By default, store meta and data files in current users home directory
+	u, err := user.Current()
+	if err == nil {
+		homeDir = u.HomeDir
+	} else if os.Getenv("HOME") != "" {
+		homeDir = os.Getenv("HOME")
+	} else {
+		return nil, fmt.Errorf("failed to determine current user for storage")
+	}
+
+	c.DocPath = filepath.Join(homeDir, "doc", c.DocPath)
+	c.DataDir = filepath.Join(homeDir, ".rush", c.DataDir)
+
+	return c, nil
+}
+
+func (c *Config) Validate() error {
+	if c.Hostname == "" {
+		return fmt.Errorf("must configure valid hostname")
+	}
+	if c.DataDir == "" {
+		return fmt.Errorf("must configure valid data dir")
+	}
+
+	if err := c.HTTP.Validate(); err != nil {
+		return errors.Wrap(err, "http")
+	}
+
+	if err := c.Minio.Validate(); err != nil {
+		return errors.Wrap(err, "minio")
+	}
+
+	if err := c.Aiis.Validate(); err != nil {
+		return errors.Wrap(err, "aiis")
+	}
+
+	if err := c.Odoo.Validate(); err != nil {
+		return errors.Wrap(err, "odoo")
+	}
+
+	if err := c.WSNotify.Validate(); err != nil {
+		return errors.Wrap(err, "websocket")
+	}
+
+	if err := c.Storage.Validate(); err != nil {
+		return errors.Wrap(err, "storage")
+	}
+
+	if err := c.Scanner.Validate(); err != nil {
+		return errors.Wrap(err, "scanner")
+	}
+
+	if err := c.IO.Validate(); err != nil {
+		return errors.Wrap(err, "io")
+	}
+
+	if err := c.Reader.Validate(); err != nil {
+		return errors.Wrap(err, "reader")
+	}
+
+	if err := c.TighteningDevice.Validate(); err != nil {
+		return errors.Wrap(err, "tightening_device")
+	}
+
+	if err := c.Device.Validate(); err != nil {
+		return errors.Wrap(err, "device")
+	}
+	if err := c.Broker.Validate(); err != nil {
+		return errors.Wrap(err, "broker")
+	}
+
+	if err := c.Grpc.Validate(); err != nil {
+		return errors.Wrap(err, "grpc")
+	}
+
+	if err := c.Transport.Validate(); err != nil {
+		return errors.Wrap(err, "transport")
+	}
+
+	if err := c.Hmi.Validate(); err != nil {
+		return errors.Wrap(err, "hmi")
+	}
+
+	if err := c.TS002.Validate(); err != nil {
+		return errors.Wrap(err, "ts002")
+	}
+
+	return nil
+}

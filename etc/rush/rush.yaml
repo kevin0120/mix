@@ -1,0 +1,207 @@
+hostname: localhost
+data_dir: /home/gubin/.rush
+# 如果是手动模式，请在此处配置工位代码
+serial_no: TA2-26L-01
+doc_path: ./etc/rush/api.json
+logging:
+#  file: ./logs/%Y%m%d.log
+  file: STDOUT
+  level: DEBUG
+  max_age: 3000h
+  rotate: 24h
+broker:
+  connect-urls:
+#    - nats://192.168.4.203:4222
+#    - nats://192.168.4.203:4223
+#    - nats://192.168.4.203:4224
+    - nats://127.0.0.1:4222
+    - nats://127.0.0.1:4223
+    - nats://127.0.0.1:4224
+  enable: true
+  provider: nats
+  connect-options:
+    name: Dummy Server
+    token: Dummy Token
+  name: 31a0def7-785c-4f43-ba19-1736a2e8b47c
+grpc:
+  enable: false
+  address: 127.0.0.1:9093
+  workers: 2
+transport:
+  provider: broker
+httpd:
+  bind-address: :8082
+  log-enabled: true
+  write-tracing: false
+  shutdown-timeout: 10s
+  cors:
+    allowed-origins:
+    - '*'
+    allow-credentials: true
+    allowed-methods:
+    - 'GET'
+    - 'HEAD'
+    - 'POST'
+    - 'PUT'
+    - 'PATCH'
+    - 'OPTIONS'
+
+minio:
+  enable: true
+  url: 127.0.0.1:9000
+  bucket: curves
+  access: minio
+  secret: minio123
+  secure: false
+  reupload_interval: 1s
+aiis:
+  enable: true
+  timeout: 5s
+  ws_result_route: ws://127.0.0.1/aiis/v1/ws/results
+  result_upload_inteval: 5s
+  keep_alive: 3s
+  recheck: false
+odoo:
+  urls:
+    - http://127.0.0.1:8069
+  timeout: 8s
+  interval: 1s
+  max_retry: 3
+  workers: 1
+  endpoints:
+    - name: test
+      path: /api/v1/test
+      headers:
+        Content-Type: application/json
+      method: GET
+
+websocket:
+  route: /rush/v1/ws
+  read_buf_size: 65535
+  write_buf_size: 65535
+
+storage:
+  db_url: 127.0.0.1:5432
+  db_name: rush_ts002
+  db_user: admin
+  db_pwd: admin
+  max_connection: 60
+  vacuum_period: 2160h
+  data_keep: 2160h
+audi/vw:
+  port: 4710
+  max_connection: 1024
+  read_buf: 65535
+  req_time_out: 300ms
+  keep_alive_period: 2s
+  tool_info_period: 10s
+  version: 21
+
+openprotocol:
+  skip_jobs:
+  - 250
+  - 240
+
+  # 0:vin 1:id2 2:id3 3:id4
+  data_index: 2
+  vin_index:
+    - 0
+    - 1
+  tool_info_period: 10h
+  default_mode: pset
+
+scanner:
+  enable: false
+  entity_label: 3118:2305
+io:
+  enable: true
+  flash_inteval: 1s
+  ios:
+    - sn: 11
+      model: MOXA_E1212
+      address: 192.168.3.250:502
+#    - sn: 22
+#      model: MOXA_E1212
+#      address: 192.168.3.251:502
+#    - sn: 3
+#      model: MOXA_E1242
+#      address: 192.168.3.252:502
+#    - sn: 11
+#      model: MOXA_E1210
+#      address: 192.168.3.240:502
+#    - sn: 12
+#      model: MOXA_E1211
+#      address: 192.168.3.241:502
+
+reader:
+  enable: false
+
+device:
+  enable: true
+
+# 协议类型: Audi/VW, OpenProtocol
+# 支持型号: ModelDesoutterCvi3, ModelDesoutterCvi2, ModelDesoutterDeltaWrench, ModelDesoutterConnect
+tightening_device:
+  enable: true
+  devices:
+#    - model: ModelDesoutterDeltaWrench
+#      protocol: OpenProtocol
+#      sn: 1
+#      tools:
+#        - sn: 1001
+#          endpoint: tcp://192.168.3.25:4545
+#          channel: 1
+#
+#    - model: ModelDesoutterDeltaWrench
+#      protocol: OpenProtocol
+#      sn: 2
+#      tools:
+#        - sn: 2001
+#          endpoint: tcp://192.168.0.26:4545
+#          channel: 1
+#
+    - model: ModelDesoutterCvi3
+      protocol: OpenProtocol
+      sn: 3
+      tools:
+        - sn: xx0011
+          channel: 1
+          endpoint: tcp://192.168.3.23:4546
+        - sn: xx0022
+          channel: 51
+          endpoint: tcp://192.168.3.23:4545
+#
+    - model: ModelDesoutterConnect
+      protocol: OpenProtocol
+      sn: 4
+      tools:
+        - sn: xx0033
+          channel: 52
+          endpoint: tcp://192.168.3.100:4546
+#        - sn: 4002
+#          channel: 52
+#          endpoint: tcp://192.168.3.100:4546
+##
+
+ts002:
+  enable: true
+
+  # 柜锁控制（当收刷卡登录成功时，控制相关IO输出）
+  io_locker:
+    - 0
+
+  # 报警控制（当收到MES报警请求或拧紧NOK时，控制相关IO输出，持续5秒）
+  io_alarm:
+    - 1
+    - 11
+
+  # 报警持续时间
+  io_alarm_last: 5s
+
+  # MES接口配置
+  mes_api:
+    api_url: http://127.0.0:1:8000/api/v1
+    timeout: 10s
+    retry_count: 3
+    endpoint_cardinfo: /cardinfo
+    endpoint_result_upload: /results
