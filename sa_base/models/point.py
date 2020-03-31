@@ -1,0 +1,260 @@
+# -*- coding: utf-8 -*-
+
+
+from odoo import api, fields, models, SUPERUSER_ID, _
+
+from odoo.exceptions import UserError, ValidationError
+
+from odoo.addons import decimal_precision as dp
+
+import uuid
+
+
+class OperationPointsGroup(models.Model):
+    _name = 'operation.point.group'
+    _description = 'Tightening Operation Point Group'
+
+    _order = "sequence"
+
+    sequence = fields.Integer('sequence', default=1)
+
+    proposal_key_num = fields.Integer(default=0, copy=False)
+
+    name = fields.Char('Operation Point Group', required=True,
+                       default=lambda self: self.env['ir.sequence'].next_by_code('operation.point.group'))
+    key_num = fields.Integer(string='Key Point Count', copy=False, compute="_compute_key_point_count",
+                             inverse='_inverse_key_point_count',
+                             store=True)
+    # operation_point_ids_domain = fields.Char(
+    #     compute="_compute_operation_point_ids_domain",
+    #     readonly=True,
+    #     store=False,
+    # )
+
+    work_step_id = fields.Many2one('sa.quality.point', ondelete='cascade', index=True)
+
+    operation_point_ids = fields.One2many('operation.point', 'group_id',
+                                          string='Points', copy=False)
+
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'Operation Point Group Name MUST BE Unique!')]
+
+    # @api.constrains('operation_point_ids')
+    # def _constraint_operation_point_ids(self):
+    #     point_ids = self.operation_point_ids.ids
+    #     if len(point_ids) != len(set(point_ids)):
+    #         raise ValidationError(u'作业点设定中存在重复项')
+
+    @api.multi
+    def _inverse_key_point_count(self):
+        for record in self:
+            record.proposal_key_num = record.key_num
+
+    @api.constrains('key_num')
+    def _constraint_key_num(self):
+        for record in self:
+            lk = len(record.operation_point_ids.filtered(lambda r: r.is_key))
+            if record.key_num < lk:
+                raise ValidationError(_('Key Point Number Can Not Less Than Operation Point Key Total'))
+
+    @api.multi
+    @api.depends('operation_point_ids.is_key', 'proposal_key_num')
+    def _compute_key_point_count(self):
+        for record in self:
+            lk = len(record.operation_point_ids.filtered(lambda r: r.is_key))
+            record.key_num = max(record.proposal_key_num, lk)
+
+    # @api.multi
+    # def name_get(self):
+    #     res = []
+    #     for point in self:
+    #         res.append((point.id, _('[%s] %s') % (point.operation_id.name, point.name)))
+    #     return res
+
+
+class OperationPoints(models.Model):
+    _name = 'operation.point'
+    _description = 'Tightening Operation Point'
+
+    _inherits = {'sa.quality.point': 'qcp_id'}
+
+    _inherit = ['mail.thread']
+
+    _order = "group_sequence, sequence"
+
+    @api.model
+    def _get_default_picking_type(self):
+        return self.env['stock.picking.type'].search([
+            ('code', '=', 'mrp_operation'),
+            (
+                'warehouse_id.company_id', 'in',
+                [self.env.context.get('company_id', self.env.user.company_id.id), False])],
+            limit=1).id
+
+    is_key = fields.Boolean(string='Is Key Point', default=False)
+    active = fields.Boolean(
+        'Active', default=True,
+        help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
+
+    sequence = fields.Integer('sequence', default=1)
+
+    name = fields.Char('Tightening Point Name', related='qcp_id.name', inherited=True,
+                       default=lambda self: str(uuid.uuid4()))  # 如果未定义拧紧点编号，即自动生成uuid号作为唯一标示
+
+    group_id = fields.Many2one('operation.point.group')
+
+    group_sequence = fields.Integer('Group Sequence for Multi Spindle')
+
+    product_id = fields.Many2one('product.product', 'Consume Product', related='qcp_id.product_id', inherited=True,
+                                 domain="[('sa_type', '=', 'screw')]")
+
+    product_tmpl_id = fields.Many2one('product.template', 'Consume Product(Tightening Screw)',
+                                      related='qcp_id.product_tmpl_id', inherited=True,
+                                      domain="[('type', 'in', ['product', 'consu']), ('sa_type', '=', 'screw')]")
+
+    product_qty = fields.Float('Product Quantity', default=1.0, digits=dp.get_precision('Product Unit of Measure'))
+
+    x_offset = fields.Float('x axis offset from left(%)', default=0.0, digits=dp.get_precision('POINT_OFFSET'))
+
+    y_offset = fields.Float('y axis offset from top(%)', default=0.0, digits=dp.get_precision('POINT_OFFSET'))
+
+    program_id = fields.Many2one('controller.program', related='qcp_id.program_id', string='程序号(Pset/Job)',
+                                 inherited=True)
+
+    control_mode = fields.Selection(related='program_id.control_mode', readonly=1)
+
+    parent_qcp_id = fields.Many2one('sa.quality.point', ondelete='cascade', index=True,
+                                    string='Quality Control Point(Tightening Work Step)')
+
+    qcp_id = fields.Many2one('sa.quality.point', required=True, string='Quality Control Point(Tightening Work Step)',
+                             ondelete='cascade', auto_join=True)
+
+    picking_type_id = fields.Many2one('stock.picking.type', related='qcp_id.picking_type_id', inherited=True,
+                                      default=_get_default_picking_type)
+
+    sa_operation_ids = fields.Many2many('mrp.routing.workcenter', related='qcp_id.sa_operation_ids', inherited=True)
+
+    operation_id = fields.Many2one('mrp.routing.workcenter', string='Preferred Operation',
+                                   related='qcp_id.operation_id', inherited=True)
+
+    test_type_id = fields.Many2one('sa.quality.point.test_type', related='qcp_id.test_type_id', inherited=True)
+
+    max_redo_times = fields.Integer(string='Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
+
+    # 测量相关
+    norm = fields.Float('Norm', related='qcp_id.norm', digits=dp.get_precision('Quality Tests'), inherited=True)
+    tolerance_min = fields.Float('Min Tolerance', related='qcp_id.tolerance_min',
+                                 digits=dp.get_precision('Quality Tests'), inherited=True)
+    tolerance_max = fields.Float('Max Tolerance', related='qcp_id.tolerance_max',
+                                 digits=dp.get_precision('Quality Tests'), inherited=True)
+
+    norm_degree = fields.Float('Norm Degree', related='qcp_id.norm_degree', inherited=True,
+                               digits=dp.get_precision('Quality Tests'))  # TDE RENAME ?
+    tolerance_min_degree = fields.Float('Degree Min Tolerance', related='qcp_id.tolerance_min_degree', inherited=True,
+                                        digits=dp.get_precision('Quality Tests'), default=0.0)
+    tolerance_max_degree = fields.Float('Degree Max Tolerance', related='qcp_id.tolerance_max_degree', inherited=True,
+                                        digits=dp.get_precision('Quality Tests'), default=0.0)
+
+    tightening_tool_ids = fields.Many2many('mrp.workcenter.group.tool', 'point_tool_rel', 'point_id', 'tool_id',
+                                           string='Tightening Tools(Tightening Gun)', copy=False)
+
+    tool_id = fields.Many2one('maintenance.equipment', string='Prefer Tightening Tool(Gun/Wrench)',
+                              domain="[('category_name', 'in', ['tightening_wrench', 'tightening_gun'])]",
+                              copy=False)
+
+    @api.onchange('tightening_tool_ids')
+    def onchange_tightening_tool_ids(self):
+        if not self.tool_id and self.tightening_tool_ids:
+            self.tool_id = self.tightening_tool_ids[0].tool_id
+
+    @api.constrains('tightening_tool_ids')
+    def _constraint_tightening_tool_ids(self):
+        for point in self:
+            if not point.tightening_tool_ids:
+                continue
+            workcenter_ids = set(point.tightening_tool_ids.mapped('workcenter_id').ids)
+            if len(workcenter_ids) != len(point.tightening_tool_ids):
+                raise ValidationError(u'不能对同一个拧紧点选择同一个工位上的拧紧工具')
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for point in self:
+            res.append((point.id, _('[%s] %s') % (point.operation_id.name, point.name)))
+        return res
+
+    @api.model
+    def default_get(self, fields):
+        res = super(OperationPoints, self).default_get(fields)
+        if 'picking_type_id' not in res:
+            res.update({
+                'picking_type_id': self._get_default_picking_type()
+            })
+
+        operation_id = self.env.context.get('default_operation_id')
+        if operation_id:
+            operation = self.env['mrp.routing.workcenter'].sudo().browse(operation_id)
+            if 'max_redo_times' in fields:
+                res.update({'max_redo_times': operation.max_redo_times})
+            if 'sequence' in fields and operation.operation_point_ids:
+                res.update({'sequence': max(operation.operation_point_ids.mapped('sequence')) + 1})
+        parent_qcp_id = self.env.context.get('default_parent_qcp_id')
+        if parent_qcp_id:
+            qcp_id = self.env['sa.quality.point'].sudo().browse(parent_qcp_id)
+            if 'sa_operation_ids' in fields:
+                res.update({'sa_operation_ids': [(6, 0, qcp_id.sa_operation_ids.ids)]})
+        return res
+
+    @api.multi
+    def unlink(self):
+        for point in self:
+            msg = _("#%s operation point has been delete") % (point.id)
+            point.operation_id.message_post(body=msg, subject=msg, message_type='comment')
+        qcp_ids = self.env['sa.quality.point'].search([('id', 'in', self.mapped('qcp_id').ids)])
+        if qcp_ids:
+            qcp_ids.unlink()
+        return super(OperationPoints, self).unlink()
+
+    @api.multi
+    def toggle_active(self):
+        # bom_line_ids = self.env['mrp.bom.line'].search([('operation_point_id', 'in', self.ids)])
+        # if bom_line_ids:
+        #     bom_line_ids.toggle_active()
+        return super(OperationPoints, self).toggle_active()
+
+    @api.model
+    def create(self, vals):
+        tightening_point_type_id = self.env.ref('quality.test_type_tightening_point').id
+        vals.update({
+            'test_type_id': tightening_point_type_id
+        })
+        if 'product_tmpl_id' not in vals and 'product_id' in vals:
+            product_tmpl_id = self.env['product.product'].sudo().browse(vals.get('product_id')).product_tmpl_id.id
+            vals.update({
+                'product_tmpl_id': product_tmpl_id
+            })
+        ret = super(OperationPoints, self).create(vals)
+        return ret
+
+    @api.multi
+    def write(self, vals):
+        ret = None
+        tracked_fields = self.env['operation.point'].fields_get(['max_redo_times', 'program_id', 'product_id'])
+        for point in self:
+            if 'max_redo_times' in vals or 'program_id' in vals or 'product_id' in vals:
+                old_values = {
+                    'max_redo_times': point.max_redo_times,
+                    'program_id': point.program_id,
+                    'product_id': point.product_id
+                }
+                ret = super(OperationPoints, point).write(vals)  # 修改数据
+                dummy, tracking_value_ids = point._message_track(tracked_fields, old_values)
+                msg = _("#%s operation point has been modified") % (point.id)
+                point.parent_qcp_id.message_post(body=msg, message_type='comment',
+                                                 tracking_value_ids=tracking_value_ids,
+                                                 subject=msg)
+            else:
+                ret = super(OperationPoints, point).write(vals)  # 修改数据
+        return ret
+
+        # return super(OperationPoints, self).write(vals)

@@ -1,0 +1,203 @@
+# -*- coding: utf-8 -*-
+from odoo import fields, models, api, _, SUPERUSER_ID
+from odoo.exceptions import ValidationError, UserError
+import odoo.addons.decimal_precision as dp
+import json
+
+
+class QualityPoint(models.Model):
+    _inherit = "sa.quality.point"
+
+    ref = fields.Char('Reference', related='name', store=True)
+
+    can_do_skip = fields.Boolean(string='Allow Do Skip', default=False, Help='Whether This Step Can Be Skipped')
+    can_do_redo = fields.Boolean(string='Allow Do Redo', default=True, Help='Whether This Step Can Be Redo')
+
+    product_tmpl_id = fields.Many2one('product.template', 'Product', required=False,
+                                      domain="[('type', 'in', ['consu', 'product']), ('sa_type', '=', 'vehicle')]")
+
+    active = fields.Boolean(
+        'Active', default=True,
+        help="If the active field is set to False, it will allow you to hide Quality Check Point without removing it.")
+
+    bom_line_id = fields.Many2one('mrp.bom.line', ondelete='cascade')
+
+    worksheet_video = fields.Binary(string='Work Step Video', attachment=True)
+
+    # 拧紧相关
+
+    norm_degree = fields.Float('Norm Degree', digits=dp.get_precision('Quality Tests'))  # TDE RENAME ?
+
+    tolerance_min_degree = fields.Float('Degree Min Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
+    tolerance_max_degree = fields.Float('Degree Max Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
+
+    worksheet_img = fields.Binary(string='Tightening Work Step Image', attachment=True)
+
+    program_id = fields.Many2one('controller.program', string='程序号(Pset/Job)', ondelete='cascade')
+
+    sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'work_step_operation_rel', 'step_id', 'operation_id',
+                                        string="Operation Groups", copy=False)
+
+    max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
+
+    operation_point_group_ids = fields.One2many('operation.point.group', 'work_step_id',
+                                                string='Operation Points Group(multi-spindle)')
+
+    operation_point_ids = fields.One2many('operation.point', 'parent_qcp_id', string='Quality Points(Tightening Point)')
+
+    operation_id_domain = fields.Char(
+        compute="_compute_operation_id_domain",
+        readonly=True,
+        store=False,
+    )
+
+    _sql_constraints = [
+        ('product_bom_line_id_uniq', 'unique(bom_line_id)', 'Only one quality point per product bom line is allowed')]
+
+    @api.onchange('ref')
+    def onchange_ref(self):
+        for point in self:
+            point.name = point.ref
+
+    @api.multi
+    def button_resequence(self):
+        self.ensure_one()
+        has_sort_point_list = self.env['operation.point']
+        group_idx = 0
+        need_add = False
+        for idx, point_group in enumerate(self.operation_point_group_ids):
+            point_group.write({'sequence': idx + 1})
+            for point in point_group.operation_point_ids:
+                need_add = True
+                point.write({'group_sequence': group_idx + 1})
+                has_sort_point_list += point
+            if need_add:
+                need_add = False
+                group_idx += 1
+        not_sort_list = self.operation_point_ids - has_sort_point_list
+        for idx, point in enumerate(not_sort_list.sorted(key=lambda r: r.sequence)):
+            point.write({'group_sequence': group_idx + idx + 1})
+        for idx, point in enumerate(self.operation_point_ids.sorted(key=lambda r: r.group_sequence)):
+            point.write({'sequence': idx + 1})
+
+    @api.onchange('program_id')
+    def onchange_program_id(self):
+        if self.program_id and self.operation_point_ids:
+            self.operation_point_ids.write({'program_id', False})  # 所有下级的拧紧点拧紧程序设置为False
+
+    @api.multi
+    def get_operation_points(self):
+        if not self:
+            return []
+        self.ensure_one()
+        vals = []
+        for point in self.operation_point_ids:
+            vals.append({
+                'sequence': point.sequence,
+                'x_offset': point.x_offset,
+                'y_offset': point.y_offset
+            })
+        return vals
+
+    def _get_type_default_domain(self):
+        domain = super(QualityPoint, self)._get_type_default_domain()
+        domain.append(('technical_name', '=', 'text'))
+        return domain
+
+    @api.model
+    def default_get(self, fields):
+        res = super(QualityPoint, self).default_get(fields)
+        if 'picking_type_id' in fields and 'picking_type_id' not in res:
+            picking_type_id = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')], limit=1).id
+            res.update({'picking_type_id': picking_type_id})
+        if 'test_type_id' in fields and 'test_type_id' not in res:
+            test_type_id = self.env.ref('quality.test_type_text').id
+            res.update({'test_type_id': test_type_id})
+        operation_id = self.env.context.get('default_operation_id')
+        if operation_id:
+            operation = self.env['mrp.routing.workcenter'].sudo().browse(operation_id)
+            if 'max_redo_times' in fields:
+                res.update({'max_redo_times': operation.max_redo_times})
+            if 'sequence' in fields and operation.operation_point_ids:
+                res.update({'sequence': max(operation.operation_point_ids.mapped('sequence')) + 1})
+        return res
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for point in self:
+            res.append((point.id, _('[%s] %s') % (point.title, point.name)))
+        return res
+
+    @api.onchange('operation_id')
+    def _onchange_opeartion_id(self):
+        self.ensure_one()
+        bom_line_ids = self.env['mrp.bom.line'].search(
+            [('bom_id.product_id', '=', self.product_id.id), ('operation_id', '=', self.operation_id.id)])
+        qtys = [bom_line_id.product_qty for bom_line_id in bom_line_ids]
+        self.times = sum(qtys)
+
+    @api.constrains('product_id', 'product_tmpl_id')
+    def _product_tmpl_product_constraint(self):
+        if self.product_id.product_tmpl_id.id != self.product_tmpl_id.id:
+            raise ValidationError('The product template "%s" is invalid on product with name "%s"' % (
+                self.product_tmpl_id.name, self.product_id.name))
+
+    @api.multi
+    @api.depends('operation_id', 'product_id')
+    def _compute_operation_id_domain(self):
+        for rec in self:
+            operation_ids = rec.product_id.bom_ids.mapped('routing_id.operation_ids').ids or []
+            rec.operation_id_domain = json.dumps(
+                [('id', 'in', operation_ids)])
+
+    @api.model
+    def create(self, vals):
+        ret = super(QualityPoint, self).create(vals)
+        if 'parent_qcp_id' in vals and not ret.sa_operation_ids:
+            val = {
+                'sa_operation_ids': [(6, 0, ret.sa_operation_ids.ids)]
+            }
+            ret.write(val)
+        return ret
+
+    @api.multi
+    def write(self, vals):
+        ret = super(QualityPoint, self).write(vals)
+        if 'sa_operation_ids' in vals:
+            self.mapped('operation_point_ids').write({'sa_operation_ids': vals.get('sa_operation_ids')})
+        return ret
+
+    @api.multi
+    def unlink(self):
+        ret = super(QualityPoint, self).unlink()
+        return ret
+
+
+class QualityCheck(models.Model):
+    _inherit = "sa.quality.check"
+
+    product_id = fields.Many2one('product.product', required=False)
+
+    bolt_number = fields.Char(string='Bolt Number', related='point_id.name', store=True)  # 质量控制点名称和螺栓编号在sa_base模块中绑定了
+
+    measure_degree = fields.Float('Measure Degree', default=0.0, digits=dp.get_precision('Quality Tests'),
+                                  track_visibility='onchange')
+
+    @api.multi
+    def unlink(self):
+        if self.env.uid != SUPERUSER_ID:
+            raise UserError(_('Quality Check Can Not Be Delete'))
+
+    @api.one
+    @api.depends('measure', 'measure_degree')
+    def _compute_measure_success(self):
+        if self.point_id.test_type == 'passfail':
+            self.measure_success = 'none'
+        else:
+            if self.measure < self.point_id.tolerance_min or self.measure > self.point_id.tolerance_max:
+                self.measure_success = 'fail'
+            elif self.measure_degree < self.point_id.tolerance_min_degree or self.measure_degree > self.point_id.tolerance_max_degree:
+                self.measure_success = 'fail'
+            else:
+                self.measure_success = 'pass'

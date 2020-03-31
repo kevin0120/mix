@@ -1,0 +1,572 @@
+<odoo>
+    <data>
+
+        <!-- equiment.request : views -->
+        <record id="hr_approval_request_view_search" model="ir.ui.view">
+            <field name="name">approval.approval.search</field>
+            <field name="model">approval.approval</field>
+            <field name="arch" type="xml">
+                <search string="Approval Request Search">
+                    <field name="name"/>
+                    <field name="category_id"/>
+                    <field name="flow_id"/>
+                    <field name="state"/>
+                    <separator/>
+                    <filter string="Draft" domain="[('state', '=', 'draft')]" name="draft"/>
+                    <filter string="Start" domain="[('state', '=', 'start')]" name="start"/>
+                    <filter string="Canceled" domain="[('state', '=', 'cancel')]" name="cancel"/>
+                    <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
+                    <separator/>
+                    <filter string="My Requests" name="my_requests" domain="[('owner_user_id.user_id', '=', uid)]"/>
+                    <separator/>
+                    <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
+                    <separator/>
+                    <filter string="Archived" name="inactive" domain="[('archive','=',True)]"/>
+                    <group  expand='0' string='Group by...'>
+                        <filter string='Draft by' domain="[]" context="{'group_by': 'flow_id.employee_id'}"/>
+                        <filter string='Category' domain="[]" context="{'group_by' : 'category_id'}"/>
+                        <filter string='Stages' domain="[]" context="{'group_by' : 'stage_id'}"/>
+                        <filter string='Created By' name='created_by' domain="[]" context="{'group_by': 'owner_user_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <!--<record id="approval_category_kanban" model="ir.ui.view">-->
+            <!--<field name="name">approval.category.kanban</field>-->
+            <!--<field name="model">approval.category</field>-->
+            <!--<field name="arch" type="xml">-->
+                <!--<kanban class="oe_background_grey o_kanban_dashboard o_approval_category_kanban" create="0">-->
+                    <!--<field name="name"/>-->
+                    <!--<field name="color"/>-->
+                    <!--<field name="todo_request_ids"/>-->
+                    <!--<field name="todo_request_count"/>-->
+                    <!--<field name="todo_request_count_date"/>-->
+                    <!--<field name="todo_request_count_high_priority"/>-->
+                    <!--<field name="todo_request_count_block"/>-->
+                    <!--<templates>-->
+                        <!--<t t-name="kanban-box">-->
+                            <!--<div t-attf-class="#{kanban_color(record.color.raw_value)}">-->
+                                <!--<div class="o_kanban_card_header">-->
+                                    <!--<div class="o_kanban_card_header_title">-->
+                                        <!--<div class="o_primary"><field name="name"/></div>-->
+                                    <!--</div>-->
+                                    <!--<div class="o_kanban_manage_button_section">-->
+                                        <!--<a class="o_kanban_manage_toggle_button" href="#">More <i class="fa fa-caret-down"/></a>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                                <!--<div class="container o_kanban_card_content o_visible">-->
+                                    <!--<div class="row">-->
+                                        <!--<div class="col-xs-6 o_kanban_primary_left">-->
+                                            <!--<button class="btn btn-primary" name="%(hr_equipment_todo_request_action_from_dashboard)d" type="action">-->
+                                                <!--<t t-esc="record.todo_request_count.value"/> To Do-->
+                                            <!--</button>-->
+                                        <!--</div>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                                <!--<div class="container o_kanban_card_manage_pane o_invisible">-->
+                                    <!--<div class="row">-->
+                                        <!--<div class="col-xs-6 o_kanban_card_manage_section o_kanban_manage_view">-->
+                                            <!--<div class="o_kanban_card_manage_title">-->
+                                                <!--<span>View</span>-->
+                                            <!--</div>-->
+                                            <!--<div>-->
+                                                <!--<a name="%(hr_approval_todo_request_action_from_dashboard)d" type="action">-->
+                                                    <!--All-->
+                                                <!--</a>-->
+                                            <!--</div>-->
+                                            <!--<div>-->
+                                                <!--<a name="%(hr_approval_todo_request_action_from_dashboard)d" type="action" context="{'search_default_todo': 1}">-->
+                                                    <!--To Do-->
+                                                <!--</a>-->
+                                            <!--</div>-->
+                                            <!--<div>-->
+                                                <!--<a name="%(hr_approval_todo_request_action_from_dashboard)d" type="action" context="{'search_default_done': 1}">-->
+                                                    <!--Done-->
+                                                <!--</a>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
+                                        <!--<div class="col-xs-6 o_kanban_card_manage_section o_kanban_manage_new">-->
+                                            <!--<div class="o_kanban_card_manage_title">-->
+                                                <!--<span>Reports</span>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
+                                    <!--</div>-->
+                                    <!--<div t-if="widget.editable" class="o_kanban_card_manage_settings row">-->
+                                        <!--<div class="col-xs-8">-->
+                                            <!--<ul class="oe_kanban_colorpicker" data-field="color"/>-->
+                                        <!--</div>-->
+                                        <!--<div class="col-xs-4 text-right">-->
+                                            <!--<a type="edit">Settings</a>-->
+                                        <!--</div>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</t>-->
+                    <!--</templates>-->
+                <!--</kanban>-->
+            <!--</field>-->
+        <!--</record>-->
+
+        <!--<record id="hr_approval_todo_request_action_from_dashboard" model="ir.actions.act_window">-->
+            <!--<field name="name">Approval Requests</field>-->
+            <!--<field name="res_model">approval.approval</field>-->
+            <!--<field name="view_mode">kanban,tree,form</field>-->
+            <!--<field name="context">{-->
+                <!--'default_category_id': active_id,-->
+            <!--}</field>-->
+            <!--<field name="domain">[('category_id', '=', active_id)]</field>-->
+        <!--</record>-->
+
+
+
+        <record id="approval_category_view_form" model="ir.ui.view">
+            <field name="name">approval.category.form</field>
+            <field name="model">approval.category</field>
+            <field name="arch" type="xml">
+                <form string="Approval Categories">
+                    <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" groups="approval.group_approval_manager"
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button"
+                                options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Category Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Leave Approval"/>
+                        </h1>
+                    </div>
+                    <group name="Information">
+                        <group>
+                            <field name="sequence_id" groups="approval.group_approval_manager"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="description_page" string="Description">
+                            <field name="description" type="html"/>
+                            <div class="oe_clear"/>
+                        </page>
+                        <page string="Approval Flow" >
+                            <field name="flow_line_ids" nolabel="1" widget="one2many_list" context="{'default_category_id': active_id}">
+                                <tree editable="bottom" string="Approval Flows" >
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="employee_id" required="1"/>
+                                    <field name="category_id" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="approval_category_view_tree" model="ir.ui.view">
+            <field name="name">approval.category.tree</field>
+            <field name="model">approval.category</field>
+            <field name="arch" type="xml">
+                <tree string="Categories">
+                    <field name="name" string="Name"/>
+                    <field name="flow_line_ids" string="Auditors"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="approval_category_view_search" model="ir.ui.view">
+            <field name="name">approval.category.search</field>
+            <field name="model">approval.category</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <field name="name" string="Category Name" filter_domain="[('name','ilike',self)]"/>
+                    <group  expand='0' string='Group by...'>
+                        <filter string='name' domain="[]" context="{'group_by' : 'name'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="approval_category_action_settings" model="ir.actions.act_window">
+            <field name="name">Approval Categories</field>
+            <field name="res_model">approval.category</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="approval_category_view_tree"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to add a new Approval category.
+                </p>
+            </field>
+        </record>
+
+        <!-- Approval Requests-->
+
+        <record id="view_approval_request_form" model="ir.ui.view">
+            <field name="name">approval.approval.form</field>
+            <field name="model">approval.approval</field>
+            <field name="arch" type="xml">
+                <form string="Approval Requests" class="o_sale_order">
+                <header>
+                    <field name="have_operation_access" invisible="1"/>
+                    <field name="state" invisible="1"/>
+                    <button name="action_start" string="Start approval" type="object" class="btn-primary"
+                            attrs="{'invisible':['|',('have_operation_access','=',False),('state','!=','draft')]}"/>
+                    <button name="action_reset" string="Reset Approval" type="object" class="btn-primary" help="Reset the approval request to draft state"
+                            attrs="{'invisible':['|',('have_operation_access','=',False),('state','!=','cancel')]}"/>
+                    <button name="action_canceled" string="Cancel" confirm="Are you sure you want to cancel this approval?"
+                        type="object" class="btn-primary" attrs="{'invisible':['|',('have_operation_access','=',False),('state','!=','start')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,start,cancel,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" groups="approval.group_approval_manager"
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button"
+                                options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Approval Request Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Leave #" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="owner_user_id" />
+                            <field name="category_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </group>
+                        <group string="Time">
+                            <field name="create_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="approval_description">
+                            <field name="description" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        </page>
+                        <page string="Approval Flows" attrs="{'invisible': [('category_id', '=', False)]}">
+                            <field name="stage_ids" context="{'default_approval_id': active_id, 'uid': uid}" attrs="{'readonly':[('state','in',('start', 'cancel','done'))]}">
+                                <tree editable="bottom" default_order="sequence asc" string="Flow Activities" decoration-danger="state == 'rejected'"
+                                      decoration-success="state == 'approved'" create="true">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="employee_id" required="1"/>
+                                    <field name="state"/>
+                                    <field name="have_operation_access" invisible="1"/>
+                                    <button name="approved" string="Approve" type="object" icon="fa-check-circle text-success"  attrs="{'invisible':['|',('state','!=','start'), ('have_operation_access','=',False)]}" />
+                                    <button name="rejected" string="Reject" type="object" icon="fa-times-circle text-danger" attrs="{'invisible':['|',('state','!=','start'),('have_operation_access','=',False)]}" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_approval_requests_tree" model="ir.ui.view">
+            <field name="name">approval.approval.tree</field>
+            <field name="model">approval.approval</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Approval Requests" decoration-bf="message_needaction==True" decoration-muted="state=='cancel'">
+                    <field name="message_needaction" invisible="1"/>
+                    <field name="name" string="Request Number"/>
+                    <field name="create_date"/>
+                    <field name="close_date"/>
+                    <field name="owner_user_id"/>
+                    <field name="flow_id"/>
+                    <field name="state" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_approval_request_kanban">
+            <field name="name">approval.approval.kanban</field>
+            <field name="model">approval.approval</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile">
+                    <field name="name"/>
+                    <field name="owner_user_id"/>
+                    <field name="flow_id"/>
+                    <field name="create_date"/>
+                    <field name="close_date"/>
+                    <field name="state"/>
+                    <templates>
+                        <t t-name="kanban-tooltip">
+                           <ul class="oe_kanban_tooltip">
+                              <li><b>Category:</b> <field name="category_id"/></li>
+                              <li><b>Pending on:</b> <field name="pending_employee_id"/></li>
+                           </ul>
+                        </t>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                                <div class="o_dropdown_kanban dropdown">
+
+                                    <a class="dropdown-toggle btn" data-toggle="dropdown" href="#" >
+                                        <span class="fa fa-bars fa-lg"/>
+                                    </a>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                        <t t-if="widget.editable"><li><a type="edit">Edit...</a></li></t>
+                                        <t t-if="widget.deletable"><li><a type="delete">Delete</a></li></t>
+                                        <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
+                                    </ul>
+                                </div>
+                                <div class="oe_kanban_content" tooltip="kanban-tooltip">
+                                    <!--<div><b><field name="name"/><span t-if="record.category_id.raw_value"> (<field name="record.category_id.raw_value"/>)</span></b></div>-->
+                                    <div class="mt4">
+                                        <div t-if="!record.owner_user_id.raw_value">Unassigned</div>
+                                        <div t-if="record.owner_user_id.raw_value"><field name="owner_user_id"/></div>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <img t-att-src="kanban_image('hr.employee', 'image', record.owner_user_id.raw_value)" t-att-title="record.owner_user_id.value" width="27" height="27" class="oe_kanban_avatar"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-6 text-muted">
+                                        <span><t t-esc="record.name.value"/> <t t-esc="record.create_date.value"/></span>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <span class="pull-right text-right">
+                                            <field name="state" widget="kanban_label_selection" options="{'classes': {'draft': 'default', 'start': 'success','cancel': 'warning',
+                                            'done': 'success'}}"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="view_approval_requests_filter" model="ir.ui.view">
+            <field name="name">approval.approval.list.select</field>
+            <field name="model">approval.approval</field>
+            <field name="arch" type="xml">
+                <search string="Search Approval Requests">
+                    <field name="name" string="Approval Request" filter_domain="[('name','ilike',self)]"/>
+                    <field name="owner_user_id"/>
+                    <field name="category_id"/>
+                    <field name="flow_id"/>
+                    <field name="state"/>
+                    <filter string="Draft" domain="[('state', '=', 'draft')]" name="draft"/>
+                    <filter string="Start" domain="[('state', '=', 'start')]" name="start"/>
+                    <filter string="Canceled" domain="[('state', '=', 'cancel')]" name="cancel"/>
+                    <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
+                    <separator/>
+                    <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+                    <separator/>
+                    <filter string="My Requests" domain="[('owner_user_id.user_id','=',uid)]" name="my_approval_requests"/>
+                    <filter string="Todo Requests" domain="[('flow_id.employee_id.user_id','=',uid)]" name="todo_requests"/>
+                    <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Approval Maker" domain="[]" context="{'group_by':'owner_user_id'}"/>
+                        <filter name="category" string="Category" domain="[]" context="{'group_by':'category_id'}"/>
+                        <filter name="stage" string="Stage" domain="[]" context="{'group_by':'flow_id'}"/>
+                        <filter name="state" string="State" domain="[]" context="{'group_by':'state'}"/>
+                    </group>
+               </search>
+            </field>
+        </record>
+
+        <record id="act_approval_approval_todo" model="ir.actions.act_window">
+            <field name="name">Approval Requests</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">approval.approval</field>
+            <field name="search_view_id" ref="view_approval_requests_filter"/>
+            <field name="context">{'search_default_todo_requests': 1}</field>
+            <!--<field name="domain">[('state', '=', 'start')]</field>-->
+            <!--<field name="help" type="html">-->
+                <!--<p class="oe_view_nocontent_create">-->
+                    <!--Create a Approval Request.-->
+                <!--</p>-->
+            <!--</field>-->
+        </record>
+
+        <record id="act_approval_approval_my" model="ir.actions.act_window">
+            <field name="name">Approval Requests</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">approval.approval</field>
+            <field name="search_view_id" ref="view_approval_requests_filter"/>
+            <field name="context">{'search_default_my_approval_requests': 1}</field>
+            <!--<field name="domain">[('state', 'not in', ('draft', 'sent', 'cancel'))]</field>-->
+            <!--<field name="help" type="html">-->
+                <!--<p class="oe_view_nocontent_create">-->
+                    <!--Create a Approval Request.-->
+                <!--</p>-->
+            <!--</field>-->
+        </record>
+
+
+        <record id="act_approval_approval_all" model="ir.actions.act_window">
+            <field name="name">Approval Requests</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">approval.approval</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="search_view_id" ref="view_approval_requests_filter"/>
+            <field name="context">{}</field>
+            <!--<field name="domain">[('state', 'not in', ('draft', 'sent', 'cancel'))]</field>-->
+            <!--<field name="help" type="html">-->
+                <!--<p class="oe_view_nocontent_create">-->
+                    <!--Create a Approval Request.-->
+                <!--</p>-->
+            <!--</field>-->
+        </record>
+
+        <record model="ir.ui.view" id="view_approval_category_kanban">
+            <field name="name">approval.category.kanban</field>
+            <field name="model">approval.category</field>
+            <field name="arch" type="xml">
+                <kanban class="oe_background_grey o_kanban_dashboard o_project_kanban">
+                    <field name="name"/>
+                    <field name="color"/>
+                    <field name="todo_approval_count"/>
+                    <field name="favorite_request_count"/>
+                    <field name="approval_request_needaction_count"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click">
+                                <div class="o_project_kanban_main">
+                                    <div class="o_kanban_card_content o_visible">
+                                        <div class="o_kanban_primary_left">
+                                            <div class="o_primary">
+                                                <span><t t-esc="record.name.value"/></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="o_kanban_card_manage_pane o_invisible">
+                                        <div class="o_kanban_card_manage_section o_kanban_manage_reports">
+                                            <div groups="approval.group_approval_manager">
+                                                <a type="edit">Settings</a>
+                                            </div>
+                                        </div>
+                                        <div t-if="widget.editable" class="o_project_kanban_colorpicker">
+                                            <ul class="oe_kanban_colorpicker" data-field="color"/>
+                                        </div>
+                                    </div>
+                                    <div class="o_project_kanban_manage">
+                                        <a class="o_kanban_manage_toggle_button o_left" href="#">More <i class="fa fa-caret-down"/></a>
+                                    </div>
+                                </div>
+
+                                <div class="o_project_kanban_boxes">
+                                    <div class="o_project_kanban_box">
+                                        <a name="%(act_approval_approval_my)d" type="action" context="{'search_default_category_id': [active_id]}">
+                                            <span class="o_value"><t t-esc="record.favorite_request_count.value"/></span>
+                                            <span class="o_label">Request</span>
+                                        </a>
+                                        <a t-if="record.approval_request_needaction_count.raw_value" class="o_needaction" name="%(act_approval_approval_all)d" type="action" context="{'search_default_category_id': [active_id],'search_default_message_needaction': 1}">
+                                            <t t-esc="record.approval_request_needaction_count.raw_value"/>
+                                        </a>
+                                    </div>
+                                    <div class="o_project_kanban_box">
+                                        <a name="%(act_approval_approval_todo)d" type="action" context="{'search_default_category_id': [active_id]}">
+                                            <span class="o_value"><t t-esc="record.todo_approval_count.value"/></span>
+                                            <span class="o_label">Todo</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+        <record id="view_approval_category_filter" model="ir.ui.view">
+            <field name="name">approval.category.select</field>
+            <field name="model">approval.category</field>
+            <field name="arch" type="xml">
+                <search string="Search Approval Category">
+                    <field name="name" string="Category" filter_domain="[('name','ilike',self)]"/>
+                    <separator/>
+                    <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Approval Maker" domain="[]" context="{'group_by':'owner_user_id'}"/>
+                        <filter name="category" string="Category" domain="[]" context="{'group_by':'category_id'}"/>
+                    </group>
+               </search>
+            </field>
+        </record>
+
+        <record id="approval_category_dashboard_action" model="ir.actions.act_window">
+            <field name="name">Approval</field>
+            <field name="res_model">approval.category</field>
+            <field name="view_type">form</field>
+            <field name="domain">[]</field>
+            <field name="view_mode">kanban,form</field>
+            <field name="search_view_id" ref="view_approval_category_filter"/>
+            <field name="target">main</field>
+            <!--<field name="help" type="html">-->
+                <!--<p class="oe_view_nocontent_create">-->
+                    <!--Click to create a new project.<br/>-->
+                    <!--<i>Or <a type="action" name="%(project.activate_sample_project)d">activate a sample project</a> to play with.</i>-->
+                <!--</p>-->
+            <!--</field>-->
+        </record>
+
+
+        <!-- Menu items hierachy -->
+        <menuitem
+            id="menu_approval_title"
+            name="Approval"
+            web_icon="approval,static/description/icon.png"
+            groups="group_approval_user,group_approval_manager,hr.group_hr_user,hr.group_hr_manager,base.group_user"
+            sequence="300"/>
+
+        <menuitem
+            id="menu_m_dashboard"
+            name="Dashboard"
+            parent="menu_approval_title"
+            groups="group_approval_user,group_approval_manager,hr.group_hr_user,hr.group_hr_manager,base.group_user"
+            action="approval_category_dashboard_action"
+            sequence="0"/>
+        <menuitem
+            id="menu_approval"
+            name="Approvals"
+            parent="menu_approval_title"
+            groups="group_approval_user,group_approval_manager,hr.group_hr_user,hr.group_hr_manager,base.group_user"
+            sequence="10"/>
+
+        <menuitem
+            id="menu_approval_requests_todo"
+            name="Todo Approval"
+            parent="menu_approval"
+            action="act_approval_approval_todo"
+            groups="group_approval_user,group_approval_manager,hr.group_hr_user,hr.group_hr_manager"
+            sequence="2"/>
+
+
+        <menuitem
+            id="menu_approval_requests_my"
+            name="My Approval"
+            parent="menu_approval"
+            action="act_approval_approval_my"
+            groups="group_approval_user,group_approval_manager,hr.group_hr_user,hr.group_hr_manager"
+            sequence="10"/>
+
+        <menuitem
+            id="menu_approval_configuration"
+            name="Configuration"
+            parent="menu_approval_title"
+            groups="group_approval_manager,hr.group_hr_manager"
+            sequence="100"/>
+
+        <menuitem
+            id="menu_approval_category"
+            name="Approval Categories"
+            parent="menu_approval_configuration"
+            action="approval_category_action_settings"
+            groups="group_approval_manager,hr.group_hr_manager"
+            sequence="1"/>
+
+    </data>
+</odoo>

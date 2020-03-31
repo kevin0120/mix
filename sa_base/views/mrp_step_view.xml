@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sa_mrp_step_view_tree_inherit" model="ir.ui.view">
+        <field name="name">sa_mrp_step_view_tree_inherit</field>
+        <field name="model">sa.quality.point</field>
+        <field name="inherit_id" ref="sa_base.sa_quality_point_view_tree_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="create">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="sa_mrp_step_view_form_inherit" model="ir.ui.view">
+        <field name="name">sa_mrp_step_view_form_inherit</field>
+        <field name="model">sa.quality.point</field>
+        <field name="inherit_id" ref="sa_base.sa_quality_point_view_form_inherit_mrp"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="create">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="sa_mrp_step_search_view" model="ir.ui.view">
+        <field name="name">sa_mrp_step_search_view</field>
+        <field name="model">sa.quality.point</field>
+        <field name="arch" type="xml">
+            <search string="Work Step">
+                <field name="name" string="Step" filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="sa_mrp_step_action" model="ir.actions.act_window">
+        <field name="name">Work Step</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sa.quality.point</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="search_view_id" ref="sa_mrp_step_search_view"/>
+        <field name="domain">[('picking_type_code', '=', 'mrp_operation'),('test_type', '!=', 'tightening_point')]</field>
+        <field name="view_ids"
+               eval="[(5, 0, 0),
+                      (0, 0, {'view_mode': 'tree', 'view_id': ref('sa_base.sa_mrp_step_view_tree_inherit')}),
+                      (0, 0, {'view_mode': 'form', 'view_id': ref('sa_base.sa_mrp_step_view_form_inherit')}),
+                      (0, 0, {'view_mode': 'kanban'})]"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to create a new work step.
+            </p>
+            <p>
+                Steps allow you to create and manage the manufacturing
+                operations that should be followed within your work centers in
+                order to produce a product. They are attached to bills of
+                materials that will define the required raw materials.
+            </p>
+        </field>
+    </record>
+
+
+    <menuitem id="menu_mrp_step_form_action"
+              action="sa_mrp_step_action"
+              parent="menu_bom_form"
+              sequence="60"/>
+
+</odoo>

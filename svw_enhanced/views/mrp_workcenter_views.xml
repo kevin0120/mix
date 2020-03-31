@@ -1,0 +1,35 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sa_svw_mrp_workcenter_form_view_inherit">
+            <field name="name">sa_svw_mrp_workcenter_form_view_inherit</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="inherit_id" ref="sa_base.sa_mrp_workcenter_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page/group[1]" position="inside">
+                    <group string="Equipments" name="equipment">
+                        <field name="controller_ids_domain" invisible="1"/>
+                        <field name="tool_ids_domain" invisible="1"/>
+                        <field name="masterpc_id" attrs="{'required': [('type','=','operate')]}"/>
+                        <field name="controller_ids" widget="many2many_tags"
+                               domain="controller_ids_domain"
+                               attrs="{'invisible': [('masterpc_id','=',False)],'required': [('type','=','operate')]}"/>
+                        <field name="tool_ids" widget="many2many_tags" domain="tool_ids_domain"
+                               attrs="{'invisible': [('controller_ids','=',False)],'required': [('type','=','operate')]}"/>
+                        <field name="hmi_id" attrs="{'required': [('type','=','operate')]}"/>
+                        <field name="io_id"/>
+                        <field name="rfid_id"/>
+                    </group>
+                </xpath>
+                <field name="qc_workcenter_id" position="attributes">
+                    <attribute name="string">QRK</attribute>
+                    <attribute name="attrs">{'invisible': [('type','=','rework')], 'required':
+                        [('type','=','operate')]}
+                    </attribute>
+                </field>
+                <field name="code" position="attributes">
+                    <attribute name="required">1</attribute>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

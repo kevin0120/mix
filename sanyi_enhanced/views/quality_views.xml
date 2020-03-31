@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="sanyi_enhanced_view_form_inherit_mrp" model="ir.ui.view">
+            <field name="name">sanyi_enhanced_view_form_inherit_mrp</field>
+            <field name="model">sa.quality.point</field>
+            <field name="inherit_id" ref="sa_base.sa_quality_point_view_form_inherit_mrp"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='qcp_tightening_point']//tree[1]//field[@name='norm']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+            </field>
+
+        </record>
+
+    </data>
+</odoo>

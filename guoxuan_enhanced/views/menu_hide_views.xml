@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Top menu item -->
+
+        <record id="tangche_enhanced.tangche_menu_view_consume" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6,0, [ref('base.group_erp_manager')])]"/>
+        </record>
+
+    </data>
+</odoo>

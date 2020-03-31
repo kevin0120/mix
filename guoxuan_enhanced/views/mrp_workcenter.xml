@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="guoxuan_enhanced_mrp_workcenter_form_view" model="ir.ui.view">
+            <field name="name">guoxuan_enhanced_mrp_workcenter_form_view</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="inherit_id" ref="tangche_enhanced.tangche_mrp_workcenter_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='workcenter_place']" position="replace">
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

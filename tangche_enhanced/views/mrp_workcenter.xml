@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="tangche_mrp_workcenter_form_view" model="ir.ui.view">
+            <field name="name">tangche_mrp_workcenter_form_view</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="inherit_id" ref="sa_base.sa_mrp_workcenter_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <button string="Sync Equipments" type="object" name="button_sync_workcenter_equipments"
+                            class="oe_highlight"/>
+                </xpath>
+                <xpath expr="//page//field[@name='equipment_ids']" position="attributes">
+                    <attribute name="domain">[('category_name', '!=', 'IO')]</attribute>
+                </xpath>
+                <xpath expr="//page//field[@name='equipment_ids']//tree" position="inside">
+                    <field name="location_id"
+                           attrs="{'required': [('category_name', 'in', ('tightening_wrench', 'tightening_gun'))]}"/>
+                </xpath>
+                <xpath expr="//page[@name='workcenter_place']//tree[@name='workcenter_loc']" position="inside">
+                    <field name="equipment_id" required="1"/>
+                    <field name="io_output" required="0"/>
+                    <field name="io_input" required="0"/>
+                </xpath>
+                <xpath expr="//page[@name='workcenter_place']//tree[@name='workcenter_loc']//field[@name='product_id']"
+                       position="attributes">
+                    <attribute name="domain">[('sa_type', 'in', ['consu', 'socket'])]</attribute>
+                    <!--<attribute name="context">{'default_type':'consu','default_tracking':'none','default_sa_type':'consu','search_default_consu': 1}</attribute>-->
+
+                    <!--tangche_enhanced.product_product_action_consum-->
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
