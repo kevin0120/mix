@@ -1,0 +1,147 @@
+hostname: localhost
+data_dir: /home/gubin/.aiis
+logging:
+#  file: ./logs/%Y%m%d.log
+  file: STDOUT
+  level: DEBUG
+  max_age: 3000h
+  rotate: 24h
+httpd:
+  bind-address: :9092
+  log-enabled: true
+  write-tracing: false
+  shutdown-timeout: 10s
+  cors:
+    allowed-origins:
+    - '*'
+    allow-credentials: true
+    allowed-methods:
+    - GET
+    - HEAD
+    - POST
+    - PUT
+    - PATCH
+    - OPTIONS
+websocket:
+  route: /aiis/v1/ws
+  read_buf_size: 4096
+  write_buf_size: 4096
+pmon:
+  path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
+  workers: 4
+  enable: false
+  send_check_count: 10
+fis:
+  ch_recv_mission: 90
+  ch_send_result: 93
+  ch_recv_heartbeat: 89
+  ch_send_urg: 91
+  ch_recv_urg: 92
+  equipment_name: SR3J
+  system_type: Screwer
+  software_version: 1.0
+  mode: AUTO
+  factory_code: 20
+  heartbeat_interval: 2m
+  mission_itv: 10ms
+  urg_timeout: 100ms
+  ad_timeout: 1s
+  prs:
+    - GSP
+    - SAB
+    - RAD
+    - REI
+    - BRS
+    - GMO
+    - EDF
+    - AED
+    - MOT
+    - LES
+    - HIS
+    - AIB
+    - FSB
+    - SIH
+    - HBV
+    - AGM
+  enable: false
+masterplc:
+  enable: false
+  port: 4721
+  max_connection: 4096
+  read_buf: 65535
+minio:
+  url: 127.0.0.1:9000
+  bucket: curves
+  access: minio
+  secret: minio123
+  secure: false
+  reupload_interval: 24h
+  enable: false
+changan:
+  andon_addr: tcp://10.144.13.69:9000
+  enable: false
+  keepalive_period: 3s
+  read_timeout: 10s
+  read_buffer_size: 65535
+  GUID: 17e2735f-fe49-4d8e-bdb6-81d5af997559
+  db:
+    db_url: 127.0.0.1:1433
+    db_name: cvinet
+    db_user: sa
+    db_pwd: Password1
+    max_connection: 60
+
+odoo:
+  url: http://10.1.1.77:8069
+  route: /api/v1/mrp.productions
+  headers:
+    Content-Type: application/json
+  timeout: 5s
+  push_interval: 1s
+  max_retry: 1
+  enable: true
+storage:
+  db_url: 10.1.1.44:5432
+  db_name: tangche
+  db_user: odoo
+  db_pwd: odoo
+#  db_url: 127.0.0.1:5432
+#  db_name: TS011
+#  db_user: admin
+#  db_pwd: admin
+  max_connection: 60
+
+rush:
+  enable: true
+  workers: 8
+  url: http://127.0.0.1:8082
+  route: /rush/v1/results
+  headers:
+    Content-Type: application/json
+  timeout: 5s
+  push_interval: 1s
+  max_retry: 1
+  ws_route: /aiis/v1/ws/results
+  ws_read_buf_size: 4096
+  ws_write_buf_size: 4096
+  batch_save_rows_limit: 100
+  batch_save_time_limit: 2s
+  grpc_port: 9093
+
+broker:
+  enable: true
+  connect-urls:
+#    - nats://192.168.4.203:4222
+#    - nats://192.168.4.203:4223
+#    - nats://192.168.4.203:4224
+    - nats://127.0.0.1:4222
+    - nats://127.0.0.1:4223
+    - nats://127.0.0.1:4224
+  connect-options:
+    name: Dummy Server
+    token: Dummy Token
+  provider: nats
+  name: 31a0def7-785c-4f43-ba19-17f813e8b47c
+
+transport:
+  provider: broker

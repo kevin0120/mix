@@ -1,0 +1,18 @@
+version: '2.1'
+services:
+  latest:
+    image: "linshenqi/aiis:dev-0.1.1"
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "6060:6060"
+    volumes:
+      - /data/aiis/conf:/etc/aiis/conf
+      - /data/aiis/log:/etc/aiis/log
+      - /etc/localtime:/etc/localtime:ro
+    restart: "always"
+    healthcheck:
+      test: curl -f --silent --fail http://127.0.0.1:9092/aiis/v1/healthz || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 3
