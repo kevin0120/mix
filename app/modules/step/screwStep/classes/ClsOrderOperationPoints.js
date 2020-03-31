@@ -110,7 +110,7 @@ export class ClsOrderOperationPoints {
 
   newResult(results: Array<tResult>) {
     let newInactiveControls: Array<?ClsOperationPoint> = [];
-    if(this.activeControls.length===0){
+    if (this.activeControls.length === 0 && results && results.length > 0) {
       this.start();
     }
     results.forEach(r => {
