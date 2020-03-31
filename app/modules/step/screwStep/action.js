@@ -1,0 +1,37 @@
+// @flow
+import type {tResult } from './interface/typeDef';
+import { SCREW_STEP } from './constants';
+import { ClsOperationPoint } from './classes/ClsOperationPoint';
+
+export type tResultAction = { type: string, results: Array<tResult> };
+
+export default {
+  result: (results: Array<tResult>): tResultAction => ({
+    type: SCREW_STEP.RESULT,
+    results
+  }),
+  redoPoint: (point: ClsOperationPoint) => ({
+    type: SCREW_STEP.REDO_POINT,
+    point
+  }),
+  confirmFail: () => ({
+    type: SCREW_STEP.CONFIRM_FAIL,
+  }),
+  confirmFailSpecPoint: () => ({
+    type: SCREW_STEP.CONFIRM_FAIL_SPEC_POINT
+  }),
+  byPassSpecPoint: () => ({
+    type: SCREW_STEP.BYPASS_SPEC_POINT
+  }),
+  selectTool: (tool) => ({
+    type: SCREW_STEP.SELECT_TOOL,
+    tool
+  }),
+  selectPset: (pset) => ({
+    type: SCREW_STEP.SELECT_PSET,
+    pset
+  }),
+  bypassRetry: ()=>({
+    type: SCREW_STEP.BYPASS_RETRY
+  })
+};

@@ -1,0 +1,55 @@
+// @flow
+
+import { call, all } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
+
+import sysInitFlow from './systemInit/saga';
+import user from './user/saga';
+import { watchAiis } from './aiis/saga';
+import { watchRushEvent } from './rush/saga';
+import watchRFIDEvent from './device/rfid/saga';
+import watchOperationViewer from './operationViewer/saga';
+import watchPower from './power/saga';
+import order from './order/saga';
+import dialog from './dialog/saga';
+import { CommonLog } from '../common/utils';
+import healthz from './healthz/saga';
+import modelViewer from './modelViewer/saga';
+import notifier from './Notifier/saga';
+import workCenterMode from './workCenterMode/saga';
+import systemInfo from './systemInfo/saga';
+import reworkPatternRoot from './reworkPattern/saga';
+import manual from './manual/saga';
+import { rootSaga as moduleSagas } from './indexModels';
+
+export default function* rootSaga(): Saga<void> {
+  try {
+    // const state = yield select();
+    yield all([
+      // 硬件设备
+      moduleSagas,
+      watchRFIDEvent,
+      watchAiis,
+      watchRushEvent,
+      user, // auth
+      // watchSettingPreSave,
+      sysInitFlow,
+      watchOperationViewer,
+      // watchNetwork,
+      // watchBattery,
+      watchPower,
+      workCenterMode, // 切换工位工作模式
+      reworkPatternRoot, // 返工模式
+      order,
+      dialog,
+      healthz,
+      modelViewer,
+      notifier,
+      systemInfo,
+      manual,
+    ].filter(e => !!e).map(e => call(e || (() => {
+    }))));
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}

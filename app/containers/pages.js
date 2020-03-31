@@ -1,0 +1,187 @@
+// @flow
+/* eslint flowtype-errors/show-errors: 0 */
+
+// color
+import * as colors from '@material-ui/core/colors';
+
+// icons
+import * as icons from '@material-ui/icons';
+
+import WorkOrders from './orders';
+import ConnResult from './result';
+import Event from './event';
+import Preferences from './config';
+import Help from './help';
+import LockLayout from './lockLayout';
+import LoginPage from './login';
+import Curve from './curve';
+import Viewer from './viewer';
+import Layout from './appLayout';
+import WorkingTemplate from './workingTemplate';
+import OperationList from './OperationList';
+import WorkingManual from './working';
+
+// import HomePage from './home';
+import Net from './config/Net';
+import IO from './config/Io';
+import Connect from './config/Connect';
+
+
+// imgs
+import helpImg from '../../resources/imgs/help.png';
+import viewerImg from '../../resources/imgs/craft.jpeg';
+import editorImg from '../../resources/imgs/operaIns.png';
+import WorkingImg from '../../resources/imgs/operation.png';
+import settingImg from '../../resources/imgs/setting.png';
+import LockingImg from '../../resources/imgs/lock.jpeg';
+import CurveImg from '../../resources/imgs/curveImg.jpeg';
+import LoginImg from '../../resources/imgs/login.jpeg';
+import type { tRouteObj, tUrl } from './typeDef';
+
+const shade = 500;
+
+const pages = {
+  '/app': {
+    component: Layout,
+    navBarContents: ['clock', 'switchWorkCenterButton', 'pages', 'healthCheck', 'language'], // 'sysInfo','avatar','clock', 'pages', 'language',
+    DefaultContent: OperationList,
+    title: 'main.home',
+    icon: icons.Home,
+    color: colors.indigo[shade],
+    '/manualwork': {
+      title: 'main.manual',
+      component: WorkingManual,
+      icon: icons.BrightnessAutoSharp,
+      color: colors.cyan[shade],
+      image: WorkingImg,
+      exact: true
+    },
+    '/working': {
+      title: 'main.operation',
+      component: WorkingTemplate,
+      icon: icons.Build,
+      color: colors.cyan[shade],
+      image: WorkingImg,
+      exact: true
+    },
+    '/viewer': {
+      title: 'main.operationViewer',
+      component: Viewer,
+      icon: icons.Image,
+      color: colors.lightGreen[shade],
+      image: viewerImg,
+      exact: true
+
+    },
+    '/order': {
+      title: 'main.orders',
+      component: WorkOrders,
+      icon: icons.Collections,
+      color: colors.deepOrange[shade],
+      image: editorImg,
+      exact: true
+
+    },
+    '/preference': {
+      title: 'main.preferences',
+      component: Preferences,
+      icon: icons.SettingsApplications,
+      color: colors.orange[shade],
+      image: settingImg,
+      exact: false,
+      '/Net': {
+        // component:null,
+        component: Net,
+        icon: icons.RssFeed,
+        title: 'Configuration.network.name',
+        color: '#009688',
+        exact: true
+      },
+      '/IO': {
+        // component:null,
+        component: IO,
+        icon: icons.ViewModule,
+        title: 'Configuration.IO.name',
+        color: '#ff9800',
+        exact: true
+      },
+      '/Connect': {
+        // component:null,
+        component: Connect,
+        icon: icons.SettingsRemote,
+        title: 'Configuration.connections.name',
+        color: '#3492ff',
+        exact: true
+      },
+      '/help': {
+        title: 'main.help',
+        component: Help,
+        icon: icons.Help,
+        color: colors.pink[shade],
+        image: helpImg,
+        exact: true
+      }
+    },
+    '/event': {
+      title: 'main.event',
+      component: Event,
+      icon: icons.Mail,
+      color: colors.blue[shade],
+      image: LoginImg,
+      exact: true
+
+    },
+    '/result': {
+      title: 'main.resultQuery',
+      component: ConnResult,
+      icon: icons.Save,
+      color: colors.grey[shade],
+      image: LockingImg,
+      exact: true
+
+    },
+    '/curve': {
+      title: 'main.curve',
+      component: Curve,
+      icon: icons.TrendingUp,
+      color: colors.teal[shade],
+      image: CurveImg,
+      exact: true
+
+    }
+
+  },
+  '/pages': {
+    component: LockLayout,
+    '/login': {
+      title: 'main.login',
+      component: LoginPage,
+      icon: icons.Fingerprint,
+      color: colors.grey[shade],
+      image: LoginImg,
+      exact: true
+    }
+    // lock: {
+    //   url: '/pages/lock-screen-page',
+    //   title: 'main.lock',
+    //   component: Pages,
+    //   icon: LockIcon,
+    //   color: grayColor,
+    //   image: LockingImg,
+    //   enName: 'Lock'
+    // },
+  }
+};
+
+export const getContentByUrl = (url: tUrl): tRouteObj => {
+  const arr = url.split('/').filter((u) => u !== '');
+  const page = arr.reduce((p, r) => (p && p[`/${r}`]) || null, pages);
+  return page && {
+    ...page,
+    url,
+    name: url.slice(-1)[0]
+  };
+};
+
+
+export default pages;

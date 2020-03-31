@@ -1,0 +1,162 @@
+{
+  "id": 2,
+  "code": "MO0002",
+  "track_code": "1x0001",
+  "product_code": "demo_product_code",
+  "date_planned_start": "date_planned_start",
+  "date_planned_complete": "date_planned_complete",
+  "status": "fail",
+  "product_type_image": "",
+  "payload": {
+    "products": [{
+      "url": "string",
+      "code": "string"
+    }],
+    "worksheet": {
+      "url": "http://baidu.com",
+      "name": "工艺指导书1",
+      "revision": "v1"
+    },
+    "environments": [
+      {
+        "text": "string",
+        "test_type": "text",
+        "code": "1111",
+        "sequence": 1,
+        "desc": "string"
+      }
+    ],
+    "components": [
+      {
+        "is_key": true,
+        "code": "1111"
+      },{
+        "is_key": true,
+        "code": "2222"
+      }
+    ],
+    "operation": {
+      "code": "G0C",
+      "resources": {
+        "equipments": ["xx0011"],
+        "users": ["112233"]
+      },
+      "desc": "测试工艺作业"
+    },
+    "workcenter": {
+      "code": "TA2-26L-01",
+      "locations": [
+        {
+          "equipment_sn": "1234567",
+          "io_input": 1,
+          "io_output": 1,
+          "product_code": "C1780589"
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "responsible_user": "工步负责人",
+      "code": "MO0002-1",
+      "sequence": 1,
+      "test_type": "register_consumed_materials",
+      "consume_product": "1111",
+      "desc": "将污⽔管摆放到定位位置， 连接管路并紧固牢固",
+      "text": "",
+      "failure_msg": "拧紧失败",
+      "tolerance_min": null,
+      "tolerance_max": null,
+      "target": null
+    },
+    {
+      "code": "MO0002-2",
+      "sequence": 1,
+      "test_type": "register_byproducts",
+      "consume_product": "1111",
+      "desc": "扫码",
+      "text": "",
+      "failure_msg": "扫码失败",
+      "tolerance_min": null,
+      "tolerance_max": null,
+      "target": null
+    },
+    {
+      "code": "MO0002-3",
+      "sequence": 1,
+      "test_type": "measure",
+      "consume_product": "1111",
+      "desc": "测量",
+      "text": "",
+      "failure_msg": "",
+      "tolerance_min": null,
+      "tolerance_max": null,
+      "target": null
+    },
+    {
+      "code": "MO0002-4",
+      "sequence": 1,
+      "test_type": "pass_fail",
+      "consume_product": "1111",
+      "desc": "检测",
+      "text": "",
+      "failure_msg": "",
+      "tolerance_min": null,
+      "tolerance_max": null,
+      "target": null
+    },
+    {
+      "code": "MO0002-5",
+      "sequence": 2,
+      "test_type": "tightening",
+      "failure_msg": "测试拧紧工步失败消息",
+      "desc": "测试拧紧工步描述",
+      "image": "",
+      "skippable": true,
+      "undoable": true,
+      "data": "{\"controllerMode\":\"pset\",\"tightening_points\":[{\"is_key\":true,\"pset\":\"1\",\"sequence\":1,\"y\":10,\"x\":10,\"key_num\":1,\"tightening_tool\":\"xx1233\",\"max_redo_times\":1,\"group_sequence\":1,\"nut_no\":\"\",\"status\":\"ERROR\",\"isActive\":false},{\"is_key\":true,\"pset\":\"1\",\"sequence\":2,\"y\":20,\"x\":20,\"key_num\":1,\"tightening_tool\":\"xx1233\",\"max_redo_times\":1,\"group_sequence\":2,\"nut_no\":\"\",\"status\":\"ERROR\",\"isActive\":false},{\"is_key\":true,\"pset\":\"1\",\"sequence\":3,\"y\":30,\"x\":30,\"key_num\":1,\"tightening_tool\":\"xx1233\",\"max_redo_times\":1,\"group_sequence\":3,\"nut_no\":\"\",\"status\":\"SUCCESS\",\"isActive\":false}],\"results\":[{\"tool_sn\":\"xx1233\",\"sequence\":1,\"ti\":1,\"mi\":1,\"wi\":1,\"result\":\"nok\",\"batch\":\"1/3\"},{\"tool_sn\":\"xx1233\",\"sequence\":2,\"ti\":1,\"mi\":1,\"wi\":1,\"result\":\"nok\",\"batch\":\"2/3\"},{\"tool_sn\":\"xx1233\",\"sequence\":3,\"ti\":1,\"mi\":1,\"wi\":1,\"result\":\"ok\",\"batch\":\"3/3\"}],\"timeLine\":[{\"title\":\"3/3\",\"color\":\"success\",\"footerTitle\":\"xx1233\",\"body\":\"OK: wi=1,mi=1,ti=1\"},{\"title\":\"2/3\",\"color\":\"danger\",\"footerTitle\":\"xx1233\",\"body\":\"NOK: wi=1,mi=1,ti=1\"},{\"title\":\"1/3\",\"color\":\"danger\",\"footerTitle\":\"xx1233\",\"body\":\"NOK: wi=1,mi=1,ti=1\"}]}",
+      "status": "fail",
+      "payload": {
+        "tightening_points": [
+          {
+            "code": "CHARACTERISTIC",
+            "is_key": true,
+            "pset": "1",
+            "sequence": 1,
+            "y": 10,
+            "x": 10,
+            "key_num": 1,
+            "tightening_tool": "xx1233",
+            "max_redo_times": 1,
+            "group_sequence": 1,
+            "nut_no": ""
+          },
+          {
+            "is_key": true,
+            "pset": "1",
+            "sequence": 2,
+            "y": 20,
+            "x": 20,
+            "key_num": 1,
+            "tightening_tool": "xx1233",
+            "max_redo_times": 1,
+            "group_sequence": 2,
+            "nut_no": ""
+          },
+          {
+            "is_key": true,
+            "pset": "1",
+            "sequence": 3,
+            "y": 30,
+            "x": 30,
+            "key_num": 1,
+            "tightening_tool": "xx1233",
+            "max_redo_times": 1,
+            "group_sequence": 3,
+            "nut_no": ""
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+// @flow
+
+import React from 'react';
+import { connect } from 'react-redux';
+import Dialog from '@material-ui/core/Dialog/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import Slide from '@material-ui/core/Slide';
+import { makeStyles } from '@material-ui/core/styles';
+import { I18n } from 'react-i18next';
+import { DialogActions } from '@material-ui/core';
+import styles from './style';
+import dialogActions from '../../modules/dialog/action';
+import Button from '../CustomButtons/Button';
+import type { Dispatch } from '../../modules/typeDef';
+import type { tDialogConfig } from '../../modules/dialog/interface/typeDef';
+
+type tOP = {||};
+
+type tSP = {|
+  ...tOP,
+  config: tDialogConfig,
+  open: boolean
+|};
+
+type tDP = {|
+  buttonAction: Dispatch,
+  closeAction: Dispatch
+|};
+
+type Props = {|
+  ...tOP,
+  ...tSP,
+  ...tDP
+|};
+
+const mapState = (state, props: tOP): tSP => ({
+  ...props,
+  config: state?.dialog?.config || {},
+  open: state?.dialog?.open || false
+});
+
+const mapDispatch: tDP = {
+  closeAction: dialogActions.dialogClose,
+  buttonAction: dialogActions.dialogButton
+};
+
+const Transition = React.forwardRef((props, ref) => (
+  <Slide direction="up" {...props} ref={ref}/>
+));
+
+
+function customDialog(props: Props) {
+  const { config, open, buttonAction, closeAction } = props;
+  const classes = makeStyles(styles)();
+  const { buttons, title, content, maxWidth = 'sm' } = config;
+
+  const onButton = (idx) => {
+    buttonAction(idx);
+  };
+  const onClose = () => {
+    closeAction();
+  };
+
+  return (
+    <I18n ns="translations">
+      {t => (
+        <Dialog
+          disableBackdropClick
+          classes={{
+            root: classes.modalRoot,
+            paper: `${classes.modal} ${classes.modalLarge}`
+          }}
+          TransitionComponent={Transition}
+          keepMounted
+          maxWidth={maxWidth}
+          open={open}
+          onClose={onClose}
+          aria-labelledby="form-dialog-title"
+          scroll="paper"
+        >
+          <DialogTitle id="form-dialog-title" className={classes.modalHeader}>
+            {(typeof title === 'string' ? t(title) : title) || ''}
+          </DialogTitle>
+          <DialogContent className={`${classes.modalBody} ${classes.diagContent}`}>
+            {content || ''}
+          </DialogContent>
+          <DialogActions>
+            {
+              buttons && buttons.map((b, idx) => b ?
+                <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} size='lg'
+                        className={classes.diagButton} fullWidth>
+                  {t(b.label || '')}
+                </Button> : null) || null
+            }
+          </DialogActions>
+        </Dialog>
+      )}
+    </I18n>
+  );
+}
+
+export default connect<Props, tOP, tSP, tDP, _, _>(
+  mapState,
+  mapDispatch
+)(customDialog);

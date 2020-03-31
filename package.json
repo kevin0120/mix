@@ -1,0 +1,336 @@
+{
+  "name": "ControlPanel-SA",
+  "productName": "ControlPanel-SA",
+  "version": "2.0.0-rc3",
+  "description": "智能装配生产-控制面板客户端",
+  "scripts": {
+    "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
+    "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",
+    "build-e2e": "cross-env E2E_BUILD=true yarn build",
+    "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.babel.js --colors",
+    "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.babel.js --colors",
+    "dev": "cross-env PORT=4343 START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env PORT=4343 START_HOT=1 yarn start-renderer-dev",
+    "flow": "flow",
+    "flow-typed": "rimraf flow-typed/npm && cross-env NODE_OPTIONS=--max_old_space_size=10000 flow-typed install --verbose || true",
+    "lint": "cross-env NODE_ENV=development eslint --cache --format=pretty .",
+    "lint-fix": "yarn --silent lint --fix; exit 0",
+    "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
+    "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0",
+    "package": "yarn build && electron-builder build --publish never",
+    "package-all": "yarn build && electron-builder build -mwl",
+    "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
+    "package-mac": "npm run build && build --mac",
+    "package-linux": "yarn build && electron-builder build --linux",
+    "package-debug-linux": "cross-env DEBUG_PROD=true yarn package-linux",
+    "package-win": "yarn build && electron-builder build --win",
+    "package-debug-win": "cross-env DEBUG_PROD=true yarn package-win",
+    "postinstall": "yarn flow-typed && yarn build-dll && electron-builder install-app-deps package.json && opencollective-postinstall",
+    "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{*{js,jsx,json},babelrc,eslintrc,prettierrc,stylelintrc}'",
+    "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
+    "precommit": "lint-staged",
+    "prestart": "yarn build",
+    "start": "cross-env NODE_ENV=production electron ./app/",
+    "start-main-dev": "cross-env HOT=1 NODE_ENV=development electron --remote-debugging-port=9222 -r @babel/register ./app/main.dev.js",
+    "start-renderer-dev": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.babel.js",
+    "test": "cross-env NODE_ENV=test BABEL_DISABLE_CACHE=1 jest --passWithNoTests",
+    "test-all": "yarn lint && yarn flow && yarn build && yarn test && yarn build-e2e && yarn test-e2e",
+    "test-e2e": "node -r @babel/register ./internals/scripts/CheckBuiltsExist.js && cross-env NODE_ENV=test testcafe electron:./ ./test/e2e/HomePage.e2e.js",
+    "test-e2e-live": "node -r @babel/register ./internals/scripts/CheckBuiltsExist.js && cross-env NODE_ENV=test testcafe-live electron:./ ./test/e2e/HomePage.e2e.js",
+    "test-watch": "yarn test --watch",
+    "mock-server": "node ./test/mockServer/index.js"
+  },
+  "config": {
+    "electron_mirror": "https://npm.taobao.org/mirrors/electron/"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "cross-env NODE_ENV=development eslint --cache --format=pretty",
+      "prettier --ignore-path .eslintignore --single-quote --write",
+      "git add"
+    ],
+    "{*.json,.{babelrc,eslintrc,prettierrc,stylelintrc}}": [
+      "prettier --ignore-path .eslintignore --parser json --write",
+      "git add"
+    ],
+    "*.{css,scss}": [
+      "stylelint --ignore-path .eslintignore --syntax scss --fix",
+      "prettier --ignore-path .eslintignore --single-quote --write",
+      "git add"
+    ],
+    "*.{yml,md}": [
+      "prettier --ignore-path .eslintignore --single-quote --write",
+      "git add"
+    ]
+  },
+  "main": "./app/main.prod.js",
+  "build": {
+    "productName": "ControlPanel-SA",
+    "extends": null,
+    "copyright": "Satrun",
+    "appId": "org.saturn.ContronPanel",
+    "files": [
+      "app/locales/",
+      "app/flags/",
+      "app/dist/",
+      "app/app.html",
+      "app/main.prod.js",
+      "app/main.prod.js.map",
+      "package.json"
+    ],
+    "electronDownload": {
+      "mirror": "https://npm.taobao.org/mirrors/electron/"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "SmartAssembly"
+    },
+    "directories": {
+      "buildResources": "resources",
+      "output": "release"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masami10/ControlPanel-SA.git"
+  },
+  "author": {
+    "name": "Frank Gu",
+    "email": "masami.nagasawa10@hotmail.com",
+    "url": "https://github.com/masami10"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/masami10/ControlPanel-SA/issues"
+  },
+  "keywords": [
+    "electron",
+    "boilerplate",
+    "react",
+    "redux",
+    "flow",
+    "sass",
+    "webpack",
+    "hot",
+    "reload"
+  ],
+  "homepage": "https://github.com/masami10/ControlPanel-SA#readme",
+  "jest": {
+    "testURL": "http://localhost/",
+    "timers": "1000",
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/internals/mocks/fileMock.js",
+      "\\.(css|less|sass|scss)$": "identity-obj-proxy"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json"
+    ],
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "./node_modules/(?!(lodash-es))"
+    ],
+    "setupFiles": [
+      "./internals/scripts/CheckBuiltsExist.js"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-proposal-decorators": "^7.1.2",
+    "@babel/plugin-proposal-do-expressions": "^7.0.0",
+    "@babel/plugin-proposal-export-default-from": "^7.0.0",
+    "@babel/plugin-proposal-export-namespace-from": "^7.0.0",
+    "@babel/plugin-proposal-function-bind": "^7.0.0",
+    "@babel/plugin-proposal-function-sent": "^7.1.0",
+    "@babel/plugin-proposal-json-strings": "^7.0.0",
+    "@babel/plugin-proposal-logical-assignment-operators": "^7.0.0",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.0.0",
+    "@babel/plugin-proposal-numeric-separator": "^7.0.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.0.0",
+    "@babel/plugin-proposal-pipeline-operator": "^7.0.0",
+    "@babel/plugin-proposal-throw-expressions": "^7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-syntax-import-meta": "^7.0.0",
+    "@babel/plugin-transform-react-constant-elements": "^7.0.0",
+    "@babel/plugin-transform-react-inline-elements": "^7.0.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "babel-eslint": "^10.0.2",
+    "babel-jest": "^24.8.0",
+    "babel-loader": "^8.0.6",
+    "babel-plugin-dev-expression": "^0.2.2",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "chalk": "^2.4.1",
+    "concurrently": "^3.6.1",
+    "connected-react-router": "^4.4.1",
+    "cross-env": "^5.2.0",
+    "cross-spawn": "^6.0.5",
+    "css-loader": "^1.0.1",
+    "detect-port": "^1.2.3",
+    "electron": "^6.0.0",
+    "electron-builder": "^21.2.0",
+    "electron-devtools-installer": "^2.2.4",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "enzyme-to-json": "^3.3.4",
+    "eslint": "^5.2.0",
+    "eslint-config-airbnb": "^17.1.1",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-formatter-pretty": "^1.3.0",
+    "eslint-import-resolver-webpack": "^0.10.1",
+    "eslint-plugin-compat": "^2.5.1",
+    "eslint-plugin-flowtype": "^4.3.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-jest": "^22.13.6",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-react": "^7.10.0",
+    "eslint-plugin-react-hooks": "^1.6.1",
+    "eslint-plugin-redux-saga": "^1.0.0",
+    "eslint-plugin-testcafe": "^0.2.1",
+    "faker": "^4.1.0",
+    "fbjs-scripts": "^0.8.3",
+    "file-loader": "^1.1.11",
+    "flow-bin": "^0.120.1",
+    "flow-runtime": "^0.17.0",
+    "flow-typed": "^2.6.1",
+    "husky": "^0.14.3",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^24.8.0",
+    "lint-staged": "^7.2.0",
+    "mini-css-extract-plugin": "^0.4.1",
+    "node-sass": "^4.9.2",
+    "opencollective-postinstall": "^2.0.1",
+    "optimize-css-assets-webpack-plugin": "^5.0.0",
+    "prettier": "^1.14.3",
+    "raw-loader": "^3.1.0",
+    "react-svg-loader": "^3.0.3",
+    "react-test-renderer": "^16.4.1",
+    "redux-logger": "^3.0.6",
+    "redux-saga-test-plan": "^4.0.0-rc.2",
+    "rimraf": "^2.6.2",
+    "sass-loader": "^7.0.3",
+    "sinon": "^6.3.5",
+    "spectron": "^3.8.0",
+    "style-loader": "^0.23.1",
+    "stylelint": "^9.4.0",
+    "stylelint-config-prettier": "^4.0.0",
+    "stylelint-config-standard": "^18.2.0",
+    "testcafe": "^0.23.0",
+    "testcafe-browser-provider-electron": "^0.0.6",
+    "testcafe-live": "^0.1.3",
+    "testcafe-react-selectors": "^3.0.0",
+    "uglifyjs-webpack-plugin": "1.2.7",
+    "url-loader": "^1.0.1",
+    "webpack": "^4.20.2",
+    "webpack-bundle-analyzer": "^2.13.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.9",
+    "webpack-merge": "^4.1.3",
+    "yarn": "^1.10.1"
+  },
+  "dependencies": {
+    "@emotion/core": "^10.0.14",
+    "@emotion/styled": "^10.0.14",
+    "@fortawesome/fontawesome-free": "^5.2.0",
+    "@material-ui/core": "^4.2.0",
+    "@material-ui/icons": "^4.2.1",
+    "@material-ui/styles": "^4.2.1",
+    "@oznu/ws-connect": "^1.0.0",
+    "axios": "^0.19.0",
+    "axios-retry": "^3.1.2",
+    "child_process": "^1.0.2",
+    "classnames": "^2.2.6",
+    "clsx": "^1.0.4",
+    "color": "^3.1.0",
+    "cross-fetch": "^2.2.1",
+    "dayjs": "^1.7.5",
+    "devtron": "^1.4.0",
+    "electron-debug": "^2.0.0",
+    "electron-log": "^2.2.17",
+    "electron-settings": "^3.2.0",
+    "electron-updater": "^4.1.2",
+    "font-awesome": "^4.7.0",
+    "fs-extra": "^8.1.0",
+    "glamor": "^2.20.40",
+    "history": "^4.7.2",
+    "http-status": "^1.4.0",
+    "i18next": "^11.6.0",
+    "i18next-browser-languagedetector": "^2.2.3",
+    "i18next-xhr-backend": "^1.5.1",
+    "jsmodbus": "^3.0.0",
+    "keypad-easy": "^1.0.5",
+    "lodash-es": "^4.17.15",
+    "moment": "^2.24.0",
+    "notistack": "^0.9.6",
+    "prop-types": "^15.7.2",
+    "qrcode.react": "^0.9.3",
+    "react": "^16.8.6",
+    "react-bootstrap-sweetalert": "^4.4.1",
+    "react-compound-timer": "^1.1.1",
+    "react-custom-scrollbars": "^4.2.1",
+    "react-dom": "^16.8.6",
+    "react-draggable": "^3.0.5",
+    "react-emotion": "^10.0.0",
+    "react-flags": "^0.1.18",
+    "react-hot-loader": "^4.12.9",
+    "react-i18next": "^7.10.1",
+    "react-live-clock": "^3.1.0",
+    "react-pdf": "^4.1.0",
+    "react-popper": "^1.3.3",
+    "react-redux": "^5.0.7",
+    "react-router": "^4.3.1",
+    "react-router-dom": "^4.3.1",
+    "react-select": "^2.0.0",
+    "react-simple-keyboard": "^1.25.0",
+    "react-spinners": "^0.4.8",
+    "react-stopwatch": "^1.1.1",
+    "react-table": "^6.8.6",
+    "react-toastify": "^4.2.0",
+    "redux": "^4.0.4",
+    "redux-saga": "^1.1.1",
+    "saga-modux": "^0.1.0",
+    "source-map-support": "^0.5.6",
+    "styled-components": "^3.4.2",
+    "sync-request": "^6.0.0",
+    "systeminformation": "^3.50.2",
+    "typeface-noto-sans": "^0.0.54",
+    "typeface-noto-sans-sc": "^0.0.71",
+    "validator": "^10.9.0",
+    "winston": "^2.4.4",
+    "ws": "^4.1.0"
+  },
+  "devEngines": {
+    "node": ">=7.x",
+    "npm": ">=4.x",
+    "yarn": ">=0.21.3"
+  },
+  "collective": {
+    "url": "https://opencollective.com/electron-react-boilerplate-594"
+  },
+  "browserslist": "electron 1.6"
+}

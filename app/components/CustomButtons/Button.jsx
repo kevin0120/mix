@@ -1,0 +1,93 @@
+import React from 'react';
+// nodejs library that concatenates classes
+import classNames from 'classnames';
+// nodejs library to set properties for components
+import PropTypes from 'prop-types';
+
+// @material-ui/core components
+import withStyles from '@material-ui/core/styles/withStyles';
+import Button from '@material-ui/core/Button';
+
+import buttonStyle from '../../common/jss/components/buttonStyle';
+
+function RegularButton(props) {
+  const {
+    classes,
+    color,
+    round,
+    children,
+    fullWidth,
+    disabled,
+    simple,
+    size,
+    block,
+    link,
+    justIcon,
+    fileButton,
+    regular,
+    className,
+    ...rest
+  } = props;
+  const btnClasses = classNames({
+    [classes.button]: true,
+    [classes[size]]: size,
+    [classes[color]]: color,
+    [classes.round]: round,
+    [classes.fullWidth]: fullWidth,
+    [classes.disabled]: disabled,
+    [classes.simple]: simple,
+    [classes.block]: block,
+    [classes.link]: link,
+    [classes.justIcon]: justIcon,
+    [classes.fileButton]: fileButton,
+    [classes.regular]: regular,
+    [className]: className
+  });
+  return (
+    <Button className={btnClasses} {...rest}>
+      {children}
+    </Button>
+  );
+}
+
+RegularButton.propTypes = {
+  classes: PropTypes.shape({}).isRequired,
+  color: PropTypes.oneOf([
+    'primary',
+    'secondary',
+    'info',
+    'success',
+    'warning',
+    'danger',
+    'rose',
+    'white',
+    'twitter',
+    'facebook',
+    'google',
+    'linkedin',
+    'pinterest',
+    'youtube',
+    'tumblr',
+    'github',
+    'behance',
+    'dribbble',
+    'reddit',
+    'instagram',
+    'transparent'
+  ]),
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  simple: PropTypes.bool,
+  round: PropTypes.bool,
+  fullWidth: PropTypes.bool,
+  disabled: PropTypes.bool,
+  block: PropTypes.bool,
+  link: PropTypes.bool,
+  justIcon: PropTypes.bool,
+  fileButton: PropTypes.bool,
+  regular: PropTypes.bool
+};
+
+export default withStyles(buttonStyle)(RegularButton);
+
+// WEBPACK FOOTER //
+// ./src/components/CustomButtons/Button.jsx
