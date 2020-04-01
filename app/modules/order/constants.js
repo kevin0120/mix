@@ -68,3 +68,30 @@ export const ORDER = Object.freeze({
     FINISH: 'ORDER_STEP_FINISH'
   }
 });
+
+export const blockReasons = {
+  materialAvailability:{
+    name: 'materialAvailability',
+    lossType: 'availability'
+  },
+  equipmentFailure:{
+    name: 'equipmentFailure',
+    lossType: 'availability'
+  },
+  setupAndAdjustments:{
+    name: 'setupAndAdjustments',
+    lossType: 'availability'
+  },
+  reducedSpeed:{
+    name: 'reducedSpeed',
+    lossType: 'performance'
+  },
+  reducedYield:{
+    name: 'reducedYield',
+    lossType: 'quality'
+  },
+  fullyProductiveTime:{
+    name: 'fullyProductiveTime',
+    lossType: 'productive'
+  }
+};

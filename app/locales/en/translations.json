@@ -91,6 +91,8 @@
   "Common": {
     "Yes": "Confirm",
     "No": "Cancel",
+    "Confirm": "Confirm",
+    "Cancel": "Cancel",
     "Retry": "Retry",
     "WorkSegment": "Work Segment",
     "WorkCenter": "Work Center",
@@ -230,5 +232,13 @@
     "Overview": "Overview",
     "Next": "Next",
     "Retry": "Retry"
+  },
+  "blockReasons": {
+    "materialAvailability": "Material Availability",
+    "equipmentFailure": "Equipment Failure",
+    "setupAndAdjustments": "Setup and Adjustments",
+    "reducedSpeed": "Reduced Speed",
+    "reducedYield": "Reduced Yield",
+    "fullyProductiveTime": "Fully Productive Time"
   }
 }
