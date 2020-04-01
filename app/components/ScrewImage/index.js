@@ -98,7 +98,7 @@ export default function ScrewImage({ menu, twinkle, style = {}, image, points, s
         selected={(selectedSequences || []).some(sp => sp === p?.sequence)}
         label={`${p?.sequence || ''}`}
         scale={pointScale}
-        info={{ [t('tool')]: t(p.tightening_tool) }}
+        info={{ [t('tool')]: (p.tightening_tools&&p.tightening_tools.length>0? p.tightening_tools.join(',') : p.tightening_tool) }}
         reworkModiBGColor
         onClick={(e) => {
           e.preventDefault();
