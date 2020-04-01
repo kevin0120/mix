@@ -16,19 +16,23 @@ SYNC_ALL_WORKCENTER_EQUIPMENT_TOOLS = '/rush/v1/equipments/sync'  # 当前只同
 class MrpWorkCenterLoc(models.Model):
     _inherit = 'mrp.workcenter.loc'
 
-    equipment_id = fields.Many2one('maintenance.equipment', 'Remote IO Module For Control',
+    equipment_id = fields.Many2one('maintenance.equipment', 'Remote IO Module For Control(Input)',
                                    domain=[('category_name', '=', 'IO')])
+
+    output_equipment_id = fields.Many2one('maintenance.equipment', 'Remote IO Module For Control(Output)',
+                                          domain=[('category_name', '=', 'IO')])
 
     io_output = fields.Integer('IO Output For Picking Indicate', default=1)
 
     io_input = fields.Integer('IO Input For Picking Confirm', default=1)
 
     @api.multi
-    @api.depends('equipment_id', 'io_output', 'io_input')
+    @api.depends('equipment_id', 'output_equipment_id', 'io_output', 'io_input')
     def name_get(self):
         res = []
         for location in self:
-            name = u"IN{0}/OUT{1}@{2}".format(location.io_input, location.io_output, location.equipment_id.name)
+            name = u"IN{0}@{1}/OUT{2}@{3}".format(location.io_input, location.equipment_id.name, location.io_output,
+                                                  location.output_equipment_id.name)
             res.append((location.id, name))
         return res
 
@@ -76,7 +80,7 @@ class MrpWorkCenter(models.Model):
             d = {
                 'equipment_sn': equipment.serial_no if equipment else '',  # 拧紧工具,
                 'location': {
-                    'equipment_sn': loc.equipment_id.serial_no if loc.equipment_id else '',  # IO模块
+                    'equipment_sn': loc.output_equipment_id.serial_no if loc.output_equipment_id else '',  # IO模块
                     'io_output': loc.io_output,
                     'io_input': loc.io_input
                 },
