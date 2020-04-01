@@ -297,8 +297,9 @@ def package_workcenter_location_data(workcenter_id, val):
         return
     for loc in workcenter_locations:
         data = {
-            'product_code': loc.product_id.default_code if loc.product_id else False,
-            'equipment_sn': loc.equipment_id.serial_no if loc.equipment_id else False,  # IO模块
+            'product_code': loc.product_id.default_code if loc.product_id else '',
+            'input_sn': loc.equipment_id.serial_no if loc.equipment_id else '',  # IO模块
+            'output_sn': loc.output_equipment_id.serial_no if loc.output_equipment_id else '',  # IO模块
             'io_output': loc.io_output,
             'io_input': loc.io_input
         }
