@@ -51,7 +51,8 @@
     "Availability": "可用率",
     "Performance": "表现率",
     "Quality": "质量",
-    "Productive": "生产率"
+    "Productive": "生产率",
+    "SelectBlockReason": "请选择阻塞原因"
   },
   "ManualDiag": {
     "title": "VIN/KNR"
@@ -236,11 +237,11 @@
     "Retry": "重试"
   },
   "blockReasons": {
-    "materialAvailability": "Material Availability",
-    "equipmentFailure": "Equipment Failure",
-    "setupAndAdjustments": "Setup and Adjustments",
-    "reducedSpeed": "Reduced Speed",
-    "reducedYield": "Reduced Yield",
-    "fullyProductiveTime": "Fully Productive Time"
+    "materialAvailability": "材料可用性",
+    "equipmentFailure": "设备故障",
+    "setupAndAdjustments": "设置和调整",
+    "reducedSpeed": "减速",
+    "reducedYield": "减产",
+    "fullyProductiveTime": "充分生产时间"
   }
 }

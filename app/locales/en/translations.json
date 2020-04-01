@@ -50,7 +50,8 @@
     "Availability": "Availability",
     "Performance": "Performance",
     "Quality": "Quality",
-    "Productive": "Productive"
+    "Productive": "Productive",
+    "SelectBlockReason": "Select Block Reason"
   },
   "ManualDiag": {
     "title": "VIN/KNR"

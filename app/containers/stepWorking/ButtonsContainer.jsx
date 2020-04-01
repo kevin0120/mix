@@ -21,8 +21,7 @@ import type { IOrder } from '../../modules/order/interface/IOrder';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 import PDFViewer from '../../components/PDFViewer';
 import { defaultClient } from '../../common/utils';
-
-// const demoPDF = 'http://www.pdf995.com/samples/pdf.pdf';
+import { BlockReasonDialog } from '../../components/BlockReasonDialog';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -204,20 +203,22 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                       </Button>
                     ) : (
                       (pendingable && (
-                        <Button
-                          type="button"
-                          onClick={() => {
+                        <BlockReasonDialog
+                          AnchorButton={({ onClick }) => <Button
+                            type="button"
+                            onClick={onClick}
+                            variant="contained"
+                            color="warning"
+                            className={classes.bigButton}
+                          >
+                            {t(trans.pending)}
+                          </Button>}
+                          onConfirm={() => {
                             pendingOrder(viewingOrder);
                             setDialogOpen(false);
                           }}
-                          variant="contained"
-                          color="warning"
-                          className={classes.bigButton}
-                        >
-                          {t(trans.pending)}
-                        </Button>
-                      )) ||
-                      null
+                        />
+                      )) || null
                     )}
                     {cancelable ? (
                       <Button
