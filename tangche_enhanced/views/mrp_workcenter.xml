@@ -18,7 +18,8 @@
                            attrs="{'required': [('category_name', 'in', ('tightening_wrench', 'tightening_gun'))]}"/>
                 </xpath>
                 <xpath expr="//page[@name='workcenter_place']//tree[@name='workcenter_loc']" position="inside">
-                    <field name="equipment_id" required="1"/>
+                    <field name="equipment_id" />
+                    <field name="output_equipment_id" />
                     <field name="io_output" required="0"/>
                     <field name="io_input" required="0"/>
                 </xpath>

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-28 05:27+0000\n"
-"PO-Revision-Date: 2020-03-28 05:27+0000\n"
+"POT-Creation-Date: 2020-04-01 07:10+0000\n"
+"PO-Revision-Date: 2020-04-01 07:10+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -122,8 +122,13 @@ msgstr "质量点"
 
 #. module: tangche_enhanced
 #: model:ir.model.fields,field_description:tangche_enhanced.field_mrp_workcenter_loc_equipment_id
-msgid "Remote IO Module For Control"
-msgstr "IO模块"
+msgid "Remote IO Module For Control(Input)"
+msgstr "IO模块(输入)"
+
+#. module: tangche_enhanced
+#: model:ir.model.fields,field_description:tangche_enhanced.field_mrp_workcenter_loc_output_equipment_id
+msgid "Remote IO Module For Control(Output)"
+msgstr "IO模块(输出)"
 
 #. module: tangche_enhanced
 #: model:ir.model.fields,field_description:tangche_enhanced.field_operation_point_socket

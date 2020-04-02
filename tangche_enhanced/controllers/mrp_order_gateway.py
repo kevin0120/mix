@@ -126,7 +126,7 @@ def pack_step_payload(env, consum_lines):
     type_promiscuous_tightening_id = env.ref('tangche_enhanced.test_type_tightening_promiscuous').id
 
     type_tightening_point_id = env.ref('quality.test_type_tightening_point').id
-    for idx, step in enumerate(consum_lines.filtered(lambda t: t.test_type_id.id != type_tightening_point_id)):
+    for idx, step in enumerate(consum_lines.mapped('step_id').filtered(lambda t: t and t.test_type_id.id != type_tightening_point_id)):
         ts = {
             "code": step.name,
             "desc": step.note or '',
@@ -297,8 +297,9 @@ def package_workcenter_location_data(workcenter_id, val):
         return
     for loc in workcenter_locations:
         data = {
-            'product_code': loc.product_id.default_code if loc.product_id else False,
-            'equipment_sn': loc.equipment_id.serial_no if loc.equipment_id else False,  # IO模块
+            'product_code': loc.product_id.default_code if loc.product_id else '',
+            'input_sn': loc.equipment_id.serial_no if loc.equipment_id else '',  # IO模块
+            'output_sn': loc.output_equipment_id.serial_no if loc.output_equipment_id else '',  # IO模块
             'io_output': loc.io_output,
             'io_input': loc.io_input
         }
