@@ -35,8 +35,7 @@ class QualityPoint(models.Model):
 
     program_id = fields.Many2one('controller.program', string='程序号(Pset/Job)', ondelete='cascade')
 
-    sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'work_step_operation_rel', 'step_id', 'operation_id',
-                                        string="Operation Groups", copy=False)
+    sa_operation_ids = fields.One2many('work.step.operation.rel', 'step_id', string="Operation Groups", copy=False)
 
     max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
 
@@ -154,18 +153,18 @@ class QualityPoint(models.Model):
     @api.model
     def create(self, vals):
         ret = super(QualityPoint, self).create(vals)
-        if 'parent_qcp_id' in vals and not ret.sa_operation_ids:
-            val = {
-                'sa_operation_ids': [(6, 0, ret.sa_operation_ids.ids)]
-            }
-            ret.write(val)
+        # if 'parent_qcp_id' in vals and not ret.sa_operation_ids:
+        #     val = {
+        #         'sa_operation_ids': [(6, 0, ret.sa_operation_ids.ids)]
+        #     }
+        #     ret.write(val)
         return ret
 
     @api.multi
     def write(self, vals):
         ret = super(QualityPoint, self).write(vals)
-        if 'sa_operation_ids' in vals:
-            self.mapped('operation_point_ids').write({'sa_operation_ids': vals.get('sa_operation_ids')})
+        # if 'sa_operation_ids' in vals:
+        #     self.mapped('operation_point_ids').write({'sa_operation_ids': vals.get('sa_operation_ids')})
         return ret
 
     @api.multi
