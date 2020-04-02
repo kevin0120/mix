@@ -21,7 +21,7 @@ class MrpWorkorder(models.Model):
     def _create_bulk_cosume_lines(self):
         consume_sudo = self.env['mrp.wo.consu.line'].sudo()
         for order in self:
-            step_ids = order.operation_id.sa_step_ids.filtered(lambda qcp: qcp.test_type != 'tightening_point')
+            step_ids = order.operation_id.sa_step_ids.mapped('step_id').filtered(lambda qcp: qcp and qcp.test_type != 'tightening_point')
             for idx, step in enumerate(step_ids):
                 val = {
                     'sequence': idx + 1,

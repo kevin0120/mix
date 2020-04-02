@@ -43,6 +43,8 @@ class OperationPoints(models.Model):
 
     @api.model
     def default_get(self, fields):
+        context_parent_test_type = self.env.context.get('default_parent_test_type', False)
+
         res = super(OperationPoints, self).default_get(fields)
         if 'picking_type_id' not in res:
             res.update({
@@ -50,12 +52,19 @@ class OperationPoints(models.Model):
             })
 
         operation_id = self.env.context.get('default_operation_id')
+        operation = None
         if operation_id:
             operation = self.env['mrp.routing.workcenter'].sudo().browse(operation_id)
-            if 'max_redo_times' in fields:
-                res.update({'max_redo_times': operation.max_redo_times})
             if 'sequence' in fields and operation.operation_point_ids:
                 res.update({'sequence': max(operation.operation_point_ids.mapped('sequence')) + 1})
+
+        if 'max_redo_times' in fields:
+            max_redo = 3
+            if context_parent_test_type == 'promiscuous_tightening':
+                max_redo = 10000  # 混杂模式最大重试次数设置为10000
+            elif operation:
+                max_redo = operation.max_redo_times
+            res.update({'max_redo_times': max_redo})
         # parent_qcp_id = self.env.context.get('default_parent_qcp_id')
         # if parent_qcp_id:
         #     qcp_id = self.env['sa.quality.point'].sudo().browse(parent_qcp_id)
