@@ -12,7 +12,7 @@ import requests
 from tenacity import retry, wait_exponential, retry_if_exception_type, stop_after_delay, RetryError
 import json
 
-MES_BASE_URL = os.environ.get('ENV_SA_TS002_MES_BASE_URL', 'http://127.0.0.1:1888')
+MES_BASE_URL = os.environ.get('ENV_SA_TS002_MES_BASE_URL', 'http://127.0.0.1:8080')
 
 schema = "http"
 
