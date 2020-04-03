@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-01 07:10+0000\n"
-"PO-Revision-Date: 2020-04-01 07:10+0000\n"
+"POT-Creation-Date: 2020-04-03 01:32+0000\n"
+"PO-Revision-Date: 2020-04-03 01:32+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -156,6 +156,11 @@ msgstr "The product form contains information to simplify the sale\n"
 #: model:ir.model,name:tangche_enhanced.model_operation_point
 msgid "Tightening Operation Point"
 msgstr "拧紧点"
+
+#. module: tangche_enhanced
+#: model:ir.model.fields,field_description:tangche_enhanced.field_sa_quality_point_tightening_tool_ids
+msgid "Tightening Tools(Tightening Gun)"
+msgstr "拧紧工具(拧紧枪)"
 
 #. module: tangche_enhanced
 #: model:ir.model,name:tangche_enhanced.model_mrp_workcenter
