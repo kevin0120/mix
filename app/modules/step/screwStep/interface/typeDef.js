@@ -37,7 +37,8 @@ export type tResult = {
   measure_angle: number, // wi 角度
   measure_result: tResultStatus, // result
   batch: string,
-  count: number
+  count: number,
+  scanner_code: string
 };
 
 export type tScrewStepData = {
