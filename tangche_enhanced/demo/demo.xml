@@ -1,26 +1,26 @@
 <odoo>
     <data>
-        <record id="product_template_100" model="product.template">
-            <field name="name">测试车架1</field>
-            <field name="type">product</field>
-        </record>
+        <!--<record id="product_template_100" model="product.template">-->
+            <!--<field name="name">测试车架1</field>-->
+            <!--<field name="type">product</field>-->
+        <!--</record>-->
 
-        <record id="product_product_100" model="product.product">
-            <field name="name">测试车架1</field>
-            <field name="type">product</field>
-            <field name="sa_type">carriage</field>
-            <field name="default_code">M003000000550</field>
-            <field name="product_tmpl_id" ref="product_template_100"/>
-        </record>
+        <!--<record id="product_product_100" model="product.product">-->
+            <!--<field name="name">测试车架1</field>-->
+            <!--<field name="type">product</field>-->
+            <!--<field name="sa_type">carriage</field>-->
+            <!--<field name="default_code">M003000000550</field>-->
+            <!--<field name="product_tmpl_id" ref="product_template_100"/>-->
+        <!--</record>-->
 
 
 
-        <record id="mrp_bom_7" model="mrp.bom">
-            <field name="product_tmpl_id" ref="product_template_100"/>
-            <field name="product_id" ref="product_product_100"/>
-            <field name="routing_id" ref="sa_base.routing_0"/>
-            <field name="code">bom001</field>
-        </record>
+        <!--<record id="mrp_bom_7" model="mrp.bom">-->
+            <!--<field name="product_tmpl_id" ref="product_template_100"/>-->
+            <!--<field name="product_id" ref="product_product_100"/>-->
+            <!--<field name="routing_id" ref="sa_base.routing_0"/>-->
+            <!--<field name="code">bom001</field>-->
+        <!--</record>-->
 
 
 

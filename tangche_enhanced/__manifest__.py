@@ -34,6 +34,7 @@
         'views/menu_hide_views.xml',
         'demo/demo.xml',
         'data/quality_data.xml',
+        'data/mes_data.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

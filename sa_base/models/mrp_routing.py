@@ -10,6 +10,27 @@ import json
 _logger = logging.getLogger(__name__)
 
 
+class OperationStepRel(models.Model):
+    _name = 'work.step.operation.rel'
+
+    _log_access = False
+
+    _order = "sequence asc, id desc"
+
+    sequence = fields.Integer('Sequence', default=0)
+
+    operation_id = fields.Many2one('mrp.routing.workcenter', required=True)
+
+    step_id = fields.Many2one('sa.quality.point')
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for point in self:
+            res.append((point.id, _('#%s[%s]') % (point.sequence, point.operation_id.name)))
+        return res
+
+
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
     """重写routing_id的定义"""
@@ -27,8 +48,7 @@ class MrpRoutingWorkcenter(models.Model):
     workcenter_ids = fields.Many2many('mrp.workcenter', related='workcenter_group_id.sa_workcenter_ids',
                                       string='Work Center Set', copy=False, readonly=True)
 
-    sa_step_ids = fields.Many2many('sa.quality.point', 'work_step_operation_rel', 'operation_id', 'step_id',
-                                   string="Steps", copy=False)
+    sa_step_ids = fields.One2many('work.step.operation.rel', 'operation_id', string="Steps", copy=False)
 
     prefer_workcenter_id_domain = fields.Char(compute='_compute_workcenter_group', readonly=True, store=False, )
 
@@ -72,7 +92,8 @@ class MrpRoutingWorkcenter(models.Model):
     @api.depends('sa_step_ids')
     def _compute_step_count(self):
         for routing in self:
-            routing.step_count = len(routing.sa_step_ids.filtered(lambda r: r.test_type != 'tightening_point'))
+            dd = routing.sa_step_ids.mapped('step_id').filtered(lambda r: r and r.test_type != 'tightening_point')
+            routing.step_count = len(dd)
 
     @api.multi
     def action_sa_show_steps(self):
@@ -82,10 +103,11 @@ class MrpRoutingWorkcenter(models.Model):
         picking_type_id = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')], limit=1).id
         test_type_id = self.env.ref('quality.test_type_text').id
         ctx = dict(self._context, default_picking_type_id=picking_type_id, default_company_id=self.company_id.id,
-                   default_sa_operation_ids=[(4, ids[0], None)], default_operation_id=self.id,
+                   default_operation_id=self.id,
                    default_test_type_id=test_type_id)
         action.update({'context': ctx})
-        action['domain'] = [('sa_operation_ids', 'in', self.ids), ('test_type', '!=', 'tightening_point')]
+        action['domain'] = [('id', 'in', self.sa_step_ids.mapped('step_id').ids),
+                            ('test_type', '!=', 'tightening_point')]
         action['name'] = _("Work Steps")
         return action
 
