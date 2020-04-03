@@ -12,7 +12,8 @@
 
                 <!--</field>-->
                 <field name="program_id" position="replace">
-
+                    <field name="tightening_tool_ids" widget="many2many_tags"
+                           options="{'no_create': True, 'no_open':True}" attrs="{'invisible': [('test_type', '!=', 'promiscuous_tightening')]}"/>
                 </field>
 
                 <field name="component_id" position="attributes">
@@ -26,8 +27,7 @@
                 <xpath expr="//field[@name='operation_point_ids']" position="attributes">
                     <attribute name="context">
                         {'default_parent_qcp_id': active_id, 'search_parent_step_ids': [active_id],
-                        'default_parent_test_type':
-                        test_type }
+                        'default_parent_test_type': test_type, 'default_tightening_tool_ids': tightening_tool_ids}
                     </attribute>
                 </xpath>
                 <xpath expr="//page[@name='qcp_tightening_point']//field[@name='sequence']"
@@ -65,7 +65,8 @@
                     <field name="socket" options="{'no_create_edit': True,'no_open': True}"/>
                 </xpath>
                 <xpath expr="//page[@name='qcp_tightening_point']//field[@name='tool_id']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('parent_test_type','=','promiscuous_tightening')], 'required':
+                    <attribute name="attrs">{'invisible': [('parent_test_type','=','promiscuous_tightening')],
+                        'required':
                         [('parent_test_type','=','tightening')]}
                     </attribute>
                 </xpath>

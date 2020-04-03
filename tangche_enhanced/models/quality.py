@@ -7,11 +7,14 @@ from odoo.exceptions import ValidationError
 class QualityPoint(models.Model):
     _inherit = "sa.quality.point"
 
-    @api.constrains('sa_operation_ids')
-    def _ts002_constrain_operation_ids(self):
-        for step in self:
-            if len(step.sa_operation_ids) > 1:
-                raise ValidationError(u'唐山客车 每个工步最多定义一个作业')
+    tightening_tool_ids = fields.Many2many('mrp.workcenter.group.tool', 'work_step_tool_rel', 'step_id', 'tool_id',
+                                           string='Tightening Tools(Tightening Gun)', copy=False)
+
+    # @api.constrains('sa_operation_ids')
+    # def _ts002_constrain_operation_ids(self):
+    #     for step in self:
+    #         if len(step.sa_operation_ids) > 1:
+    #             raise ValidationError(u'唐山客车 每个工步最多定义一个作业')
 
 
 
