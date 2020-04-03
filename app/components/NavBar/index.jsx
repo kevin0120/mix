@@ -149,6 +149,7 @@ function ConnectedNavBar(
       key={key}
       type="navigation"
       value={path}
+      users={users}
       routes={[self, ...childRoutes, getContentByUrl('/pages/login')]}
       onItemClick={(route) => {
         if (disabled) {

@@ -1,5 +1,4 @@
 import { put, race, take } from 'redux-saga/effects';
-import type { ClsOperationPoint } from './classes/ClsOperationPoint';
 import { CommonLog } from '../../../common/utils';
 import dialogActions from '../../dialog/action';
 import screwStepActions from './action';
@@ -7,7 +6,7 @@ import { SCREW_STEP } from './constants';
 import { orderActions } from '../../order/action';
 import { STEP_STATUS } from '../constants';
 
-export function* byPassPoint(controls, retry = false) {
+export function* byPassPoint(controls, retry = false, disableByPass = false) {
   try {
     const n: string = controls
       .map((c) => c.sequence)
@@ -34,11 +33,11 @@ export function* byPassPoint(controls, retry = false) {
               // action: reworkActions.tryRework(null, null, finalFailPoints[0])
               action: { type: SCREW_STEP.MANUAL }
             }] : []),
-            {
+            ...disableByPass ? [] : [{
               label: 'Screw.Next',
               color: 'warning',
               action: screwStepActions.byPassSpecPoint()
-            }
+            }]
           ],
           // eslint-disable-next-line camelcase
           title: `拧紧点失败：${n}`,

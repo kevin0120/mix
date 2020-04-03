@@ -23,7 +23,9 @@ if (
 }
 
 if (Object.keys(settings.getAll()).length === 0) {
-  settings.setAll(defaultConfigs);
+  settings.setAll(defaultConfigs,{
+    prettify: true
+  });
 }
 
 const configs = settings.getAll();

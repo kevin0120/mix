@@ -89,6 +89,7 @@ class ConnectedWelcome extends React.Component {
             <PageEntrance
               type="card"
               routes={childRoutes}
+              users={users}
               onItemClick={(route) => {
                 if (!route.role || route.role.length === 0 || users.some((u) => lodash.includes(route.role, u.role))) {
                   doPush(route.url);

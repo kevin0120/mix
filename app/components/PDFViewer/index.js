@@ -10,18 +10,22 @@ export default function PDFViewer({ file = '', page, scale = 1.3, bindNext, bind
   return <div className={classes.container}>
     <Document
       className={classes.document}
-      file={{
-        url: file
-      }}
-      onLoadSuccess={() => setPageNum(page)}
+      file={file}
+      onLoadSuccess={(pdf) => setPageNum(pdf.numPages)}
       onLoadError={e => console.log(e)}
+      loading="正在加载..."
+      noData="没有找到文件"
+      error="打开文件失败"
     >
-      <Page
+      {[...new Array(pageNum)].map((p, idx) => idx).map(p => <Page
         className={classes.page}
         scale={scale}
-        pageIndex={pageNum > page ? page : pageNum}
+        loading="正在加载..."
+        noData="页面为空"
+        error="打开页面失败"
+        pageIndex={pageNum > p ? p : pageNum}
         renderAnnotationLayer={false}
-      />
+      />)}
     </Document>
   </div>;
 }

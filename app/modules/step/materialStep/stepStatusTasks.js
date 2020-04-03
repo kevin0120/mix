@@ -4,12 +4,13 @@ import { orderActions } from '../../order/action';
 import { ioDirection, ioTriggerMode } from '../../device/io/constants';
 import actions, { MATERIAL_STEP } from './action';
 import { CommonLog } from '../../../common/utils';
-import dialogActions from '../../dialog/action';
 import type { IDevice } from '../../device/IDevice';
 import { getDevice } from '../../deviceManager/devices';
 import ClsIOModule from '../../device/io/ClsIOModule';
 import { stepDataApi } from '../../../api/order';
 import notifierActions from '../../Notifier/action';
+import type { IIOModule } from '../../device/io/interface/IIOModule';
+import type { tIOPort } from '../../device/io/type';
 
 function* enteringState(config) {
   try {
@@ -23,18 +24,31 @@ function* enteringState(config) {
     if (!location) {
       throw new Error(`location not provided`);
     }
-    if (!(location.equipment_sn)) {
+    const { input_sn: inputSN, output_sn: outputSN } = location;
+    if (!inputSN || !outputSN) {
       throw new Error(`io module not provided`);
     }
-    const ioModule: IDevice = getDevice(location.equipment_sn);
-    if (!(ioModule instanceof ClsIOModule)) {
-      throw new Error(`io module (${location.equipment_sn}) not found`);
-    }
-    const input = ioModule.getPort(ioDirection.input, location.io_input);
-    const output = ioModule.getPort(ioDirection.input, location.io_output);
-    this._io.add(ioModule);
+    const ioIn: IDevice = getDevice(inputSN);
+    const ioOut: IDevice = getDevice(outputSN);
+
+    checkIOModule(ioIn, inputSN);
+    checkIOModule(ioOut, outputSN);
+
+    const input = ioIn.getPort(ioDirection.input, location.io_input);
+    const output = ioOut.getPort(ioDirection.output, location.io_output);
+    this._io.add(ioIn);
+    this._io.add(ioOut);
     this._ports.add(input);
-    this._items.add({ io: ioModule, in: input, out: output });
+    this._items.add({
+      in:{
+        io: ioIn,
+        port: input
+      },
+      out:{
+        io: ioOut,
+        port: output
+      }
+    });
     yield all(
       [...this._io].map(io => {
         if (!io?.ioContact) {
@@ -69,24 +83,30 @@ function* enteringState(config) {
   }
 }
 
+function checkIOModule(ioInstance, sn) {
+  if (!(ioInstance instanceof ClsIOModule)) {
+    throw new Error(`io module (${sn}) not found`);
+  }
+}
+
 function* doingState() {
   try {
     const listeners = [];
     [...this._items].forEach(i => {
       listeners.push({
-        listener: i.io.addListener(
-          input => i.in === input.data.port &&
+        listener: i.in.io.addListener(
+          input => i.in.port === input.data.port &&
             ioTriggerMode.falling === input.data.triggerMode,
           () => actions.item(i)
         ),
-        io: i.io
+        io: i.in.io
       });
     });
     yield all(
       [...this._items]
         .map(item => {
-          if (item?.io?.openIO && item?.out) {
-            return call(item.io.openIO, item.out);
+          if (item?.out?.io?.openIO && item?.out?.port) {
+            return call(item.out?.io?.openIO, item.out.port);
           }
           return null;
         })

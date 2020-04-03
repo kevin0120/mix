@@ -63,8 +63,12 @@ export default model('io', {
       const { [ioDirection.output]: outputs } = ioPorts;
 
       const { ioPorts: prevIoPorts } = yield select(this.select);
-      eSetting.set('devices.io.inputs', inputs);
-      eSetting.set('devices.io.inputs', outputs);
+      eSetting.set('devices.io.inputs', inputs,{
+        prettify:true
+      });
+      eSetting.set('devices.io.inputs', outputs,{
+        prettify:true
+      });
       yield write(this, s => ({
         ...s,
         ioPorts

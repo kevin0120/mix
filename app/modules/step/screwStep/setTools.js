@@ -23,7 +23,8 @@ export function* setTools(activeControls, controllerMode, isFirst) {
       }
     });
     for (const c of distinctControls) {
-      successCount += yield call([this, setSingleTool], controllerMode, c);
+      successCount += yield call([this, setSingleTool], controllerMode, c,
+        distinctControls.find(cc => cc.sequence === c.sequence && c.toolSN !== cc.toolSN));
     }
     return successCount;
   } catch (e) {
@@ -32,7 +33,7 @@ export function* setTools(activeControls, controllerMode, isFirst) {
   }
 }
 
-function* setSingleTool(controllerMode, singleControl) {
+function* setSingleTool(controllerMode, singleControl, disableBypass = false) {
   try {
     const { sequence, tool, controllerModeId } = singleControl;
     yield call([this, controllerModeTasks[controllerMode]], sequence, tool, controllerModeId);
@@ -43,9 +44,10 @@ function* setSingleTool(controllerMode, singleControl) {
     }));
     return 1;
   } catch (e) {
-    yield call([this, byPassPoint], [singleControl],
-      call([this, setSingleTool], controllerMode, singleControl)
-    );
+      yield call([this, byPassPoint], [singleControl],
+        call([this, setSingleTool], controllerMode, singleControl, disableBypass),
+        disableBypass
+      );
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)

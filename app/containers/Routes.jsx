@@ -36,7 +36,7 @@ function parseRouteTree(routesObj: tRouteObj, parentUrl: string, filter: Object)
       ...(routesObj[u] instanceof Object && !(routesObj[u] instanceof Array) ? routesObj[u] : {}),
       url: (parentUrl || '') + u,
       name,
-      role: filter[name] instanceof Array ? filter[name] : []
+      role: filter[name] instanceof Array ? filter[name] : filter[name].__role || []
     } : null;
   });
   const renderedRoute = routeList.map((route) => {

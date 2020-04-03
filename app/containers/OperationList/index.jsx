@@ -100,6 +100,7 @@ function HomeOperationList(props: Props) {
                 ]}
                 height={130}
                 item={order}
+                image={order.productTypeImage}
                 onClick={onCardClick}
               />
             </Grid>
