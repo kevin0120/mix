@@ -1,8 +1,8 @@
-import { take, put, fork,delay,cancel,call,takeEvery,select,takeLatest} from 'redux-saga/effects';
+import { take, put, fork, delay, cancel, call, takeEvery, select, takeLatest } from 'redux-saga/effects';
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import type { Saga } from 'redux-saga';
-import { MANUAL, start, close, getresult, selectTool, selectPset, setData ,inputOk1} from './action';
+import { MANUAL, start, close, getresult, selectTool, selectPset, setData, inputOk1 } from './action';
 import { CommonLog } from '../../common/utils';
 import { tNS } from '../../i18n';
 import { reworkDialogConstants as dia, reworkNS } from '../reworkPattern/constants';
@@ -23,13 +23,13 @@ import reworkActions from '../reworkPattern/action';
 
 export default function* root() {
   try {
-    yield takeEvery(MANUAL.CANCEL,initManual);
-    yield takeEvery(MANUAL.TIGHTENING,oK);
+    yield takeEvery(MANUAL.CANCEL, initManual);
+    yield takeEvery(MANUAL.TIGHTENING, oK);
     // yield takeEvery(MANUAL.RESULTINPUT,recieveResult);
 
     while (true) {
       yield take(MANUAL.START);
-      const work =yield fork(manualWork);
+      const work = yield fork(manualWork);
       yield take(MANUAL.CLOSE);
       if (work) {
         yield cancel(work);
@@ -75,19 +75,19 @@ export default function* root() {
 //   }
 // }
 
-export function* manualResult(action: tAction = {}): Saga<void>  {
+export function* manualResult(action: tAction = {}): Saga<void> {
   console.log('请手动输入拧紧结果');
   const { point } = action;
-  try{
+  try {
     if (point.isActive) {
       const buttons = [
         {
-          label: "取消",
+          label: '取消',
           color: 'info',
           action: reworkActions.cancelRework()
         },
         {
-          label: "完成",
+          label: '完成',
           color: 'success',
           action: inputOk1()
         }
@@ -101,28 +101,28 @@ export function* manualResult(action: tAction = {}): Saga<void>  {
         })
       );
 
-      yield take (MANUAL.INPUTOK);
+      yield take(MANUAL.INPUTOK);
 
       yield delay(300);
-      const state = yield select()
+      const state = yield select();
       const { manual } = state;
-      if (!manual.resultIn?.sucess){
+      if (!manual.resultIn?.sucess) {
         yield put(
           notifierActions.enqueueSnackbar('Warn', '输入的拧紧结果不符合(扭矩值必填,ok值必填,或者数据类型)的约束', {
             at: '输入结果'
           })
         );
-        return
+        return;
       }
 
       yield put(
         dialogActions.dialogShow({
           buttons,
-          title: `请确认输入完成`,
+          title: `请确认输入完成`
         })
       );
 
-      yield take (MANUAL.INPUTOK);
+      yield take(MANUAL.INPUTOK);
 
       if (manual.resultIn?.sucess) {
 
@@ -146,7 +146,7 @@ export function* manualResult(action: tAction = {}): Saga<void>  {
           if (!ControllerSN) {
             throw new Error(`工具(${tool?.serialNumber})缺少控制器`);
           }
-          console.log(ControllerSN)
+          console.log(ControllerSN);
 
           yield call(
             rushSendApi,
@@ -157,15 +157,15 @@ export function* manualResult(action: tAction = {}): Saga<void>  {
               measure_result: manual.resultIn?.result?.ok.toUpperCase(),
               measure_torque: parseFloat(manual.resultIn?.result?.niu),
               measure_angle: parseFloat(manual.resultIn?.result?.jao),
-              count: point.max_redo_times+1,
-            },
-          )
+              count: point.max_redo_times + 1
+            }
+          );
 
         }
       }
     }
 
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }
@@ -176,7 +176,7 @@ function* oK() {
   try {
     const state = yield select();
 
-    const  {manual} = state;
+    const { manual } = state;
     const tool = getDevice(manual?.tool);
 
     // if (result !==null&& typeof result !== 'undefined') {
@@ -186,7 +186,7 @@ function* oK() {
 
     const retries = 1;
     for (let retry = 1; retry <= retries; retry += 1) {
-      if (manual.scanner===''){
+      if (manual.scanner === '') {
         yield put(
           notifierActions.enqueueSnackbar('Warn', '没有条码进行拧紧结果追溯,不能进行手动作业请输入条码', {
             at: 'controllerModes.pset'
@@ -231,7 +231,7 @@ function* oK() {
       }
     }
 
-    if (manual.scanner!=='') {
+    if (manual.scanner !== '') {
       yield call(tool?.Enable || (() => {
         CommonLog.lError(
           `tool ${tool?.Name}: no such tool or tool cannot be enabled.`
@@ -239,54 +239,53 @@ function* oK() {
       }));
 
 
-     const result = tool.addListener(
+      const result = tool.addListener(
         () => true,
         input => getresult(input.data)
+      );
 
-      )
+      while (true) {
+        const action = yield take(MANUAL.GETRESULT);
 
-      while (true){
-      const action= yield take(MANUAL.GETRESULT);
-
-      if (action.result[0]?.measure_result==="NOK"){
-        yield call(
-          addNewStory,
-          STORY_TYPE.FAIL,
-          `结果 失败`,
-          `T=${action.result[0]?.measure_torque}Nm A=${action.result[0]?.measure_angle}° Tool=${action.result[0]?.tool_sn} Scanner=${action.result[0]?.scanner_code}`
-        );
-
-      } else {
-        yield call(
-          addNewStory,
-          STORY_TYPE.PASS,
-          `结果 成功`,
-          `T=${action.result[0]?.measure_torque}Nm A=${action.result[0]?.measure_angle}° Tool=${action.result[0]?.tool_sn} Scanner=${action.result[0]?.scanner_code}`
-        );
-        yield call(tool?.Disable || (() => {
-          CommonLog.lError(
-            `tool ${tool?.Name}: no such tool or tool cannot be disabled.`
+        if (action.result[0]?.measure_result === 'NOK') {
+          yield call(
+            addNewStory,
+            STORY_TYPE.FAIL,
+            `结果 失败`,
+            `T=${action.result[0]?.measure_torque}Nm A=${action.result[0]?.measure_angle}° Tool=${action.result[0]?.tool_sn} Scanner=${action.result[0]?.scanner_code}`
           );
-        }));
-        if (result !==null&& typeof result !== 'undefined') {
-          tool.removeListener(result);
-          return
+
+        } else {
+          yield call(
+            addNewStory,
+            STORY_TYPE.PASS,
+            `结果 成功`,
+            `T=${action.result[0]?.measure_torque}Nm A=${action.result[0]?.measure_angle}° Tool=${action.result[0]?.tool_sn} Scanner=${action.result[0]?.scanner_code}`
+          );
+          yield call(tool?.Disable || (() => {
+            CommonLog.lError(
+              `tool ${tool?.Name}: no such tool or tool cannot be disabled.`
+            );
+          }));
+          if (result !== null && typeof result !== 'undefined') {
+            tool.removeListener(result);
+            return;
+          }
         }
-      }
       }
     }
 
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }
 
 function* initManual() {
-  try{
-  yield put(close());
-  yield delay(300);
-  yield put(start());
-  }catch (e) {
+  try {
+    yield put(close());
+    yield delay(300);
+    yield put(start());
+  } catch (e) {
     console.error(e);
   }
 }
@@ -334,14 +333,14 @@ function* manualWork() {
         </Grid>)}
       </Grid>)
     }));
-    const { tool } = yield take(MANUAL.SELECT_TOOL,);
+    const { tool } = yield take(MANUAL.SELECT_TOOL);
     // this._tools = [tool];
     // this._forceTool = tool;
     yield put(dialogActions.dialogClose());
     const PsetSelect = SelectCard(selectPset);
     const ControllerSN = ((tool.parent: any): IDevice)?.serialNumber;
     // TODO get tool psets
-    const psets= (yield call(getPestListApi, tool.serialNumber, ControllerSN))?.data || [];
+    const psets = (yield call(getPestListApi, tool.serialNumber, ControllerSN))?.data || [];
     yield delay(300);
     yield put(dialogActions.dialogShow({
       buttons: [btnCancel],
@@ -360,10 +359,9 @@ function* manualWork() {
     // this._forcePset = pset;
     yield put(dialogActions.dialogClose());
 
-    yield put(setData(ControllerSN,tool.serialNumber,pset));
+    yield put(setData(ControllerSN, tool.serialNumber, pset));
 
-  }
-   catch (e) {
+  } catch (e) {
     CommonLog.lError(e);
   }
 }
