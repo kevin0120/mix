@@ -263,6 +263,11 @@ function* oK() {
           `结果 成功`,
           `T=${action.result[0]?.measure_torque}Nm A=${action.result[0]?.measure_angle}° Tool=${action.result[0]?.tool_sn} Scanner=${action.result[0]?.scanner_code}`
         );
+        yield call(tool?.Disable || (() => {
+          CommonLog.lError(
+            `tool ${tool?.Name}: no such tool or tool cannot be disabled.`
+          );
+        }));
       }
       }
     }
