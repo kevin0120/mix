@@ -74,7 +74,7 @@ class MrpWorkCenter(models.Model):
                                                         SYNC_ALL_WORKCENTER_EQUIPMENT_TOOLS)
         equipment_ids = self.equipment_ids.filtered(
             lambda equipment: equipment.category_name in ['tightening_wrench',
-                                                          'tightening_gun'] and equipment.location_id)
+                                                          'tightening_gun'])
         vals = []
         for equipment in equipment_ids:
             loc = equipment.location_id
