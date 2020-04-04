@@ -24,7 +24,7 @@ import reworkActions from '../reworkPattern/action';
 export default function* root() {
   try {
     yield takeEvery(MANUAL.CANCEL,initManual);
-    yield takeLatest(MANUAL.TIGHTENING,oK);
+    yield takeEvery(MANUAL.TIGHTENING,oK);
     // yield takeEvery(MANUAL.RESULTINPUT,recieveResult);
 
     while (true) {
@@ -170,7 +170,7 @@ export function* manualResult(action: tAction = {}): Saga<void>  {
   }
 }
 
-let result;
+// let result;
 
 function* oK() {
   try {
@@ -179,9 +179,9 @@ function* oK() {
     const  {manual} = state;
     const tool = getDevice(manual?.tool);
 
-    if (result !==null&& typeof result !== 'undefined') {
-      tool.removeListener(result);
-    }
+    // if (result !==null&& typeof result !== 'undefined') {
+    //   tool.removeListener(result);
+    // }
 
 
     const retries = 1;
@@ -239,7 +239,7 @@ function* oK() {
       }));
 
 
-      result = tool.addListener(
+     const result = tool.addListener(
         () => true,
         input => getresult(input.data)
 
@@ -268,6 +268,10 @@ function* oK() {
             `tool ${tool?.Name}: no such tool or tool cannot be disabled.`
           );
         }));
+        if (result !==null&& typeof result !== 'undefined') {
+          tool.removeListener(result);
+          return
+        }
       }
       }
     }
