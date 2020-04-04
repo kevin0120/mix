@@ -210,7 +210,8 @@ function* oK() {
           // retryTimes,
           0,
           '手动工单',
-          manual?.scanner
+          manual?.scanner,
+          1
         );
         if (set.data.result === 0) {
           const msg1 = `pset设置成功, 工具：${manual?.tool}`;
