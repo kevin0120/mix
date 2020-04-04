@@ -36,7 +36,9 @@ export default function* root() {
       }
     }
   } catch (e) {
-    CommonLog.lError(e);
+    CommonLog.lError(e,{
+      at: 'manual root'
+    });
   }
 }
 
@@ -166,7 +168,9 @@ export function* manualResult(action: tAction = {}): Saga<void> {
     }
 
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e,{
+      at: 'manualResult'
+    });
   }
 }
 
@@ -269,14 +273,16 @@ function* oK() {
           }));
           if (result !== null && typeof result !== 'undefined') {
             tool.removeListener(result);
-            return;
           }
+          return;
         }
       }
     }
 
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e,{
+      at: 'manual ok'
+    });
   }
 }
 
@@ -286,7 +292,9 @@ function* initManual() {
     yield delay(300);
     yield put(start());
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e,{
+      at: 'initManual'
+    });
   }
 }
 
@@ -362,6 +370,8 @@ function* manualWork() {
     yield put(setData(ControllerSN, tool.serialNumber, pset));
 
   } catch (e) {
-    CommonLog.lError(e);
+    CommonLog.lError(e,{
+      at: 'manualWork'
+    });
   }
 }
