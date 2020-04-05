@@ -27,6 +27,7 @@ export default function* root() {
   try {
     yield takeEvery(MANUAL.TIGHTENING, startTightening);
     yield takeEvery(MANUAL.CLEAR, clearManual);
+    yield takeEvery(MANUAL.SCANNER_NEW_DATA, newScannerData);
     // yield takeEvery(MANUAL.RESULTINPUT,recieveResult);
     yield takeLatest(MANUAL.START, manualWork);
     yield takeEvery(MANUAL.GET_RESULT, manualNewResult);
@@ -74,6 +75,23 @@ const manualListeners = [];
 //   }
 // }
 
+// 重新扫码清空
+let prevScanner = '';
+
+function* newScannerData({ scanner }) {
+  try {
+    if (scanner === prevScanner || !scanner) {
+      return;
+    }
+    yield call(clearManual);
+    prevScanner = scanner;
+  } catch (e) {
+    yield put(notifierActions.enqueueSnackbar('Error', e.message, {
+      at: 'manual newScannerData'
+    }));
+  }
+}
+
 function* clearManual() {
   try {
     while (manualListeners.length > 0) {
@@ -82,117 +100,34 @@ function* clearManual() {
       yield call(tool.Disable);
     }
   } catch (e) {
-    notifierActions.enqueueSnackbar('Error', e.message, {
+    yield put(notifierActions.enqueueSnackbar('Error', e.message, {
       at: 'clearManual'
-    });
+    }));
   }
 }
 
 // 手动模式收到结果
 function* manualNewResult(action) {
-  yield call(timeLineResult, action.result[0]);
-}
-
-// 手动输入拧紧结果
-export function* manualResult(action: tAction = {}): Saga<void> {
-  console.log('请手动输入拧紧结果');
-  const { point } = action;
-  try {
-    if (point.isActive) {
-      const buttons = [
-        {
-          label: '取消',
-          color: 'info',
-          action: reworkActions.cancelRework()
-        },
-        {
-          label: '完成',
-          color: 'success',
-          action: inputOk1()
-        }
-      ];
-
-      yield put(
-        dialogActions.dialogShow({
-          buttons,
-          title: `请输入拧紧结果`,
-          content: (<ResultInput/>)
-        })
-      );
-
-      yield take(MANUAL.INPUT_OK);
-
-      yield delay(300);
-      const state = yield select();
-      const { manual } = state;
-      if (!manual.resultIn?.sucess) {
-        yield put(
-          notifierActions.enqueueSnackbar('Warn', '输入的拧紧结果不符合(扭矩值必填,ok值必填,或者数据类型)的约束', {
-            at: '输入结果'
-          })
-        );
-        return;
-      }
-
-      yield put(
-        dialogActions.dialogShow({
-          buttons,
-          title: `请确认输入完成`
-        })
-      );
-
-      yield take(MANUAL.INPUT_OK);
-
-      if (manual.resultIn?.sucess) {
-
-        // const r = {
-        //     tool_sn: point.tightening_tool,
-        //     seq: point.sequence,
-        //     group_seq: point.group_sequence,
-        //     measure_time: 0,
-        //     measure_torque: manual.resultIn?.result?.niu,
-        //     measure_angle: manual.resultIn?.result?.jao,
-        //     measure_result: manual.resultIn?.result?.ok,
-        //     batch: '1/24',
-        //     count: point.max_redo_times,
-        //     scanner:'',
-        //   }
-
-        const tool = getDevice(point.tightening_tool);
-        if (tool) {
-          // yield call(tool.doDispatch, [r]);
-          const ControllerSN = ((tool.parent: any): IDevice)?.serialNumber;
-          if (!ControllerSN) {
-            throw new Error(`工具(${tool?.serialNumber})缺少控制器`);
-          }
-          console.log(ControllerSN);
-
-          yield call(
-            rushSendApi,
-            'WS_TOOL_RESULT_SET',
-            {
-              tool_sn: point.tightening_tool,
-              controller_sn: ControllerSN,
-              measure_result: manual.resultIn?.result?.ok.toUpperCase(),
-              measure_torque: parseFloat(manual.resultIn?.result?.niu),
-              measure_angle: parseFloat(manual.resultIn?.result?.jao),
-              count: point.max_redo_times + 1
-            }
-          );
-
-        }
-      }
+  try{
+    const [result] = action.result;
+    if (!result) {
+      return;
     }
-
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'manualResult'
-    });
+    yield call(timeLineResult, result);
+    const { tool_sn: toolSN, measure_result: mResult } = result;
+    if (mResult !== OPERATION_RESULT.OK) {
+      return;
+    }
+    const { scanner, pset, controllerSN } = toolWorking(toolSN);
+    yield call(setToolPset, toolSN, controllerSN, pset, scanner);
+  }catch (e) {
+    yield put(notifierActions.enqueueSnackbar('Error', e.message, {
+      at: 'manualNewResult'
+    }));
   }
 }
 
-// let result;
-
+// 将结果添加到timeline
 function* timeLineResult(result) {
   const { measure_result } = result;
   const storyTypes = {
@@ -211,19 +146,21 @@ function* timeLineResult(result) {
   );
 }
 
-function isToolWorking(toolSN) {
+// 工具是否在作业中（有listener）
+function toolWorking(toolSN) {
   return manualListeners.find(l => {
     return l.toolSN === toolSN;
   });
 }
 
-function isToolWorkingWithPSET(toolSN, pset) {
+// 工具是否以相同pset号在作业中（有listener）
+function toolWorkingWithPSET(toolSN, pset) {
   return manualListeners.find(l => {
     return l.toolSN === toolSN && l.pset === pset;
   });
 }
 
-
+// 手动模式开始拧紧
 function* startTightening() {
   try {
     const { tool: toolSN, scanner, controllerSN, pset } = yield select(s => s.manual);
@@ -243,43 +180,14 @@ function* startTightening() {
       return;
     }
 
-    if (isToolWorkingWithPSET(toolSN, pset)) {
+    if (toolWorkingWithPSET(toolSN, pset)) {
       yield put(notifierActions.enqueueSnackbar('Warn', '当前工具和PSET正在作业中', {
         at: 'controllerModes.pset'
       }));
       return;
     }
 
-    const retries = 1;
-    for (let retry = 1; retry <= retries; retry += 1) {
-      try {
-        const set = yield call(
-          psetApi,
-          toolSN || '',
-          controllerSN || '',
-          '手动工步',
-          '',
-          pset,
-          0,
-          0,
-          '手动工单',
-          scanner,
-          1
-        );
-        if (set.data.result === 0) {
-          const msg1 = `pset设置成功, 工具：${toolSN}`;
-          yield put(notifierActions.enqueueSnackbar('Info', msg1, {
-            at: 'manual oK'
-          }));
-          break;
-        }
-      } catch (e) {
-        const msg = `pset失败，${e.message}, 工具：${toolSN}`;
-        if (retry === retries) {
-          throw new Error(msg);
-        }
-      }
-    }
+    yield call(setToolPset, toolSN, controllerSN, pset, scanner);
 
     yield call(tool?.Enable || (() => {
       CommonLog.lError(
@@ -288,9 +196,9 @@ function* startTightening() {
     }));
 
 
-    const toolWorking = isToolWorking(toolSN, pset);
-    if (toolWorking) {
-      toolWorking.pset = pset;
+    const workingTool = toolWorking(toolSN, pset);
+    if (workingTool) {
+      workingTool.pset = pset;
       return;
     }
 
@@ -302,6 +210,8 @@ function* startTightening() {
       tool,
       toolSN,
       pset,
+      scanner,
+      controllerSN,
       listener
     });
 
@@ -311,6 +221,41 @@ function* startTightening() {
         at: 'manual startTightening'
       })
     );
+  }
+}
+
+// 设置工具Pset
+function* setToolPset(toolSN, controllerSN, pset, scanner) {
+  const retries = 1;
+  for (let retry = 1; retry <= retries; retry += 1) {
+    try {
+      const set = yield call(
+        psetApi,
+        toolSN || '',
+        controllerSN || '',
+        '手动工步',
+        '',
+        pset,
+        0,
+        0,
+        '手动工单',
+        scanner,
+        1
+      );
+      if (set.data.result === 0) {
+        const msg1 = `pset设置成功, 工具：${toolSN}, pset：${pset}`;
+        yield put(notifierActions.enqueueSnackbar('Info', msg1, {
+          at: 'manual oK'
+        }));
+        break;
+      }
+    } catch (e) {
+      if (retry <= retries) {
+        continue;
+      }
+      const msg = `pset失败，${e.message}, 工具：${toolSN}, pset：${pset}`;
+      throw new Error(msg);
+    }
   }
 }
 
@@ -415,4 +360,102 @@ function* showPsetSelectDialog(tool, ControllerSN) {
   });
   yield put(dialogActions.dialogClose());
   return resp;
+}
+
+// 手动输入拧紧结果
+export function* manualResult(action: tAction = {}): Saga<void> {
+  console.log('请手动输入拧紧结果');
+  const { point } = action;
+  try {
+    if (point.isActive) {
+      const buttons = [
+        {
+          label: '取消',
+          color: 'info',
+          action: reworkActions.cancelRework()
+        },
+        {
+          label: '完成',
+          color: 'success',
+          action: inputOk1()
+        }
+      ];
+
+      yield put(
+        dialogActions.dialogShow({
+          buttons,
+          title: `请输入拧紧结果`,
+          content: (<ResultInput/>)
+        })
+      );
+
+      yield take(MANUAL.INPUT_OK);
+
+      yield delay(300);
+      const state = yield select();
+      const { manual } = state;
+      if (!manual.resultIn?.sucess) {
+        yield put(
+          notifierActions.enqueueSnackbar('Warn', '输入的拧紧结果不符合(扭矩值必填,ok值必填,或者数据类型)的约束', {
+            at: '输入结果'
+          })
+        );
+        return;
+      }
+
+      yield put(
+        dialogActions.dialogShow({
+          buttons,
+          title: `请确认输入完成`
+        })
+      );
+
+      yield take(MANUAL.INPUT_OK);
+
+      if (manual.resultIn?.sucess) {
+
+        // const r = {
+        //     tool_sn: point.tightening_tool,
+        //     seq: point.sequence,
+        //     group_seq: point.group_sequence,
+        //     measure_time: 0,
+        //     measure_torque: manual.resultIn?.result?.niu,
+        //     measure_angle: manual.resultIn?.result?.jao,
+        //     measure_result: manual.resultIn?.result?.ok,
+        //     batch: '1/24',
+        //     count: point.max_redo_times,
+        //     scanner:'',
+        //   }
+
+        const tool = getDevice(point.tightening_tool);
+        if (tool) {
+          // yield call(tool.doDispatch, [r]);
+          const ControllerSN = ((tool.parent: any): IDevice)?.serialNumber;
+          if (!ControllerSN) {
+            throw new Error(`工具(${tool?.serialNumber})缺少控制器`);
+          }
+          console.log(ControllerSN);
+
+          yield call(
+            rushSendApi,
+            'WS_TOOL_RESULT_SET',
+            {
+              tool_sn: point.tightening_tool,
+              controller_sn: ControllerSN,
+              measure_result: manual.resultIn?.result?.ok.toUpperCase(),
+              measure_torque: parseFloat(manual.resultIn?.result?.niu),
+              measure_angle: parseFloat(manual.resultIn?.result?.jao),
+              count: point.max_redo_times + 1
+            }
+          );
+
+        }
+      }
+    }
+
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'manualResult'
+    });
+  }
 }
