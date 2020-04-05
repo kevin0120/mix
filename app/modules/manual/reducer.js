@@ -1,6 +1,7 @@
 // @flow
 import { MANUAL, TIMELINE_STORY } from './action';
 import type { StateType, Action } from './types';
+import type { tAction, tWorkCenterMode } from '../workCenterMode/interface/typeDef';
 
 const configs = {
   counter: 2,
@@ -9,38 +10,44 @@ const configs = {
   tool: '',
   pset: 0,
   result: [],
-  timeline: []
+  timeline: [],
+  workingTools:[]
 };
 
-export default function(state: StateType = configs, action: Action) {
-  switch (action.type) {
-    case MANUAL.SETDATA:
-      return {
-        ...state,
-        controllerSN: action.ControllerSN,
-        tool: action.tool,
-        pset: action.pset
-      };
-    case MANUAL.NEWCANNERDATA:
-      return { ...state, scanner: action.scanner };
-    case MANUAL.GETRESULT:
-      return { ...state, result: state.result.concat(action.result) };
-    // case MANUAL.START:
-    //   return { ...state, working: true };
-    // case MANUAL.CLOSE:
-    //   return { ...state, working: false};
-    case MANUAL.DIDMOUNT:
-      return { ...state, result: [], working: true };
-    case TIMELINE_STORY.NEW:
-      return { ...state, timeline: NewStory(state.timeline, action.story) };
-    case TIMELINE_STORY.CLEAR:
-      return { ...state, timeline: ClearStory(), working: false };
-    case MANUAL.RESULTINPUT:
-      return { ...state, resultIn: action.resultIn };
-    default:
-      return state;
-  }
-}
+const manualReducers = {
+  [MANUAL.SET_DATA]: (state, action) => ({
+    ...state,
+    controllerSN: action.ControllerSN,
+    tool: action.tool,
+    pset: action.pset
+  }),
+  [MANUAL.SCANNER_NEW_DATA]: (state, action) => ({
+    ...state,
+    scanner: action.scanner
+  }),
+  [MANUAL.GET_RESULT]: (state, action) => ({
+    ...state,
+    result: state.result.concat(action.result)
+  }),
+  [MANUAL.START]: (state, action) => ({
+    ...state,
+    result: [],
+    working: true
+  }),
+  [TIMELINE_STORY.NEW]: (state, action) => ({
+    ...state,
+    timeline: NewStory(state.timeline, action.story)
+  }),
+  [TIMELINE_STORY.CLEAR]: (state, action) => ({
+    ...state,
+    timeline: ClearStory(),
+    working: false
+  }),
+  [MANUAL.RESULT_INPUT]: (state, action) => ({
+    ...state,
+    resultIn: action.resultIn
+  })
+};
 
 export function NewStory(state, story) {
   return [story, ...state];
@@ -49,3 +56,12 @@ export function NewStory(state, story) {
 export function ClearStory() {
   return [];
 }
+
+export default function(state: StateType = configs, action: Action): tWorkCenterMode {
+  if (manualReducers[(action?.type)]) {
+    return manualReducers[(action?.type)](state, action);
+  }
+  return state;
+}
+
+

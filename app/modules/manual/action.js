@@ -9,37 +9,28 @@ export const TIMELINE_STORY = {
 export const MANUAL = {
   START: 'MANUAL_START',
   CLOSE: 'MANUAL_CLOSE',
-  CANCEL: 'MANUAL_CANCEL',
+  CLEAR: 'MANUAL_CLEAR',
   TIGHTENING: 'MANUAL_TIGHTENING',
-  NOSCANNER:'NO_SCANNER',
-  NEWCANNERDATA:'SCANNER_NEW_DATA',
+  NO_SCANNER:'NO_SCANNER',
+  SCANNER_NEW_DATA:'SCANNER_NEW_DATA',
   SELECT_TOOL: 'MANUAL_SELECT_TOOL',
-  SELECT_PSET: 'MANUAL_SELECT_PSET',
-  SETDATA:'SET_DATA',
-  GETRESULT:'GET_RESULT',
-  DIDMOUNT: 'DID_MOUNT',
-  RESULTINPUT:'RESULT_INPUT',
-  INPUTOK:'INPUT_OK'
+  SELECT_PSET: 'SELECT_PSET',
+  SET_DATA:'SET_DATA',
+  GET_RESULT:'GET_RESULT',
+  DID_MOUNT: 'DID_MOUNT',
+  RESULT_INPUT:'RESULT_INPUT',
+  INPUT_OK:'INPUT_OK'
 };
 
-export function inputOk1(){
-  return{
-  type: MANUAL.INPUTOK
+export function inputOk1() {
+  return {
+    type: MANUAL.INPUT_OK
   }
 }
 
-
-export function clickPoint () {
-  return {
-    type: MANUAL.CLICKPOINT
-  };
-}
-
-
-
 export function resultInput(resultIn: Result) {
   return {
-    type: MANUAL.RESULTINPUT,
+    type: MANUAL.RESULT_INPUT,
     resultIn
   };
 }
@@ -52,14 +43,14 @@ export function clearStories() {
 
 export function didMount() {
   return {
-    type: MANUAL.DIDMOUNT
+    type: MANUAL.DID_MOUNT
   };
 }
 
 
 export function getresult(result) {
   return {
-    type: MANUAL.GETRESULT,
+    type: MANUAL.GET_RESULT,
     result
   };
 }
@@ -83,26 +74,25 @@ export function close() {
   };
 }
 
-
+export function manualClear() {
+  return {
+    type: MANUAL.CLEAR
+  };
+}
 
 export function noScanner() {
   return {
-    type: MANUAL.NOSCANNER
+    type: MANUAL.NO_SCANNER
   };
 }
 
 export function newData(scanner) {
   return {
-    type: MANUAL.NEWCANNERDATA,
+    type: MANUAL.SCANNER_NEW_DATA,
     scanner
   };
 }
 
-export function manualCancel() {
-  return {
-    type: MANUAL.CANCEL
-  };
-}
 export function selectTool(tool){
   return {
     type: MANUAL.SELECT_TOOL,
@@ -120,7 +110,7 @@ export function selectPset(pset) {
 
 export function setData(ControllerSN: string,tool: string,pset: number) {
   return {
-    type: MANUAL.SETDATA,
+    type: MANUAL.SET_DATA,
     ControllerSN,
     tool,
     pset
