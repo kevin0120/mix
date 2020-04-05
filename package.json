@@ -1,7 +1,7 @@
 {
   "name": "ControlPanel-SA",
   "productName": "ControlPanel-SA",
-  "version": "2.0.0-rc4",
+  "version": "2.0.0-rc5",
   "description": "智能装配生产-控制面板客户端",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
