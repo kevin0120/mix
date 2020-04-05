@@ -18,9 +18,15 @@ export function* setTools(activeControls, controllerMode, isFirst) {
     const distinctControls = [];
     activeControls.forEach(c => {
       const { toolSN } = c;
-      if (!distinctControls.find(cc => cc.toolSN === toolSN)) {
-        distinctControls.push(c);
+      const control = distinctControls.find(cc => cc.toolSN === toolSN);
+      if (!control) {
+        distinctControls.push({
+          ...c,
+          batch: 1
+        });
+        return;
       }
+      control.batch += 1;
     });
     for (const c of distinctControls) {
       successCount += yield call([this, setSingleTool], controllerMode, c,
@@ -35,8 +41,8 @@ export function* setTools(activeControls, controllerMode, isFirst) {
 
 function* setSingleTool(controllerMode, singleControl, disableBypass = false) {
   try {
-    const { sequence, tool, controllerModeId } = singleControl;
-    yield call([this, controllerModeTasks[controllerMode]], sequence, tool, controllerModeId);
+    const { sequence, tool, controllerModeId, batch } = singleControl;
+    yield call([this, controllerModeTasks[controllerMode]], sequence, tool, controllerModeId, batch);
     yield call(tool?.Enable || (() => {
       throw new Error(
         `tool ${tool?.Name}: no such tool or tool cannot be enabled.`
@@ -44,10 +50,10 @@ function* setSingleTool(controllerMode, singleControl, disableBypass = false) {
     }));
     return 1;
   } catch (e) {
-      yield call([this, byPassPoint], [singleControl],
-        call([this, setSingleTool], controllerMode, singleControl, disableBypass),
-        disableBypass
-      );
+    yield call([this, byPassPoint], [singleControl],
+      call([this, setSingleTool], controllerMode, singleControl, disableBypass),
+      disableBypass
+    );
     yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
       ...data,
       tightening_points: this._pointsManager.points.map(p => p.data)

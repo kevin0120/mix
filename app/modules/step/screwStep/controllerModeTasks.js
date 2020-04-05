@@ -12,7 +12,7 @@ import { stepTypeKeys } from '../constants';
 
 // pset/job模式
 export default {
-  * [controllerModes.pset](sequence, tool, pset): Saga<void> {
+  * [controllerModes.pset](sequence, tool, pset, batch = 64): Saga<void> {
     try {
       const sData: tScrewStepData = this.data;
       const stepCode = this.code;
@@ -48,7 +48,7 @@ export default {
             total,
             workorderCode,
             '',
-            this.type === stepTypeKeys.screw ? 1 : 0
+            this.type === stepTypeKeys.screw ? 1 : batch
           );
           break;
         } catch (e) {
