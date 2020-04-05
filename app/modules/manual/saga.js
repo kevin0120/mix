@@ -263,7 +263,8 @@ function* startTightening() {
           0,
           0,
           '手动工单',
-          scanner
+          scanner,
+          1
         );
         if (set.data.result === 0) {
           const msg1 = `pset设置成功, 工具：${toolSN}`;
