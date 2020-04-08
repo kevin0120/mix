@@ -3,3 +3,4 @@
 from . import mrp_order_gateway
 from . import api
 from . import mes_api
+from . import mes

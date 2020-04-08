@@ -33,6 +33,7 @@
         'views/mrp_routing_views.xml',
         'views/menu_hide_views.xml',
         # 'demo/demo.xml',
+        'report/report_result_views.xml',
         'data/quality_data.xml',
         'data/mes_data.xml',
     ],
