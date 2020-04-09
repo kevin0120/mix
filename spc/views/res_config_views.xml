@@ -99,10 +99,10 @@
               parent="menu_spc_scope_root" sequence="50"/>
 
 
-        <menuitem id="menu_spc_param_settings"
-              name="SPC"
-              groups="spc.group_spc_user"
-              parent="menu_spc_settings" action="action_spc_settings" sequence="50"/>
+<!--        <menuitem id="menu_spc_param_settings"-->
+<!--              name="SPC"-->
+<!--              groups="spc.group_spc_user"-->
+<!--              parent="menu_spc_settings" action="action_spc_settings" sequence="50"/>-->
 
 
         <menuitem id="menu_sa_param_settings"

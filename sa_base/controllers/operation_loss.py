@@ -23,7 +23,7 @@ class OperationLoss(http.Controller):
             vals.append({
                 'loss_id': loss.id,
                 'name': loss.name,
-                'type:': loss.loss_type,
+                'type': loss.loss_type,
             })
         body = json.dumps(vals)
         headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]

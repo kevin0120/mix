@@ -11,7 +11,7 @@ class MaintenanceEquipment(models.Model):
         action = self.env.ref('spc.quality_check_action_spc').read()[0]
         action.update({
             'context': {
-                'search_default_gun_id': self.id
+                'search_default_tool_id': self.id
             }
         })
         return action
