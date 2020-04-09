@@ -17,20 +17,13 @@ class OperationLoss(http.Controller):
             limit = int(kw['limit'])
         else:
             limit = DEFAULT_LIMIT
-        if 'lossType' not in kw or len(kw['lossType'].split(',')) != 1 or kw['lossType'] not in ['availability',
-                                                                                                 'performance',
-                                                                                                 'quality',
-                                                                                                 'productive']:
-            body = json.dumps({'msg': "lossType parameter not correct"})
-            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
-            return Response(body, status=400, headers=headers)
-        domain += [('loss_type', '=', kw['lossType'])]
         losses = env['mrp.workcenter.productivity.loss'].search(domain, limit=limit)
         vals = []
         for loss in losses:
             vals.append({
                 'loss_id': loss.id,
-                'name': loss.name
+                'name': loss.name,
+                'type:': loss.loss_type,
             })
         body = json.dumps(vals)
         headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
