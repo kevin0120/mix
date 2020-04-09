@@ -39,7 +39,7 @@ type Props = {|
 
 function TextStep({ step, isCurrent, submit, bindAction }: Props) {
   const classes = makeStyles(styles)();
-  const { text } = step;
+  const { text, desc } = step;
   useEffect(() => {
     bindAction(
       <Button
@@ -58,11 +58,10 @@ function TextStep({ step, isCurrent, submit, bindAction }: Props) {
 
   return (
     <div className={classes.container}>
-      <Typography variant="h4" dangerouslySetInnerHTML={{ __html: text || '' }}/>
+      <Typography variant="h4" dangerouslySetInnerHTML={{ __html: text || desc || '' }}/>
     </div>
   );
 }
-
 
 
 export default connect<Props, tOP, tSP, tDP, _, _>(
