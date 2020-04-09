@@ -8,9 +8,8 @@ import Select from '@material-ui/core/Select';
 import Button from '../CustomButtons/Button';
 import { withI18n } from '../../i18n';
 import styles from './styles';
-import { blockReasons } from '../../modules/order/constants';
 
-export function BlockReasonDialog({ AnchorButton, onConfirm }) {
+export function BlockReasonDialog({ AnchorButton, onConfirm, blockReasons }) {
   const classes = makeStyles(styles)();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectValue, setSelectValue] = useState(null);

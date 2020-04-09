@@ -132,5 +132,11 @@ export const orderActions = Object.freeze({
   ) => ({
     type: ORDER.REPORT_FINISH,
     order
+  }),
+  setBlockReasonList: (
+    blockReasons
+  ) => ({
+    type: ORDER.SET_BLOCK_REASON_LIST,
+    blockReasons
   })
 });

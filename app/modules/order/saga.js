@@ -24,7 +24,7 @@ import i18n from '../../i18n';
 import OrderInfoTable from '../../components/OrderInfoTable';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
-import { orderDetailByCodeApi, orderListApi, orderReportFinishApi } from '../../api/order';
+import { getBlockReasonsApi, orderDetailByCodeApi, orderListApi, orderReportFinishApi } from '../../api/order';
 import { ORDER, ORDER_STATUS } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
@@ -43,6 +43,7 @@ export default function* root(): Saga<void> {
   try {
     yield takeEvery(ORDER.NEW_SCANNER, onNewScanner);
     yield call(bindNewScanner);
+    yield call(getBlockReasons);
     yield all([
       call(bindRushAction.onConnect, orderActions.getList), // 绑定rush连接时需要触发的action
       takeEvery(ORDER.LIST.GET, getOrderList),
@@ -349,5 +350,25 @@ function* viewOrder({ order }: { order: IOrder }) {
     );
   } catch (e) {
     CommonLog.lError(`showOverview error: ${e.message}`);
+  }
+}
+
+function* getBlockReasons() {
+  try {
+    const odooUrl = yield select(s => s.setting.page.odooConnection.odooUrl.value);
+    const resp = yield call(getBlockReasonsApi, odooUrl);
+    if (!resp || !resp.data) {
+      // todo : handle no data
+      return;
+    }
+    const blockReasons = resp.data.map(r => ({
+      name: r.name,
+      lossType: r.type
+    }));
+    yield put(orderActions.setBlockReasonList(blockReasons));
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'order getBlockReasons'
+    });
   }
 }

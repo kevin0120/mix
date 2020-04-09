@@ -125,7 +125,7 @@ const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        value: 'http://192.168.4.42:8069/api/v1',
+        value: 'http://10.1.1.44:8069/api/v1',
         // value: 'http://127.0.0.1:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },

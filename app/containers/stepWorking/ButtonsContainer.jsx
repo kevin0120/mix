@@ -37,7 +37,8 @@ const mapState = (state, props) => {
     pendingable: oSel.pendingable(vOrder),
     cancelable: oSel.cancelable(vOrder),
     canReportFinish: oSel.canReportFinish(vOrder) || false,
-    reportFinishEnabled: state.setting.systemSettings.reportFinish
+    reportFinishEnabled: state.setting.systemSettings.reportFinish,
+    blockReasons: state.order.blockReasons || []
   };
 };
 
@@ -99,7 +100,8 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                                                            showDialog,
                                                            reportFinish,
                                                            canReportFinish,
-                                                           reportFinishEnabled
+                                                           reportFinishEnabled,
+                                                           blockReasons
                                                          }: ButtonsContainerProps) => {
   const classes = makeStyles(styles.buttonsContainer)();
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
@@ -204,6 +206,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                     ) : (
                       (pendingable && (
                         <BlockReasonDialog
+                          blockReasons={blockReasons}
                           AnchorButton={({ onClick }) => <Button
                             type="button"
                             onClick={onClick}

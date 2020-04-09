@@ -2,6 +2,8 @@
 import Moment from 'moment';
 import { rushSendApi } from './rush';
 import { ORDER_WS_TYPES } from '../modules/order/constants';
+import type { tUuid } from '../modules/user/interface/typeDef';
+import { CommonLog, defaultClient } from '../common/utils';
 
 export function orderListApi({
   timeFrom,
@@ -149,3 +151,18 @@ export function orderResumeApi(
   });
 }
 
+export function getBlockReasonsApi(url: string) {
+  const fullUrl = `${url}/mrp.workcenter.productivity.loss`;
+
+  return defaultClient
+    .get(fullUrl)
+    .then(resp => resp)
+    .catch(e => {
+      CommonLog.lError(e, {
+        at: 'getBlockReasonsApi',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
+      });
+      throw e;
+    });
+}
