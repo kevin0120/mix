@@ -24,7 +24,14 @@ import i18n from '../../i18n';
 import OrderInfoTable from '../../components/OrderInfoTable';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
-import { getBlockReasonsApi, orderDetailByCodeApi, orderListApi, orderReportFinishApi } from '../../api/order';
+import {
+  getBlockReasonsApi,
+  orderDetailByCodeApi,
+  orderListApi,
+  orderPendingApi,
+  orderReportFinishApi,
+  orderResumeApi
+} from '../../api/order';
 import { ORDER, ORDER_STATUS } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
@@ -50,6 +57,7 @@ export default function* root(): Saga<void> {
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
       call(watchOrderTrigger),
       takeEvery(ORDER.WORK_ON, workOnOrder),
+      takeEvery(a => a.type === ORDER.STEP.STATUS && a.status === ORDER_STATUS.PENDING, handlePending),
       takeEvery(ORDER.VIEW, viewOrder),
       takeEvery(ORDER.TRY_VIEW, tryViewOrder),
       takeEvery(ORDER.REPORT_FINISH, reportFinish),
@@ -192,14 +200,14 @@ function* tryWorkOnOrder({
 
 function* workOnOrder({ order, config }: { order: IOrder }) {
   try {
-    const runConfig = {
-      ...config
-    };
     if (order.status === ORDER_STATUS.PENDING) {
-      runConfig.isResume = true;
+      const startTime = new Date();
+      const orderCode = order.code;
+      const workCenterCode = yield select(s => s.systemInfo.workcenter);
+      yield call(orderResumeApi, startTime, orderCode, workCenterCode);
     }
     yield race([
-      call(order.run, ORDER_STATUS.WIP, runConfig),
+      call(order.run, ORDER_STATUS.WIP, config),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
     yield put(orderActions.orderDidFinish());
@@ -359,7 +367,7 @@ function* getBlockReasons() {
     const resp = yield call(getBlockReasonsApi, odooUrl);
     if (!resp || !resp.data) {
       // todo : handle no data
-      return;
+      throw new Error('got empty block reason');
     }
     const blockReasons = resp.data.map(r => ({
       name: r.name,
@@ -371,4 +379,31 @@ function* getBlockReasons() {
       at: 'order getBlockReasons'
     });
   }
+}
+
+function* handlePending({ config, step: order }) {
+  try {
+    if (!order) {
+      // todo handle no order
+      throw new Error('trying to pending without order');
+    }
+    let reason = config?.reason;
+    if (!reason) {
+      reason = {
+        lossType: 'availability',
+        name: 'Equipment Failure'
+      };
+    }
+    const { lossType: exceptType, name: exceptCode } = reason;
+
+    const PendingTime = new Date();
+    const orderCode = order.code;
+    const workCenterCode = yield select(s => s.systemInfo.workcenter);
+    yield call(orderPendingApi, exceptType, exceptCode, PendingTime, orderCode, workCenterCode);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'order handlePending'
+    });
+  }
+
 }

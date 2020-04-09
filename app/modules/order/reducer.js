@@ -12,7 +12,11 @@ const initState: tOrderState = {
   workingOrder: null,
   viewingOrder: null,
   viewingIndex: 0,
-  list: []
+  list: [],
+  blockReasons: [{
+    lossType: 'availability',
+    name: 'Equipment Failure'
+  }]
 };
 
 function limitIndex(order: ?IOrder, index: tOrderStepIdx): tOrderStepIdx {

@@ -7,7 +7,7 @@ import { filter, some } from 'lodash-es';
 import { Typography } from '@material-ui/core';
 import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
-import { orderPendingApi, orderReportStartApi, orderResumeApi, orderUpdateApi } from '../../api/order';
+import { orderReportStartApi, orderResumeApi, orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
@@ -163,13 +163,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.WIP](config = {}) {
         try {
-          const { isResume } = config;
-          if (isResume) {
-            const startTime = new Date();
-            const orderCode = this.code;
-            const workCenterCode = yield select(s => s.systemInfo.workcenter);
-            yield call(orderResumeApi, startTime, orderCode, workCenterCode);
-          }
           this.workingIndex =
             this.workingIndex >= this._steps.length ? 0 : this.workingIndex;
           const { step } = config;
@@ -248,18 +241,9 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           });
         }
       },
-      * [ORDER_STATUS.PENDING](config) {
+      * [ORDER_STATUS.PENDING]() {
         try {
           yield put(io.action.setIOOutput({ group: ioOutputGroups.warning, status: true }));
-          const { reason } = config;
-          if (!reason) {
-            // todo handle no reason
-          }
-          const { lossType: exceptType, name: exceptCode } = reason;
-          const PendingTime = new Date();
-          const orderCode = this.code;
-          const workCenterCode = yield select(s => s.systemInfo.workcenter);
-          yield call(orderPendingApi, exceptType, exceptCode, PendingTime, orderCode, workCenterCode);
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
