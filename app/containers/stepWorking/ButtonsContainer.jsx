@@ -213,8 +213,8 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                           >
                             {t(trans.pending)}
                           </Button>}
-                          onConfirm={() => {
-                            pendingOrder(viewingOrder);
+                          onConfirm={(reason) => {
+                            pendingOrder(viewingOrder, reason);
                             setDialogOpen(false);
                           }}
                         />

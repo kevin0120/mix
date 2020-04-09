@@ -1,7 +1,7 @@
 // @flow
-import type { tOrder, tOrderStepIdx, tOrderStatus } from './interface/typeDef';
+import type { tOrder, tOrderStatus, tOrderStepIdx } from './interface/typeDef';
 import type { IOrder } from './interface/IOrder';
-import { ORDER_STATUS, ORDER } from './constants';
+import { ORDER, ORDER_STATUS } from './constants';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IScanner } from '../device/scanner/IScanner';
@@ -85,10 +85,13 @@ export const orderActions = Object.freeze({
     step: order,
     status: ORDER_STATUS.CANCEL
   }),
-  pendingOrder: (order: IOrder): tActUpdateState => ({
+  pendingOrder: (order: IOrder, reason): tActUpdateState => ({
     type: ORDER.STEP.STATUS,
     step: order,
-    status: ORDER_STATUS.PENDING
+    status: ORDER_STATUS.PENDING,
+    config: {
+      reason
+    }
   }),
   nextStep: () => ({
     type: ORDER.STEP.NEXT
@@ -125,7 +128,7 @@ export const orderActions = Object.freeze({
     order
   }),
   reportFinish: (
-    order: IOrder,
+    order: IOrder
   ) => ({
     type: ORDER.REPORT_FINISH,
     order

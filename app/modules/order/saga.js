@@ -61,9 +61,9 @@ export default function* root(): Saga<void> {
 }
 
 function* setStepStatus({
-  step,
-  status
-}: {
+                          step,
+                          status
+                        }: {
   step: IWorkable,
   status: tAnyStatus
 }) {
@@ -104,8 +104,8 @@ function onNewScanner({ scanner }) {
 }
 
 function* reportFinish({
-  order
-}) {
+                         order
+                       }) {
   try {
     const code = (order: IWorkable)._code;
     const { trackCode } = order;
@@ -143,10 +143,10 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-  order,
-  code,
-  config
-}: {
+                           order,
+                           code,
+                           config
+                         }: {
   order: IOrder,
   code: string | number
 }) {
@@ -191,9 +191,14 @@ function* tryWorkOnOrder({
 
 function* workOnOrder({ order, config }: { order: IOrder }) {
   try {
-
+    const runConfig = {
+      ...config
+    };
+    if (order.status === ORDER_STATUS.PENDING) {
+      runConfig.isResume = true;
+    }
     yield race([
-      call(order.run, ORDER_STATUS.WIP, config),
+      call(order.run, ORDER_STATUS.WIP, runConfig),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
     yield put(orderActions.orderDidFinish());
@@ -261,9 +266,9 @@ function* getOrderList() {
 }
 
 function* tryViewOrder({
-  order,
-  code
-}: {
+                         order,
+                         code
+                       }: {
   order: IOrder,
   code: string | number
 }) {

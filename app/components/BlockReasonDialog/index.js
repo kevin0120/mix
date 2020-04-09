@@ -8,7 +8,7 @@ import Select from '@material-ui/core/Select';
 import Button from '../CustomButtons/Button';
 import { withI18n } from '../../i18n';
 import styles from './styles';
-import {blockReasons} from '../../modules/order/constants';
+import { blockReasons } from '../../modules/order/constants';
 
 export function BlockReasonDialog({ AnchorButton, onConfirm }) {
   const classes = makeStyles(styles)();
@@ -37,14 +37,15 @@ export function BlockReasonDialog({ AnchorButton, onConfirm }) {
               }}
             >
               {
-                Object.values(blockReasons).map(r=><MenuItem value={r.name}>{t(`blockReasons.${r.name}`)}</MenuItem>)
+                Object.values(blockReasons).map(r => <MenuItem value={r}>{t(`blockReasons.${r.name}`)}</MenuItem>)
               }
             </Select>
           </div>
           <Button
             type="button"
+            disabled={!selectValue}
             onClick={() => {
-              onConfirm();
+              onConfirm(selectValue);
               setDialogOpen(false);
             }}
             variant="contained"
