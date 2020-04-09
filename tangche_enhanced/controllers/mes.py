@@ -6,7 +6,7 @@ import requests as Requests
 from api_data import api_data
 import json
 
-MES_BASE_URL = getenv('MES_BASE_URL', 'http://172.26.214.80:8080/api/tcmes')
+MES_BASE_URL = getenv('ENV_SA_TS002_MES_BASE_URL', 'http://172.26.214.80:8080/api/tcmes')
 
 
 def get_mes_endpoint(endpoint):

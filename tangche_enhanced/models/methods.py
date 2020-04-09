@@ -7,6 +7,7 @@ import logging
 import pprint
 from odoo.tools import exception_to_unicode
 from odoo.exceptions import UserError
+from requests import Response
 
 _logger = logging.getLogger(__name__)
 
@@ -21,13 +22,14 @@ def mes_method_wrapper(key):
     def method_wrapper(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            resp = None
             try:
                 data = f(*args, **kwargs)
                 url = endpoint.get('url')
                 method = endpoint.get('method')
                 if not url or not method or not data:
                     _logger.error(u"数据缺失")
-                    return
+                    return resp
                 headers = {'Content-Type': 'application/json'}
                 resp = method(url, json=data, headers=headers)
                 status_code = getattr(resp, 'status_code')
@@ -40,7 +42,8 @@ def mes_method_wrapper(key):
             except Exception as e:
                 _logger.error("{} Error: {}".format(f.__name__, exception_to_unicode(e)))
                 raise e
-            return resp
+            finally:
+                return resp
 
         return wrapper
 
@@ -55,6 +58,11 @@ def dosync_user_info(station_code):
 @mes_method_wrapper('device_sync')
 def dosync_device_info(station_code):
     return {'station': station_code}
+
+
+@mes_method_wrapper('poductline')
+def dosync_poductline_info():
+    return {}
 
 
 class MESMETHODAPI(models.AbstractModel):
@@ -72,6 +80,16 @@ class MESMETHODAPI(models.AbstractModel):
     def sync_device_info(self, station_code):
         try:
             ret = dosync_device_info(station_code)
+            if not ret:
+                return
+            # todo: 将数据进行处理
+        except Exception as e:
+            raise e
+
+    @api.multi
+    def sync_productline_info(self):
+        try:
+            ret = dosync_poductline_info()
             # todo: 将数据进行处理
         except Exception as e:
             raise e
