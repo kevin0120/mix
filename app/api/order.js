@@ -4,12 +4,12 @@ import { rushSendApi } from './rush';
 import { ORDER_WS_TYPES } from '../modules/order/constants';
 
 export function orderListApi({
-                               timeFrom,
-                               timeTo,
-                               status,
-                               pageSize,
-                               pageNo
-                             }: {
+  timeFrom,
+  timeTo,
+  status,
+  pageSize,
+  pageNo
+}: {
   timeFrom?: string,
   timeTo?: string,
   status?: string,
@@ -120,3 +120,32 @@ export function orderDetailByCodeApi(
 ): Promise<any> {
   return rushSendApi(ORDER_WS_TYPES.ORDER_DETAIL_BY_CODE, { code, workcenter });
 }
+
+export function orderPending(
+  exceptType,
+  exceptCode,
+  endTime,
+  orderCode,
+  workcenterCode
+) {
+  return rushSendApi(ORDER_WS_TYPES.ORDER_PENDING, {
+    except_type: exceptType,
+    except_code: exceptCode,
+    end_time: endTime,
+    order_name: orderCode,
+    workcenter_code: workcenterCode
+  });
+}
+
+export function orderResume(
+  startTime,
+  orderCode,
+  workcenterCode
+) {
+  return rushSendApi(ORDER_WS_TYPES.ORDER_RESUME, {
+    start_time: startTime,
+    order_name: orderCode,
+    workcenter_code: workcenterCode
+  });
+}
+
