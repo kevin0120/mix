@@ -11,12 +11,17 @@ odoo.define('web_widget_echart', function (require) {
 
     var EChartWidget = form_common.AbstractField.extend({
         render_value: function () {
-            var val = JSON.parse(this.get('value'));
+            var oval = this.get('value');
+            if (this.options.origin) {
+                this.$el.html(oval);
+                return;
+            }
+            var val = JSON.parse(oval);
             var chart = echarts.init(this.el, null, {width: 950, height: 600});
             var xLabel = 'cur_w';
             var yLabel = 'cur_m';
             var series = [];
-            var names=[];
+            var names = [];
             for (var v in val) {
                 if (val[v]) {
                     series.push({

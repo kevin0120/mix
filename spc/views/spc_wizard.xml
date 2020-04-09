@@ -182,7 +182,7 @@
                 </sheet>
                 <notebook>
                     <page string="Normal Distribution">
-                        <field name="normal_dist" widget="echart"/>
+                        <field name="normal_dist" widget="echart" options="{'origin': true}"/>
                     </page>
                     <page string="Weibull Distribution">
                         <group>
@@ -190,13 +190,13 @@
                                 <field name="weibull_dist_method" widget="radio"/>
                             </group>
                             <group>
-                                <field name="weibull_dist" widget="echart"/>
+                                <field name="weibull_dist" widget="echart" options="{'origin': true}"/>
                             </group>
                         </group>
 
                     </page>
                     <page string="Scatter">
-                        <field name="scatter" widget="echart"/>
+                        <field name="scatter" widget="echart" options="{'origin': true}"/>
                     </page>
                 </notebook>
                 <div class="oe_chatter"/>
