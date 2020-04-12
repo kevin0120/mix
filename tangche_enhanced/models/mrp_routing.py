@@ -53,7 +53,7 @@ class MrpRoutingWorkcenter(models.Model):
             msg = "Can Not Found MRP BOM Within The Operation:{0}".format(operation_id.name)
             _logger.error(msg)
             raise ValidationError(msg)
-        tightening_step_ids = operation_id.sa_step_ids.mapped('step_id').filtered(lambda step: step and step.test_type == 'tightening')
+        tightening_step_ids = operation_id.sa_step_ids.mapped('step_id').filtered(lambda step: step and (step.test_type == 'tightening' or step.test_type == 'promiscuous_tightening'))
         if not tightening_step_ids:
             msg = "Can Not Found Tightening Step For Operation:{0}".format(operation_id.name)
             _logger.error(msg)
