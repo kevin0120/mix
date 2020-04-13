@@ -34,7 +34,7 @@ function* enteringState(config) {
       throw new Error(
         `ScrewStepPayload Is Empty! code: ${
           this._id
-          }, Payload: ${JSON.stringify(payload)}`
+        }, Payload: ${JSON.stringify(payload)}`
       );
     }
     const points = payload.tightening_points;
@@ -234,7 +234,7 @@ function* doingState(config) {
         }
         case workModes.normWorkCenterMode: {
           const finalFailPoints = (_newInactiveControls || []).filter(
-            (c) => this.points.find(p=>p.sequence===c.sequence)?.isFinalFail
+            (c) => this.points.find(p => p.sequence === c.sequence)?.isFinalFail
           );
           yield call([this, byPassPoint], finalFailPoints);
 
@@ -394,6 +394,9 @@ function* clearStepData() {
 
 export function* onLeave() {
   try {
+    CommonLog.Info('screw step on leave', {
+      code: this.code
+    });
     yield call(stepDataApi, this.code, this._data);
     yield call([this, clearStepData]);
   } catch (e) {
