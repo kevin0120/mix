@@ -74,9 +74,7 @@ export const doable = (order: ?IOrder): boolean =>
 
 export const pendingable = (order: ?IOrder): boolean =>
   (order?.status &&
-    (order?.status !== ORDER_STATUS.PENDING &&
-      order?.status !== ORDER_STATUS.CANCEL &&
-      order?.status !== ORDER_STATUS.DONE)) ||
+    (order?.status === ORDER_STATUS.WIP)) ||
   false;
 
 export const cancelable = (order: ?IOrder): boolean =>

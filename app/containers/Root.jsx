@@ -9,6 +9,7 @@ import type { Store } from '../modules/typeDef';
 import Routes from './Routes';
 import theme from '../common/theme';
 import { systemInit } from '../modules/systemInit/action';
+import Notifier from '../components/Notifier';
 
 type Props = {
   store: Store,
@@ -26,6 +27,7 @@ const Root = (props: Props) => {
         <SnackbarProvider maxSnack={5}>
           <ConnectedRouter history={history}>
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Notifier/>
               <Routes pagesConfig={pages}/>
             </div>
           </ConnectedRouter>
