@@ -7,7 +7,6 @@ import { stepWorkingNS } from '../../containers/stepWorking/local';
 import styles from './styles';
 
 function OrderInfoRow(steps, classes) {
-  console.warn(classes.text);
   return (steps &&
     steps.map((s: IWorkStep, idx) => [
       idx + 1,
