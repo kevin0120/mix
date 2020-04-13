@@ -202,7 +202,7 @@ export default class Workable implements IWorkable {
       }
 
       if (!this.status) {
-        throw new Error(`trying to run invalid status ${status}`);
+        throw new Error(`状态不存在 ${status}`);
       }
       const taskToRun = this._statusTasks[status].bind(this);
       this._runningStatusTask = yield fork(taskToRun, config);
