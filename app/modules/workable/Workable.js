@@ -8,6 +8,7 @@ import stepTypes from '../step/stepTypes';
 import type { tAnyStatus, tRunSubStepCallbacks, tStep, tStepType } from '../step/interface/typeDef';
 import type { IWorkable } from './IWorkable';
 import type { tWorkableData } from './typeDef';
+import { workableDidFinish, WORKABLE } from './actions';
 
 export default class Workable implements IWorkable {
   _statusTasks = {};
@@ -82,7 +83,7 @@ export default class Workable implements IWorkable {
     this._status = status || this._status;
     this._steps = steps
       ? ((steps: any): Array<tStep>).sort((s1, s2) => s1.sequence - s2.sequence)
-      .map<IWorkable>((sD: tStep) => {
+      .map < IWorkable > ((sD: tStep) => {
       const existStep = this._steps.find(s => s.code === sD.code);
       if (existStep) {
         existStep.update(((sD: any): tWorkableData));
@@ -255,6 +256,7 @@ export default class Workable implements IWorkable {
         yield call([this, this._onLeave]);
       }
       this._runningStatusTask = null;
+      yield put(workableDidFinish(this));
     }
   }
 
@@ -265,6 +267,11 @@ export default class Workable implements IWorkable {
     config
   ): Saga<void> {
     try {
+      function* subStepDidFinish() {
+        yield take((action) => action.type === WORKABLE.DID_FINISH && action.workable === step);
+      }
+
+      const finishTask = yield fork(subStepDidFinish);
       const { exit, next, previous } = yield race({
         exit: call([step, step.run], status, {
           ...config,
@@ -275,6 +282,8 @@ export default class Workable implements IWorkable {
         ),
         previous: take(ORDER.STEP.DO_PREVIOUS)
       });
+      yield join(finishTask);
+      CommonLog.Info('workable run exited');
       if (exit && callbacks && callbacks.onExit) {
         return yield call(callbacks.onExit);
       }
