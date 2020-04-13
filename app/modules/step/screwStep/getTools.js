@@ -20,7 +20,7 @@ export function getTools(points: Array<tPoint>) {
   });
 
   if (lostTool.length > 0) {
-    throw new Error(`tools not found: ${String(lostTool.map(t => `${t}`))}`);
+    throw new Error(`未找到工具: ${String(lostTool.map(t => `${t}`))}`);
   }
 
   // const unhealthyTools = tools.filter(t => !t.Healthz);
