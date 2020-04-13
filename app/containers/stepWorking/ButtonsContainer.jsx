@@ -20,7 +20,7 @@ import modelViewerActions from '../../modules/modelViewer/action';
 import type { IOrder } from '../../modules/order/interface/IOrder';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 import PDFViewer from '../../components/PDFViewer';
-import { defaultClient } from '../../common/utils';
+import { CommonLog, defaultClient } from '../../common/utils';
 import { BlockReasonDialog } from '../../components/BlockReasonDialog';
 
 const mapState = (state, props) => {
@@ -136,10 +136,12 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   const url = viewingOrder?.payload?.worksheet?.url;
   useEffect(() => {
     defaultClient
-      .get()
+      .get(url)
       .then(resp => {
-        setPdfUrl(resp.request._redirectable._currentUrl);
-      });
+        setPdfUrl(resp?.request?._redirectable?._currentUrl || '');
+      }).catch((err)=>{
+        CommonLog.lError(err);
+    });
   }, [url]);
 
   const modelsTableDialog = {
@@ -170,7 +172,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       color: 'warning'
     }],
     title: tNS(trans.viewFile, stepWorkingNS),
-    content: <PDFViewer file={url}/>
+    content: <PDFViewer file={pdfUrl || url}/>
   };
 
   return withI18n(
