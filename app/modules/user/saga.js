@@ -40,7 +40,7 @@ function* doLogin(userInfo: tUser) {
     CommonLog.lError(
       `login Workflow User Authentication Error: ${e.toString()}`
     );
-    yield put(notifierActions.enqueueSnackbar('Error', e));
+    yield put(notifierActions.enqueueSnackbar('Error', '登录失败', { msg: e.message }));
   }
 }
 
@@ -119,7 +119,7 @@ function* authenticate(action) {
         uid: uuid,
         name: uuid,
         uuid,
-        avatar:'',
+        avatar: '',
         role: 'user'
       });
       return;
@@ -127,7 +127,7 @@ function* authenticate(action) {
     CommonLog.lError(
       `login Workflow User Authentication Error: ${e.toString()}`
     );
-    yield put(notifierActions.enqueueSnackbar('Error', e));
+    yield put(notifierActions.enqueueSnackbar('Error', '登录失败', { msg: e.message }));
   }
 }
 
@@ -218,7 +218,7 @@ function* loginLocal(action) {
     CommonLog.lError(
       `loginLocal login Workflow login Local User Authentication Error: ${e.toString()}`
     );
-    yield put(notifierActions.enqueueSnackbar('Error', e));
+    yield put(notifierActions.enqueueSnackbar('Error', '登录失败', { msg: e.message }));
   }
 }
 
