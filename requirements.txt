@@ -9,3 +9,4 @@ numpy
 boltons
 requests
 tenacity==5.1.5
+jsonschema==3.2.0
