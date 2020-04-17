@@ -26,9 +26,12 @@ import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
 import {
   apiOrderStartSimulate,
+  getBlockReasonsApi,
   orderDetailByCodeApi,
   orderListApi,
-  orderReportFinishApi
+  orderPendingApi,
+  orderReportFinishApi,
+  orderResumeApi
 } from '../../api/order';
 import { ORDER, ORDER_STATUS } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
@@ -49,12 +52,14 @@ export default function* root(): Saga<void> {
   try {
     yield takeEvery(ORDER.NEW_SCANNER, onNewScanner);
     yield call(bindNewScanner);
+    yield call(getBlockReasons);
     yield all([
       call(bindRushAction.onConnect, orderActions.getList), // 绑定rush连接时需要触发的action
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
       call(watchOrderTrigger),
       takeEvery(ORDER.WORK_ON, workOnOrder),
+      takeEvery(a => a.type === ORDER.STEP.STATUS && a.status === ORDER_STATUS.PENDING, handlePending),
       takeEvery(ORDER.VIEW, viewOrder),
       takeEvery(ORDER.TRY_VIEW, tryViewOrder),
       takeEvery(ORDER.REPORT_FINISH, reportFinish),
@@ -234,6 +239,12 @@ function* workOnOrder({
   config: tWorkOnOrderConfig
 }) {
   try {
+    if (order.status === ORDER_STATUS.PENDING) {
+      const startTime = new Date();
+      const orderCode = order.code;
+      const workCenterCode = yield select(s => s.systemInfo.workcenter);
+      yield call(orderResumeApi, startTime, orderCode, workCenterCode);
+    }
     yield race([
       call(order.run, ORDER_STATUS.WIP, config),
       take(a => a.type === ORDER.FINISH && a.order === order)
@@ -280,15 +291,11 @@ function* getOrderDetail({ code }) {
     yield put(loadingActions.stop());
   } catch (e) {
     yield put(loadingActions.stop());
-    yield put(
-      notifierActions.enqueueSnackbar(
-        'Error',
-        `获取工单详情失败（${e.message}）`,
-        {
-          at: 'getOrderDetail'
-        }
-      )
-    );
+    yield put(notifierActions.enqueueSnackbar(
+      'Error', `获取工单详情失败（${e.message}）`, {
+        at: 'getOrderDetail'
+      }
+    ));
   }
 }
 
@@ -298,15 +305,11 @@ function* getOrderList() {
       // TODO: order query args
     });
   } catch (e) {
-    yield put(
-      notifierActions.enqueueSnackbar(
-        'Error',
-        `获取工单列表失败（${e.message}）`,
-        {
-          at: 'getOrderList'
-        }
-      )
-    );
+    yield put(notifierActions.enqueueSnackbar(
+      'Error', `获取工单列表失败（${e.message}）`, {
+        at: 'getOrderList'
+      }
+    ));
   }
 }
 
@@ -386,4 +389,51 @@ function* viewOrder({ order }: { order: IOrder }) {
   } catch (e) {
     CommonLog.lError(`showOverview error: ${e.message}`);
   }
+}
+
+function* getBlockReasons() {
+  try {
+    const odooUrl = yield select(s => s.setting.page.odooConnection.odooUrl.value);
+    const resp = yield call(getBlockReasonsApi, odooUrl);
+    if (!resp || !resp.data) {
+      // todo : handle no data
+      throw new Error('got empty block reason');
+    }
+    const blockReasons = resp.data.map(r => ({
+      name: r.name,
+      lossType: r.type
+    }));
+    yield put(orderActions.setBlockReasonList(blockReasons));
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'order getBlockReasons'
+    });
+  }
+}
+
+function* handlePending({ config, step: order }) {
+  try {
+    if (!order) {
+      // todo handle no order
+      throw new Error('trying to pending without order');
+    }
+    let reason = config?.reason;
+    if (!reason) {
+      reason = {
+        lossType: 'availability',
+        name: 'Equipment Failure'
+      };
+    }
+    const { lossType: exceptType, name: exceptCode } = reason;
+
+    const PendingTime = new Date();
+    const orderCode = order.code;
+    const workCenterCode = yield select(s => s.systemInfo.workcenter);
+    yield call(orderPendingApi, exceptType, exceptCode, PendingTime, orderCode, workCenterCode);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'order handlePending'
+    });
+  }
+
 }
