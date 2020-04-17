@@ -216,10 +216,10 @@ function* orderStartSimulate(code: 工单号) {
       throw new Error(errorMessage);
     }
   } catch (e) {
-    const { restrictOrderSimulate } = yield select(
+    const { strictOrderSimulate } = yield select(
       s => s.setting.systemSettings
     );
-    if (restrictOrderSimulate) {
+    if (strictOrderSimulate) {
       throw new Error(`产前模拟失败，无法开始作业：${e.message}`);
     }
     yield put(
