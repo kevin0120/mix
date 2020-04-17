@@ -4,27 +4,19 @@ import { ORDER } from './constants';
 import { genReducers } from '../util';
 
 import type { tAction, tReducer } from '../typeDef';
-import type {
-  tOrderState,
-  tOrderStepIdx,
-  tOrderActionTypes
-} from './interface/typeDef';
-import {
-  orderLength,
-  viewingIndex,
-  viewingOrder,
-  viewingStep,
-  workingIndex,
-  workingOrder,
-  workingStep
-} from './selector';
+import type { tOrderActionTypes, tOrderState, tOrderStepIdx } from './interface/typeDef';
+import { orderLength, viewingIndex, viewingOrder, workingIndex, workingOrder } from './selector';
 import type { IOrder } from './interface/IOrder';
 
 const initState: tOrderState = {
   workingOrder: null,
   viewingOrder: null,
   viewingIndex: 0,
-  list: []
+  list: [],
+  blockReasons: [{
+    lossType: 'availability',
+    name: 'Equipment Failure'
+  }]
 };
 
 function limitIndex(order: ?IOrder, index: tOrderStepIdx): tOrderStepIdx {
@@ -110,7 +102,7 @@ const orderReducer: {
     //     ? newIndex
     //     : viewingIndex(state);
     return {
-      ...state,
+      ...state
       // viewingIndex: vIndex
     };
   },
@@ -128,6 +120,12 @@ const orderReducer: {
       };
     }
     return state;
+  },
+  [ORDER.SET_BLOCK_REASON_LIST](state, { blockReasons }) {
+    return {
+      ...state,
+      blockReasons
+    };
   }
 };
 

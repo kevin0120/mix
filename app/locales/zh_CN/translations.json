@@ -51,7 +51,8 @@
     "Availability": "可用率",
     "Performance": "表现率",
     "Quality": "质量",
-    "Productive": "生产率"
+    "Productive": "生产率",
+    "SelectBlockReason": "请选择阻塞原因"
   },
   "ManualDiag": {
     "title": "VIN/KNR"
@@ -91,8 +92,10 @@
   },
   "Common": {
     "Yes": "确认",
-    "Retry": "重试",
     "No": "取消",
+    "Confirm": "确认",
+    "Cancel": "取消",
+    "Retry": "重试",
     "Idx": "序号",
     "WorkSegment": "工段",
     "WorkCenter": "工位",
@@ -232,5 +235,13 @@
     "Overview": "概览",
     "Next": "跳到下一工步",
     "Retry": "重试"
+  },
+  "blockReasons": {
+    "materialAvailability": "材料可用性",
+    "equipmentFailure": "设备故障",
+    "setupAndAdjustments": "设置和调整",
+    "reducedSpeed": "减速",
+    "reducedYield": "减产",
+    "fullyProductiveTime": "充分生产时间"
   }
 }

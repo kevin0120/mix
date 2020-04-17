@@ -21,8 +21,7 @@ import type { IOrder } from '../../modules/order/interface/IOrder';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 import PDFViewer from '../../components/PDFViewer';
 import { CommonLog, defaultClient } from '../../common/utils';
-
-// const demoPDF = 'http://www.pdf995.com/samples/pdf.pdf';
+import { BlockReasonDialog } from '../../components/BlockReasonDialog';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -38,7 +37,8 @@ const mapState = (state, props) => {
     pendingable: oSel.pendingable(vOrder),
     cancelable: oSel.cancelable(vOrder),
     canReportFinish: oSel.canReportFinish(vOrder) || false,
-    reportFinishEnabled: state.setting.systemSettings.reportFinish
+    reportFinishEnabled: state.setting.systemSettings.reportFinish,
+    blockReasons: state.order.blockReasons || []
   };
 };
 
@@ -135,12 +135,10 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   const url = viewingOrder?.payload?.worksheet?.url;
   useEffect(() => {
     defaultClient
-      .get(url)
+      .get()
       .then(resp => {
-        setPdfUrl(resp?.request?._redirectable?._currentUrl || '');
-      }).catch((err)=>{
-        CommonLog.lError(err);
-    });
+        setPdfUrl(resp.request._redirectable._currentUrl);
+      });
   }, [url]);
 
   const modelsTableDialog = {
@@ -171,7 +169,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       color: 'warning'
     }],
     title: tNS(trans.viewFile, stepWorkingNS),
-    content: <PDFViewer file={pdfUrl || url}/>
+    content: <PDFViewer file={url}/>
   };
 
   return withI18n(

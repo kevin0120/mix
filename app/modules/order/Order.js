@@ -7,7 +7,7 @@ import { filter, some } from 'lodash-es';
 import { Typography } from '@material-ui/core';
 import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
-import { orderReportStartApi, orderUpdateApi } from '../../api/order';
+import { orderReportStartApi, orderResumeApi, orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';

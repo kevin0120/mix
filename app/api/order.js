@@ -9,6 +9,8 @@ import type {
 } from '../modules/order/interface/typeDef';
 
 type anyPromise = Promise<any>;
+import type { tUuid } from '../modules/user/interface/typeDef';
+import { CommonLog, defaultClient } from '../common/utils';
 
 export function orderListApi({
   timeFrom,
@@ -124,6 +126,50 @@ export function orderDetailByCodeApi(
   workcenter?: 工位号
 ): anyPromise {
   return rushSendApi(ORDER_WS_TYPES.ORDER_DETAIL_BY_CODE, { code, workcenter });
+}
+
+export function orderPendingApi(
+  exceptType,
+  exceptCode,
+  endTime,
+  orderCode,
+  workCenterCode
+) {
+  return rushSendApi(ORDER_WS_TYPES.ORDER_PENDING, {
+    except_type: exceptType,
+    except_code: exceptCode,
+    end_time: endTime,
+    order_name: orderCode,
+    workcenter_code: workCenterCode
+  });
+}
+
+export function orderResumeApi(
+  startTime,
+  orderCode,
+  workCenterCode
+) {
+  return rushSendApi(ORDER_WS_TYPES.ORDER_RESUME, {
+    start_time: startTime,
+    order_name: orderCode,
+    workcenter_code: workCenterCode
+  });
+}
+
+export function getBlockReasonsApi(url: string) {
+  const fullUrl = `${url}/mrp.workcenter.productivity.loss`;
+
+  return defaultClient
+    .get(fullUrl)
+    .then(resp => resp)
+    .catch(e => {
+      CommonLog.lError(e, {
+        at: 'getBlockReasonsApi',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
+      });
+      throw e;
+    });
 }
 
 // 产前模拟
