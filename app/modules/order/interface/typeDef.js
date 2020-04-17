@@ -4,6 +4,10 @@ import type { IOrder } from './IOrder';
 import type { tRushData } from '../../rush/type';
 import type { tWorkableData } from '../../workable/typeDef';
 
+export type 工单号 = string;
+export type 人员列表 = Array<string>;
+export type 工位号 = string;
+
 export type tStockMove = {
   lot: string, // 批次号或者序列号
   product: string // 所选的产品名称
@@ -11,10 +15,10 @@ export type tStockMove = {
 
 export type tOrderListData = {|
   id?: number,
-  code?: string,
+  code?: 工单号,
   track_code: string,
   product_code: string,
-  workcenter: string,
+  workcenter: 工位号,
   date_planned_start: string,
   date_planned_complete: string,
   status: tOrderStatus,
@@ -85,3 +89,5 @@ export type tOrderPayload = {
   components: Array<tComponent>,
   operation: tOperation
 };
+
+export type tWorkOnOrderConfig = Object;

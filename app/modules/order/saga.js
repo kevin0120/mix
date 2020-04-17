@@ -25,6 +25,7 @@ import OrderInfoTable from '../../components/OrderInfoTable';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
 import {
+  apiOrderStartSimulate,
   getBlockReasonsApi,
   orderDetailByCodeApi,
   orderListApi,
@@ -45,6 +46,7 @@ import ClsScanner from '../device/scanner/ClsScanner';
 import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
 import { workModes } from '../workCenterMode/constants';
+import type { tWorkOnOrderConfig, 工单号 } from './interface/typeDef';
 
 export default function* root(): Saga<void> {
   try {
@@ -70,9 +72,9 @@ export default function* root(): Saga<void> {
 }
 
 function* setStepStatus({
-                          step,
-                          status
-                        }: {
+  step,
+  status
+}: {
   step: IWorkable,
   status: tAnyStatus
 }) {
@@ -112,9 +114,7 @@ function onNewScanner({ scanner }) {
   }
 }
 
-function* reportFinish({
-                         order
-                       }) {
+function* reportFinish({ order }) {
   try {
     const code = (order: IWorkable)._code;
     const { trackCode } = order;
@@ -152,19 +152,23 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-                           order,
-                           code,
-                           config
-                         }: {
+  order,
+  code,
+  config
+}: {
   order: IOrder,
-  code: string | number
+  code: 工单号,
+  config: tWorkOnOrderConfig
 }) {
   try {
-    let orderToDo = null;
+    yield put(loadingActions.start());
+    let orderToDo: ?IOrder = null;
     if (order) {
       orderToDo = order;
     }
-    const workCenterMode: tWorkCenterMode = yield select(s => sGetWorkCenterMode(s));
+    const workCenterMode: tWorkCenterMode = yield select(s =>
+      sGetWorkCenterMode(s)
+    );
     if (workCenterMode === workModes.reworkWorkCenterMode) {
       // do nothing when rework
       // yield put(reworkActions.tryRework(orderToDo));
@@ -178,27 +182,62 @@ function* tryWorkOnOrder({
     if (!orderToDo) {
       return;
     }
-    let canWorkOnOrder = true;
-    if (workingOrder(orderState)) {
-      canWorkOnOrder = false;
+    if (hasAnotherWorkingOrder(orderState, orderToDo)) {
+      throw new Error('无法开始新工单：当前有正在进行的工单');
     }
-    const { list } = orderState;
-    const wOrder = list.find(o => o.status === ORDER_STATUS.WIP);
-    if (wOrder && wOrder !== order) {
-      canWorkOnOrder = false;
-    }
-    if (canWorkOnOrder) {
-      yield put(orderActions.workOn(orderToDo, config));
-    } else {
-      yield put(notifierActions.enqueueSnackbar('Warn', `无法开始新工单：当前有正在进行的工单`));
 
-    }
+    yield call(orderStartSimulate, orderToDo.code);
+    yield put(loadingActions.stop());
+    yield put(orderActions.workOn(orderToDo, config));
   } catch (e) {
+    yield put(loadingActions.stop());
+    yield put(notifierActions.enqueueSnackbar('Error', e.message));
     CommonLog.lError(e, { at: 'tryWorkOnOrder' });
   }
 }
 
-function* workOnOrder({ order, config }: { order: IOrder }) {
+function hasAnotherWorkingOrder(orderState, order: IOrder) {
+  if (workingOrder(orderState)) {
+    return true;
+  }
+  const { list } = orderState;
+  const wOrder = list.find(o => o.status === ORDER_STATUS.WIP);
+  return !!(wOrder && wOrder !== order);
+}
+
+function* orderStartSimulate(code: 工单号) {
+  try {
+    const users = []; // todo get users
+    const workCenterCode = yield select(s => s.systemInfo.workcenter);
+    const { errorMessage } = yield call(
+      apiOrderStartSimulate,
+      code,
+      users,
+      workCenterCode
+    );
+    if (errorMessage) {
+      throw new Error(errorMessage);
+    }
+  } catch (e) {
+    const { restrictOrderSimulate } = yield select(
+      s => s.setting.systemSettings
+    );
+    if (restrictOrderSimulate) {
+      throw new Error(`产前模拟失败，无法开始作业：${e.message}`);
+    }
+    yield put(
+      notifierActions.enqueueSnackbar('Warn', `产前模拟失败：${e.message}`)
+    );
+  }
+}
+
+function* workOnOrder({
+  order,
+  config
+}: {
+  order: IOrder,
+  config: tWorkOnOrderConfig
+}) {
   try {
     if (order.status === ORDER_STATUS.PENDING) {
       const startTime = new Date();
@@ -274,13 +313,7 @@ function* getOrderList() {
   }
 }
 
-function* tryViewOrder({
-                         order,
-                         code
-                       }: {
-  order: IOrder,
-  code: string | number
-}) {
+function* tryViewOrder({ order, code }: { order?: IOrder, code?: 工单号 }) {
   try {
     yield put(loadingActions.start());
     if (isNil(order) && isNil(code)) {
@@ -292,7 +325,7 @@ function* tryViewOrder({
     if (!isNil(code)) {
       triggerCode = code;
     }
-    if (!isNil(order)) {
+    if (order) {
       triggerCode = order.code;
     }
     // if (!order) {
@@ -334,10 +367,7 @@ function* viewOrder({ order }: { order: IOrder }) {
     const oList = yield select(s => s.order.list);
     const wOrder = oList.find(o => o.status === ORDER_STATUS.WIP);
     const showStartButton =
-      !isRework &&
-      !WIPOrder &&
-      (!wOrder || (wOrder === order)) &&
-      doable(order);
+      !isRework && !WIPOrder && (!wOrder || wOrder === order) && doable(order);
     yield put(
       dialogActions.dialogShow({
         maxWidth: 'md',
@@ -353,7 +383,7 @@ function* viewOrder({ order }: { order: IOrder }) {
           }
         ],
         title: i18n.t('Order.Overview'),
-        content: <OrderInfoTable steps={vOrderSteps}/>
+        content: <OrderInfoTable steps={vOrderSteps} />
       })
     );
   } catch (e) {

@@ -69,20 +69,6 @@ const defaultConfigs = {
         uuid: '1',
         avatar: ''
       }
-      // ming: {
-      //   password: '123',
-      //   role: 'user',
-      //   uid: 'XiaoMing',
-      //   uuid: '87d1c74e9000',
-      //   avatar: ''
-      // },
-      // hong: {
-      //   password: '123',
-      //   role: 'user',
-      //   uid: 'XiaoHong',
-      //   uuid: '677e0f4f9000',
-      //   avatar: ''
-      // }
     },
     verify: 'online', // 'online'
     maxUsers: 0 // 0:no limit
@@ -166,6 +152,7 @@ const defaultConfigs = {
       // rush: 'http://192.168.3.118:8082',
       // rush: 'http://192.168.4.96:8082',
       // rush: 'http://192.168.5.2:8082',
+      // rush: 'http://127.0.0.1:8082',
       rush: 'http://127.0.0.1:8082',
       // rush: 'http://192.168.3.240:8082',
       // rush: 'http://0da41704.ngrok.io:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
@@ -226,7 +213,8 @@ const defaultConfigs = {
     },
     curveEnable: true,
     reportStart: false, // 报开工
-    reportFinish: false // 报完工
+    reportFinish: false, // 报完工
+    restrictOrderSimulate: false // true:严格产前模拟，不通过无法开工
   },
   debugSettings: {
     disableOrderTriggerLimit: false

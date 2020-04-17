@@ -26,6 +26,7 @@ export const ORDER_WS_TYPES = Object.freeze({
   STEP_DATA: 'WS_ORDER_STEP_DATA_UPDATE',
   ORDER_DATA: 'WS_WORKORDER_DATA_UPDATE',
   ORDER_DETAIL_BY_CODE: 'WS_ORDER_DETAIL_BY_CODE',
+  WS_ORDER_SIMULATE: 'WS_ORDER_SIMULATE',
   ORDER_PENDING: 'WS_ORDER_PENDING',
   ORDER_RESUME: 'WS_ORDER_RESUME'
 });
@@ -71,30 +72,3 @@ export const ORDER = Object.freeze({
     FINISH: 'ORDER_STEP_FINISH'
   }
 });
-
-export const blockReasons = {
-  materialAvailability:{
-    name: 'materialAvailability',
-    lossType: 'availability'
-  },
-  equipmentFailure:{
-    name: 'equipmentFailure',
-    lossType: 'availability'
-  },
-  setupAndAdjustments:{
-    name: 'setupAndAdjustments',
-    lossType: 'availability'
-  },
-  reducedSpeed:{
-    name: 'reducedSpeed',
-    lossType: 'performance'
-  },
-  reducedYield:{
-    name: 'reducedYield',
-    lossType: 'quality'
-  },
-  fullyProductiveTime:{
-    name: 'fullyProductiveTime',
-    lossType: 'productive'
-  }
-};
