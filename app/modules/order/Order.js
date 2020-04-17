@@ -132,21 +132,20 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           if (reportStart) {
             yield put(loadingActions.start());
             const orderCode = this.code;
-            const trackCode = this._trackCode;
-            const productCode = this._productCode;
             const dateStart = new Date();
             const workCenterCode = yield select(s => s.systemInfo.workcenter);
-            const { resources } = this._payload.operation || {};
             // eslint-disable-next-line flowtype/no-weak-types
-            yield call(
+            const resp = yield call(
               orderReportStartApi,
               orderCode,
-              trackCode,
               workCenterCode,
-              productCode,
-              dateStart,
-              resources
+              dateStart
             );
+            if(resp){
+              CommonLog.Info(`开工请求完成`,{
+                resp
+              });
+            }
             yield put(loadingActions.stop());
           }
           yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP));

@@ -117,21 +117,18 @@ function onNewScanner({ scanner }) {
 function* reportFinish({ order }) {
   try {
     const code = (order: IWorkable)._code;
-    const { trackCode } = order;
     const workCenterCode = yield select(s => s.systemInfo.workcenter);
-    const { productCode } = order;
     const dateComplete = new Date();
-    const { operation } = order.payload || {};
     const resp = yield call(
       orderReportFinishApi,
       code,
-      trackCode,
-      productCode,
       workCenterCode,
-      dateComplete,
-      operation
+      dateComplete
     );
     if (resp) {
+      CommonLog.Info(`完工请求完成`,{
+        resp
+      });
       // TODO:  on resp
     }
   } catch (e) {
@@ -383,7 +380,7 @@ function* viewOrder({ order }: { order: IOrder }) {
           }
         ],
         title: i18n.t('Order.Overview'),
-        content: <OrderInfoTable steps={vOrderSteps} />
+        content: <OrderInfoTable steps={vOrderSteps}/>
       })
     );
   } catch (e) {
