@@ -30,6 +30,7 @@ const mapState = (state, props) => {
     ...props,
     viewingOrder: vOrder,
     workingOrder: wOrder,
+    canDoAnotherStep: state.setting.systemSettings.canDoAnotherStep || false,
     viewingStep: oSel.viewingStep(state.order) || {},
     workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {},
     steps: oSel.orderSteps(vOrder) || [],
@@ -87,6 +88,7 @@ type ButtonsContainerProps = {
 const ButtonsContainer: ButtonsContainerProps => Node = ({
   viewingOrder,
   workingOrder,
+  canDoAnotherStep,
   viewingStep,
   workingStep,
   next,
@@ -297,7 +299,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           >
             {t(trans.undo)}
           </Button>
-          {viewingOrder === workingOrder ? <Button
+          {canDoAnotherStep && viewingOrder === workingOrder ? <Button
             type="button"
             color="info"
             disabled={viewingStep === workingStep || viewingStep.status === STEP_STATUS.FINISHED}
