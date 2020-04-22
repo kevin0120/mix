@@ -169,7 +169,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       color: 'warning'
     }],
     title: tNS(trans.viewFile, stepWorkingNS),
-    content: <PDFViewer file={url}/>
+    content: <PDFViewer file={pdfUrl || url}/>
   };
 
   return withI18n(
