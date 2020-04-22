@@ -21,12 +21,15 @@ import type { IOrder } from '../../modules/order/interface/IOrder';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 import PDFViewer from '../../components/PDFViewer';
 import { defaultClient } from '../../common/utils';
+import STEP_STATUS from '../../modules/step/constants';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
+  const wOrder = oSel.workingOrder(state.order);
   return {
     ...props,
     viewingOrder: vOrder,
+    workingOrder: wOrder,
     viewingStep: oSel.viewingStep(state.order) || {},
     workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {},
     steps: oSel.orderSteps(vOrder) || [],
@@ -58,6 +61,7 @@ const mapDispatch = {
 /* eslint-disable flowtype/no-weak-types */
 type ButtonsContainerProps = {
   viewingOrder: IOrder,
+  workingOrder: IOrder,
   viewingIndex: number,
   viewingStep: IWorkStep,
   workingStep: IWorkStep,
@@ -82,6 +86,7 @@ type ButtonsContainerProps = {
 
 const ButtonsContainer: ButtonsContainerProps => Node = ({
   viewingOrder,
+  workingOrder,
   viewingStep,
   workingStep,
   next,
@@ -292,15 +297,15 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           >
             {t(trans.undo)}
           </Button>
-          <Button
+          {viewingOrder === workingOrder ? <Button
             type="button"
             color="info"
-            disabled={viewingStep === workingStep}
+            disabled={viewingStep === workingStep || viewingStep.status === STEP_STATUS.FINISHED}
             onClick={() => {
               doAnotherStep(viewingStep);
             }}>
             {t(trans.startViewing)}
-          </Button>
+          </Button> : null}
         </div>
         <div>{action}</div>
       </div>
