@@ -9,3 +9,4 @@ from . import quality
 from . import result
 from . import push_workorder
 from . import mrp_production
+from . import methods
