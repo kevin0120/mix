@@ -79,6 +79,8 @@ class MrpRoutingWorkcenter(models.Model):
 
     step_count = fields.Integer(string='Steps', compute='_compute_step_count')
 
+    active = fields.Boolean(default=True)
+
     @api.multi
     @api.depends('workcenter_group_id')
     def _compute_workcenter_group(self):
