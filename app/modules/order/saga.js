@@ -126,13 +126,14 @@ function* reportFinish({ order }) {
       dateComplete
     );
     if (resp) {
-      CommonLog.Info(`完工请求完成`,{
+      yield put(notifierActions.enqueueSnackbar('Info', '完工请求完成', {
         resp
-      });
-      // TODO:  on resp
+      }));
     }
   } catch (e) {
-    CommonLog.lError(e, { at: 'reportFinish' });
+    yield put(notifierActions.enqueueSnackbar('Error', e.message, {
+      at: 'reportFinish'
+    }));
   }
 }
 
@@ -240,10 +241,21 @@ function* workOnOrder({
       const startTime = new Date();
       const orderCode = order.code;
       const workCenterCode = yield select(s => s.systemInfo.workcenter);
-      yield call(orderResumeApi, startTime, orderCode, workCenterCode);
+      try {
+        yield call(orderResumeApi, startTime, orderCode, workCenterCode);
+      } catch (e) {
+        const { strictResume } = yield select(s => s.setting.systemSettings);
+        if (strictResume) {
+          throw e;
+        }
+      }
+    }
+    let startStatus = ORDER_STATUS.WIP;
+    if (!order.status || order.status === ORDER_STATUS.TODO) {
+      startStatus = ORDER_STATUS.TODO;
     }
     yield race([
-      call(order.run, ORDER_STATUS.WIP, config),
+      call(order.run, startStatus, config),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
     yield put(orderActions.orderDidFinish());

@@ -212,9 +212,11 @@ const defaultConfigs = {
       file: true
     },
     curveEnable: true,
-    reportStart: false, // 报开工
-    reportFinish: false, // 报完工
-    strictOrderSimulate: false // true:严格产前模拟，不通过无法开工
+    reportStart: true, // 报开工
+    reportFinish: true, // 报完工
+    strictOrderSimulate: false, // true:严格产前模拟，不通过无法开工
+    strictReportStart: false, // true:严格报开工，不通过无法开工
+    strictResume: false // true:严格恢复，不通过无法恢复作业
   },
   debugSettings: {
     disableOrderTriggerLimit: false

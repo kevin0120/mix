@@ -171,17 +171,17 @@ export function apiOrderStartSimulate(
     workcenter_code: workCenter
   })
     .then(resp => {
-      const { Message, Result, Status } = resp;
-      if (Message) {
-        throw new Error(Message);
-      }
-      if (Status === 'E') {
-        throw new Error('产前模拟失败');
-      }
+      // const { Message, Result, Status } = resp;
+      // if (Message) {
+      //   throw new Error(Message);
+      // }
+      // if (Status === 'E') {
+      //   throw new Error('产前模拟失败');
+      // }
       // eslint-disable-next-line promise/always-return
-      if (Result === 'N') {
-        throw new Error('产前模拟失败');
-      }
+      // if (Result === 'N') {
+      //   throw new Error('产前模拟失败');
+      // }
       return { success: '产前模拟成功' };
     })
     .catch(err => ({ errorMessage: err.message }));

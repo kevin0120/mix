@@ -7,7 +7,7 @@ import { filter, some } from 'lodash-es';
 import { Typography } from '@material-ui/core';
 import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
-import { orderReportStartApi, orderResumeApi, orderUpdateApi } from '../../api/order';
+import { orderReportStartApi, orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
@@ -72,51 +72,6 @@ function* redoOrder(step, point) {
 
 const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
   class ClsOrder extends ClsBaseStep implements IOrder {
-    // eslint-disable-next-line flowtype/no-weak-types
-    constructor(dataObj: ?$Shape<tOrder>): void {
-      // eslint-disable-next-line prefer-rest-params
-      super(dataObj);
-      this.update.call(this, dataObj);
-    }
-
-    _workingIndex = 0;
-
-    get workingIndex() {
-      if (this._workingIndex) {
-        return this._workingIndex;
-      }
-      const idx = this._steps.findIndex(s => s.status === STEP_STATUS.DOING);
-      return idx >= 0 ? idx : 0;
-    }
-
-    set workingIndex(val) {
-      this._workingIndex = val;
-    }
-
-    _status = ORDER_STATUS.TODO;
-
-    get status() {
-      return this._status;
-    }
-
-    _data = {};
-
-    get data() {
-      return this._data;
-    }
-
-    _trackCode = '';
-
-    get trackCode() {
-      return this._trackCode;
-    }
-
-    _productCode = '';
-
-    get productCode() {
-      return this._productCode;
-    }
-
     _statusTasks = {
       * [ORDER_STATUS.TODO](config) {
         try {
@@ -127,7 +82,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             return;
           }
           const { reportStart } = yield select(s => s.setting.systemSettings);
-          // TODO 开工自检
 
           if (reportStart) {
             yield put(loadingActions.start());
@@ -135,18 +89,26 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             const dateStart = new Date();
             const workCenterCode = yield select(s => s.systemInfo.workcenter);
             // eslint-disable-next-line flowtype/no-weak-types
-            const resp = yield call(
-              orderReportStartApi,
-              orderCode,
-              workCenterCode,
-              dateStart
-            );
-            if(resp){
-              CommonLog.Info(`开工请求完成`,{
-                resp
-              });
+            try {
+              const resp = yield call(
+                orderReportStartApi,
+                orderCode,
+                workCenterCode,
+                dateStart
+              );
+              if (resp) {
+                CommonLog.Info(`开工请求完成`, {
+                  resp
+                });
+              }
+              yield put(loadingActions.stop());
+            } catch (e) {
+              yield put(loadingActions.stop());
+              const { strictReportStart } = yield select(s => s.setting.systemSettings);
+              if (strictReportStart) {
+                throw e;
+              }
             }
-            yield put(loadingActions.stop());
           }
           yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP));
         } catch (e) {
@@ -157,7 +119,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             name: this._name
           });
           yield put(notifyActions.enqueueSnackbar('Error', e.message));
-          yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
+          yield put(orderActions.finishOrder(this));
+          // yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
       * [ORDER_STATUS.WIP](config = {}) {
@@ -262,6 +225,51 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       }
     };
 
+    // eslint-disable-next-line flowtype/no-weak-types
+    constructor(dataObj: ?$Shape<tOrder>): void {
+      // eslint-disable-next-line prefer-rest-params
+      super(dataObj);
+      this.update.call(this, dataObj);
+    }
+
+    _workingIndex = 0;
+
+    get workingIndex() {
+      if (this._workingIndex) {
+        return this._workingIndex;
+      }
+      const idx = this._steps.findIndex(s => s.status === STEP_STATUS.DOING);
+      return idx >= 0 ? idx : 0;
+    }
+
+    set workingIndex(val) {
+      this._workingIndex = val;
+    }
+
+    _status = ORDER_STATUS.TODO;
+
+    get status() {
+      return this._status;
+    }
+
+    _data = {};
+
+    get data() {
+      return this._data;
+    }
+
+    _trackCode = '';
+
+    get trackCode() {
+      return this._trackCode;
+    }
+
+    _productCode = '';
+
+    get productCode() {
+      return this._productCode;
+    }
+
     _components = [];
 
     get components() {
@@ -345,6 +353,9 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
 
     * _onLeave() {
       try {
+        if (this.status === ORDER_STATUS.TODO) {
+          return;
+        }
         const { workCenterMode } = yield select();
         switch (workCenterMode) {
           case workModes.normWorkCenterMode: {
