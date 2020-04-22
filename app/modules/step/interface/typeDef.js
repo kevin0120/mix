@@ -31,7 +31,8 @@ export type tAnyStatus = any;
 export type tRunSubStepCallbacks = {
   onExit?: Function,
   onNext?: Function,
-  onPrevious?: Function
+  onPrevious?: Function,
+  onAnother?: Function
 };
 
 

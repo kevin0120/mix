@@ -20,8 +20,7 @@ import modelViewerActions from '../../modules/modelViewer/action';
 import type { IOrder } from '../../modules/order/interface/IOrder';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 import PDFViewer from '../../components/PDFViewer';
-import { CommonLog, defaultClient } from '../../common/utils';
-import { BlockReasonDialog } from '../../components/BlockReasonDialog';
+import { defaultClient } from '../../common/utils';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -47,6 +46,7 @@ const mapDispatch = {
   finishStep: orderActions.finishStep,
   previous: orderActions.previousStep,
   doPreviousStep: orderActions.doPreviousStep,
+  doAnotherStep: orderActions.doAnotherStep,
   cancelOrder: orderActions.cancelOrder,
   pendingOrder: orderActions.pendingOrder,
   tryWorkOn: orderActions.tryWorkOn,
@@ -67,6 +67,7 @@ type ButtonsContainerProps = {
   previous: () => any,
   finishStep: IWorkStep => any,
   doPreviousStep: () => any,
+  doAnotherStep: () => any,
   cancelOrder: (order: IOrder) => tActUpdateState,
   pendingOrder: (order: IOrder) => tActUpdateState,
   isPending: boolean,
@@ -80,28 +81,29 @@ type ButtonsContainerProps = {
 /* eslint-enable flowtype/no-weak-types */
 
 const ButtonsContainer: ButtonsContainerProps => Node = ({
-                                                           viewingOrder,
-                                                           viewingStep,
-                                                           workingStep,
-                                                           next,
-                                                           steps,
-                                                           viewingIndex,
-                                                           action,
-                                                           previous,
-                                                           finishStep,
-                                                           doPreviousStep,
-                                                           cancelOrder,
-                                                           pendingOrder,
-                                                           isPending,
-                                                           pendingable,
-                                                           cancelable,
-                                                           tryWorkOn,
-                                                           viewModel,
-                                                           showDialog,
-                                                           reportFinish,
-                                                           canReportFinish,
-                                                           reportFinishEnabled
-                                                         }: ButtonsContainerProps) => {
+  viewingOrder,
+  viewingStep,
+  workingStep,
+  next,
+  steps,
+  viewingIndex,
+  action,
+  previous,
+  finishStep,
+  doPreviousStep,
+  doAnotherStep,
+  cancelOrder,
+  pendingOrder,
+  isPending,
+  pendingable,
+  cancelable,
+  tryWorkOn,
+  viewModel,
+  showDialog,
+  reportFinish,
+  canReportFinish,
+  reportFinishEnabled
+}: ButtonsContainerProps) => {
   const classes = makeStyles(styles.buttonsContainer)();
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
   const noNext = steps.length <= 0 || viewingIndex >= steps.length - 1;
@@ -289,6 +291,15 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
             color="danger"
           >
             {t(trans.undo)}
+          </Button>
+          <Button
+            type="button"
+            color="info"
+            disabled={viewingStep === workingStep}
+            onClick={() => {
+              doAnotherStep(viewingStep);
+            }}>
+            {t(trans.startViewing)}
           </Button>
         </div>
         <div>{action}</div>
