@@ -16,6 +16,6 @@ export function getUserInfo(url: string, uuid: tUuid) {
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
       });
-      throw e.toString();
+      throw e;
     });
 }

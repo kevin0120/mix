@@ -1,7 +1,7 @@
 {
   "name": "ControlPanel-SA",
   "productName": "ControlPanel-SA",
-  "version": "2.0.0-alpha",
+  "version": "2.0.0-rc6",
   "description": "智能装配生产-控制面板客户端",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -9,7 +9,7 @@
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.babel.js --colors",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.babel.js --colors",
-    "dev": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev",
+    "dev": "cross-env PORT=4343 START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env PORT=4343 START_HOT=1 yarn start-renderer-dev",
     "flow": "flow",
     "flow-typed": "rimraf flow-typed/npm && cross-env NODE_OPTIONS=--max_old_space_size=10000 flow-typed install --verbose || true",
     "lint": "cross-env NODE_ENV=development eslint --cache --format=pretty .",
@@ -283,6 +283,7 @@
     "i18next-browser-languagedetector": "^2.2.3",
     "i18next-xhr-backend": "^1.5.1",
     "jsmodbus": "^3.0.0",
+    "keypad-easy": "^1.0.5",
     "lodash-es": "^4.17.15",
     "moment": "^2.24.0",
     "notistack": "^0.9.6",

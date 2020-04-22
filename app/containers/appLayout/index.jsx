@@ -13,7 +13,6 @@ import type { tUser } from '../../modules/user/interface/typeDef';
 import { logoutRequest } from '../../modules/user/action';
 import type { Dispatch } from '../../modules/typeDef';
 import type { tRouteComponent, tRouteObj } from '../typeDef';
-import Notifier from '../../components/Notifier';
 import Dialog from '../../components/Dialog';
 import Loading from '../../components/Loading';
 
@@ -58,7 +57,6 @@ function AppLayout(
     <I18n ns="translations">
       {t => (
         <React.Fragment>
-          <Notifier/>
           <Dialog/>
           <Loading/>
           <div style={{ height: 'calc(100% - 64px)', display: 'flex' }}>
@@ -70,15 +68,19 @@ function AppLayout(
                   display: 'flex',
                   flexDirection: 'row',
                   justifyContent: 'space-between',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  flex:1
                 }}>
-                  {u.name}
+                  <span style={{flex:1,textOverflow: 'ellipsis', overflow:'hidden'}}>
+                    {u.name}
+                  </span>
                   <Button
                     color="warning"
                     size="md"
                     regular
                     variant="contained"
                     onClick={() => logout(u.uuid)}
+                    style={{right:0}}
                   >
                     <Typography variant="body1">
                       {t('Common.Logout')}

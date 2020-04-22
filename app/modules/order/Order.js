@@ -7,7 +7,7 @@ import { filter, some } from 'lodash-es';
 import { Typography } from '@material-ui/core';
 import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
-import { orderReportStartApi, orderUpdateApi } from '../../api/order';
+import { orderReportStartApi, orderResumeApi, orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
@@ -82,7 +82,15 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     _workingIndex = 0;
 
     get workingIndex() {
-      return this._workingIndex;
+      if (this._workingIndex) {
+        return this._workingIndex;
+      }
+      const idx = this._steps.findIndex(s => s.status === STEP_STATUS.DOING);
+      return idx >= 0 ? idx : 0;
+    }
+
+    set workingIndex(val) {
+      this._workingIndex = val;
     }
 
     _status = ORDER_STATUS.TODO;
@@ -124,21 +132,20 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           if (reportStart) {
             yield put(loadingActions.start());
             const orderCode = this.code;
-            const trackCode = this._trackCode;
-            const productCode = this._productCode;
             const dateStart = new Date();
             const workCenterCode = yield select(s => s.systemInfo.workcenter);
-            const { resources } = this._payload.operation || {};
             // eslint-disable-next-line flowtype/no-weak-types
-            yield call(
+            const resp = yield call(
               orderReportStartApi,
               orderCode,
-              trackCode,
               workCenterCode,
-              productCode,
-              dateStart,
-              resources
+              dateStart
             );
+            if(resp){
+              CommonLog.Info(`开工请求完成`,{
+                resp
+              });
+            }
             yield put(loadingActions.stop());
           }
           yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP));
@@ -155,13 +162,13 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.WIP](config = {}) {
         try {
-          this._workingIndex =
-            this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
+          this.workingIndex =
+            this.workingIndex >= this._steps.length ? 0 : this.workingIndex;
           const { step } = config;
           if (step) {
             const stepIndex = this.steps.findIndex(s => s.code === step.code);
             if (stepIndex >= 0) {
-              this._workingIndex = stepIndex;
+              this.workingIndex = stepIndex;
             }
           }
 
@@ -206,11 +213,11 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.DONE]() {
         try {
-          if (this._workingIndex > this._steps.length - 1) {
-            this._workingIndex = this._steps.length - 1;
+          if (this.workingIndex > this._steps.length - 1) {
+            this.workingIndex = this._steps.length - 1;
           }
-          if (this._workingIndex < 0) {
-            this._workingIndex = 0;
+          if (this.workingIndex < 0) {
+            this.workingIndex = 0;
           }
           yield put(io.action.setIOOutput({ group: ioOutputGroups.ready, status: true }));
           yield put(orderActions.finishOrder(this));
@@ -286,7 +293,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     }
 
     get workingStep() {
-      return (((this: IWorkable)._steps[this._workingIndex]: any): IWorkStep);
+      return (((this: IWorkable)._steps[this.workingIndex]: any): IWorkStep);
     }
 
     get failSteps(): Array<IWorkStep> {
@@ -302,10 +309,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
         const wStep = this.workingStep;
         yield call([wStep, wStep.clearData]);
         const mode = yield select(s => s.workCenterMode);
-        if (this._workingIndex - 1 >= 0) {
+        if (this.workingIndex - 1 >= 0) {
           if (mode === workModes.normWorkCenterMode) {
-            this._workingIndex -= 1;
-            yield put(orderActions.jumpToStep(this._workingIndex));
+            this.workingIndex -= 1;
+            yield put(orderActions.jumpToStep(this.workingIndex));
             const nextStep = this.workingStep;
             yield call([nextStep, nextStep.clearData]);
           }
@@ -321,8 +328,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       try {
         const mode = yield select(s => s.workCenterMode);
         if (mode === workModes.normWorkCenterMode) {
-          this._workingIndex += 1;
-          yield put(orderActions.jumpToStep(this._workingIndex));
+          this.workingIndex = this.workingIndex + 1;
+          yield put(orderActions.jumpToStep(this.workingIndex));
         }
       } catch (e) {
         CommonLog.lError(e, { at: 'order._onNextStep' });
@@ -333,7 +340,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
 
     clearData() {
       this._steps = [];
-      this._workingIndex = 0;
+      this.workingIndex = 0;
     }
 
     * _onLeave() {

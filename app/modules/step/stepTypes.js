@@ -14,6 +14,7 @@ export default {
   [s.instruction]: (ClsWorkable: Class<IWorkable>) => StepMixin(ClsWorkable),
   [s.text]: (ClsWorkable: Class<IWorkable>) => StepMixin(ClsWorkable),
   [s.screw]: (ClsWorkable: Class<IWorkable>) => ScrewStepMixin(StepMixin(ClsWorkable)),
+  [s.promiscuousTightening]: (ClsWorkable: Class<IWorkable>) => ScrewStepMixin(StepMixin(ClsWorkable)),
   [s.material]: (ClsWorkable: Class<IWorkable>) => MaterialStepMixin(StepMixin(ClsWorkable)),
   [s.passFail]: (ClsWorkable: Class<IWorkable>) => PassFailStepMixin(StepMixin(ClsWorkable)),
   [s.measure]: (ClsWorkable: Class<IWorkable>) => StepMixin(ClsWorkable),

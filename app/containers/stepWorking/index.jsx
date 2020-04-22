@@ -25,12 +25,14 @@ const mapState = (state, props) => {
   };
 };
 
-const mapDispatch = {};
+const mapDispatch = {
+};
 
 type Props = {
   status: ?tOrderStatus,
   name: ?string,
-  code: ?string
+  code: ?string,
+  clickPoint: () => void
 };
 
 const statusMap = classes => ({
@@ -43,7 +45,7 @@ const statusMap = classes => ({
   [ORDER_STATUS.FAIL]: classes.statusFail
 });
 
-function StepWorking({ status, code }: Props): Node {
+function StepWorking({ status, code,clickPoint}: Props): Node {
   const classes = makeStyles(styles.layout)();
 
   type tNodeHook = [Node, ((Node => Node) | Node) => void];

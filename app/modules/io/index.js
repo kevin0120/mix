@@ -14,13 +14,11 @@ let defaultIOModule = null;
 
 const listeners = {};
 
-const ioFunctions = {
-
-};
+const ioFunctions = {};
 
 export default model('io', {
   * root() {
-    try{
+    try {
       yield call(this._initIO);
       yield call(watch([
         this.bindIOListeners,
@@ -29,8 +27,8 @@ export default model('io', {
         this.testPort,
         this.setIOOutput
       ]));
-    }catch(e){
-      CommonLog.lError(e,{at:'io model'});
+    } catch (e) {
+      CommonLog.lError(e, { at: 'io model' });
     }
   },
 
@@ -45,7 +43,7 @@ export default model('io', {
         []
       );
       // TODO set init io status
-      yield call(this.setIOOutput,{ group: ioOutputGroups.ready, status: true });
+      yield call(this.setIOOutput, { group: ioOutputGroups.ready, status: true });
       yield write(this, (s) => ({
         ...s,
         ioModule: defaultIOModule
@@ -65,8 +63,12 @@ export default model('io', {
       const { [ioDirection.output]: outputs } = ioPorts;
 
       const { ioPorts: prevIoPorts } = yield select(this.select);
-      eSetting.set('devices.io.inputs', inputs);
-      eSetting.set('devices.io.inputs', outputs);
+      eSetting.set('devices.io.inputs', inputs,{
+        prettify:true
+      });
+      eSetting.set('devices.io.inputs', outputs,{
+        prettify:true
+      });
       yield write(this, s => ({
         ...s,
         ioPorts
@@ -169,11 +171,22 @@ export default model('io', {
 
   * setIOOutput({ group, status } = {}) {
     try {
-      if (!group || !status || !defaultIOModule) {
+      if (!group || !defaultIOModule) {
         return;
       }
+      const { on, off } = group;
       const { ioPorts } = yield select(this.select);
-      const ports = group.map(
+      console.log(on, status, ioPorts);
+
+      const onPorts = (on || []).map(
+        o =>
+          defaultIOModule &&
+          defaultIOModule.getPort(
+            ioDirection.output,
+            ioPorts[ioDirection.output][o]
+          )
+      );
+      const offPorts = (off || []).map(
         o =>
           defaultIOModule &&
           defaultIOModule.getPort(
@@ -183,15 +196,12 @@ export default model('io', {
       );
 
       if (status) {
-        const otherPorts = defaultIOModule.ports
-          .filter(p => p.direction === ioDirection.output)
-          .filter(p => (ports || []).every(sp => sp.idx !== p.idx));
-        yield all(otherPorts.map(p => call(
+        yield all(offPorts.map(p => call(
           (defaultIOModule && defaultIOModule.setIO) || (() => {
           }), p, false)
         ));
       }
-      yield all(ports.map(p => call(
+      yield all(onPorts.map(p => call(
         (defaultIOModule && defaultIOModule.setIO) || (() => {
         }), p, status)
       ));

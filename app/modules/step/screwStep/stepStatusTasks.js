@@ -186,7 +186,8 @@ function* doingState(config) {
     const { reworkConfig } = config || {};
     const { workCenterMode } = yield select();
     let redoPointClsObj = null;
-
+    let _controlsToActive = [];
+    let _newInactiveControls = [];
     switch (workCenterMode) {
       case workModes.reworkWorkCenterMode: {
         const { point } = reworkConfig;
@@ -196,7 +197,7 @@ function* doingState(config) {
           redoPointClsObj = this.points.find(p => !p.noRedo);
         }
         if (redoPointClsObj) {
-          this._pointsToActive = [redoPointClsObj.start(true)];
+          _controlsToActive = [redoPointClsObj.start(true)];
         }
         break;
       }
@@ -214,11 +215,10 @@ function* doingState(config) {
     const { controllerMode, jobID } = this._data;
     let isFirst = true; // job只设置一次，记录状态
 
-
     while (true) {
       switch (workCenterMode) {
         case workModes.reworkWorkCenterMode: {
-          if (this._pointsToActive && this._pointsToActive.length > 0) {
+          if (_controlsToActive && _controlsToActive.length > 0) {
             break;
           }
           const canRedoPoint = this.points.find(p => !p.noRedo);
@@ -233,14 +233,17 @@ function* doingState(config) {
           break;
         }
         case workModes.normWorkCenterMode: {
-          const finalFailPoints = (this._newInactivePoints || []).filter(
-            (p: ClsOperationPoint) => p.isFinalFail
+          const finalFailPoints = (_newInactiveControls || []).filter(
+            (c) => this.points.find(p => p.sequence === c.sequence)?.isFinalFail
           );
           yield call([this, byPassPoint], finalFailPoints);
-          const newActivePoints = this._pointsManager.start();
-          this._pointsToActive = newActivePoints.filter(p =>
-            this._pointsToActive.every(pp => pp.sequence !== p.sequence)
-          );
+
+          // if (test){
+          // yield  put(screwStepActions.byPassSpecPoint());
+          //   test=false;
+          // }
+
+          _controlsToActive = this._pointsManager.start();
           if (
             this._pointsManager.isFailed &&
             this._pointsManager.points.filter(p => p.isActive).length === 0
@@ -260,29 +263,35 @@ function* doingState(config) {
         tightening_points: this._pointsManager.points.map(p => p.data)
       }));
 
-      const activeConfigs = this._pointsToActive.map(p => {
-        const cModeId = controllerMode === controllerModes.job ? jobID : this._forcePset || p.pset;
-        const tool = this._forceTool || getDevice(p.toolSN);
+      // set force pset & tool
+      const activeControls = _controlsToActive.map(c => {
+        const cModeId = controllerMode === controllerModes.job ? jobID : this._forcePset || c.controllerModeId;
+        const tool = this._forceTool || getDevice(c.toolSN);
         return {
-          point: p,
+          ...c,
           tool,
           controllerModeId: cModeId
         };
       });
-      yield call([this, setTools],
-        activeConfigs,
+
+      let results = [];
+      const successCounts = yield call([this, setTools],
+        activeControls,
         controllerMode,
         isFirst
       );
-      const results = yield call(
-        [this, getResult],
-        resultChannel
-      );
-      this._pointsToActive = [];
+      if (successCounts > 0 || activeControls.length === 0) {
+        results = yield call(
+          [this, getResult],
+          resultChannel
+        );
+      }
 
-      this._newInactivePoints = this._pointsManager.newResult(results);
+      _controlsToActive = [];
+
+      _newInactiveControls = this._pointsManager.newResult(results);
       // disable tools before bypass point
-      yield call([this, disableTools], this._newInactivePoints);
+      yield call([this, disableTools], _newInactiveControls);
       yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
         ...data,
         tightening_points: this._pointsManager.points.map(p => p.data)
@@ -371,7 +380,6 @@ function* clearStepData() {
       this._tools = [];
       this._listeners = [];
     }
-    this._pointsToActive = [];
 
     CommonLog.Info('tools cleared', {
       at: `screwStep(${String((this: IWorkable)._code)})._onLeave`
@@ -386,6 +394,9 @@ function* clearStepData() {
 
 export function* onLeave() {
   try {
+    CommonLog.Info('screw step on leave', {
+      code: this.code
+    });
     yield call(stepDataApi, this.code, this._data);
     yield call([this, clearStepData]);
   } catch (e) {

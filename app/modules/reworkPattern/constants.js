@@ -10,6 +10,8 @@ export const REWORK_PATTERN = {
 export const reworkDialogConstants = {
   confirm: 'confirm',
   cancel: 'cancel',
+  manualCancel: 'manualCancel',
+  cancelScanner: 'cancelScanner',
   switchWorkCenterModeTitle: 'switchWorkCenterModeTitle',
   switchWorkCenterModeContent: 'switchWorkCenterModeContent'
 };

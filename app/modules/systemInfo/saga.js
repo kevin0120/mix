@@ -14,5 +14,7 @@ export default function* system() {
 
 
 function setWorkCenter({ workcenter }) {
-  eSetting.set('system.workcenter.code', workcenter);
+  eSetting.set('system.workcenter.code', workcenter,{
+    prettify:true
+  });
 }

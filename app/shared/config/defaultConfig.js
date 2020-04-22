@@ -1,7 +1,6 @@
 // @flow
 import { ioInputs, ioOutputs } from '../../modules/io/constants';
 
-
 const defaultConfigs = {
   version: 'v0.1',
   // appName: '智能装配系统-终端',
@@ -20,23 +19,33 @@ const defaultConfigs = {
         [ioOutputs.white]: 0,
         [ioOutputs.yellow]: 1,
         [ioOutputs.green]: 2,
-        [ioOutputs.red]: 3
+        [ioOutputs.red]: 3,
+        [ioOutputs.unlock]: 4
       }
     }
   },
+
+  adminKey: {
+    enable: false,
+    io_sn: '11',
+    input: 3
+  },
   pages: {
     app: {
+      // manual: ['user', 'admin'],
       working: ['user', 'admin'],
+      manualwork: ['user', 'admin'],
       // viewer: ['user', 'admin'],
       // order: ['user', 'admin'],
       preference: {
+        __role: ['admin'],
         Net: ['user', 'admin'],
         IO: ['user', 'admin'],
         Connect: ['user', 'admin'],
         help: ['user', 'admin']
       },
-      event: ['user', 'admin']
-      // result: ['user', 'admin'],
+      event: ['admin'],
+      result: ['admin']
       // curve: ['user', 'admin'],
       // help: ['user', 'admin']
     },
@@ -53,22 +62,15 @@ const defaultConfigs = {
         uuid: '1',
         avatar: ''
       },
-      ming: {
-        password: '123',
+      admin: {
+        password: 'admin',
         role: 'admin',
-        uid: 'XiaoMing',
-        uuid: '87d1c74e9000',
-        avatar: ''
-      },
-      hong: {
-        password: '123',
-        role: 'admin',
-        uid: 'XiaoHong',
-        uuid: '677e0f4f9000',
+        uid: '1',
+        uuid: '1',
         avatar: ''
       }
     },
-    verify: 'online',//'online'
+    verify: 'online', // 'online'
     maxUsers: 0 // 0:no limit
   },
 
@@ -109,8 +111,8 @@ const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        // value: 'http://192.168.4.42:8069/api/v1',
-        value: 'http://127.0.0.1:8069/api/v1',
+        value: 'http://10.1.1.47:8069/api/v1',
+        // value: 'http://127.0.0.1:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {
@@ -151,6 +153,7 @@ const defaultConfigs = {
       // rush: 'http://192.168.4.96:8082',
       // rush: 'http://192.168.5.2:8082',
       rush: 'http://127.0.0.1:8082',
+      // rush: 'http://10.1.1.47:8082',
       // rush: 'http://192.168.3.240:8082',
       // rush: 'http://0da41704.ngrok.io:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
       rfid: 'tcp://127.0.0.1:2112',
@@ -210,10 +213,11 @@ const defaultConfigs = {
     },
     curveEnable: true,
     reportStart: false, // 报开工
-    reportFinish: false // 报完工
+    reportFinish: false, // 报完工
+    strictOrderSimulate: false // true:严格产前模拟，不通过无法开工
   },
-  debugSettings:{
-    disableOrderTriggerLimit: true
+  debugSettings: {
+    disableOrderTriggerLimit: false
   }
 };
 

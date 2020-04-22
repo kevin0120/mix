@@ -16,6 +16,7 @@ export type tPoint = {
   y: number,
   key_num: number, // key_num,定义了关键点个数
   tightening_tool: string,
+  tightening_tools: Array<string>,
   max_redo_times: number, // max_redo_times
   group_sequence: number,
   nut_no: string // 螺栓编号
@@ -36,7 +37,8 @@ export type tResult = {
   measure_angle: number, // wi 角度
   measure_result: tResultStatus, // result
   batch: string,
-  count: number
+  count: number,
+  scanner_code: string
 };
 
 export type tScrewStepData = {
@@ -63,3 +65,9 @@ export type tScrewStepPayload = {
   lnr: string,
   controllerMode: tControllerMode
 };
+
+export type tControl = {
+  sequences: number,
+  toolSN: string,
+  controllerModeId: string
+}

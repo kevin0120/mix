@@ -1,11 +1,9 @@
 // @flow
 import { isNil } from 'lodash-es';
 import { CommonLog } from '../../../../common/utils';
-import type { tPoint, tResult, tScrewStepPayload } from '../interface/typeDef';
+import type { tControl, tPoint, tResult, tScrewStepPayload } from '../interface/typeDef';
 import { ClsOperationPointGroup } from './ClsOperationPointGroup';
 import { ClsOperationPoint } from './ClsOperationPoint';
-import { getDevicesByType } from '../../../deviceManager/devices';
-import { deviceType } from '../../../deviceManager/constants';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOrderOperationPoints {
@@ -20,9 +18,15 @@ export class ClsOrderOperationPoints {
     //   // return;
     // }
     // const { points } = p;
-    points.forEach((point: tPoint) => {
+    points.sort((p1, p2) => p1.sequence - p2.sequence).forEach((point: tPoint) => {
       this._appendNewOperationPoint(point);
     });
+  }
+
+  get activeControls() {
+    return this.points.filter(p => p.isActive).reduce((controls, p) => {
+      return controls.concat(p.controls);
+    }, []);
   }
 
   get operationGroups(): { [groupSeq: number]: ClsOperationPointGroup } {
@@ -105,35 +109,62 @@ export class ClsOrderOperationPoints {
   }
 
   newResult(results: Array<tResult>) {
-    let newInactivePoints: Array<?ClsOperationPoint> = [];
+    let newInactiveControls: Array<?ClsOperationPoint> = [];
+    if (this.activeControls.length === 0 && results && results.length > 0) {
+      this.start();
+    }
     results.forEach(r => {
-      const { seq } = r;
-      const group = this.getGroupByPointSequence(seq);
-      if (!group) {
+      const { tool_sn, seq } = r;
+      const controls = this.activeControls.filter(c => c.toolSN === tool_sn);
+
+      const pointSeqs = [...new Set(controls.map(c => c.sequence))].sort();
+
+      if (!pointSeqs.length > 0) {
+        const point = this.points.find(p => p.sequence === seq);
+        point.newResult(r);
         return;
       }
-      const inactivePoints = group.newResult(r);
-      newInactivePoints = newInactivePoints.concat(inactivePoints);
+      const firstSeq = pointSeqs[0];
+      const point = this.points.find(p => p.sequence === firstSeq);
+      const inactive = point.newResult(r);
+      if (inactive) {
+        pointSeqs.shift();
+      }
+      if (pointSeqs.length > 0) {
+        return;
+      }
+      newInactiveControls = newInactiveControls.concat(...controls);
     });
 
-    return newInactivePoints;
+    return newInactiveControls;
   }
 
-  start(): Array<ClsOperationPoint> {
+  start(): Array<tControl> {
     // 所有可被最先开始的的组内的点
     const allPoints = this.nextActiveGroups().reduce((points, g) => {
       return points.concat(g.points);
     }, []).filter(p => !p.isPass);
+
+
+    let activeControls = [];
+    this.points.filter(p => p.isActive).forEach(p => {
+      activeControls = activeControls.concat(p.controls);
+    });
+
     // 工具未被占用的点
-    const occupiedTools = getDevicesByType(deviceType.tool).filter(t => t.isEnable).map(t => t.serialNumber);
-    console.warn(occupiedTools, allPoints);
-    return allPoints.filter(p => {
-      if (occupiedTools.find(t => t === p.toolSN)) {
+    return [].concat(...allPoints.filter(p => {
+      // todo : 有一把工具占用就无法拧紧这个点？
+      if (activeControls.find(c => {
+        if (p.point.tightening_tools && p.point.tightening_tools.length > 0) {
+          return p.toolSNs.find(t => c.toolSN === t) && c.controllerModeId !== p.pset;
+        }
+        return p.toolSNs.find(t => c.toolSN === t);
+      })) {
         return false;
       }
-      occupiedTools.push(p.toolSN);
+      activeControls = activeControls.concat(p.controls);
       return true;
-    }).map(p => p.start()).filter(p => !!p);
+    }).map(p => p.start())).filter(c => !!c);
   }
 
   stop() {
@@ -142,15 +173,11 @@ export class ClsOrderOperationPoints {
     });
   }
 
-  byPassPoint(points: Array<ClsOperationPoint> | number) {
-    points.forEach(p => {
-      if (p instanceof ClsOperationPoint) {
-        p.setBypass(true);
-      } else if (typeof p === 'number') {
-        const point = this.points.find(pp => pp.sequence === p);
-        if (point) {
-          point.setBypass(true);
-        }
+  byPassControls(controls) {
+    controls.forEach(c => {
+      const point = this.points.find(pp => pp.sequence === c.sequence);
+      if (point) {
+        point.setBypass(true);
       }
     });
   }

@@ -19,11 +19,12 @@ import Viewer from './viewer';
 import Layout from './appLayout';
 import WorkingTemplate from './workingTemplate';
 import OperationList from './OperationList';
+import WorkingManual from './working';
+
 // import HomePage from './home';
 import Net from './config/Net';
 import IO from './config/Io';
 import Connect from './config/Connect';
-
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
@@ -41,11 +42,25 @@ const shade = 500;
 const pages = {
   '/app': {
     component: Layout,
-    navBarContents: ['clock', 'switchWorkCenterButton', 'pages', 'healthCheck', 'language'], // 'sysInfo','avatar','clock', 'pages', 'language',
+    navBarContents: [
+      'clock',
+      'switchWorkCenterButton',
+      'pages',
+      'healthCheck',
+      'language'
+    ], // 'sysInfo','avatar','clock', 'pages', 'language',
     DefaultContent: OperationList,
     title: 'main.home',
     icon: icons.Home,
     color: colors.indigo[shade],
+    '/manualwork': {
+      title: 'main.manual',
+      component: WorkingManual,
+      icon: icons.BrightnessAutoSharp,
+      color: colors.cyan[shade],
+      image: WorkingImg,
+      exact: true
+    },
     '/working': {
       title: 'main.operation',
       component: WorkingTemplate,
@@ -61,7 +76,6 @@ const pages = {
       color: colors.lightGreen[shade],
       image: viewerImg,
       exact: true
-
     },
     '/order': {
       title: 'main.orders',
@@ -70,7 +84,6 @@ const pages = {
       color: colors.deepOrange[shade],
       image: editorImg,
       exact: true
-
     },
     '/preference': {
       title: 'main.preferences',
@@ -119,7 +132,6 @@ const pages = {
       color: colors.blue[shade],
       image: LoginImg,
       exact: true
-
     },
     '/result': {
       title: 'main.resultQuery',
@@ -128,7 +140,6 @@ const pages = {
       color: colors.grey[shade],
       image: LockingImg,
       exact: true
-
     },
     '/curve': {
       title: 'main.curve',
@@ -137,14 +148,12 @@ const pages = {
       color: colors.teal[shade],
       image: CurveImg,
       exact: true
-
     }
-
   },
   '/pages': {
     component: LockLayout,
     '/login': {
-      title: 'main.login',
+      title: 'main.lock',
       component: LoginPage,
       icon: icons.Fingerprint,
       color: colors.grey[shade],
@@ -164,14 +173,15 @@ const pages = {
 };
 
 export const getContentByUrl = (url: tUrl): tRouteObj => {
-  const arr = url.split('/').filter((u) => u !== '');
+  const arr = url.split('/').filter(u => u !== '');
   const page = arr.reduce((p, r) => (p && p[`/${r}`]) || null, pages);
-  return page && {
-    ...page,
-    url,
-    name: url.slice(-1)[0]
-  };
+  return (
+    page && {
+      ...page,
+      url,
+      name: url.slice(-1)[0]
+    }
+  );
 };
-
 
 export default pages;

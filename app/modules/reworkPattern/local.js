@@ -12,6 +12,8 @@ const trans = [
   makeLocalBundle(lng.zh_CN, reworkNS, {
     confirm: '确认返工',
     cancel: '取消返工',
+    manualCancel: '取消',
+    cancelScanner:'不扫码',
     redoSpecScrewPointTitle: '返工当前拧紧点',
     redoSpecScrewPointTitleNoPoint: '返工当前工步',
     redoSpecScrewPointContent: '返工当前拧紧点:',

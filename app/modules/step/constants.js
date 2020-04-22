@@ -15,6 +15,7 @@ export const stepTypeKeys=Object.freeze({
   instruction: 'instruction',
   text: 'text',
   screw: 'tightening',
+  promiscuousTightening:'promiscuous_tightening',
   material: 'register_consumed_materials',
   passFail: 'passfail',
   measure: 'measure',

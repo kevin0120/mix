@@ -2,7 +2,12 @@ import type { tPoint } from './interface/typeDef';
 import { getDevice } from '../../deviceManager/devices';
 
 export function getTools(points: Array<tPoint>) {
-  const toolSnSet = new Set(points.map(p => p.tightening_tool));
+  const toolSnSet = new Set(points.reduce((tools, p) => {
+    if (p.tightening_tools && p.tightening_tools.length > 0) {
+      return tools.concat(...p.tightening_tools);
+    }
+    return tools.concat(p.tightening_tool);
+  }, []));
   const lostTool = [];
   const tools = [];
   [...toolSnSet].forEach(t => {
@@ -15,7 +20,7 @@ export function getTools(points: Array<tPoint>) {
   });
 
   if (lostTool.length > 0) {
-    throw new Error(`tools not found: ${String(lostTool.map(t => `${t}`))}`);
+    throw new Error(`未找到工具: ${String(lostTool.map(t => `${t}`))}`);
   }
 
   // const unhealthyTools = tools.filter(t => !t.Healthz);

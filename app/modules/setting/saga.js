@@ -24,6 +24,8 @@ function* saveConfiguration(action) {
         eSetting.setAll({
           ...setting,
           system: { ...setting.system, [section]: newConfigs }
+        },{
+          prettify:true
         });
         try {
           yield put({ type: CONNECTION.MANUAL_MODIFICATION, data: newConfigs });
@@ -43,6 +45,8 @@ function* saveConfiguration(action) {
         eSetting.setAll({
           ...setting,
           system: { ...setting.system, [section]: newConfigs }
+        },{
+          prettify:true
         });
         break;
       }
@@ -54,12 +58,16 @@ function* saveConfiguration(action) {
         eSetting.setAll({
           ...setting,
           page: { ...setting.page, [section]: newConfigs }
+        },{
+          prettify:true
         });
         break;
       default:
         eSetting.setAll({
           ...setting,
           page: { ...setting.page, [section]: newConfigs }
+        },{
+          prettify:true
         });
         break;
     }

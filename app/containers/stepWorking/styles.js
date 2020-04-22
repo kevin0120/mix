@@ -232,14 +232,18 @@ const stepPageContainer = {
     width: 'fit-content',
     overflow: 'auto',
     padding: 4,
-    wordBreak: 'break-word'
+    wordBreak: 'break-word',
+    '& p': {
+      lineHeight: 'inherit !important',
+      fontSize:'inherit !important'
+    }
   },
   descriptionPaper: {
     maxHeight: '100%',
     maxWidth: '100%',
     padding: 8,
     overflow: 'auto',
-    wordBreak: 'break-word',
+    // wordBreak: 'break-word',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',

@@ -5,6 +5,10 @@ export default {
     overflow:'auto',
     display:'flex',
     justifyContent:'center',
-    alignItems:'center'
+    alignItems:'center',
+    '& p': {
+      lineHeight: 'inherit !important',
+      fontSize:'inherit !important'
+    }
   },
 }

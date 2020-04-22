@@ -9,7 +9,7 @@ const resultStatusColor = {
   AK2: 'info',
   default: 'info'
 };
-
+// .toUpperCase()
 // eslint-disable-next-line import/prefer-default-export
 export const result2TimeLine = (results: Array<tResult>): Array<tTimeLineObj> =>
   results.map(r => ({

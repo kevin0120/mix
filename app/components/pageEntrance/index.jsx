@@ -10,13 +10,17 @@ import { withStyles } from '@material-ui/core/styles';
 import { cardStyles } from './styles';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
+const lodash = require('lodash');
 
 const renderCard = (props) => {
-  const classes=makeStyles(cardStyles)();
-  const { routes, onItemClick } = props;
+  const classes = makeStyles(cardStyles)();
+  const { routes, onItemClick, users } = props;
   return <I18n ns="translations">
     {t => (<Grid container className={classes.container} justify="center">
-      {routes.map(route => route ? (
+      {routes
+        .filter(r => !!r)
+        .filter(r => !r.role || r.role.length === 0 || users.some((u) => lodash.includes(r.role, u.role)))
+        .map(route => route ? (
         <Grid key={route.name} item className={classes.cardGridItem}>
           <Card
             key={route.name}
@@ -49,17 +53,20 @@ const renderCard = (props) => {
 };
 
 const renderNavigation = (props) => {
-  const { routes, onItemClick, navigationClassName, ActionClassName, value } = props;
+  const { routes, onItemClick, navigationClassName, ActionClassName, value, users } = props;
   return <I18n ns="translations">
     {t => (<BottomNavigation
       value={value}
       showLabels
       // className={navigationClassName}
       classes={{
-        root:navigationClassName
+        root: navigationClassName
       }}
     >
-      {routes.map(route => route ? (
+      {routes
+        .filter(r => !!r)
+        .filter(r => !r.role || r.role.length === 0 || users.some((u) => lodash.includes(r.role, u.role)))
+        .map(route => route ? (
         <BottomNavigationAction
           key={route.name}
           value={route.url}
@@ -68,7 +75,7 @@ const renderNavigation = (props) => {
           icon={<route.icon/>}
           // className={ActionClassName}
           classes={{
-            root:ActionClassName
+            root: ActionClassName
           }}
         />
       ) : null)}

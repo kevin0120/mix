@@ -4,10 +4,11 @@ export const ioOutputs = Object.freeze({
   green: 'green',
   white: 'white',
   yellow: 'yellow',
-  beep: 'beep'
+  beep: 'beep',
+  unlock: 'unlock'
 });
 
-// resetKey | byPass| modeSelect
+// resetKey | byPass| modeSelect | unlock
 export const ioInputs = Object.freeze({
   resetKey: 'resetKey',
   byPass: 'byPass',
@@ -18,13 +19,28 @@ export const ioInputs = Object.freeze({
 const { red, green, white, yellow } = ioOutputs;
 const singleGroups = {};
 Object.values(ioOutputs).forEach(o => {
-  singleGroups[o] = [o];
+  singleGroups[o] = { on: [o] };
 });
 export const ioOutputGroups = {
   ...singleGroups,
-  info: [white],
-  warning: [yellow],
-  error: [red],
-  ready: [green],
-  doing: [white, green]
+  info: {
+    on: [white],
+    off: [red, green, yellow]
+  },
+  warning: {
+    on: [yellow],
+    off: [red, green, white]
+  },
+  error: {
+    on: [red],
+    off: [yellow, green, white]
+  },
+  ready: {
+    on: [green],
+    off: [yellow, red, white]
+  },
+  doing: {
+    on: [white, green],
+    off: [yellow, red]
+  }
 };

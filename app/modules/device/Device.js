@@ -66,14 +66,14 @@ export default class Device extends CommonExternalEntity implements IDevice {
     return this.validator(data);
   }
 
-  * doDispatch(data: tInputData): Saga<void> {
+  *doDispatch(data: tInputData): Saga<void> {
     try {
       console.log(data);
-      if (!this.isEnable) {
-        const msg = `${this.source} Is Not Enabled`;
-        CommonLog.Info(msg);
-        return;
-      }
+      // if (!this.isEnable) {
+      //   const msg = `${this.source} Is Not Enabled`;
+      //   CommonLog.Info(msg);
+      //   return;
+      // }
       if (!this.doValidate(data)) {
         const msg = `data ${data} didn't pass validator at ${this.source}`;
         CommonLog.Info(msg);

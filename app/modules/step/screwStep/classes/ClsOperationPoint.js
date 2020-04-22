@@ -2,7 +2,7 @@
 
 // NOTE: 拧紧点key定义,如果此点为key，此点必须拧紧结束同时此组的结果到达拧紧关键点个数才能进入下个拧紧组
 import { POINT_STATUS, RESULT_STATUS } from '../constants';
-import type { tPoint, tPointStatus, tResult } from '../interface/typeDef';
+import type { tControl, tPoint, tPointStatus, tResult } from '../interface/typeDef';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOperationPoint {
@@ -11,8 +11,12 @@ export class ClsOperationPoint {
 
   constructor(p: tPoint) {
     this._point = p;
-    this._toolSN = p.tightening_tool;
     this._results = [];
+    if (p.tightening_tools && p.tightening_tools.length > 0) {
+      this._toolSNs = p.tightening_tools;
+      return;
+    }
+    this._toolSNs = [p.tightening_tool];
   }
 
   _point: tPoint;
@@ -21,10 +25,18 @@ export class ClsOperationPoint {
     return this._point;
   }
 
-  _toolSN: string;
+  _toolSNs: Array<string>;
 
-  get toolSN(): string {
-    return this._toolSN;
+  get toolSNs(): string {
+    return this._toolSNs;
+  }
+
+  get controls(): tControl {
+    return this._toolSNs.map(t => ({
+      sequence: this.sequence,
+      toolSN: t,
+      controllerModeId: this.pset
+    }));
   }
 
   _isActive: boolean = false;
@@ -40,12 +52,21 @@ export class ClsOperationPoint {
   }
 
   get isFinalFail(): boolean {
+    // 一个点绑定多把工具时
+    if(this.controls && this.controls.length>1){
+      return false;
+    }
     // 结果的长度已经达到最大重试次数，同时最后一条结果为fail
     return (
       this._point.max_redo_times >= 0
       && this._results.filter(r => r.measure_result === RESULT_STATUS.nok)
         .length >= this._point.max_redo_times
       && this._results.slice(-1)[0].measure_result === RESULT_STATUS.nok
+    ) || (
+      this._results.filter(r => r.count > this._point.max_redo_times && r.measure_result === RESULT_STATUS.nok)
+        .length > 0
+    ) || (
+      this._bypass
     );
   }
 
@@ -119,18 +140,19 @@ export class ClsOperationPoint {
     this._bypass = status;
     if (status) {
       this.setActive(false);
+      this._status = POINT_STATUS.ERROR;
     }
   }
 
   start(forceStart) {
     if (this.isActive) {
-      return null;
+      return [];
     }
     if (forceStart || !this.isPass) {
       this.setActive(true);
-      return this;
+      return this.controls;
     }
-    return null;
+    return [];
   }
 
   toString(): string {
@@ -153,7 +175,7 @@ export class ClsOperationPoint {
     this._results.push(r);
 
     this._parseStatus(r);
-    if(this._isActive){
+    if (this._isActive) {
       this._parseActive(r);
       if (!this._isActive) {
         return this;
