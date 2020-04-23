@@ -22,6 +22,19 @@ import { workModes } from '../workCenterMode/constants';
 import { ioOutputGroups } from '../io/constants';
 import { orderActions } from './action';
 import io from '../io';
+import { getAppDirectory } from '../../logger';
+
+const path = require('path');
+const fse = require('fs-extra');
+const fs = require('fs');
+
+const dir = getAppDirectory();
+const isExist = fs.existsSync(dir);
+if (!isExist) {
+  fse.mkdirpSync(dir);
+}
+const imageDir = path.join(dir, '/imgs/order.jpg');
+
 
 const stepStatus = status => {
   switch (status) {
@@ -433,7 +446,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       this._datePlannedComplete = datePlannedComplete
         ? new Date(datePlannedComplete)
         : null;
-      this._productTypeImage = productTypeImage || '';
+      this._productTypeImage = productTypeImage || imageDir;
       (this: IWorkable)._desc = payload?.operation?.desc || '';
     }
 
