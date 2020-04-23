@@ -216,6 +216,7 @@ class LoginPage extends React.Component {
                   inputName={inputName}
                   layoutName={layoutName}
                   onChange={this.handleInput}
+                  theme={`hg-theme-default hg-layout-default ${classes.keyboardTheme}`}
                   // onChangeAll={inputs => this.onChangeAll(inputs)}
                   onKeyPress={this.handlePress}
                 />
