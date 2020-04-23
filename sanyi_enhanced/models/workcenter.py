@@ -43,6 +43,7 @@ class MrpWorkCenter(models.Model):
             user = tool.technician_user_id
             val = {
                 'serial_no': tool.serial_no,
+                'name': tool.name or '',
                 'connection': 'tcp://{0}:{1}'.format(conn.ip, conn.port) if conn else None,
                 'technician_user': {'name': user.login, 'uuid': user.uuid} if user else None,
             }
