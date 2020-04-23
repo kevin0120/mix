@@ -205,12 +205,13 @@ function hasAnotherWorkingOrder(orderState, order: IOrder) {
 
 function* orderStartSimulate(code: 工单号) {
   try {
-    const users = []; // todo get users
+    const { users } = yield select();
+    const uuids = users.map(u => u.uuid || ''); // todo get users
     const workCenterCode = yield select(s => s.systemInfo.workcenter);
     const { errorMessage } = yield call(
       apiOrderStartSimulate,
       code,
-      users,
+      uuids,
       workCenterCode
     );
     if (errorMessage) {
