@@ -167,7 +167,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
                 wStep,
                 {
                   onNext: this._onNextStep.bind(this),
-                  onPrevious: this._onPreviousStep.bind(this)
+                  onPrevious: this._onPreviousStep.bind(this),
+                  onAnother: this._onAnotherStep.bind(this)
                 },
                 window.debugSettings && window.debugSettings.disableOrderTriggerLimit ?
                   STEP_STATUS.READY :
@@ -325,6 +326,18 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       return ((ret: any): Array<IWorkStep>);
     }
 
+    * _onAnotherStep(another) {
+      const { step } = another;
+      if (!step) {
+        throw new Error('没有指定工步');
+      }
+      const index = this.steps.findIndex(s => s.code === step.code);
+      if (!(index >= 0)) {
+        throw new Error('没有找到指定工步');
+      }
+      this.workingIndex = index;
+    }
+
     * _onPreviousStep() {
       try {
         const wStep = this.workingStep;
@@ -356,7 +369,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
         CommonLog.lError(e, { at: 'order._onNextStep' });
         throw(e);
       }
-
     }
 
     clearData() {

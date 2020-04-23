@@ -93,6 +93,10 @@ export const orderActions = Object.freeze({
       reason
     }
   }),
+  doAnotherStep: (step: IWorkStep) => ({
+    type: ORDER.STEP.DO_ANOTHER,
+    step
+  }),
   nextStep: () => ({
     type: ORDER.STEP.NEXT
   }),

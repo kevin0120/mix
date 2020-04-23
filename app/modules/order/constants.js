@@ -69,6 +69,8 @@ export const ORDER = Object.freeze({
     STATUS: 'ORDER_STEP_STATUS',
     // 步进、步退
     DO_PREVIOUS: 'ORDER_STEP_DO_PREVIOUS',
-    FINISH: 'ORDER_STEP_FINISH'
+    FINISH: 'ORDER_STEP_FINISH',
+    // 开始另一工步
+    DO_ANOTHER: 'ORDER_STEP_DO_ANOTHER'
   }
 });
