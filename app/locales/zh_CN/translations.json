@@ -110,6 +110,7 @@
     "QuestShutdown": "是否现在关机?",
     "Close": "关闭",
     "Manual": "手动模式",
+    "ManualInput": "手动输入",
     "Auto": "自动模式",
     "Scanner": "扫码枪模式",
     "Download": "下载",
