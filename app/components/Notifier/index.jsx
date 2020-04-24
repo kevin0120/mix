@@ -9,7 +9,7 @@ import Button from '../CustomButtons/Button';
 class Notifier extends Component {
   // eslint-disable-next-line react/sort-comp
   displayed = [];
-  
+
   storeDisplayed = (id) => {
     this.displayed = [...this.displayed, id];
   };
@@ -22,19 +22,19 @@ class Notifier extends Component {
 
     const { notifications: currentSnacks } = this.props;
     let notExists = false;
-    for (let i = 0; i < newSnacks.length; i += 1) {
-      const newSnack = newSnacks[i];
-      if (newSnack.dismissed) {
-        const {removeSnackbarAction, closeSnackbar} = this.props;
-        removeSnackbarAction(newSnack.key);
-        closeSnackbar(newSnack.key);
+    newSnacks.forEach(s => {
+      if (s.dismissed) {
+        const { removeSnackbarAction, closeSnackbar } = this.props;
+        console.log('removing');
+        removeSnackbarAction(s.key);
+        closeSnackbar(s.key);
+        return;
       }
-
       if (!notExists) {
         // update notExists Flag
-        notExists = notExists || !currentSnacks.filter(({ key }) => newSnack.key === key).length;
+        notExists = notExists || !currentSnacks.filter(({ key }) => s.key === key).length;
       }
-    }
+    });
     return notExists;
   }
 
@@ -44,7 +44,7 @@ class Notifier extends Component {
       enqueueSnackbar,
       closeSnackbar,
       removeSnackbarAction,
-      closeSnackbarAction,
+      closeSnackbarAction
     } = this.props;
 
     notifications.forEach(({ key, message, options = {} }) => {
@@ -73,6 +73,7 @@ class Notifier extends Component {
           }
 
           // Dispatch action to remove snackbar from redux store
+          closeSnackbar(k);
           removeSnackbarAction(k);
         }
       });

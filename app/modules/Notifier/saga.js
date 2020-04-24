@@ -19,6 +19,7 @@ const notifyFuncMap: tNotifyFuncMap = {
   Error: lError
 };
 
+// 同时记录日志
 function* notificationAlways(action): Saga<void> {
   try {
     const { variant = 'Info', message, meta } = action;
