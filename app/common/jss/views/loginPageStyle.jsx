@@ -49,8 +49,8 @@ const loginPageStyle = theme => ({
   keyboardTheme: {
     fontSize: '1.5rem',
     '& .hg-button': {
-      height: '55px !important',
-      margin: '3px !important'
+      height: '65px !important',
+      margin: '2px !important'
     }
   },
   socialLine: {
