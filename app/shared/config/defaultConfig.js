@@ -216,7 +216,8 @@ const defaultConfigs = {
     reportFinish: true, // 报完工
     strictOrderSimulate: false, // true:严格产前模拟，不通过无法开工
     strictReportStart: false, // true:严格报开工，不通过无法开工
-    strictResume: false // true:严格恢复，不通过无法恢复作业
+    strictResume: false, // true:严格恢复，不通过无法恢复作业
+    canRedoOrders: true
   },
   debugSettings: {
     disableOrderTriggerLimit: false

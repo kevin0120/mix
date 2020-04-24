@@ -20,11 +20,12 @@ import modelViewerActions from '../../modules/modelViewer/action';
 import type { IOrder } from '../../modules/order/interface/IOrder';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 import PDFViewer from '../../components/PDFViewer';
-import { CommonLog, defaultClient } from '../../common/utils';
-import { BlockReasonDialog } from '../../components/BlockReasonDialog';
+import { defaultClient } from '../../common/utils';
+import { ORDER_STATUS } from '../../modules/order/constants';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
+  const wOrder = oSel.workingOrder(state.order);
   return {
     ...props,
     viewingOrder: vOrder,
@@ -38,7 +39,9 @@ const mapState = (state, props) => {
     cancelable: oSel.cancelable(vOrder),
     canReportFinish: oSel.canReportFinish(vOrder) || false,
     reportFinishEnabled: state.setting.systemSettings.reportFinish,
-    blockReasons: state.order.blockReasons || []
+    blockReasons: state.order.blockReasons || [],
+    canRedoOrders: state.setting?.systemSettings?.canRedoOrders &&
+      !wOrder && (vOrder?.status === ORDER_STATUS.DONE || vOrder?.status === ORDER_STATUS.FAIL)
   };
 };
 
@@ -52,7 +55,8 @@ const mapDispatch = {
   tryWorkOn: orderActions.tryWorkOn,
   showDialog: dialogActions.dialogShow,
   viewModel: modelViewerActions.open,
-  reportFinish: orderActions.reportFinish
+  reportFinish: orderActions.reportFinish,
+  redoOrder: orderActions.redoOrder
 };
 
 /* eslint-disable flowtype/no-weak-types */
@@ -74,34 +78,38 @@ type ButtonsContainerProps = {
   pendingable: boolean,
   cancelable: boolean,
   tryWorkOn: (order: IOrder) => tActOrderTrigger,
+  redoOrder: (order: IOrder) => tActOrderTrigger,
   viewModel: any, // 查看的三维模型
-  viewModelDialog: any
+  viewModelDialog: any,
+  canRedoOrders: boolean
 };
 /* eslint-enable flowtype/no-weak-types */
 
 const ButtonsContainer: ButtonsContainerProps => Node = ({
-                                                           viewingOrder,
-                                                           viewingStep,
-                                                           workingStep,
-                                                           next,
-                                                           steps,
-                                                           viewingIndex,
-                                                           action,
-                                                           previous,
-                                                           finishStep,
-                                                           doPreviousStep,
-                                                           cancelOrder,
-                                                           pendingOrder,
-                                                           isPending,
-                                                           pendingable,
-                                                           cancelable,
-                                                           tryWorkOn,
-                                                           viewModel,
-                                                           showDialog,
-                                                           reportFinish,
-                                                           canReportFinish,
-                                                           reportFinishEnabled
-                                                         }: ButtonsContainerProps) => {
+  viewingOrder,
+  viewingStep,
+  workingStep,
+  next,
+  steps,
+  viewingIndex,
+  action,
+  previous,
+  finishStep,
+  doPreviousStep,
+  cancelOrder,
+  pendingOrder,
+  isPending,
+  pendingable,
+  cancelable,
+  tryWorkOn,
+  viewModel,
+  showDialog,
+  reportFinish,
+  canReportFinish,
+  reportFinishEnabled,
+  canRedoOrders, // 工单是否能重新作业
+  redoOrder
+}: ButtonsContainerProps) => {
   const classes = makeStyles(styles.buttonsContainer)();
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
   const noNext = steps.length <= 0 || viewingIndex >= steps.length - 1;
@@ -290,6 +298,16 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           >
             {t(trans.undo)}
           </Button>
+          {
+            canRedoOrders ? <Button
+              disabled={!canRedoOrders}
+              type="button"
+              onClick={() => redoOrder(viewingOrder)}
+              color="danger"
+            >
+              {t(trans.redoOrder)}
+            </Button> : null
+          }
         </div>
         <div>{action}</div>
       </div>

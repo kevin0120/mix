@@ -1,6 +1,6 @@
 // @flow
 import type { Saga } from 'redux-saga';
-import { all, call, put } from 'redux-saga/effects';
+import { call, put } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import type { IWorkStep } from './interface/IWorkStep';
 import type { IWorkable } from '../workable/IWorkable';
@@ -9,7 +9,6 @@ import type { tStep, tStepStatus } from './interface/typeDef';
 import { STEP_STATUS, stepTypeKeys } from './constants';
 import { stepStatusTasks } from './stepStatusTasks';
 import notifierActions from '../Notifier/action';
-import { orderActions } from '../order/action';
 
 const StepMixin = (ClsWorkable: Class<IWorkable>) =>
   class Step extends ClsWorkable implements IWorkStep {
@@ -168,7 +167,19 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
     }
 
     * clearData() {
+      // eslint-disable-next-line redux-saga/no-unhandled-errors
       yield call(this.updateData, () => ({}));
+    }
+
+    * reset() {
+      try {
+        yield call([this, this.clearData]);
+        yield call(stepDataApi, this.code, this.data);
+        this._status = STEP_STATUS.READY;
+        yield call(orderStepUpdateApi, this.code, this._status);
+      } catch (e) {
+        throw e;
+      }
     }
   };
 

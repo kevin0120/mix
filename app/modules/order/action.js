@@ -138,5 +138,9 @@ export const orderActions = Object.freeze({
   ) => ({
     type: ORDER.SET_BLOCK_REASON_LIST,
     blockReasons
+  }),
+  redoOrder: (order: IOrder) => ({
+    type: ORDER.REDO_ORDER,
+    order
   })
 });
