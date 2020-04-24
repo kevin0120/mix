@@ -184,6 +184,15 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
     content: <PDFViewer file={pdfUrl || url}/>
   };
 
+  const envDialog = {
+    maxWidth: 'xl',
+    buttons: [{
+      label: 'Common.Close',
+      color: 'warning'
+    }],
+    content: <iframe src="https://www.baidu.com" style={{ width: '80vw', height: '75vh' }}/>
+  };
+
   return withI18n(
     t => (
       <div className={classes.root}>
@@ -273,7 +282,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           <Button
             color="primary"
             type="button"
-            onClick={() => viewModel('www.baidu.com')}
+            onClick={() => showDialog(envDialog)}
           >
             {'查看环境'}
           </Button>
