@@ -35,7 +35,9 @@ function* doLogin(userInfo: tUser) {
     if (!/\/app/.test(newState.router.location.pathname)) {
       yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: true }));
       yield put(push('/app'));
+      return;
     }
+    yield put(notifierActions.enqueueSnackbar('Error', '登录失败：用户名或密码错误'));
   } catch (e) {
     CommonLog.lError(
       `login Workflow User Authentication Error: ${e.toString()}`
@@ -213,7 +215,9 @@ function* loginLocal(action) {
       yield put(loginSuccess(userInfo));
       yield put(ioModel.action.setIOOutput({ group: ioOutputGroups.unlock, status: true }));
       yield put(push('/app'));
+      return;
     }
+    yield put(notifierActions.enqueueSnackbar('Error', '登录失败：用户名或密码错误'));
   } catch (e) {
     CommonLog.lError(
       `loginLocal login Workflow login Local User Authentication Error: ${e.toString()}`
