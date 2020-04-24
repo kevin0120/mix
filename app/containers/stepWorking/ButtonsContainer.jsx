@@ -282,6 +282,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           <Button
             color="primary"
             type="button"
+            disabled={!viewingOrder}
             onClick={() => showDialog(envDialog)}
           >
             {'查看环境'}
