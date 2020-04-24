@@ -1,8 +1,8 @@
 // @flow
 import { take, call } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 import { MODEL_VIEWER } from './action';
 import { CommonLog } from '../../common/utils';
-import type { Saga } from 'redux-saga';
 
 const { exec } = require('child_process');
 
@@ -10,10 +10,14 @@ export default function* root(): Saga<void> {
   try {
     while (true) {
       const { url } = yield take(MODEL_VIEWER.OPEN);
-      if (url) {
+      console.log(url);
+      try{
+        if(!url){
+          throw new Error('model viewing url not valid')
+        }
         yield call(exec, `firefox ${url}`);
-      } else {
-        CommonLog.lError('model viewing url not valid', {
+      }catch (e) {
+        CommonLog.lError(`查看模型错误${e.message}`, {
           at: 'model viewer root',
           url
         });

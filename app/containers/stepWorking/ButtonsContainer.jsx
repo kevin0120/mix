@@ -272,6 +272,13 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           </Button>
           <Button
             color="primary"
+            type="button"
+            onClick={() => viewModel('www.baidu.com')}
+          >
+            {'查看环境'}
+          </Button>
+          <Button
+            color="primary"
             disabled={noPrevious}
             type="button"
             onClick={() => previous()}
