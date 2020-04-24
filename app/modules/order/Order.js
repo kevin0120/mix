@@ -249,7 +249,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     _workingIndex = 0;
 
     get workingIndex() {
-      if (this._workingIndex) {
+      if (this._workingIndex >= 0) {
         return this._workingIndex;
       }
       const idx = this._steps.findIndex(s => s.status === STEP_STATUS.DOING);
