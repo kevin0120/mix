@@ -143,8 +143,11 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
 
   const url = viewingOrder?.payload?.worksheet?.url;
   useEffect(() => {
+    if (!url) {
+      return;
+    }
     defaultClient
-      .get()
+      .get(url)
       .then(resp => {
         setPdfUrl(resp.request._redirectable._currentUrl);
       });
