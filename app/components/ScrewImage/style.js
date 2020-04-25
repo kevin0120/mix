@@ -19,7 +19,7 @@ export default {
       objectFit: 'contain',
       resize: 'both',
       margin: 0,
-      flex: 0,
+      flex: 0
     }
   },
   point: (circleRadius, scale) => theme => ({
@@ -32,10 +32,12 @@ export default {
       lineHeight: `${circleRadius * 2}px`,
       fontSize: `${(circleRadius - 10) * 2}px`,
       overflow: 'hidden',
-      transform: `scale(${scale},${scale})`
+      transform: `scale(${scale},${scale})`,
+      zIndex: 1
     },
     active: {
-      animation: '$activeRipple 1s infinite cubic-bezier(1, 1, 1, 1)'
+      animation: '$activeRipple 1s infinite cubic-bezier(1, 1, 1, 1)',
+      zIndex: '3 !important'
     },
     '@keyframes activeRipple': {
       '0%': {

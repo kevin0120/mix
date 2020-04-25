@@ -34,11 +34,7 @@ type Props = {
 function Point({ info, twinkle, x, y, status, label, scale, reworkModiBGColor, onClick, selected, menu = false, ...restProps }: Props) {
   const classes = makeStyles(styles.point(pointRadius, scale))();
 
-  return <div style={{
-    width: '0px', height: '0px', left: `calc(${x}% - ${pointRadius}px)`,
-    top: `calc(${y}% - ${pointRadius}px)`, position: 'relative',
-    overflow: 'visible'
-  }}>
+  return <React.Fragment>
     <div
       className={clsx(
         classes.root, {}, {
@@ -53,6 +49,11 @@ function Point({ info, twinkle, x, y, status, label, scale, reworkModiBGColor, o
           onClick(e);
         }
       }}
+      style={{
+        overflow: 'visible',
+        left: `calc(${x}% - ${pointRadius}px)`,
+        top: `calc(${y}% - ${pointRadius}px)`, position: 'absolute',
+      }}
       {...(restProps: any)}
     >
       {label}
@@ -60,10 +61,13 @@ function Point({ info, twinkle, x, y, status, label, scale, reworkModiBGColor, o
 
     </div>
     {menu && !!twinkle && info && Object.keys(info).length > 0 ? <List style={{
+      zIndex: 2,
       width: 200,
       // minHeight: pointRadius * 2,
-      left: x <= 80 ? pointRadius * 2 + 10 : -200 - 10,
-      top: 5,
+      left: `calc(${x}% + ${pointRadius}px)`,
+      top: `calc(${y}% - ${pointRadius}px)`,
+      // left: x <= 80 ? pointRadius * 2 + 10 : -200 - 10,
+      // top: 5,
       position: 'absolute',
       borderRadius: 10,
       color: 'white',
@@ -74,10 +78,10 @@ function Point({ info, twinkle, x, y, status, label, scale, reworkModiBGColor, o
         display: 'flex',
         justifyContent: 'space-between'
       }}
-        key={i}
+                                                  key={i}
       ><span>{`${i} : `}</span><span>{info[i]}</span></ListItem>)}
     </List> : null}
-  </div>;
+  </React.Fragment>;
 }
 
 Point.defaultProps = {
