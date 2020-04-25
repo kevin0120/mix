@@ -20,7 +20,8 @@
             <field name="inherit_id" ref="sa_base.sa_product_normal_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='sa_type']" position="after">
-                    <field name="socket" options="{'no_create_edit': True , 'no_open': True}" />
+                    <field name="socket" options="{'no_create_edit': True , 'no_open': True}"
+                           attrs="{'invisible': [('sa_type', '!=', 'screw')]}"/>
                 </xpath>
             </field>
         </record>
