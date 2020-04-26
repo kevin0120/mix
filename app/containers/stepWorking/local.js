@@ -18,6 +18,7 @@ export const translation = {
   desc: 'desc',
   action: 'action',
   reportFinish:'reportFinish',
+  redoOrder:'redoOrder',
   ...stepTypeKeys
 };
 
@@ -49,7 +50,8 @@ const trans = [
     [translation.passFail]: '检测',
     [translation.measure]: '测量',
     [translation.video]: '视频',
-    [translation.reportFinish]: '报工'
+    [translation.reportFinish]: '报工',
+    [translation.redoOrder]: '工单重复作业'
   }),
   makeLocalBundle(lng.en, 'stepWorking', {
     skip: 'skip',
@@ -77,7 +79,8 @@ const trans = [
     [translation.passFail]: 'pass/fail',
     [translation.measure]: 'measure',
     [translation.video]: 'video',
-    [translation.reportFinish]: 'Report finish'
+    [translation.reportFinish]: 'Report finish',
+    [translation.redoOrder]: 'Redo Order'
   })
 ];
 

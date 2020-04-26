@@ -24,6 +24,7 @@ import { CommonLog, defaultClient } from '../../common/utils';
 import { BlockReasonDialog } from '../../components/BlockReasonDialog';
 import STEP_STATUS from '../../modules/step/constants';
 import { Typography } from '@material-ui/core';
+import { ORDER_STATUS } from '../../modules/order/constants';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -43,7 +44,9 @@ const mapState = (state, props) => {
     cancelable: oSel.cancelable(vOrder),
     canReportFinish: oSel.canReportFinish(vOrder) || false,
     reportFinishEnabled: state.setting.systemSettings.reportFinish,
-    blockReasons: state.order.blockReasons || []
+    blockReasons: state.order.blockReasons || [],
+    canRedoOrders: state.setting?.systemSettings?.canRedoOrders &&
+      !wOrder && (vOrder?.status === ORDER_STATUS.DONE || vOrder?.status === ORDER_STATUS.FAIL)
   };
 };
 
@@ -58,7 +61,8 @@ const mapDispatch = {
   tryWorkOn: orderActions.tryWorkOn,
   showDialog: dialogActions.dialogShow,
   viewModel: modelViewerActions.open,
-  reportFinish: orderActions.reportFinish
+  reportFinish: orderActions.reportFinish,
+  redoOrder: orderActions.redoOrder
 };
 
 /* eslint-disable flowtype/no-weak-types */
@@ -82,8 +86,10 @@ type ButtonsContainerProps = {
   pendingable: boolean,
   cancelable: boolean,
   tryWorkOn: (order: IOrder) => tActOrderTrigger,
+  redoOrder: (order: IOrder) => tActOrderTrigger,
   viewModel: any, // 查看的三维模型
-  viewModelDialog: any
+  viewModelDialog: any,
+  canRedoOrders: boolean
 };
 /* eslint-enable flowtype/no-weak-types */
 
@@ -112,7 +118,9 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   reportFinish,
   canReportFinish,
   reportFinishEnabled,
-  blockReasons
+  blockReasons,
+  canRedoOrders, // 工单是否能重新作业
+  redoOrder
 }: ButtonsContainerProps) => {
   const classes = makeStyles(styles.buttonsContainer)();
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
@@ -348,6 +356,16 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           >
             {t(trans.undo)}
           </Button>
+          {
+            canRedoOrders ? <Button
+              disabled={!canRedoOrders}
+              type="button"
+              onClick={() => redoOrder(viewingOrder)}
+              color="danger"
+            >
+              {t(trans.redoOrder)}
+            </Button> : null
+          }
           {canDoAnotherStep && viewingOrder === workingOrder ? <Button
             type="button"
             color="info"
@@ -357,6 +375,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
             }}>
             {t(trans.startViewing)}
           </Button> : null}
+
         </div>
         <div>{action}</div>
       </div>

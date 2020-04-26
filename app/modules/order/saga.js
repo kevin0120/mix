@@ -64,6 +64,7 @@ export default function* root(): Saga<void> {
       takeEvery(ORDER.TRY_VIEW, tryViewOrder),
       takeEvery(ORDER.REPORT_FINISH, reportFinish),
       takeEvery(ORDER.STEP.STATUS, setStepStatus),
+      takeEvery(ORDER.REDO_ORDER, redoOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
   } catch (e) {
@@ -445,5 +446,26 @@ function* handlePending({ config, step: order }) {
       at: 'order handlePending'
     });
   }
+}
 
+function* redoOrder({ order }: { order: IOrder }) {
+  try {
+    if (!order) {
+      throw new Error('没有指定工单');
+    }
+    // clear order data
+    const { steps } = order;
+    console.log(steps);
+    const clearDataEffects = steps.map(s =>
+      call([s, s.reset])
+    );
+    yield all(clearDataEffects);
+    // run order
+    yield put(orderActions.tryWorkOn(order));
+  } catch (e) {
+    yield put(notifierActions.enqueueSnackbar('Error', `工单重新作业失败：${e.message}`, {
+      e,
+      at: 'redoOrder'
+    }));
+  }
 }
