@@ -28,7 +28,9 @@ const customStyles = theme => ({
     }
   },
   numericKeyboardButton: {
-    flex: 1
+    flex: 1,
+    height:'60px !important',
+    fontSize:'1.5rem'
   }
 });
 
