@@ -8,6 +8,7 @@ import Paper from '@material-ui/core/Paper';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { Typography } from '@material-ui/core';
 import {
   clearStories,
   close,
@@ -19,7 +20,6 @@ import {
 } from '../../modules/manual/action';
 import withKeyboard from '../Keyboard';
 import styles from './style';
-
 
 const mapStateToProps = (state, ownProps) => ({
   logo: state.logo,
@@ -59,6 +59,32 @@ type Result = {
   sucess: boolean
 };
 
+function InputLabel({ labelText, classes }) {
+  return <Grid item xs={4}>
+    <Paper
+      className={classes.inputLabel}
+      component="div"
+      elevation={0}
+    >
+      <Typography variant="h5">
+        {labelText}
+      </Typography>
+    </Paper>
+  </Grid>;
+}
+
+function InputItem({ classes, onClick, disabled, content }) {
+  return <Grid item xs={8}>
+    <Paper
+      className={classes.inputContainer}
+      component="button"
+      onClick={onClick}
+      disabled={disabled || false}
+    >
+      {content}
+    </Paper>
+  </Grid>;
+}
 
 class ConnectedWorking extends React.Component {
 
@@ -67,6 +93,11 @@ class ConnectedWorking extends React.Component {
   v1: State;
 
   r: Result;
+
+  inputTitles = {
+    niu: '请输入扭矩值(N·m)：',
+    jao: '请输入角度值(°)：'
+  };
 
   constructor(props) {
     super(props);
@@ -98,148 +129,72 @@ class ConnectedWorking extends React.Component {
     this.props.resultInput(this.r);
   }
 
-  openManualDiag = (e, butt) => {
+  openManualDiag = (e, inputKey) => {
     e.preventDefault();
     const { keyboardInput } = this.props;
-    if (butt === 1) {
-      keyboardInput({
-        onSubmit:
-          text => {
-            this.v1.niu = text;
-          },
-        text: e.target.value,
-        title: '请输入扭矩值：',
-        label: '请精确到小数点后三位'
-      });
-    } else {
-      keyboardInput({
-        onSubmit:
-          text => {
-            this.v1.jao = text;
-          },
-        text: e.target.value,
-        title: '请输入角度值：',
-        label: '请精确到小数点后三位'
-      });
-
-    }
+    keyboardInput({
+      onSubmit:
+        text => {
+          this.v1[inputKey] = text;
+        },
+      text: e.target.value,
+      title: this.inputTitles[inputKey],
+      label: '请精确到小数点后三位'
+    });
   };
 
 
   render() {
-    const {
-      classes
-    } = this.props;
+    const { classes } = this.props;
 
 
     return (
       <I18n ns="translations">
         {t => (
-          <Grid container spacing={0} className={classes.root} justify="center">
-            <Grid item xs={3} container style={{ height: '30%' }}>
-              <Paper
-                className={classes.LeftTopTab}
-                component="button"
-                onClick={e => this.openManualDiag(e, 1)}
-                disabled
-              >
-                <div className={classes.LeftTabContiner}>
-                  <h4 className={classes.LeftTopDes}>
-                    <p className={classes.MarginTopBottom5}>
-                      扭矩值:
-                    </p>
-                  </h4>
-                </div>
-              </Paper>
-            </Grid>
+          <Grid container spacing={0} className={classes.root}>
+            <InputLabel labelText="扭矩值(N·m)：" classes={classes}/>
+            <InputItem
+              onClick={e => this.openManualDiag(e, 'niu')}
+              classes={classes}
+              content={<Typography variant="h4">
+                {this.v1.niu}
+              </Typography>}
+            />
 
-            <Grid item xs={9} container style={{ height: '30%' }}>
-              <Paper
-                className={classes.LeftTopTab}
-                component="button"
-                onClick={e => this.openManualDiag(e, 1)}
-                disabled={false}
-              >
-                <div className={classes.LeftTabContiner}>
-                  <p className={classes.cardDescription}>
-                    {this.v1.niu}
-                  </p>
-                </div>
-              </Paper>
-            </Grid>
+            <InputLabel labelText="角度值(°)：" classes={classes}/>
 
+            <InputItem
+              onClick={e => this.openManualDiag(e, 'jao')}
+              classes={classes}
+              content={<Typography variant="h4">
+                {this.v1.jao}
+              </Typography>}
+            />
 
-            <Grid item xs={3} container style={{ height: '30%' }}>
-              <Paper
-                className={classes.LeftTopTab}
-                component="button"
-                onClick={e => this.openManualDiag(e, 2)}
-                disabled
-              >
-                <div className={classes.LeftTabContiner}>
-                  <h4 className={classes.LeftTopDes}>
-                    <p className={classes.MarginTopBottom5}>
-                      角度值：
-                    </p>
-                  </h4>
-                </div>
-              </Paper>
-            </Grid>
+            <InputLabel labelText="OK/NOK：" classes={classes}/>
 
-            <Grid item xs={9} container style={{ height: '30%' }}>
-              <Paper
-                className={classes.LeftTopTab}
-                component="button"
-                onClick={e => this.openManualDiag(e, 2)}
-                disabled={false}
-              >
-                <div className={classes.LeftTabContiner}>
-                  <p className={classes.cardDescription}>
-                    {this.v1.jao}
-                  </p>
-                </div>
-              </Paper>
-            </Grid>
-
-
-            <Grid item xs={3} container style={{ height: '30%' }}>
-              <Paper
-                className={classes.LeftTopTab}
-                component="button"
-                onClick={e => this.openManualDiag(e, 2)}
-                disabled
-              >
-                <div className={classes.LeftTabContiner}>
-                  <h4 className={classes.LeftTopDes}>
-                    <p className={classes.MarginTopBottom5}>
-                      OK/NOk：
-                    </p>
-                  </h4>
-
-                </div>
-              </Paper>
-            </Grid>
-
-            <Grid item xs={9} style={{ height: '30%' }}>
-              <Paper
-                className={classes.LeftTopTab}
-                component="button"
-                onClick={e => this.openManualDiag(e, 2)}
-                disabled
-              >
-                <div className={classes.LeftTabContiner}>
-
-                  <RadioGroup aria-label="gender" name="gender1" className={classes.cardDescription}
-                              onChange={event => {
-                                this.v1.ok = event.target.value;
-                              }}>
-                    <FormControlLabel value="ok" control={<Radio/>} label="OK" className={classes.cardDescription}/>
-                    <FormControlLabel value="nok" control={<Radio/>} label="NOK"/>
-                  </RadioGroup>
-                </div>
-              </Paper>
-            </Grid>
-
+            <InputItem
+              disabled
+              classes={classes}
+              content={
+                <RadioGroup
+                  className={classes.radioGroup}
+                  onChange={event => {
+                    this.v1.ok = event.target.value;
+                  }}>
+                  <FormControlLabel
+                    value="ok"
+                    control={<Radio/>}
+                    label={<Typography variant="h4">OK</Typography>}
+                  />
+                  <FormControlLabel
+                    value="nok"
+                    control={<Radio/>}
+                    label={<Typography variant="h4">NOK</Typography>}
+                  />
+                </RadioGroup>
+              }
+            />
           </Grid>
         )}
       </I18n>
