@@ -190,7 +190,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       label: 'Common.Close',
       color: 'warning'
     }],
-    content: <iframe src="https://www.baidu.com" style={{ width: '80vw', height: '75vh' }}/>
+    content: <iframe src="http://172.26.214.80:8091/a/login" style={{ width: '80vw', height: '75vh' }}/>
   };
 
   return withI18n(
@@ -285,7 +285,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
             disabled={!viewingOrder}
             onClick={() => showDialog(envDialog)}
           >
-            {'查看环境'}
+            {'生产指导'}
           </Button>
           <Button
             color="primary"
