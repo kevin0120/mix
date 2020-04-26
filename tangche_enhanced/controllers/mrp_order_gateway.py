@@ -2,6 +2,7 @@
 from odoo import api, SUPERUSER_ID, fields
 from odoo.http import request, Response, Controller, route
 from odoo.exceptions import ValidationError
+from odoo.addons.web.controllers.main import binary_content
 from odoo.addons.common_sa_utils.http import sa_success_resp, sa_fail_response
 import os
 from odoo.addons.spc.models.push_workorder import MASTER_WROKORDERS_API
@@ -119,6 +120,30 @@ def package_tightening_points(tightening_points):
 #     if not product_id:
 #         raise ValidationError("Can Not Get Finished Product By Code:{0}".format(code))
 
+from lxml.html.soupparser import fromstring
+from xml.etree import ElementTree
+
+def replace_text_img(val):
+    text = val.get('desc')
+    if not text:
+        return
+    tree = fromstring(text)
+    ts = tree.xpath('//img')
+    for t in ts:
+        src = t.get('src')
+        if not src or src == 'undefined':
+            continue
+        src_content = src.split('/')
+        xml_id = src_content[-2]
+        fn = src_content[-1]
+        status, headers, content = binary_content(id=int(xml_id), filename=fn, default_mimetype='image/png')
+        if not content:
+            continue
+        t.set('src', u'data:{0};base64,{1}'.format('image/png', content))
+    tt = ElementTree.tostring(tree, encoding='utf-8')
+    val.update({'desc': tt})
+
+
 def pack_step_payload(env, consum_lines):
     payloads = []
 
@@ -126,7 +151,9 @@ def pack_step_payload(env, consum_lines):
     type_promiscuous_tightening_id = env.ref('tangche_enhanced.test_type_tightening_promiscuous').id
 
     type_tightening_point_id = env.ref('quality.test_type_tightening_point').id
-    for idx, step in enumerate(consum_lines.mapped('step_id').filtered(lambda t: t and t.test_type_id.id != type_tightening_point_id)):
+    type_text_id = env.ref('quality.test_type_text').id
+    for idx, step in enumerate(
+            consum_lines.mapped('step_id').filtered(lambda t: t and t.test_type_id.id != type_tightening_point_id)):
         ts = {
             "code": step.name,
             "desc": step.note or '',
@@ -141,6 +168,8 @@ def pack_step_payload(env, consum_lines):
             "tolerance_max": step.tolerance_max,
             "target": step.norm,
         }
+        # if step.test_type_id.id == type_text_id:
+        #     replace_text_img(ts)
         ts.update({'tightening_image_by_step_code': step.name or step.ref})
         if step.test_type_id.id == type_tightening_id or step.test_type_id.id == type_promiscuous_tightening_id:
             val = package_tightening_points(step.operation_point_ids)
