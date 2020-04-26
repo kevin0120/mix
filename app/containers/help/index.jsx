@@ -13,7 +13,7 @@ const fakeHelp = [
   {
     key: 'Version',
     displayTitle: '版本',
-    value: 'v2.0.0-rc9'
+    value: '2.0.0-rc10'
   },
   {
     key: 'ReleaseDate',
