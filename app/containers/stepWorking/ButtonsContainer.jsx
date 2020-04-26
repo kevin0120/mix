@@ -46,7 +46,7 @@ const mapState = (state, props) => {
     reportFinishEnabled: state.setting.systemSettings.reportFinish,
     blockReasons: state.order.blockReasons || [],
     canRedoOrders: state.setting?.systemSettings?.canRedoOrders &&
-      !wOrder && (vOrder?.status === ORDER_STATUS.DONE || vOrder?.status === ORDER_STATUS.FAIL)
+      !wOrder && (vOrder?.status === ORDER_STATUS.DONE || vOrder?.status === ORDER_STATUS.FAIL || vOrder?.status===ORDER_STATUS.CANCEL)
   };
 };
 
