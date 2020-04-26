@@ -1,4 +1,4 @@
-import { all, call, put, race, take } from 'redux-saga/effects';
+import { all, call, fork, put, race, take } from 'redux-saga/effects';
 import { STEP_STATUS } from '../constants';
 import { orderActions } from '../../order/action';
 import { ioDirection, ioTriggerMode } from '../../device/io/constants';
@@ -9,8 +9,6 @@ import { getDevice } from '../../deviceManager/devices';
 import ClsIOModule from '../../device/io/ClsIOModule';
 import { stepDataApi } from '../../../api/order';
 import notifierActions from '../../Notifier/action';
-import type { IIOModule } from '../../device/io/interface/IIOModule';
-import type { tIOPort } from '../../device/io/type';
 
 function* enteringState(config) {
   try {
@@ -34,17 +32,18 @@ function* enteringState(config) {
     checkIOModule(ioIn, inputSN);
     checkIOModule(ioOut, outputSN);
 
+
     const input = ioIn.getPort(ioDirection.input, location.io_input);
     const output = ioOut.getPort(ioDirection.output, location.io_output);
     this._io.add(ioIn);
     this._io.add(ioOut);
     this._ports.add(input);
     this._items.add({
-      in:{
+      in: {
         io: ioIn,
         port: input
       },
-      out:{
+      out: {
         io: ioOut,
         port: output
       }
@@ -69,23 +68,35 @@ function* enteringState(config) {
         };
       }
     }
-
     yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
   } catch (e) {
-    CommonLog.lError(e);
     yield put(
       notifierActions.enqueueSnackbar(
-        'Error',
+        'Warn',
         `${this.failureMsg}(${e.message})`
       )
     );
-    yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { msg: e.message }));
+    yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
+    // yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { msg: e.message }));
   }
 }
 
 function checkIOModule(ioInstance, sn) {
   if (!(ioInstance instanceof ClsIOModule)) {
     throw new Error(`io module (${sn}) not found`);
+  }
+}
+
+function* doIOInstruction() {
+  try {
+    yield all([...this._items].map(item => {
+      if (item?.out?.io?.openIO && item?.out?.port) {
+        return call(item.out?.io?.openIO, item.out.port);
+      }
+      return null;
+    }).filter(calls => !!calls));
+  } catch (e) {
+    yield put(notifierActions.enqueueSnackbar('Warn', e.message));
   }
 }
 
@@ -102,16 +113,8 @@ function* doingState() {
         io: i.in.io
       });
     });
-    yield all(
-      [...this._items]
-        .map(item => {
-          if (item?.out?.io?.openIO && item?.out?.port) {
-            return call(item.out?.io?.openIO, item.out.port);
-          }
-          return null;
-        })
-        .filter(calls => !!calls)
-    );
+
+    yield fork([this, doIOInstruction]);
 
     let readyListener = null;
     // const confirmPort = io.getPort(ioDirection.input, confirmIdx(sPayload));
@@ -124,14 +127,19 @@ function* doingState() {
       );
     }
 
-    yield race([
-      take(MATERIAL_STEP.READY),
-      all(
-        [...this._items].map(i =>
-          take(a => a.type === MATERIAL_STEP.ITEM && a.item === i)
+    if (this._items.size > 0) {
+      yield race([
+        take(MATERIAL_STEP.READY),
+        all(
+          [...this._items].map(i =>
+            take(a => a.type === MATERIAL_STEP.ITEM && a.item === i)
+          )
         )
-      )
-    ]);
+      ]);
+    } else {
+      yield take(MATERIAL_STEP.READY);
+    }
+
 
     if (readyListener) {
       this._confirm.io.removeListener(readyListener);

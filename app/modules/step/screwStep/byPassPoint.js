@@ -28,7 +28,7 @@ export function* byPassPoint(controls, retry = false, disableByPass = false) {
               color: 'info',
               action: screwStepActions.bypassRetry()
             }, {
-              label: 'Common.Manual',
+              label: 'Common.ManualInput',
               color: 'info',
               // action: reworkActions.tryRework(null, null, finalFailPoints[0])
               action: { type: SCREW_STEP.MANUAL }

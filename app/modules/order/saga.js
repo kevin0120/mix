@@ -117,25 +117,23 @@ function onNewScanner({ scanner }) {
 function* reportFinish({ order }) {
   try {
     const code = (order: IWorkable)._code;
-    const { trackCode } = order;
     const workCenterCode = yield select(s => s.systemInfo.workcenter);
-    const { productCode } = order;
     const dateComplete = new Date();
-    const { operation } = order.payload || {};
     const resp = yield call(
       orderReportFinishApi,
       code,
-      trackCode,
-      productCode,
       workCenterCode,
-      dateComplete,
-      operation
+      dateComplete
     );
     if (resp) {
-      // TODO:  on resp
+      yield put(notifierActions.enqueueSnackbar('Info', '完工请求完成', {
+        resp
+      }));
     }
   } catch (e) {
-    CommonLog.lError(e, { at: 'reportFinish' });
+    yield put(notifierActions.enqueueSnackbar('Error', e.message, {
+      at: 'reportFinish'
+    }));
   }
 }
 
@@ -207,22 +205,23 @@ function hasAnotherWorkingOrder(orderState, order: IOrder) {
 
 function* orderStartSimulate(code: 工单号) {
   try {
-    const users = []; // todo get users
+    const { users } = yield select();
+    const uuids = users.map(u => u.uuid || ''); // todo get users
     const workCenterCode = yield select(s => s.systemInfo.workcenter);
     const { errorMessage } = yield call(
       apiOrderStartSimulate,
       code,
-      users,
+      uuids,
       workCenterCode
     );
     if (errorMessage) {
       throw new Error(errorMessage);
     }
   } catch (e) {
-    const { restrictOrderSimulate } = yield select(
+    const { strictOrderSimulate } = yield select(
       s => s.setting.systemSettings
     );
-    if (restrictOrderSimulate) {
+    if (strictOrderSimulate) {
       throw new Error(`产前模拟失败，无法开始作业：${e.message}`);
     }
     yield put(
@@ -243,10 +242,21 @@ function* workOnOrder({
       const startTime = new Date();
       const orderCode = order.code;
       const workCenterCode = yield select(s => s.systemInfo.workcenter);
-      yield call(orderResumeApi, startTime, orderCode, workCenterCode);
+      try {
+        yield call(orderResumeApi, startTime, orderCode, workCenterCode);
+      } catch (e) {
+        const { strictResume } = yield select(s => s.setting.systemSettings);
+        if (strictResume) {
+          throw e;
+        }
+      }
+    }
+    let startStatus = ORDER_STATUS.WIP;
+    if (!order.status || order.status === ORDER_STATUS.TODO) {
+      startStatus = ORDER_STATUS.TODO;
     }
     yield race([
-      call(order.run, ORDER_STATUS.WIP, config),
+      call(order.run, startStatus, config),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
     yield put(orderActions.orderDidFinish());
@@ -383,7 +393,7 @@ function* viewOrder({ order }: { order: IOrder }) {
           }
         ],
         title: i18n.t('Order.Overview'),
-        content: <OrderInfoTable steps={vOrderSteps} />
+        content: <OrderInfoTable steps={vOrderSteps}/>
       })
     );
   } catch (e) {

@@ -4,6 +4,9 @@ export default {
     paddingLeft: '15px',
     marginRight: 'auto',
     marginLeft: 'auto',
+    '@media (max-width: 768px)': {
+      width: '100%'
+    },
     '@media (min-width: 768px)': {
       width: '750px'
     },
@@ -12,6 +15,9 @@ export default {
     },
     '@media (min-width: 1200px)': {
       width: '1170px'
+    },
+    '@media (min-width: 1600px)': {
+      width: '1370px'
     },
     '&:before,&:after': {
       display: 'table',

@@ -6,6 +6,7 @@ export const stepWorkingNS = 'stepWorking';
 export const translation = {
   skip: 'skip',
   undo: 'undo',
+  startViewing: 'startViewing',
   submit: 'submit',
   viewModel: 'viewModel',
   viewFile: 'viewFile',
@@ -25,6 +26,7 @@ const trans = [
   makeLocalBundle(lng.zh_CN, 'stepWorking', {
     skip: '跳过',
     undo: '取消上次动作',
+    startViewing: '开始工步',
     submit: '提交',
     finish: '完成',
     viewModel: '查看模型',
@@ -52,6 +54,7 @@ const trans = [
   makeLocalBundle(lng.en, 'stepWorking', {
     skip: 'skip',
     undo: 'undo',
+    startViewing: 'Start Viewing',
     submit: 'submit',
     finish: 'finish',
     viewModel: 'view model',

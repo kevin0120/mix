@@ -56,46 +56,33 @@ export function orderStepUpdateApi(code: string, status: string): anyPromise {
   });
 }
 
-type 开工人员 = Array<{ name: string, code: string }>;
-type 开工设备 = Array<{ name: string, code: string }>;
-
 // 开工
 export function orderReportStartApi(
   code: 工单号,
-  trackCode: string,
-  workCenter: string,
-  productCode: string,
-  dateStart: Date,
-  resources: { user: 开工人员, equipments: 开工设备 }
-): Promise<any> {
-  const dateStartString = Moment(dateStart).format();
+  workCenterCode: 工位号,
+  startTime: Date
+): anyPromise {
+  const dateStartString = Moment(startTime).format();
   return rushSendApi(ORDER_WS_TYPES.START_REQUEST, {
     code,
-    track_code: trackCode,
-    workcenter: workCenter,
-    product_code: productCode,
-    date_start: dateStartString,
-    resources
+    start_time: dateStartString,
+    workcenter_code: workCenterCode
   });
 }
 
 // 完工
 export function orderReportFinishApi(
   code: 工单号,
-  trackCode: string,
-  productCode: string,
-  workCenter: string,
-  dateComplete: Date,
-  operation: {}
-) {
-  const dateCompleteString = Moment(dateComplete).format();
+  workCenterCode: 工位号,
+  endTime: Date
+): anyPromise {
+  const dateCompleteString = Moment(endTime).format();
   return rushSendApi(ORDER_WS_TYPES.FINISH_REQUEST, {
-    code,
-    track_code: trackCode,
-    workcenter: workCenter,
-    product_code: productCode,
-    date_complete: dateCompleteString,
-    operation
+    except_type: 'finish',
+    except_code: 'finish',
+    end_time: dateCompleteString,
+    order_name: code,
+    workcenter_code: workCenterCode
   });
 }
 
@@ -131,9 +118,9 @@ export function orderDetailByCodeApi(
 export function orderPendingApi(
   exceptType,
   exceptCode,
-  endTime,
-  orderCode,
-  workCenterCode
+  endTime: Date,
+  orderCode: 工单号,
+  workCenterCode: 工位号
 ) {
   return rushSendApi(ORDER_WS_TYPES.ORDER_PENDING, {
     except_type: exceptType,
@@ -184,17 +171,17 @@ export function apiOrderStartSimulate(
     workcenter_code: workCenter
   })
     .then(resp => {
-      const { Message, Result, Status } = resp;
-      if (Message) {
-        throw new Error(Message);
-      }
-      if (Status === 'E') {
-        throw new Error('产前模拟失败');
-      }
+      // const { Message, Result, Status } = resp;
+      // if (Message) {
+      //   throw new Error(Message);
+      // }
+      // if (Status === 'E') {
+      //   throw new Error('产前模拟失败');
+      // }
       // eslint-disable-next-line promise/always-return
-      if (Result === 'N') {
-        throw new Error('产前模拟失败');
-      }
+      // if (Result === 'N') {
+      //   throw new Error('产前模拟失败');
+      // }
       return { success: '产前模拟成功' };
     })
     .catch(err => ({ errorMessage: err.message }));

@@ -22,12 +22,16 @@ import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 import PDFViewer from '../../components/PDFViewer';
 import { CommonLog, defaultClient } from '../../common/utils';
 import { BlockReasonDialog } from '../../components/BlockReasonDialog';
+import STEP_STATUS from '../../modules/step/constants';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
+  const wOrder = oSel.workingOrder(state.order);
   return {
     ...props,
     viewingOrder: vOrder,
+    workingOrder: wOrder,
+    canDoAnotherStep: state.setting.systemSettings.canDoAnotherStep || false,
     viewingStep: oSel.viewingStep(state.order) || {},
     workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {},
     steps: oSel.orderSteps(vOrder) || [],
@@ -47,6 +51,7 @@ const mapDispatch = {
   finishStep: orderActions.finishStep,
   previous: orderActions.previousStep,
   doPreviousStep: orderActions.doPreviousStep,
+  doAnotherStep: orderActions.doAnotherStep,
   cancelOrder: orderActions.cancelOrder,
   pendingOrder: orderActions.pendingOrder,
   tryWorkOn: orderActions.tryWorkOn,
@@ -58,6 +63,7 @@ const mapDispatch = {
 /* eslint-disable flowtype/no-weak-types */
 type ButtonsContainerProps = {
   viewingOrder: IOrder,
+  workingOrder: IOrder,
   viewingIndex: number,
   viewingStep: IWorkStep,
   workingStep: IWorkStep,
@@ -67,6 +73,7 @@ type ButtonsContainerProps = {
   previous: () => any,
   finishStep: IWorkStep => any,
   doPreviousStep: () => any,
+  doAnotherStep: () => any,
   cancelOrder: (order: IOrder) => tActUpdateState,
   pendingOrder: (order: IOrder) => tActUpdateState,
   isPending: boolean,
@@ -80,28 +87,32 @@ type ButtonsContainerProps = {
 /* eslint-enable flowtype/no-weak-types */
 
 const ButtonsContainer: ButtonsContainerProps => Node = ({
-                                                           viewingOrder,
-                                                           viewingStep,
-                                                           workingStep,
-                                                           next,
-                                                           steps,
-                                                           viewingIndex,
-                                                           action,
-                                                           previous,
-                                                           finishStep,
-                                                           doPreviousStep,
-                                                           cancelOrder,
-                                                           pendingOrder,
-                                                           isPending,
-                                                           pendingable,
-                                                           cancelable,
-                                                           tryWorkOn,
-                                                           viewModel,
-                                                           showDialog,
-                                                           reportFinish,
-                                                           canReportFinish,
-                                                           reportFinishEnabled
-                                                         }: ButtonsContainerProps) => {
+  viewingOrder,
+  workingOrder,
+  canDoAnotherStep,
+  viewingStep,
+  workingStep,
+  next,
+  steps,
+  viewingIndex,
+  action,
+  previous,
+  finishStep,
+  doPreviousStep,
+  doAnotherStep,
+  cancelOrder,
+  pendingOrder,
+  isPending,
+  pendingable,
+  cancelable,
+  tryWorkOn,
+  viewModel,
+  showDialog,
+  reportFinish,
+  canReportFinish,
+  reportFinishEnabled,
+  blockReasons
+}: ButtonsContainerProps) => {
   const classes = makeStyles(styles.buttonsContainer)();
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
   const noNext = steps.length <= 0 || viewingIndex >= steps.length - 1;
@@ -134,11 +145,16 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
 
   const url = viewingOrder?.payload?.worksheet?.url;
   useEffect(() => {
+    if (!url) {
+      return;
+    }
     defaultClient
-      .get()
+      .get(url)
       .then(resp => {
-        setPdfUrl(resp.request._redirectable._currentUrl);
-      });
+        setPdfUrl(resp?.request?._redirectable?._currentUrl || '');
+      }).catch((err)=>{
+        CommonLog.lError(err);
+    });
   }, [url]);
 
   const modelsTableDialog = {
@@ -169,7 +185,16 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       color: 'warning'
     }],
     title: tNS(trans.viewFile, stepWorkingNS),
-    content: <PDFViewer file={url}/>
+    content: <PDFViewer file={pdfUrl || url}/>
+  };
+
+  const envDialog = {
+    maxWidth: 'xl',
+    buttons: [{
+      label: 'Common.Close',
+      color: 'warning'
+    }],
+    content: <iframe src="http://172.26.214.80:8091/a/login" style={{ width: '80vw', height: '75vh' }}/>
   };
 
   return withI18n(
@@ -204,20 +229,23 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                       </Button>
                     ) : (
                       (pendingable && (
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            pendingOrder(viewingOrder);
+                        <BlockReasonDialog
+                          blockReasons={blockReasons}
+                          AnchorButton={({ onClick }) => <Button
+                            type="button"
+                            onClick={onClick}
+                            variant="contained"
+                            color="warning"
+                            className={classes.bigButton}
+                          >
+                            {t(trans.pending)}
+                          </Button>}
+                          onConfirm={(reason) => {
+                            pendingOrder(viewingOrder, reason);
                             setDialogOpen(false);
                           }}
-                          variant="contained"
-                          color="warning"
-                          className={classes.bigButton}
-                        >
-                          {t(trans.pending)}
-                        </Button>
-                      )) ||
-                      null
+                        />
+                      )) || null
                     )}
                     {cancelable ? (
                       <Button
@@ -260,6 +288,14 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           </Button>
           <Button
             color="primary"
+            type="button"
+            disabled={!viewingOrder}
+            onClick={() => showDialog(envDialog)}
+          >
+            {'生产指导'}
+          </Button>
+          <Button
+            color="primary"
             disabled={noPrevious}
             type="button"
             onClick={() => previous()}
@@ -290,6 +326,15 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           >
             {t(trans.undo)}
           </Button>
+          {canDoAnotherStep && viewingOrder === workingOrder ? <Button
+            type="button"
+            color="info"
+            disabled={viewingStep === workingStep || viewingStep.status === STEP_STATUS.FINISHED}
+            onClick={() => {
+              doAnotherStep(viewingStep);
+            }}>
+            {t(trans.startViewing)}
+          </Button> : null}
         </div>
         <div>{action}</div>
       </div>

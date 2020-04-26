@@ -8,7 +8,7 @@ import stepTypes from '../step/stepTypes';
 import type { tAnyStatus, tRunSubStepCallbacks, tStep, tStepType } from '../step/interface/typeDef';
 import type { IWorkable } from './IWorkable';
 import type { tWorkableData } from './typeDef';
-import { workableDidFinish, WORKABLE } from './actions';
+import { WORKABLE, workableDidFinish } from './actions';
 
 export default class Workable implements IWorkable {
   _statusTasks = {};
@@ -83,24 +83,24 @@ export default class Workable implements IWorkable {
     this._status = status || this._status;
     this._steps = steps
       ? ((steps: any): Array<tStep>).sort((s1, s2) => s1.sequence - s2.sequence)
-      .map < IWorkable > ((sD: tStep) => {
-      const existStep = this._steps.find(s => s.code === sD.code);
-      if (existStep) {
-        existStep.update(((sD: any): tWorkableData));
-        return existStep;
-      }
-      const stepType: ?tStepType = (sD: tStep).test_type;
-      if (
-        !stepType ||
-        !stepTypes[stepType] ||
-        typeof stepTypes[stepType] !== 'function'
-      ) {
-        return new Workable(((sD: any): tWorkableData));
-      }
-      return new (stepTypes[stepType](Workable))(
-        ((sD: any): tWorkableData)
-      );
-    }) || []
+      .map <IWorkable>((sD: tStep) => {
+        const existStep = this._steps.find(s => s.code === sD.code);
+        if (existStep) {
+          existStep.update(((sD: any): tWorkableData));
+          return existStep;
+        }
+        const stepType: ?tStepType = (sD: tStep).test_type;
+        if (
+          !stepType ||
+          !stepTypes[stepType] ||
+          typeof stepTypes[stepType] !== 'function'
+        ) {
+          return new Workable(((sD: any): tWorkableData));
+        }
+        return new (stepTypes[stepType](Workable))(
+          ((sD: any): tWorkableData)
+        );
+      }) || []
       : this._steps;
     if (data) {
       this._data = (() => {
@@ -272,7 +272,7 @@ export default class Workable implements IWorkable {
       }
 
       const finishTask = yield fork(subStepDidFinish);
-      const { exit, next, previous } = yield race({
+      const { exit, next, previous, another } = yield race({
         exit: call([step, step.run], status, {
           ...config,
           parent: this
@@ -280,7 +280,8 @@ export default class Workable implements IWorkable {
         next: take(
           action => action.type === ORDER.STEP.FINISH && action.step === step
         ),
-        previous: take(ORDER.STEP.DO_PREVIOUS)
+        previous: take(ORDER.STEP.DO_PREVIOUS),
+        another: take(ORDER.STEP.DO_ANOTHER)
       });
       yield join(finishTask);
       CommonLog.Info('workable run exited');
@@ -292,6 +293,9 @@ export default class Workable implements IWorkable {
       }
       if (previous && callbacks && callbacks.onPrevious) {
         return yield call(callbacks.onPrevious);
+      }
+      if (another && callbacks && callbacks.onAnother) {
+        return yield call(callbacks.onAnother, another);
       }
     } catch (e) {
       CommonLog.lError(e, {
