@@ -238,11 +238,11 @@
     "Retry": "重试"
   },
   "blockReasons": {
-    "materialAvailability": "材料可用性",
-    "equipmentFailure": "设备故障",
-    "setupAndAdjustments": "设置和调整",
-    "reducedSpeed": "减速",
-    "reducedYield": "减产",
-    "fullyProductiveTime": "充分生产时间"
+    "Material Availability": "材料可用性",
+    "Equipment Failure": "设备故障",
+    "Setup and Adjustments": "设置和调整",
+    "Reduced Speed": "减速",
+    "Reduced Yield": "减产",
+    "Fully Productive Time": "充分生产时间",
   }
 }

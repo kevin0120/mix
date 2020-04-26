@@ -236,11 +236,11 @@
     "Retry": "Retry"
   },
   "blockReasons": {
-    "materialAvailability": "Material Availability",
-    "equipmentFailure": "Equipment Failure",
-    "setupAndAdjustments": "Setup and Adjustments",
-    "reducedSpeed": "Reduced Speed",
-    "reducedYield": "Reduced Yield",
-    "fullyProductiveTime": "Fully Productive Time"
+    "Material Availability": "Material Availability",
+    "Equipment Failure": "Equipment Failure",
+    "Setup and Adjustments": "Setup and Adjustments",
+    "Reduced Speed": "Reduced Speed",
+    "Reduced Yield": "Reduced Yield",
+    "Fully Productive Time": "Fully Productive Time"
   }
 }
