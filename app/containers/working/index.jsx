@@ -559,7 +559,7 @@ class ConnectedWorking extends React.Component {
               </Grid>
               <Grid item xs={12} style={{ height: '87%' }}>
                 <Paper className={classes.LeftBottomTab}>
-                  <img src={logo} alt="alt"/>
+                  <img alt="" src={logo}/>
                 </Paper>
               </Grid>
             </Grid>

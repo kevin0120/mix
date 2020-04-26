@@ -118,7 +118,7 @@ class ConnectedLockScreenPage extends React.Component {
               >
                 <CardAvatar profile className={classes.cardAvatar}>
                   <a href="#pablo" onClick={e => e.preventDefault()}>
-                    <img src={avatarImg} alt="..." />
+                    <img alt="" src={avatarImg} alt="..." />
                   </a>
                 </CardAvatar>
                 <CardBody profile>

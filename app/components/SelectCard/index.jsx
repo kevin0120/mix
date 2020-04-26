@@ -46,6 +46,7 @@ function SelectCard(props) {
         className={classes.image}
         src={image || settingImg}
         component="img"
+        alt=""
         style={{ overflow: 'hidden' }}
       />
       <CardContent className={classes.info}>

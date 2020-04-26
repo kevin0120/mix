@@ -88,6 +88,7 @@ class Image extends React.Component {
             this.imageRef = r;
           }}
           src={src}
+          alt=""
           className={classes.imgSheet}
           alt={alt}
           onLoad={() => {

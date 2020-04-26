@@ -72,7 +72,7 @@ function StepWorking({ status, code,clickPoint}: Props): Node {
             </Typography>
             <Typography variant="h5">{code || ''}</Typography>
           </div>
-          {logo ? <img alt="logo" src={logo} className={classes.logo} /> : null}
+          {logo ? <img alt="" src={logo} className={classes.logo} /> : null}
         </Paper>
         <div className={classes.main}>
           <Paper square classes={{ root: classes.leftContainer }}>

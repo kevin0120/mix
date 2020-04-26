@@ -72,6 +72,7 @@ export default function ScrewImage({ menu, twinkle, style = {}, image, points, s
     style={style}
   >
     <img
+      alt=""
       ref={imageRef}
       src={image || ''}
       className={classes.image}
