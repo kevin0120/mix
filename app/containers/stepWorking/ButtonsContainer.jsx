@@ -23,6 +23,7 @@ import PDFViewer from '../../components/PDFViewer';
 import { CommonLog, defaultClient } from '../../common/utils';
 import { BlockReasonDialog } from '../../components/BlockReasonDialog';
 import STEP_STATUS from '../../modules/step/constants';
+import { Typography } from '@material-ui/core';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -152,8 +153,8 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       .get(url)
       .then(resp => {
         setPdfUrl(resp?.request?._redirectable?._currentUrl || '');
-      }).catch((err)=>{
-        CommonLog.lError(err);
+      }).catch((err) => {
+      CommonLog.lError(err);
     });
   }, [url]);
 
@@ -225,7 +226,14 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                         color="primary"
                         className={classes.bigButton}
                       >
-                        {t(trans.continueDoing)}
+                        <Typography
+                          variant="h4"
+                          color="inherit"
+                          align="left"
+                          className={classes.orderInfoText}
+                        >
+                          {t(trans.continueDoing)}
+                        </Typography>
                       </Button>
                     ) : (
                       (pendingable && (
@@ -238,7 +246,14 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                             color="warning"
                             className={classes.bigButton}
                           >
-                            {t(trans.pending)}
+                            <Typography
+                              variant="h4"
+                              color="inherit"
+                              align="left"
+                              className={classes.orderInfoText}
+                            >
+                              {t(trans.pending)}
+                            </Typography>
                           </Button>}
                           onConfirm={(reason) => {
                             pendingOrder(viewingOrder, reason);
@@ -257,7 +272,14 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                           setDialogOpen(false);
                         }}
                       >
-                        {t(trans.cancel)}
+                        <Typography
+                          variant="h4"
+                          color="inherit"
+                          align="left"
+                          className={classes.orderInfoText}
+                        >
+                          {t(trans.cancel)}
+                        </Typography>
                       </Button>
                     ) : null}
                   </DialogContent>
