@@ -1,8 +1,8 @@
-import { take, put, fork, delay, cancel, call, takeEvery, select, race, takeLatest } from 'redux-saga/effects';
+import { call, delay, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import type { Saga } from 'redux-saga';
-import { MANUAL, close, getresult, selectTool, selectPset, setData, inputOk1 } from './action';
+import { close, getresult, inputOk1, MANUAL, selectPset, selectTool, setData } from './action';
 import { CommonLog } from '../../common/utils';
 import { tNS } from '../../i18n';
 import { reworkDialogConstants as dia, reworkNS } from '../reworkPattern/constants';
@@ -21,7 +21,6 @@ import type { tAction } from '../reworkPattern/interface/typeDef';
 import reworkActions from '../reworkPattern/action';
 import { DIALOG } from '../dialog/constants';
 import { OPERATION_RESULT } from '../../containers/working/operations';
-
 
 export default function* root() {
   try {
@@ -108,7 +107,7 @@ function* clearManual() {
 
 // 手动模式收到结果
 function* manualNewResult(action) {
-  try{
+  try {
     const [result] = action.result;
     if (!result) {
       return;
@@ -120,7 +119,7 @@ function* manualNewResult(action) {
     }
     const { scanner, pset, controllerSN } = toolWorking(toolSN);
     yield call(setToolPset, toolSN, controllerSN, pset, scanner);
-  }catch (e) {
+  } catch (e) {
     yield put(notifierActions.enqueueSnackbar('Error', e.message, {
       at: 'manualNewResult'
     }));
@@ -364,92 +363,96 @@ function* showPsetSelectDialog(tool, ControllerSN) {
 
 // 手动输入拧紧结果
 export function* manualResult(action: tAction = {}): Saga<void> {
-  console.log('请手动输入拧紧结果');
   const { point } = action;
   try {
-    if (point.isActive) {
-      const buttons = [
-        {
-          label: '取消',
-          color: 'info',
-          action: reworkActions.cancelRework()
-        },
-        {
-          label: '完成',
-          color: 'success',
-          action: inputOk1()
-        }
-      ];
-
-      yield put(
-        dialogActions.dialogShow({
-          buttons,
-          title: `请输入拧紧结果`,
-          content: (<ResultInput/>)
-        })
-      );
-
-      yield take(MANUAL.INPUT_OK);
-
-      yield delay(300);
-      const state = yield select();
-      const { manual } = state;
-      if (!manual.resultIn?.sucess) {
-        yield put(
-          notifierActions.enqueueSnackbar('Warn', '输入的拧紧结果不符合(扭矩值必填,ok值必填,或者数据类型)的约束', {
-            at: '输入结果'
-          })
-        );
-        return;
+    if (!point.isActive) {
+      yield put(notifierActions.enqueueSnackbar('Warn', '请选择正在作业中的点输入结果', {
+        at: 'manualResult'
+      }));
+      yield put(reworkActions.cancelRework());
+      return;
+    }
+    const buttons = [
+      {
+        label: '取消',
+        color: 'info',
+        action: reworkActions.cancelRework()
+      },
+      {
+        label: '完成',
+        color: 'success',
+        action: inputOk1()
       }
+    ];
 
+    yield put(
+      dialogActions.dialogShow({
+        buttons,
+        title: `请输入拧紧结果`,
+        content: (<ResultInput/>)
+      })
+    );
+
+    yield take(MANUAL.INPUT_OK);
+
+    yield delay(300);
+    const state = yield select();
+    const { manual } = state;
+    if (!manual.resultIn?.sucess) {
       yield put(
-        dialogActions.dialogShow({
-          buttons,
-          title: `请确认输入完成`
+        notifierActions.enqueueSnackbar('Warn', '输入的拧紧结果不符合(扭矩值必填,ok值必填,或者数据类型)的约束', {
+          at: '输入结果'
         })
       );
+      return;
+    }
 
-      yield take(MANUAL.INPUT_OK);
+    yield put(
+      dialogActions.dialogShow({
+        buttons,
+        title: `请确认输入完成`
+      })
+    );
 
-      if (manual.resultIn?.sucess) {
+    yield take(MANUAL.INPUT_OK);
 
-        // const r = {
-        //     tool_sn: point.tightening_tool,
-        //     seq: point.sequence,
-        //     group_seq: point.group_sequence,
-        //     measure_time: 0,
-        //     measure_torque: manual.resultIn?.result?.niu,
-        //     measure_angle: manual.resultIn?.result?.jao,
-        //     measure_result: manual.resultIn?.result?.ok,
-        //     batch: '1/24',
-        //     count: point.max_redo_times,
-        //     scanner:'',
-        //   }
+    if (manual.resultIn?.sucess) {
 
-        const tool = getDevice(point.tightening_tool);
-        if (tool) {
-          // yield call(tool.doDispatch, [r]);
-          const ControllerSN = ((tool.parent: any): IDevice)?.serialNumber;
-          if (!ControllerSN) {
-            throw new Error(`工具(${tool?.serialNumber})缺少控制器`);
-          }
-          console.log(ControllerSN);
+      // const r = {
+      //     tool_sn: point.tightening_tool,
+      //     seq: point.sequence,
+      //     group_seq: point.group_sequence,
+      //     measure_time: 0,
+      //     measure_torque: manual.resultIn?.result?.niu,
+      //     measure_angle: manual.resultIn?.result?.jao,
+      //     measure_result: manual.resultIn?.result?.ok,
+      //     batch: '1/24',
+      //     count: point.max_redo_times,
+      //     scanner:'',
+      //   }
 
-          yield call(
-            rushSendApi,
-            'WS_TOOL_RESULT_SET',
-            {
-              tool_sn: point.tightening_tool,
-              controller_sn: ControllerSN,
-              measure_result: manual.resultIn?.result?.ok.toUpperCase(),
-              measure_torque: parseFloat(manual.resultIn?.result?.niu),
-              measure_angle: parseFloat(manual.resultIn?.result?.jao),
-              count: point.max_redo_times + 1
-            }
-          );
-
+      const tool = getDevice(point.tightening_tool);
+      if (tool) {
+        // yield call(tool.doDispatch, [r]);
+        const ControllerSN = ((tool.parent: any): IDevice)?.serialNumber;
+        if (!ControllerSN) {
+          throw new Error(`工具(${tool?.serialNumber})缺少控制器`);
         }
+        console.log(ControllerSN);
+
+        yield call(
+          rushSendApi,
+          'WS_TOOL_RESULT_SET',
+          {
+            tool_sn: point.tightening_tool,
+            controller_sn: ControllerSN,
+            measure_result: manual.resultIn?.result?.ok.toUpperCase(),
+            measure_torque: parseFloat(manual.resultIn?.result?.niu),
+            measure_angle: parseFloat(manual.resultIn?.result?.jao),
+            count: point.max_redo_times + 1
+          }
+        );
+
       }
     }
 

@@ -78,7 +78,6 @@ function ScrewStep({ order, step, isCurrent, image, points, workCenterMode, noti
       selectedSequences={selectedSequences}
       onPointClick={(point: ClsOperationPoint) => {
         redoPointSpecPoint(order, step, point);
-        return true;
       }}
     />
     <Paper
