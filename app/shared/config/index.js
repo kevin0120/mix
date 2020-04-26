@@ -1,16 +1,10 @@
 import defaultConfigs from './defaultConfig';
-import { getAppDirectory } from '../../logger';
+import { getAppDirectory } from '../../utils/appDir';
 
 const path = require('path');
 const settings = require('electron-settings');
-const fse = require('fs-extra');
-const fs = require('fs');
 
 const dir = getAppDirectory();
-const isExist = fs.existsSync(dir);
-if (!isExist) {
-  fse.mkdirpSync(dir);
-}
 
 settings.setPath(path.join(dir, 'setting.json'));
 

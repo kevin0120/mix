@@ -1,8 +1,13 @@
-import React  from 'react';
+import React from 'react';
 import i18n from 'i18next';
 import Backend from 'i18next-xhr-backend';
 import LngDetector from 'i18next-browser-languagedetector';
 import { I18n, reactI18nextModule } from 'react-i18next';
+import { getAppDirectory } from './utils/appDir';
+
+const path = require('path');
+const dir = path.join(getAppDirectory(), '{{lng}}/{{ns}}.json');
+console.log(dir);
 
 export const lng = {
   'zh_CN': 'zh_CN',
@@ -47,8 +52,8 @@ export function tNS(str, ns) {
   return i18n.t(str, { ns: ns || 'translations' });
 }
 
-export function withI18n(tComp,ns, props){
+export function withI18n(tComp, ns, props) {
   return <I18n ns={ns} {...props}>
     {tComp}
-  </I18n>
+  </I18n>;
 }

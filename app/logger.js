@@ -1,36 +1,12 @@
 // @flow
 import type { QueryOptions } from 'winston';
 import { primaryColor, dangerColor, infoColor, warningColor, roseColor } from './common/theme/palette';
+import {getAppDirectory} from './utils/appDir';
 
 const winston = require('winston');
-const fs = require('fs');
-const fse = require('fs-extra');
 const path = require('path');
-const os = require('os');
-
-export const getAppDirectory = () => {
-  if (
-    process.env.NODE_ENV === 'development' ||
-    process.env.DEBUG_PROD === 'true' ||
-    process.env.NODE_ENV === 'test'
-  ) {
-    return path.join(os.homedir(), '.controlPanel_sa');
-  }
-  switch (process.platform) {
-    case 'darwin':
-      return process.execPath.substring(0, process.execPath.indexOf('.app') + 4);
-    case 'linux':
-    case 'win32':
-      return path.join(os.homedir(), '.controlPanel_sa');
-    default:
-      return path.join(os.homedir(), '.controlPanel_sa');
-  }
-};
 
 const homeDir = getAppDirectory();
-
-const dir = path.join(homeDir, 'logs');
-
 let gLogger = null;
 
 const cpFormate = config => {
@@ -39,10 +15,6 @@ const cpFormate = config => {
 };
 
 export function CreateDailyLogger() {
-  const isExist = fs.existsSync(dir);
-  if (!isExist) {
-    fse.mkdirpSync(dir);
-  }
   if (gLogger === null) {
     gLogger = new winston.Logger({
       level: 'info',

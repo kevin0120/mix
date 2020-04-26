@@ -22,17 +22,14 @@ import { workModes } from '../workCenterMode/constants';
 import { ioOutputGroups } from '../io/constants';
 import { orderActions } from './action';
 import io from '../io';
-import { getAppDirectory } from '../../logger';
+import { getAppDirectory } from '../../utils/appDir';
 
 const path = require('path');
 const fse = require('fs-extra');
 const fs = require('fs');
 
 const dir = getAppDirectory();
-const isExist = fs.existsSync(dir);
-if (!isExist) {
-  fse.mkdirpSync(dir);
-}
+
 const imageDir = path.join(dir, '/imgs/order.jpg');
 
 
