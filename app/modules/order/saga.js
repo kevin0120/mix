@@ -47,6 +47,8 @@ import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
 import { workModes } from '../workCenterMode/constants';
 import type { tWorkOnOrderConfig, 工单号 } from './interface/typeDef';
+import viewOperationInfo from '../viewOperationInfo';
+
 
 export default function* root(): Saga<void> {
   try {
@@ -379,6 +381,7 @@ function* viewOrder({ order }: { order: IOrder }) {
     const wOrder = oList.find(o => o.status === ORDER_STATUS.WIP);
     const showStartButton =
       !isRework && !WIPOrder && (!wOrder || wOrder === order) && doable(order);
+    const showViewTracing = !!([ORDER_STATUS.DONE, ORDER_STATUS.FAIL, ORDER_STATUS.CANCEL].find((s) => s === order?.status));
     yield put(
       dialogActions.dialogShow({
         maxWidth: 'md',
@@ -391,6 +394,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             label: 'Order.Start',
             color: 'info',
             action: orderActions.tryWorkOn(order)
+          },
+          showViewTracing && {
+            label: '生产追溯',
+            color: 'info',
+            action: viewOperationInfo.action.viewOperationTracing()
           }
         ],
         title: i18n.t('Order.Overview'),

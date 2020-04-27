@@ -1,9 +1,10 @@
 import { combineModels } from 'saga-modux';
 import io from './io';
+import viewOperationInfo from './viewOperationInfo';
 
 const models = [
-  io
-
+  io,
+  viewOperationInfo
 ];
 
 export const { reducer: rootReducer, saga: rootSaga } = combineModels(

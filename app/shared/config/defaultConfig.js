@@ -158,6 +158,10 @@ const defaultConfigs = {
       // rush: 'http://0da41704.ngrok.io:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
       rfid: 'tcp://127.0.0.1:2112',
       aiis: 'http://127.0.0.1:9092'
+    },
+    endpoints: {
+      operationResources: 'http://172.26.214.80:8091/a/login',
+      operationTracing: 'http://172.26.214.80:8091/a/login'
     }
   },
   // 作业配置

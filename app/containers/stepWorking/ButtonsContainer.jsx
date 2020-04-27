@@ -25,6 +25,7 @@ import { BlockReasonDialog } from '../../components/BlockReasonDialog';
 import STEP_STATUS from '../../modules/step/constants';
 import { Typography } from '@material-ui/core';
 import { ORDER_STATUS } from '../../modules/order/constants';
+import viewOperationInfo from '../../modules/viewOperationInfo';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -46,7 +47,7 @@ const mapState = (state, props) => {
     reportFinishEnabled: state.setting.systemSettings.reportFinish,
     blockReasons: state.order.blockReasons || [],
     canRedoOrders: state.setting?.systemSettings?.canRedoOrders &&
-      !wOrder && (vOrder?.status === ORDER_STATUS.DONE || vOrder?.status === ORDER_STATUS.FAIL || vOrder?.status===ORDER_STATUS.CANCEL)
+      !wOrder && (vOrder?.status === ORDER_STATUS.DONE || vOrder?.status === ORDER_STATUS.FAIL || vOrder?.status === ORDER_STATUS.CANCEL)
   };
 };
 
@@ -62,7 +63,8 @@ const mapDispatch = {
   showDialog: dialogActions.dialogShow,
   viewModel: modelViewerActions.open,
   reportFinish: orderActions.reportFinish,
-  redoOrder: orderActions.redoOrder
+  redoOrder: orderActions.redoOrder,
+  viewOperationResources: viewOperationInfo.action.viewOperationResources
 };
 
 /* eslint-disable flowtype/no-weak-types */
@@ -79,6 +81,7 @@ type ButtonsContainerProps = {
   finishStep: IWorkStep => any,
   doPreviousStep: () => any,
   doAnotherStep: () => any,
+  viewOperationResources: () => any,
   cancelOrder: (order: IOrder) => tActUpdateState,
   pendingOrder: (order: IOrder) => tActUpdateState,
   isPending: boolean,
@@ -120,7 +123,8 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   reportFinishEnabled,
   blockReasons,
   canRedoOrders, // 工单是否能重新作业
-  redoOrder
+  redoOrder,
+  viewOperationResources
 }: ButtonsContainerProps) => {
   const classes = makeStyles(styles.buttonsContainer)();
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
@@ -195,15 +199,6 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
     }],
     title: tNS(trans.viewFile, stepWorkingNS),
     content: <PDFViewer file={pdfUrl || url}/>
-  };
-
-  const envDialog = {
-    maxWidth: 'xl',
-    buttons: [{
-      label: 'Common.Close',
-      color: 'warning'
-    }],
-    content: <iframe src="http://172.26.214.80:8091/a/login" style={{ width: '80vw', height: '75vh' }}/>
   };
 
   return withI18n(
@@ -320,7 +315,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
             color="primary"
             type="button"
             disabled={!viewingOrder}
-            onClick={() => showDialog(envDialog)}
+            onClick={() => viewOperationResources()}
           >
             {'生产操作资源'}
           </Button>
