@@ -1,4 +1,4 @@
-const layout = (theme) => ({
+const layout = theme => ({
   root: {
     overflow: 'hidden',
     width: '100%',
@@ -8,7 +8,6 @@ const layout = (theme) => ({
     // backgroundImage: 'url("../resources/imgs/texture.png")',
     backgroundRepeat: 'repeat',
     backgroundColor: theme.palette.grey[100]
-
   },
   main: {
     overflow: 'hidden',
@@ -19,7 +18,6 @@ const layout = (theme) => ({
     // backgroundImage: 'url("../resources/imgs/texture.png")',
     backgroundRepeat: 'repeat',
     backgroundColor: theme.palette.grey[100]
-
   },
   rightContainer: {
     flex: 2,
@@ -28,7 +26,6 @@ const layout = (theme) => ({
     height: '100%',
     width: '30%'
     // padding:3,
-
   },
   leftContainer: {
     overflow: 'hidden',
@@ -230,12 +227,12 @@ const stepPageContainer = {
     maxWidth: '100%',
     height: 'fit-content',
     width: 'fit-content',
-    overflow: 'auto',
+    overflow: 'visible',
     padding: 4,
     wordBreak: 'break-word',
     '& p': {
       lineHeight: 'inherit !important',
-      fontSize:'inherit !important'
+      fontSize: 'inherit !important'
     }
   },
   descriptionPaper: {
@@ -261,4 +258,3 @@ export default {
   buttonsContainer,
   stepPageContainer
 };
-
