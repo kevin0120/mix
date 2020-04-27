@@ -155,7 +155,7 @@ const stepperContainer = theme => ({
 
 const buttonsContainer = {
   root: {
-    height: 70,
+    height: 'fit-content',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
