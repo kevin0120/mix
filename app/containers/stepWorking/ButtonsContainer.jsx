@@ -322,7 +322,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
             disabled={!viewingOrder}
             onClick={() => showDialog(envDialog)}
           >
-            {'生产指导'}
+            {'生产操作资源'}
           </Button>
           <Button
             color="primary"
