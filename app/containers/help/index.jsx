@@ -9,11 +9,13 @@ import { withStyles } from '@material-ui/core/styles';
 
 import styles from './styles';
 
+const pjson = require('../../../package.json');
+
 const fakeHelp = [
   {
     key: 'Version',
     displayTitle: '版本',
-    value: '2.0.0-rc11'
+    value: pjson.version
   },
   {
     key: 'ReleaseDate',
@@ -29,7 +31,7 @@ const fakeHelp = [
     key: 'Company',
     displayTitle: '公司',
     value: '上海途泰工具贸易有限公司'
-  },
+  }
   // {
   //   key: 'ContactPerson',
   //   displayTitle: '联系人',
@@ -68,7 +70,7 @@ class Help extends React.PureComponent {
             {h.displayTitle}: {h.value}
           </ListItem>
           <li>
-            <Divider />
+            <Divider/>
           </li>
         </div>
       );
@@ -77,7 +79,7 @@ class Help extends React.PureComponent {
     return (
       <div className={classes.root}>
         <main className={classes.content}>
-          <div className={classes.toolbar} />
+          <div className={classes.toolbar}/>
           <div className={classes.wrap}>
             <h2 className={classes.title}>帮助信息</h2>
             <Paper elevation={1}>
