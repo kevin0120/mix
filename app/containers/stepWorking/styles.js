@@ -23,14 +23,14 @@ const layout = theme => ({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    width:'20%',
+    width:'15%',
     // padding:3,
   },
   rightContainer: {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    width:'20%',
+    width:'15%',
     // padding:3,
   },
   centerContainer: {

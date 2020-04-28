@@ -40,7 +40,67 @@ const data = {
 
 
 // 订单人机料法环信息
-function OrderInfo({ payload }: Props) {
+function OrderInfoLeft({ payload }: Props) {
+  const classes = makeStyles(styles.OrderInfoStyles)();
+
+  const viewingRef = useRef(null);
+  const viewingNode = viewingRef?.current;
+  useEffect(() => {
+    if (viewingNode) {
+      // eslint-disable-next-line react/no-find-dom-node
+      const node: null | Element | Text = ReactDOM.findDOMNode(viewingNode);
+      if (node && node.scrollIntoView && typeof node.scrollIntoView === 'function') {
+        ((node: any): Element).scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+  }, [viewingNode]);
+  const {
+    STARTEMPLOYEE: startEmployee, // 人员
+    MOMCONFIG: {
+      TOOLS: tools,
+      DEVICES: devices,
+      MOMWIPORDERCOMS: materials,
+      SECURITY: security,
+      RESOURCENO,
+      PRODUCTNAME
+    } = {},
+    environments
+  } = payload;
+  console.log(payload);
+  return withI18n(t => (
+    <Paper square className={classes.root}>
+      <Panel
+        title="产品"
+        cols={[{
+          label: '产品名称',
+          name: 'PRODUCTNAME'
+        }, {
+          label: '物料编码',
+          name: 'RESOURCENO'
+        }]}
+        data={[{ RESOURCENO, PRODUCTNAME }]}
+        classes={classes}
+      />
+      <Panel
+        title="物料"
+        cols={[{
+          label: '物料编号',
+          name: 'NAME'
+        }, {
+          label: '物料名称',
+          name: 'NO'
+        }, {
+          label: '数量',
+          name: 'QUANTITY'
+        }]}
+        data={materials}
+        classes={classes}
+      />
+    </Paper>
+  ));
+}
+
+function OrderInfoRight({ payload }: Props) {
   const classes = makeStyles(styles.OrderInfoStyles)();
 
   const viewingRef = useRef(null);
@@ -100,33 +160,6 @@ function OrderInfo({ payload }: Props) {
         classes={classes}
       />
       <Panel
-        title="物料"
-        cols={[{
-          label: '物料编号',
-          name: 'NAME'
-        }, {
-          label: '物料名称',
-          name: 'NO'
-        }, {
-          label: '数量',
-          name: 'QUANTITY'
-        }]}
-        data={materials}
-        classes={classes}
-      />
-      <Panel
-        title="产品"
-        cols={[{
-          label: '产品名称',
-          name: 'PRODUCTNAME'
-        }, {
-          label: '物料编码',
-          name: 'RESOURCENO'
-        }]}
-        data={[{ RESOURCENO, PRODUCTNAME }]}
-        classes={classes}
-      />
-      <Panel
         title="环境要求"
         cols={[{
           label: '环境要求',
@@ -148,4 +181,7 @@ function OrderInfo({ payload }: Props) {
   ));
 }
 
-export default connect(mapState, mapDispatch)(OrderInfo);
+export default {
+  OrderInfoLeft: connect(mapState, mapDispatch)(OrderInfoLeft),
+  OrderInfoRight: connect(mapState, mapDispatch)(OrderInfoRight)
+}

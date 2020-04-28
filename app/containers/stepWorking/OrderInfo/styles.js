@@ -36,8 +36,13 @@ const OrderInfoStyles = (theme) => ({
   },
   tableCell: {
     wordBreak: 'break-all',
-    minWidth: '70px',
-    textAlign: 'center'
+    minWidth: '60px',
+    textAlign: 'center',
+    padding:'5px !important',
+    paddingLeft:'2px !important',
+    paddingRight:'2px !important',
+    fontSize:'1rem',
+    color: theme.palette.grey[800]
   }
 });
 

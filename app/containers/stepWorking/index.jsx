@@ -17,6 +17,7 @@ import { stepWorkingNS } from './local';
 import { withI18n } from '../../i18n';
 import OrderInfo from './OrderInfo';
 
+const { OrderInfoLeft, OrderInfoRight } = OrderInfo;
 const mapState = (state, props) => {
   const vOrder = orderSelectors.viewingOrder(state.order);
   return {
@@ -76,7 +77,7 @@ function StepWorking({ status, code, clickPoint }: Props): Node {
         </Paper>
         <div className={classes.main}>
           <div className={classes.leftContainer}>
-            <OrderInfo/>
+            <OrderInfoLeft/>
           </div>
           <Paper square classes={{ root: classes.centerContainer }}>
             <ButtonsContainer action={action}/>
@@ -90,6 +91,9 @@ function StepWorking({ status, code, clickPoint }: Props): Node {
             <Paper square className={classes.stepperContainer}>
               <StepperContainer/>
             </Paper>
+          </div>
+          <div className={classes.leftContainer}>
+            <OrderInfoRight/>
           </div>
         </div>
       </div>
