@@ -130,6 +130,18 @@ function OrderInfoRight({ payload }: Props) {
   return withI18n(t => (
     <Paper square className={classes.root}>
       <Panel
+        title="环境"
+        cols={[{
+          label: '当前温度',
+          name: 'temperature'
+        }, {
+          label: '当前湿度',
+          name: 'moisture'
+        }]}
+        data={[{ temperature: '/', moisture: '/' }]}
+        classes={classes}
+      />
+      <Panel
         title="人员"
         cols={[{
           label: '用户名',
@@ -156,7 +168,7 @@ function OrderInfoRight({ payload }: Props) {
           label: '设备名称',
           name: 'name'
         }]}
-        data={(devices || []).map(d => ({ name: d }))}
+        data={(devices || []).map(d => ({ name: String(d) }))}
         classes={classes}
       />
       <Panel
@@ -165,7 +177,7 @@ function OrderInfoRight({ payload }: Props) {
           label: '环境要求',
           name: 'name'
         }]}
-        data={(environments || []).map(e => ({ name: e }))}
+        data={(environments || []).map(e => ({ name: String(e) }))}
         classes={classes}
       />
       <Panel
@@ -184,4 +196,4 @@ function OrderInfoRight({ payload }: Props) {
 export default {
   OrderInfoLeft: connect(mapState, mapDispatch)(OrderInfoLeft),
   OrderInfoRight: connect(mapState, mapDispatch)(OrderInfoRight)
-}
+};

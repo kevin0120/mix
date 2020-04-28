@@ -38,10 +38,11 @@ const OrderInfoStyles = (theme) => ({
     wordBreak: 'break-all',
     minWidth: '60px',
     textAlign: 'center',
-    padding:'5px !important',
+    paddingTop:'6px !important',
+    paddingBottom:'6px !important',
     paddingLeft:'2px !important',
     paddingRight:'2px !important',
-    fontSize:'1rem',
+    fontSize:'1.1rem',
     color: theme.palette.grey[800]
   }
 });
