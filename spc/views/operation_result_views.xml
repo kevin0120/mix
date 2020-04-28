@@ -231,7 +231,7 @@
         <field name="name">Operation Result</field>
         <field name="res_model">operation.result</field>
         <field name="view_type">form</field>
-        <field name="view_mode">tree,form,kanban,pivot,graph</field>
+        <field name="view_mode">tree,form,kanban</field>
         <!--<field name="context">{'search_default_ok': 1,'search_default_nok': 1}</field>-->
         <field name="help" type="html">
             <p>

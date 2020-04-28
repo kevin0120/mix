@@ -32,11 +32,13 @@
         'views/quality_views.xml',
         'views/mrp_routing_views.xml',
         'views/menu_hide_views.xml',
-        'demo/demo.xml',
+        # 'demo/demo.xml',
+        'report/report_result_views.xml',
         'data/quality_data.xml',
+        'data/mes_data.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
-        'demo/demo.xml',
+        # 'demo/demo.xml',
     ],
 }

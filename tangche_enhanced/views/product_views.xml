@@ -20,7 +20,8 @@
             <field name="inherit_id" ref="sa_base.sa_product_normal_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='sa_type']" position="after">
-                    <field name="socket" options="{'no_create_edit': True , 'no_open': True}" />
+                    <field name="socket" options="{'no_create_edit': True , 'no_open': True}"
+                           attrs="{'invisible': [('sa_type', '!=', 'screw')]}"/>
                 </xpath>
             </field>
         </record>
@@ -104,7 +105,7 @@
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="product_search_form_view_sa"/>
             <field name="context">{'default_type':'consu','default_tracking':
-                'none','default_sa_type':'consu','search_default_socket': 1}
+                'none','default_sa_type':'socket','search_default_socket': 1}
             </field>
             <field name="view_ids"
                    eval="[(5, 0, 0),

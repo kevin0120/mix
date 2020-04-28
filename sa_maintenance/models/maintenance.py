@@ -233,18 +233,20 @@ class MaintenanceRequest(models.Model):
             check_point_ids = self.env['maintenance.cp'].sudo().search([('equipment_id', '=', equipment_id)])
             actions = []
             for check_point in check_point_ids:
-                actions.append({
+                val = {
                     'point_id': check_point.id,
                     'category_id': check_point.category_id.id,
                     'request_id': ret.id,
-                    'description': check_point.description if check_point.description else "",
+                    'description': check_point.description or "",
                     'test_type': check_point.category_id.test_type,
                     'norm': check_point.norm,
                     'tolerance_min': check_point.tolerance_min,
                     'tolerance_max': check_point.tolerance_max,
-                })
-            if len(actions) > 0:
-                self.env['maintenance.cp.action'].sudo().bulk_create(actions)
+                }
+                actions.append(val)
+                self.env['maintenance.cp.action'].sudo().create(val)
+            # if len(actions) > 0:
+            #     self.env['maintenance.cp.action'].sudo().bulk_create(actions)
 
             ret.post_maintenance_req()  # 主动发送维护请求到HMI
             # template_id = self.env.ref('sa_maintenance.new_maintenance_request_email_template', False)

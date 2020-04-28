@@ -73,7 +73,8 @@ class MrpWorkCenter(models.Model):
         sync_equipment_url = 'http://{0}:{1}{2}'.format(connect.ip, connect.port,
                                                         SYNC_ALL_WORKCENTER_EQUIPMENT_TOOLS)
         equipment_ids = self.equipment_ids.filtered(
-            lambda equipment: equipment.category_name in ['tightening_wrench', 'tightening_gun'])
+            lambda equipment: equipment.category_name in ['tightening_wrench',
+                                                          'tightening_gun'])
         vals = []
         for equipment in equipment_ids:
             loc = equipment.location_id

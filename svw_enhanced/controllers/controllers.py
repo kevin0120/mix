@@ -2,7 +2,7 @@
 from odoo import http, fields, api, SUPERUSER_ID
 import json
 from odoo.http import request, Response
-from odoo.addons.spc.controllers.workorder import ApiMrpWorkorder, str_time_to_rfc3339
+from odoo.addons.svw_enhanced.controllers.workorder import ApiMrpWorkorder, str_time_to_rfc3339
 import requests as Requests
 from requests import ConnectionError, RequestException
 import validators

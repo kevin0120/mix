@@ -1186,7 +1186,7 @@ msgstr "Operate"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_dispatch_mrp_workorder_workcenter_id
 msgid "Operate In Work Center"
-msgstr "生产作业"
+msgstr "作业在工位"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_line_picking_id
@@ -1232,7 +1232,7 @@ msgstr "工位组"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_dispatch_mrp_workorder_operation_id
 msgid "Operation id"
-msgstr "作业 id"
+msgstr "生产作业"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_operation_id_domain

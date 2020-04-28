@@ -59,7 +59,7 @@
                               decoration-success="is_dispatched"
                               decoration-danger="not is_dispatched" create="0">
                             <field name="is_dispatched" invisible="1"/>
-                            <field name="sequence" invisible="1"/>
+                            <field name="sequence" widget="handle"/>
                             <field name="workcenter_ids" groups="base.group_no_one" readonly="1"
                                    widget="many2many_tags"/>
                             <field name="operation_workcenter_domain" invisible="1"/>

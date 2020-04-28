@@ -120,10 +120,14 @@ class OperationView(http.Controller):
 
             context = {'default_parent_test_type': operation.test_type}
 
-
             for val in points:
                 point_id = env['operation.point'].search([('parent_qcp_id', '=', operation_id),
                                                           ('sequence', '=', val['sequence'])])
+
+                if operation.test_type == 'promiscuous_tightening' and getattr(operation, 'tightening_tool_ids',
+                                                                               None):
+                    # 混杂默认默认取得原来的工步上定义的拧紧工具
+                    val.update({'tightening_tool_ids': [(6, 0, operation.tightening_tool_ids.ids)]})
                 if not point_id:
                     # 新增
                     val.update({
@@ -134,6 +138,7 @@ class OperationView(http.Controller):
                         'y_offset': val['y_offset'],
                         'product_id': env.ref('sa_base.product_product_screw_default').id  # 获取默认螺栓
                     })
+
                     ret = env['operation.point'].with_context(context).create(val)
                     if not ret:
                         _logger.error("Create Operation Point Fail, Vals: {0}".format(pprint.pformat(val, indent=4)))

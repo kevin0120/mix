@@ -381,20 +381,20 @@
 
 
         <record id="mrp_workcenter_group_0" model="mrp.workcenter.group">
-            <field name="name">#1工位组</field>
-            <field name="code">#1</field>
+            <!--<field name="name">#1工位组</field>-->
+            <!--<field name="code">#1</field>-->
             <field name="sa_workcenter_ids" eval="[(6,0, [ref('sa_base.mrp_workcenter_0')])]"/>
         </record>
 
         <record id="mrp_workcenter_group_1" model="mrp.workcenter.group">
-            <field name="name">#2工位组</field>
-            <field name="code">#2</field>
+            <!--<field name="name">#2工位组</field>-->
+            <!--<field name="code">#2</field>-->
             <field name="sa_workcenter_ids" eval="[(6,0, [ref('sa_base.mrp_workcenter_1')])]"/>
         </record>
 
         <record id="mrp_workcenter_group_2" model="mrp.workcenter.group">
-            <field name="name">#3工位组</field>
-            <field name="code">#3</field>
+            <!--<field name="name">#3工位组</field>-->
+            <!--<field name="code">#3</field>-->
             <field name="sa_workcenter_ids" eval="[(6,0, [ref('sa_base.mrp_workcenter_2')])]"/>
         </record>
 
