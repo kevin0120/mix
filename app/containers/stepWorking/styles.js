@@ -35,17 +35,6 @@ const layout = theme => ({
     flexDirection: 'column',
     backgroundColor: theme.palette.common.white
   },
-  timerContainer: {
-    flex: 1,
-    margin: 3,
-    zIndex: 1,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    backgroundColor: theme.palette.common.white
-  },
   stepperContainer: {
     margin: 3,
     flex: 4,
@@ -104,7 +93,12 @@ const layout = theme => ({
 
 const stepperContainer = theme => ({
   root: {
-    padding: 16
+    padding: 16,
+    background: 'inherit'
+  },
+  step: {
+    background: 'inherit',
+    color: theme.palette.grey[100]
   },
   stepButton: {
     display: 'flex',
@@ -113,7 +107,8 @@ const stepperContainer = theme => ({
     justifyContent: 'flex-start !important',
     height: 50,
     padding: '0 0',
-    margin: '10px 0'
+    margin: '10px 0',
+    color: theme.palette.grey[100]
   },
   stepIconDoing: {
     animation: '$doing-icon-rotation 1s infinite linear',
