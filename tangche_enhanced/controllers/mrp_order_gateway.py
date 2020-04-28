@@ -186,6 +186,19 @@ def convert_ts002_order(env, vals):
         RESOURCENAMES = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('RESOURCENAMES')
         PARENTWIPORDERNO = vals.get('requestInfo').get('MOMWIPORDER').get('PARENTWIPORDERNO')
         PARENTWIPORDERTYPE = vals.get('requestInfo').get('MOMWIPORDER').get('PARENTWIPORDERTYPE')
+        MOMWIPORDERCOMS = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('MOMWIPORDERCOMS')
+        TOOLS = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('TOOLS')
+        DEVICES = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('DEVICES')
+        SECURITY = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('SECURITY')
+
+        MOMCONFIG["TOOLS"] = TOOLS
+        MOMCONFIG["DEVICES"] = DEVICES
+        MOMCONFIG["MOMWIPORDERCOMS"] = MOMWIPORDERCOMS
+        MOMCONFIG["SECURITY"] = SECURITY
+        MOMCONFIG["PRODUCTNAME"] = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('PRODUCTNAME')
+        MOMCONFIG["RESOURCENO"] = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('RESOURCENO')
+
+        ENVS = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('ENVIRONS')
     except RetryError:
         msg = 'TS002  WorkOrder Payload is not qualifed!!'
         return [], msg
@@ -226,7 +239,7 @@ def convert_ts002_order(env, vals):
                 },
             },
             'components': [],
-            'environments': [],
+            'environments': ENVS,
             "SYSTEMTYPE": SYSTEMTYPE,
             "WIPORDERTYPE": WIPORDERTYPE,
             "MOMDISPOSITIONS": MOMDISPOSITIONS,
@@ -239,7 +252,6 @@ def convert_ts002_order(env, vals):
             "LOCATION": LOCATION,
             "OPRSEQUENCENO": OPRSEQUENCENO,
             "SKILL": SKILL,
-
             'steps': _steps,
         }
         ret.append(vals)
