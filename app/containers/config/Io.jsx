@@ -1,7 +1,8 @@
 // @flow
-import React, { useState, useEffect } from 'react';
+import type { Node } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { get, cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
@@ -12,10 +13,9 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { makeStyles } from '@material-ui/styles';
-import type { Node } from 'react';
 import Button from '../../components/CustomButtons/Button';
 import { ioDirection } from '../../modules/device/io/constants';
-import { ioOutputs, ioInputs } from '../../modules/io/constants';
+import { ioInputs, ioOutputs } from '../../modules/io/constants';
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';
 import { withI18n } from '../../i18n';
@@ -219,16 +219,22 @@ function ConnectedIo(props): ?Node {
 
   return withI18n(t => (
     <section className={classes.section}>
-      <h3 className={classes.sectionTitle}>{t('Configuration.IO.INname')}</h3>
-      <Paper className={classes.paperWrap} elevation={1}>
-        {inItems}
-      </Paper>
-      <h3 className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}>
-        {t('Configuration.IO.OUTname')}
-      </h3>
-      <Paper className={classes.paperWrap} elevation={1}>
-        {outItems}
-      </Paper>
+      {ioModule.maxInputs > 0 ?
+        <React.Fragment>
+          <h3 className={classes.sectionTitle}>{t('Configuration.IO.INname')}</h3>
+          <Paper className={classes.paperWrap} elevation={1}>
+            {inItems}
+          </Paper>
+        </React.Fragment> : null}
+      {ioModule.maxOutputs > 0 ?
+        <React.Fragment>
+          <h3 className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}>
+            {t('Configuration.IO.OUTname')}
+          </h3>
+          <Paper className={classes.paperWrap} elevation={1}>
+            {outItems}
+          </Paper>
+        </React.Fragment> : null}
       <Button
         variant="contained"
         disabled={!isConfigValid || !ioEnabled}

@@ -1,4 +1,4 @@
-import { model, write, watch } from 'saga-modux';
+import { model, watch, write } from 'saga-modux';
 import { all, call, delay, put, select } from 'redux-saga/effects';
 import { ioDirection, ioTriggerMode } from '../device/io/constants';
 import { ioOutputGroups } from './constants';
@@ -38,7 +38,7 @@ export default model('io', {
         deviceType.io,
         'defaultIO',
         eSetting.get('devices.io.sn'),
-        { input_num: 8, output_num: 8 },
+        eSetting.get('devices.io.config'),
         {},
         []
       );
@@ -63,11 +63,11 @@ export default model('io', {
       const { [ioDirection.output]: outputs } = ioPorts;
 
       const { ioPorts: prevIoPorts } = yield select(this.select);
-      eSetting.set('devices.io.inputs', inputs,{
-        prettify:true
+      eSetting.set('devices.io.inputs', inputs, {
+        prettify: true
       });
-      eSetting.set('devices.io.inputs', outputs,{
-        prettify:true
+      eSetting.set('devices.io.inputs', outputs, {
+        prettify: true
       });
       yield write(this, s => ({
         ...s,

@@ -9,7 +9,7 @@ const defaultConfigs = {
     io: {
       sn: '11',
       enable: true,
-      config: { input_num: 8, output_num: 8 },
+      config: { input_num: 0, output_num: 16 },
       inputs: {
         [ioInputs.resetKey]: 0,
         [ioInputs.byPass]: 1,
@@ -20,7 +20,7 @@ const defaultConfigs = {
         [ioOutputs.yellow]: 1,
         [ioOutputs.green]: 2,
         [ioOutputs.red]: 3,
-        [ioOutputs.unlock]: 4
+        [ioOutputs.unlock]: 13
       }
     }
   },

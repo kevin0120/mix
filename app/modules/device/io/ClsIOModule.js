@@ -2,33 +2,17 @@
 // @flow
 import { isNil } from 'lodash-es';
 import type { Saga } from 'redux-saga';
-import { call, put, all } from 'redux-saga/effects';
+import { all, call, put } from 'redux-saga/effects';
 import Device from '../Device';
-import type {
-  tIOContact,
-  tIOData,
-  tIODirection,
-  tIOPort,
-  tIOChange
-} from './type';
+import type { tIOChange, tIOContact, tIOData, tIODirection, tIOPort } from './type';
 import { CommonLog } from '../../../common/utils';
 import { ioDirection, ioTriggerMode } from './constants';
-import { ioSetApi, ioContactApi, ioStatusApi } from '../../../api/io';
+import { ioContactApi, ioSetApi, ioStatusApi } from '../../../api/io';
 import type { IIOModule } from './interface/IIOModule';
 import type { IDevice } from '../IDevice';
 
 export default class ClsIOModule extends Device implements IIOModule {
   _data: tIOData = { input: '', output: '' };
-
-  _ports: Array<tIOPort> = [];
-
-  get ports() {
-    return this._ports;
-  }
-
-  _maxInputs: number = 0;
-
-  _maxOutputs: number = 0;
 
   constructor(
     name: string,
@@ -65,6 +49,35 @@ export default class ClsIOModule extends Device implements IIOModule {
     /* eslint-enable flowtype/no-weak-types */
   }
 
+  _ports: Array<tIOPort> = [];
+
+  get ports() {
+    return this._ports;
+  }
+
+  _maxInputs: number = 0;
+
+  get maxInputs() {
+    return this._maxInputs;
+  };
+
+  _maxOutputs: number = 0;
+
+  get maxOutputs() {
+    return this._maxOutputs;
+  };
+
+  static bitString2Boolean(bit: string): boolean {
+    switch (bit) {
+      case '1':
+        return true;
+      case '0':
+        return false;
+      default:
+        return false;
+    }
+  }
+
   getPort(direction: tIODirection, idx: number): ?tIOPort {
     return this._ports.find(p => p.direction === direction && p.idx === idx);
   }
@@ -79,17 +92,6 @@ export default class ClsIOModule extends Device implements IIOModule {
         return idx <= this._maxInputs;
       case 'output':
         return idx <= this._maxOutputs;
-      default:
-        return false;
-    }
-  }
-
-  static bitString2Boolean(bit: string): boolean {
-    switch (bit) {
-      case '1':
-        return true;
-      case '0':
-        return false;
       default:
         return false;
     }
