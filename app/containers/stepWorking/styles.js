@@ -19,27 +19,31 @@ const layout = theme => ({
     backgroundRepeat: 'repeat',
     backgroundColor: theme.palette.grey[100]
   },
-  rightContainer: {
-    flex: 2,
+  leftContainer: {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    width: '30%'
+    width:'20%',
     // padding:3,
   },
-  leftContainer: {
-    overflow: 'hidden',
-    flex: 7,
-    margin: 3,
+  rightContainer: {
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: theme.palette.common.white
+    height: '100%',
+    width:'20%',
+    // padding:3,
+  },
+  centerContainer: {
+    overflow: 'hidden',
+    flex: 1,
+    margin: 3,
+    display: 'flex',
+    flexDirection: 'column'
   },
   stepperContainer: {
     margin: 3,
-    flex: 4,
+    flex: 1,
     overflowY: 'auto',
-
     backgroundColor: theme.palette.common.white,
     padding: 0
   },

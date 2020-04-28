@@ -133,25 +133,22 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const modelsData =
-    (viewingOrder &&
-      viewingOrder.payload &&
-      viewingOrder.payload.products &&
-      viewingOrder.payload.products.map(m => [
-        m.code,
-        m.desc,
-        withI18n(
-          t => (
-            <Button
-              color="primary"
-              type="button"
-              onClick={() => viewModel(m.url)}
-            >
-              {t(trans.view)}
-            </Button>
-          ),
-          stepWorkingNS
-        )
-      ])) ||
+    (viewingOrder?.payload?.products?.map(m => [
+      m.code,
+      m.desc,
+      withI18n(
+        t => (
+          <Button
+            color="primary"
+            type="button"
+            onClick={() => viewModel(m.url)}
+          >
+            {t(trans.view)}
+          </Button>
+        ),
+        stepWorkingNS
+      )
+    ])) ||
     [];
 
   const [pdfUrl, setPdfUrl] = useState('');

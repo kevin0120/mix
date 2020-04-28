@@ -1,9 +1,9 @@
 // @flow
-import React, { useState } from 'react';
 import type { Node } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Paper } from '@material-ui/core';
+import { Paper, Typography } from '@material-ui/core';
 import clsx from 'clsx';
 import ButtonsContainer from './ButtonsContainer';
 import * as orderSelectors from '../../modules/order/selector';
@@ -15,6 +15,7 @@ import { ORDER_STATUS } from '../../modules/order/constants';
 import logo from '../../../resources/imgs/logo.jpg';
 import { stepWorkingNS } from './local';
 import { withI18n } from '../../i18n';
+import OrderInfo from './OrderInfo';
 
 const mapState = (state, props) => {
   const vOrder = orderSelectors.viewingOrder(state.order);
@@ -25,8 +26,7 @@ const mapState = (state, props) => {
   };
 };
 
-const mapDispatch = {
-};
+const mapDispatch = {};
 
 type Props = {
   status: ?tOrderStatus,
@@ -45,7 +45,7 @@ const statusMap = classes => ({
   [ORDER_STATUS.FAIL]: classes.statusFail
 });
 
-function StepWorking({ status, code,clickPoint}: Props): Node {
+function StepWorking({ status, code, clickPoint }: Props): Node {
   const classes = makeStyles(styles.layout)();
 
   type tNodeHook = [Node, ((Node => Node) | Node) => void];
@@ -72,11 +72,14 @@ function StepWorking({ status, code,clickPoint}: Props): Node {
             </Typography>
             <Typography variant="h5">{code || ''}</Typography>
           </div>
-          {logo ? <img alt="" src={logo} className={classes.logo} /> : null}
+          {logo ? <img alt="" src={logo} className={classes.logo}/> : null}
         </Paper>
         <div className={classes.main}>
-          <Paper square classes={{ root: classes.leftContainer }}>
-            <ButtonsContainer action={action} />
+          <div className={classes.leftContainer}>
+            <OrderInfo/>
+          </div>
+          <Paper square classes={{ root: classes.centerContainer }}>
+            <ButtonsContainer action={action}/>
             <StepPageContainer
               bindParentAction={bindAction}
               bindParentDescription={bindDescription}
@@ -85,7 +88,7 @@ function StepWorking({ status, code,clickPoint}: Props): Node {
           </Paper>
           <div className={classes.rightContainer}>
             <Paper square className={classes.stepperContainer}>
-              <StepperContainer />
+              <StepperContainer/>
             </Paper>
           </div>
         </div>
