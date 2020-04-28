@@ -66,7 +66,6 @@ function OrderInfoLeft({ payload }: Props) {
     } = {},
     environments
   } = payload;
-  console.log(payload);
   return withI18n(t => (
     <Paper square className={classes.root}>
       <Panel
@@ -126,7 +125,6 @@ function OrderInfoRight({ payload }: Props) {
     } = {},
     environments
   } = payload;
-  console.log(payload);
   return withI18n(t => (
     <Paper square className={classes.root}>
       <Panel
