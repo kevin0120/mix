@@ -317,7 +317,7 @@ function* failState(config) {
       const isNormal = workCenterMode === workModes.normWorkCenterMode;
       let buttons = [
         {
-          label: 'Common.Close',
+          label: 'Order.Next',
           color: 'danger',
           action: screwStepActions.confirmFail()
         }
@@ -328,11 +328,6 @@ function* failState(config) {
             label: 'Order.Retry',
             color: 'info',
             action: orderActions.stepStatus(this, STEP_STATUS.READY)
-          },
-          {
-            label: 'Order.Next',
-            color: 'warning',
-            action: screwStepActions.confirmFail()
           }
         ]);
       }

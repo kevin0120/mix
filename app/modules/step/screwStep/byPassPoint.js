@@ -17,22 +17,22 @@ export function* byPassPoint(controls, retry = false, disableByPass = false) {
         dialogActions.dialogShow({
           maxWidth: 'md',
           buttons: [
+            ...(retry ? [{
+              label: 'Common.Close',
+              color: 'danger',
+              // action: reworkActions.tryRework(null, null, finalFailPoints[0])
+              action: { type: SCREW_STEP.MANUAL }
+            }, {
+              label: 'Common.Retry',
+              color: 'info',
+              action: screwStepActions.bypassRetry()
+            }] : []),
             {
               label: 'Order.Next',
               color: 'danger',
               action: screwStepActions.confirmFailSpecPoint()
 
             },
-            ...(retry ? [{
-              label: 'Common.Retry',
-              color: 'info',
-              action: screwStepActions.bypassRetry()
-            }, {
-              label: 'Common.ManualInput',
-              color: 'info',
-              // action: reworkActions.tryRework(null, null, finalFailPoints[0])
-              action: { type: SCREW_STEP.MANUAL }
-            }] : []),
             ...disableByPass ? [] : [{
               label: 'Screw.Next',
               color: 'warning',
