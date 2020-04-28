@@ -160,8 +160,10 @@ const defaultConfigs = {
       aiis: 'http://127.0.0.1:9092'
     },
     endpoints: {
-      operationResources: 'http://172.26.214.80:8091/a/login',
-      operationTracing: 'http://172.26.214.80:8091/a/login'
+      operationResources:
+        'http://172.26.214.80:8091/a/login2authc?type=mtShow&userId=5f19fbe973a44b99826488b3be02d41a&orderNumber=0000198338122', // 生产过程MES
+      operationTracing:
+        'http://172.26.214.80:8091/a/product/traceable?orderNumber=0000198338122' // 生产信息追溯
     }
   },
   // 作业配置
