@@ -93,6 +93,7 @@ function HomeOperationList(props: Props) {
                 status={t(`OrderStatus.${order.status || ORDER_STATUS.TODO}`)}
                 statusClass={statusMap[order.status || ORDER_STATUS.TODO]}
                 infoArr={[
+                  order.trackCode,
                   order.productCode,
                   order.workcenter,
                   order.datePlannedStart &&
