@@ -98,7 +98,7 @@ const StepPageContainer = ({
           </Grid>
           <Grid item className={classes.result}>
             <Paper square className={classes.Paper}>
-              <TimeLine
+              {timeLine&&timeLine.length>0?<TimeLine
                 simple
                 stories={timeLine.map(t => ({
                   simple: true,
@@ -110,7 +110,7 @@ const StepPageContainer = ({
                   body: <Typography>{t.body}</Typography>,
                   footerTitle: t.footerTitle
                 }))}
-              />
+              />: <Typography variant="body1" color="textSecondary">无结果数据</Typography>}
             </Paper>
           </Grid>
         </Grid>

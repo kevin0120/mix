@@ -215,7 +215,11 @@ const stepPageContainer = {
   Paper: {
     width: '100%',
     height: '100%',
-    padding: 'auto 6px'
+    padding: 'auto 6px',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   Description: {
     maxHeight: '100%',
