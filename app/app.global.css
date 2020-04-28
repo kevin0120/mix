@@ -5,14 +5,15 @@
 @import '~@fortawesome/fontawesome-free/css/all.css';
 @import '~react-simple-keyboard/build/css/index.css';
 @import './common/static/material-react-pro.css';
-@import "~typeface-noto-sans/index.css";
-@import "~typeface-noto-sans-sc/index.css";
+@import '~typeface-noto-sans/index.css';
+@import '~typeface-noto-sans-sc/index.css';
 
 body {
   position: relative;
   height: 100vh;
   font-family: Noto Sans SC, serif;
-  /*font-weight: bold;*/
+
+  /* font-weight: bold; */
   overflow: hidden !important;
   user-select: none;
 }
@@ -61,9 +62,11 @@ a:hover {
   overflow: hidden;
 }
 
-/*div{*/
-/*  overflow: hidden;*/
-/*}*/
+/* div{ */
+
+/*  overflow: hidden; */
+
+/* } */
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -71,12 +74,12 @@ a:hover {
 }
 
 ::-webkit-scrollbar-button {
-  background-color: #FF7677;
+  background-color: #ff7677;
   display: none;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.7);
+  background: inherit;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -85,6 +88,6 @@ a:hover {
 }
 
 ::-webkit-scrollbar-corner {
-  background: #82AFFF;
+  background: inherit;
   display: none;
 }
