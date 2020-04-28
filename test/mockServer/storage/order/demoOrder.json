@@ -1,0 +1,267 @@
+{
+	"id": 1577161080335,
+	"code": "WO1577161080335",
+	"track_code": "1x0001",
+	"product_code": "demo_product_code",
+	"date_planned_start": "Tue Dec 24 2019",
+	"date_planned_complete": "Tue Dec 24 2019",
+	"status": "todo",
+	"product_type_image": "",
+	"payload": {
+		"products": [
+			{
+				"url": "string",
+				"code": "string"
+			}
+		],
+		"worksheet": {
+			"name": "工艺指导书1",
+			"revision": "v1",
+			"url": "http://www.pdf995.com/samples/pdf.pdf"
+		},
+		"environments": [
+			{
+				"text": "string",
+				"test_type": "text",
+				"code": "1111",
+				"sequence": 1,
+				"desc": "string"
+			}
+		],
+		"components": [
+			{
+				"is_key": true,
+				"code": "1111"
+			}
+		],
+		"operation": {
+			"code": "G0C",
+			"resources": {
+				"equipments": [
+					"xx0011"
+				],
+				"users": [
+					"112233"
+				]
+			},
+			"desc": "测试工艺作业"
+		},
+		"workcenter": {
+			"code": "TA2-26L-01",
+			"locations": [
+				{
+					"equipment_sn": "1234567",
+					"io_input": 1,
+					"io_output": 1,
+					"product_code": "C1780589"
+				}
+			]
+		},
+		"SYSTEMTYPE": "3",
+		"WIPORDERTYPE": "108",
+		"MOMDISPOSITIONS": [
+			{
+				"DTID": "null",
+				"DISPOSITION": "null",
+				"LINESEQUENCENO": "null",
+				"SEQUENCENO": "null",
+				"SPECIFICATIONDESC": "null",
+				"CHARACTERISTIC": "null",
+				"CHARACTERISTICDESC": "null",
+				"CHARACTERISTICTYPE": "null",
+				"UPPERCONTROLLIMIT": "null",
+				"LOWERCONTROLLIMIT": "null",
+				"TARGETVALUE": "null",
+				"UOMCODE": "null",
+				"TESTVALUE": "null",
+				"MEANVALUE": "null",
+				"ATTRIBUTE": "null"
+			}
+		],
+		"MOMCONFIG": {
+			"PLABEL": "null",
+			"PPRODUCTNO": "M003000000529",
+			"PSERIALNO": "null",
+			"CHILDCONFIGS": {
+				"CHILDCONFIG": [
+					{
+						"CGBOMID": 11652,
+						"CPRODUCTID": 100224207,
+						"CPRODUCTNO": "CNR0000392139",
+						"TRACKINGCODE": "3",
+						"INSTALLATIONPOSITION": "",
+						"INSTALLATIONDESC": "",
+						"BOMGWDESC": "",
+						"DUMMY1": "",
+						"DUMMY2": "",
+						"DUMMY3": "",
+						"DUMMY4": "",
+						"DUMMY5": "",
+						"DUMMY6": ""
+					}
+				]
+			}
+		},
+		"RESOURCEGROUP": "null",
+		"STARTEMPLOYEE": "luogan",
+		"RESOURCENAMES": {
+			"RESOURCENAME": [
+				"null",
+				"null"
+			]
+		},
+		"PARENTWIPORDERNO": "083000166996",
+		"PARENTWIPORDERTYPE": "101"
+	},
+	"steps": [
+		{
+			"id": 1577161080335,
+			"code": "register_byproducts-1577161080335",
+			"sequence": 1,
+			"desc": "register_byproducts 工步描述",
+			"test_type": "register_byproducts",
+			"text": "",
+			"failure_msg": "register_byproducts-1577161080335-failed",
+			"tolerance_min": 2,
+			"tolerance_max": 4,
+			"target": 3,
+			"consume_product": null,
+			"skippable": false,
+			"undoable": false,
+			"data": "",
+			"status": "ready",
+			"image": ""
+		},
+		{
+			"id": 1577161080335,
+			"code": "register_consumed_materials-1577161080335",
+			"sequence": 2,
+			"desc": "register_consumed_materials 工步描述",
+			"test_type": "register_consumed_materials",
+			"text": "",
+			"failure_msg": "register_consumed_materials-1577161080335-failed",
+			"tolerance_min": 7,
+			"tolerance_max": 9,
+			"target": 8,
+			"consume_product": "1111",
+			"skippable": false,
+			"undoable": false,
+			"data": "",
+			"status": "ready",
+			"image": ""
+		},
+		{
+			"id": 1577161080335,
+			"code": "text-1577161080335",
+			"sequence": 3,
+			"desc": "text 工步描述",
+			"test_type": "text",
+			"text": "",
+			"failure_msg": "text-1577161080335-failed",
+			"tolerance_min": 6,
+			"tolerance_max": 8,
+			"target": 7,
+			"consume_product": null,
+			"skippable": false,
+			"undoable": false,
+			"data": "",
+			"status": "ready",
+			"image": ""
+		},
+		{
+			"id": 1577161080335,
+			"code": "tightening-1577161080335",
+			"sequence": 4,
+			"desc": "tightening 工步描述",
+			"test_type": "tightening",
+			"text": "",
+			"failure_msg": "tightening-1577161080335-failed",
+			"tolerance_min": 6,
+			"tolerance_max": 8,
+			"target": 7,
+			"consume_product": null,
+			"skippable": false,
+			"undoable": false,
+			"data": "",
+			"status": "ready",
+			"image": "",
+			"payload": {
+				"tightening_total": 3,
+				"tightening_points": [
+					{
+						"is_key": true,
+						"pset": "1",
+						"sequence": 1,
+						"y": 10,
+						"x": 10,
+						"key_num": 2,
+						"tightening_tool": "xx4443",
+						"max_redo_times": 3,
+						"group_sequence": 1,
+						"nut_no": ""
+					},
+					{
+						"is_key": true,
+						"pset": "1",
+						"sequence": 2,
+						"y": 10,
+						"x": 20,
+						"key_num": 2,
+						"tightening_tool": "xx0011",
+						"max_redo_times": 3,
+						"group_sequence": 1,
+						"nut_no": ""
+					},
+					{
+						"is_key": true,
+						"pset": "1",
+						"sequence": 3,
+						"y": 20,
+						"x": 10,
+						"key_num": 1,
+						"tightening_tool": "xx4443",
+						"max_redo_times": 3,
+						"group_sequence": 2,
+						"nut_no": ""
+					}
+				]
+			}
+		},
+		{
+			"id": 1577161080336,
+			"code": "pass_fail-1577161080336",
+			"sequence": 5,
+			"desc": "pass_fail 工步描述",
+			"test_type": "pass_fail",
+			"text": "",
+			"failure_msg": "pass_fail-1577161080336-failed",
+			"tolerance_min": 6,
+			"tolerance_max": 8,
+			"target": 7,
+			"consume_product": null,
+			"skippable": false,
+			"undoable": false,
+			"data": "",
+			"status": "ready",
+			"image": ""
+		},
+		{
+			"id": 1577161080336,
+			"code": "measure-1577161080336",
+			"sequence": 6,
+			"desc": "measure 工步描述",
+			"test_type": "measure",
+			"text": "",
+			"failure_msg": "measure-1577161080336-failed",
+			"tolerance_min": 2,
+			"tolerance_max": 4,
+			"target": 3,
+			"consume_product": null,
+			"skippable": false,
+			"undoable": false,
+			"data": "",
+			"status": "ready",
+			"image": ""
+		}
+	]
+}

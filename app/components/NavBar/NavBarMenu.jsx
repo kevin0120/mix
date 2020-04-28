@@ -1,0 +1,68 @@
+import React, { useState } from 'react';
+import Menu from '@material-ui/core/Menu';
+import Fade from '@material-ui/core/Fade';
+import { makeStyles } from '@material-ui/core/styles';
+import PropTypes from "prop-types";
+import Button from '../CustomButtons/Button';
+import styles from './styles';
+
+function NavBarMenu({ statusOK, title,children,onClick }) {
+  const classes = makeStyles(styles.NavBarMenu)();
+  const [showMenu, setShowMenu] = useState(null);
+  const statusClassName = statusOK
+    ? classes.menuStatusOK
+    : classes.menuStatusFail;
+  const open = Boolean(showMenu);
+
+  return (
+    <React.Fragment>
+      <Button
+        variant="contained"
+        onClick={e => {
+          onClick(e);
+          setShowMenu(e.currentTarget);
+
+        }}
+        className={statusClassName}
+      >
+        {title}
+      </Button>
+      <Menu
+        id="menu-sysInfo"
+        anchorEl={showMenu}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        open={open}
+        onClose={() => setShowMenu(null)}
+        TransitionComponent={Fade}
+        classes={{
+          paper: classes.popover
+        }}
+      >
+        {children}
+      </Menu>
+    </React.Fragment>
+  );
+}
+
+NavBarMenu.propTypes = {
+  title: PropTypes.string,
+  statusOK: PropTypes.bool,
+  children: PropTypes.element,
+  onClick: PropTypes.func,
+};
+
+NavBarMenu.defaultProps = {
+  title: '',
+  statusOK: false,
+  children: null,
+  onClick: () => {}
+};
+
+export default NavBarMenu;

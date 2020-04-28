@@ -1,0 +1,249 @@
+{
+  "Title": "欢迎",
+  "OrderStatus": {
+    "todo": "待办",
+    "wip": "进行中",
+    "cancel": "已取消",
+    "pending": "阻塞",
+    "fail": "失败",
+    "done": "已完成",
+    "excp": "异常"
+  },
+  "StepType": {
+    "input": "输入",
+    "scanner": "扫码",
+    "instruction": "指导",
+    "screw": "拧紧",
+    "tightening": "拧紧",
+    "promiscuous_tightening": "混杂拧紧",
+    "text": "文本",
+    "material": "取料",
+    "video": "视频",
+    "check": "检测"
+  },
+  "Language": {
+    "en": "英文",
+    "zh_CN": "中文(简体)"
+  },
+  "Back": "返回",
+  "main": {
+    "operation": "作业",
+    "operationViewer": "查看工艺",
+    "orders": "车辆队列",
+    "home": "首页",
+    "manual": "手动模式",
+    "worksheet_img": "工艺&作业配置",
+    "preferences": "系统配置",
+    "help": "帮助",
+    "lock": "锁屏",
+    "event": "事件日志",
+    "resultQuery": "结果查询",
+    "login": "登出",
+    "currentOrder": "当前车辆",
+    "nextOrder": "下一车辆",
+    "curve": "曲线"
+  },
+  "OEE": {
+    "title": "故障记录",
+    "resume": "继续作业",
+    "FaultType": "请选择故障类型",
+    "FaultCode": "请选择具体的故障原因",
+    "Availability": "可用率",
+    "Performance": "表现率",
+    "Quality": "质量",
+    "Productive": "生产率",
+    "SelectBlockReason": "请选择阻塞原因"
+  },
+  "ManualDiag": {
+    "title": "VIN/KNR"
+  },
+  "Configuration": {
+    "network": {
+      "name": "网络配置(wifi)",
+      "SSID": "SSID",
+      "PWD": "无线密码",
+      "Addr": "IP地址",
+      "Mask": "子网掩码",
+      "Gateway": "网关"
+    },
+    "IO": {
+      "name": "IO(输入/输出)",
+      "INname": "IO(输入)",
+      "OUTname": "IO(输出)"
+    },
+    "connections": {
+      "name": "外围连接",
+      "Odoo": "应用服务器API地址",
+      "HMI": "HMI序列号",
+      "AIIS": "AIIS"
+    }
+  },
+  "test": {
+    "masterPC": "工位控制器URL",
+    "HMI": "人机交互界面序列号",
+    "RFID": "RFID链接地址",
+    "IO": "输入/输出模块链接地址"
+  },
+  "editor": {
+    "PicSelect": "插入新图片",
+    "PointAdd": "添加拧紧点",
+    "PointDel": "删除拧紧点",
+    "Save": "保存"
+  },
+  "Common": {
+    "Yes": "确认",
+    "No": "取消",
+    "Confirm": "确认",
+    "Cancel": "取消",
+    "Retry": "重试",
+    "Idx": "序号",
+    "WorkSegment": "工段",
+    "WorkCenter": "工位",
+    "SocketTray": "套筒",
+    "Controller": "控制器",
+    "isRequired": "必填",
+    "Submit": "确定",
+    "Save": "保存",
+    "Test": "测试",
+    "Shutdown": "关机",
+    "Logout": "登出",
+    "QuestShutdown": "是否现在关机?",
+    "Close": "关闭",
+    "Manual": "手动模式",
+    "ManualInput": "手动输入",
+    "Auto": "自动模式",
+    "Scanner": "扫码枪模式",
+    "Download": "下载",
+    "Bypass": "车辆放行",
+    "Reset": "复位",
+    "QuestBypass": "是否放行车辆 ?",
+    "Result": "结果",
+    "VerifyCar": "验证车辆信息",
+    "QuestConfirmCarInfo": "此对话框将在5秒后自动关闭,车辆信息是否准确?"
+  },
+  "ManualBar": {
+    "Vehicle": "车型选择",
+    "VIN": "VIN",
+    "Job": "装配过程选择",
+    "Pset": "程序号选择",
+    "ContinuePset": "连续作业",
+    "DiscretePset": "间断作业",
+    "EnableForce": "强制使能",
+    "DisableForce": "强制关闭"
+  },
+  "SwitchModeBar": {
+    "title": "切换拧紧控制器工作模式",
+    "Pset": "程序号",
+    "Job": "装配过程"
+  },
+  "HealthCheck": {
+    "MasterPC": "工位控制器",
+    "Controller": "拧紧控制器",
+    "IO": "输入/输出模块",
+    "RFID": "射频识别模块",
+    "Odoo": "后台服务器",
+    "Andon": "安灯系统"
+  },
+  "Lock": {
+    "Pwd": "请输入密码...",
+    "Unlock": "解锁"
+  },
+  "Login": {
+    "Name": "用户名",
+    "Pwd": "密码",
+    "Submit": "登录"
+  },
+  "Operation": {
+    "Input": {
+      "carType": "车型",
+      "vin": "VIN/零件号"
+    },
+    "Processbar": {
+      "Init": "系统启动中,请稍后...",
+      "Ready": "等待车辆进站...",
+      "Fail": "达到最大拧接次数",
+      "Error": "系统异常"
+    },
+    "Info": {
+      "ReworkWorkCenter": "返修工位",
+      "WorkMode": {
+        "Title": "工作模式",
+        "auto": "自动模式",
+        "manual": "手动模式",
+        "scanner": "扫码枪模式"
+      },
+      "WorkStatus": {
+        "Title": "工作状态"
+      },
+      "Job": {
+        "Title": "程序号"
+      },
+      "Tool": {
+        "Title": "拧紧枪",
+        "disconnected": "已断开",
+        "connected": "已连接"
+      }
+    },
+    "Display": {
+      "Init": "启动中",
+      "Ready": "就绪",
+      "PreDoing": "即将开始",
+      "Doing": "作业中",
+      "Fail": "失败",
+      "Error": "异常",
+      "Timeout": "超时",
+      "Continue": "作业中"
+    }
+  },
+  "Event": {
+    "Time": "时间",
+    "Level": "事件等级",
+    "Message": "消息",
+    "Actions": "动作",
+    "Detail": "事件详情",
+    "Info": "日常信息",
+    "Maintenance": "维护请求",
+    "Alert": "报警事件",
+    "All": "全部",
+    "Warn": "警告",
+    "Error": "错误"
+  },
+  "Viewer": {
+    "Image": "工艺图片",
+    "File": "工艺文件"
+  },
+  "Table": {
+    "Previous": "上一页",
+    "Next": "下一页",
+    "Loading": "加载中...",
+    "NoRowsFound": "空",
+    "Page": "页",
+    "of": "/",
+    "rows": "行"
+  },
+  "Screw": {
+    "Next": "下一个拧紧点",
+    "Prev": "上一个拧紧点"
+  },
+  "Order": {
+    "Step": {
+      "name": "名称",
+      "type": "类型",
+      "desc": "描述"
+    },
+    "Start": "开始",
+    "info": "工单信息",
+    "Overview": "概览",
+    "Next": "跳到下一工步",
+    "Retry": "重试"
+  },
+  "blockReasons": {
+    "Material Availability": "材料可用性",
+    "Equipment Failure": "设备故障",
+    "Setup and Adjustments": "设置和调整",
+    "Reduced Speed": "减速",
+    "Reduced Yield": "减产",
+    "Fully Productive Time": "充分生产时间",
+    "Process Defect": "工艺缺陷"
+  }
+}

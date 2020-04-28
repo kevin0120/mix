@@ -1,0 +1,263 @@
+const layout = theme => ({
+  root: {
+    overflow: 'hidden',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    // backgroundImage: 'url("../resources/imgs/texture.png")',
+    backgroundRepeat: 'repeat',
+    backgroundColor: theme.palette.grey[100]
+  },
+  main: {
+    overflow: 'hidden',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    // backgroundImage: 'url("../resources/imgs/texture.png")',
+    backgroundRepeat: 'repeat',
+    backgroundColor: theme.palette.grey[100]
+  },
+  leftContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width:'15%',
+    // padding:3,
+  },
+  rightContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width:'15%',
+    // padding:3,
+  },
+  centerContainer: {
+    overflow: 'hidden',
+    flex: 1,
+    margin: 3,
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  stepperContainer: {
+    margin: 3,
+    flex: 1,
+    overflowY: 'auto',
+    backgroundColor: theme.palette.common.white,
+    padding: 0
+  },
+  contentContainer: {
+    flex: 1
+  },
+  topBarContainer: {
+    margin: `3px`,
+    height: 60,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    textAlign: 'center',
+    padding: `0 ${theme.spacing(2)}px`,
+    alignItems: 'center',
+    backgroundColor: theme.palette.common.white
+  },
+  orderInfoContainer: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    textAlign: 'center',
+    alignItems: 'center'
+  },
+  logo: {
+    maxHeight: '100%'
+  },
+  orderStatus: {
+    marginRight: theme.spacing(1)
+  },
+  statusTodo: {
+    color: theme.palette.gray.main
+  },
+  statusWIP: {
+    color: theme.palette.primary.main
+  },
+  statusDone: {
+    color: theme.palette.success.main
+  },
+  statusCancel: {
+    color: theme.palette.danger.main
+  },
+  statusPending: {
+    color: theme.palette.warning.main
+  },
+  statusFail: {
+    color: theme.palette.rose.main
+  }
+});
+
+const stepperContainer = theme => ({
+  root: {
+    padding: 16,
+    background: 'inherit'
+  },
+  step: {
+    background: 'inherit',
+    color: theme.palette.grey[100]
+  },
+  stepButton: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start !important',
+    height: 50,
+    padding: '0 0',
+    margin: '10px 0',
+    color: theme.palette.grey[100]
+  },
+  stepIconDoing: {
+    animation: '$doing-icon-rotation 1s infinite linear',
+    color: theme.palette.primary.main
+  },
+  fail: {
+    color: theme.palette.error.main
+  },
+  '@keyframes doing-icon-rotation': {
+    '0%': {
+      transform: 'rotate(0deg)'
+    },
+    '100%': {
+      transform: 'rotate(-360deg)'
+    }
+  },
+  stepLabelRoot: {
+    flex: 1,
+    display: 'flex'
+  },
+  stepLabelContainer: {
+    flex: 1,
+    display: 'flex'
+  },
+  stepLabel: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  infoRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }
+});
+
+const buttonsContainer = {
+  root: {
+    height: 'fit-content',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: '0 3px',
+    alignItems: 'center'
+  },
+  menuIcon: {},
+  menuButton: {},
+  dialog: {},
+  dialogContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  bigButton: {
+    width: '20vw',
+    height: '15vh'
+  }
+};
+
+const stepPageContainer = {
+  root: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignSelf: 'center'
+  },
+
+  leftContainer: {
+    flex: 3,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    overflow: 'hidden'
+  },
+  leftContent: {
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden'
+  },
+  right: {
+    flex: 1,
+    height: '100%'
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    flex: 1
+  },
+  descriptionContainer: {
+    flex: 1,
+    height: '33%',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  Paper: {
+    width: '100%',
+    height: '100%',
+    padding: 'auto 6px',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  Description: {
+    maxHeight: '100%',
+    maxWidth: '100%',
+    height: 'fit-content',
+    width: 'fit-content',
+    overflow: 'visible',
+    padding: 4,
+    wordBreak: 'break-word',
+    '& p': {
+      lineHeight: 'inherit !important',
+      fontSize: 'inherit !important'
+    }
+  },
+  descriptionPaper: {
+    maxHeight: '100%',
+    maxWidth: '100%',
+    padding: 8,
+    overflow: 'auto',
+    // wordBreak: 'break-word',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  result: {
+    flex: 2,
+    height: '66%'
+  }
+};
+
+export default {
+  layout,
+  stepperContainer,
+  buttonsContainer,
+  stepPageContainer
+};

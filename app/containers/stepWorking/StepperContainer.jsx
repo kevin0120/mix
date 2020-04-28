@@ -1,0 +1,142 @@
+// @flow
+import { makeStyles, StepContent, Typography } from '@material-ui/core';
+import { connect } from 'react-redux';
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepButton from '@material-ui/core/StepButton';
+import StepLabel from '@material-ui/core/StepLabel';
+import React, { useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+import { Loop } from '@material-ui/icons';
+import clsx from 'clsx';
+import {STEP_STATUS} from '../../modules/step/constants';
+import styles from './styles';
+import * as oSel from '../../modules/order/selector';
+import { orderActions } from '../../modules/order/action';
+import type { Dispatch } from '../../modules/typeDef';
+import Timer from './Timer';
+import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
+
+type DProps = {|
+  jumpTo: Dispatch
+|};
+
+type ownProps = {||};
+
+type SProps = {|
+  ...ownProps,
+  steps: Array<IWorkStep>,
+  viewingIndex: number,
+  workingStep: ?IWorkStep,
+  viewingStep: ?IWorkStep
+|};
+
+type Props = {|
+  ...ownProps,
+  ...SProps,
+  ...DProps
+|};
+
+const mapState = (state, props: ownProps): SProps => ({
+  ...props,
+  steps: oSel.orderSteps(oSel.viewingOrder(state.order)) || [],
+  workingStep: oSel.workingStep(oSel.workingOrder(state.order)),
+  viewingStep: oSel.viewingStep(state.order),
+  viewingIndex: oSel.viewingIndex(state.order) || 0
+  // isCurrent: oSel.viewingOrder(state.order) === oSel.workingOrder(state.order)
+});
+
+const mapDispatch: DProps = {
+  jumpTo: orderActions.jumpToStep
+};
+
+// 步骤条
+const StepperContainer = ({
+                            steps,
+                            viewingIndex,
+                            jumpTo,
+                            workingStep,
+                            viewingStep
+                          }: Props) => {
+  const classes = makeStyles(styles.stepperContainer)();
+
+  const viewingRef = useRef(null);
+  const viewingNode = viewingRef?.current;
+  useEffect(() => {
+    if (viewingNode) {
+      // eslint-disable-next-line react/no-find-dom-node
+      const node: null | Element | Text = ReactDOM.findDOMNode(viewingNode);
+      if (node && node.scrollIntoView && typeof node.scrollIntoView === 'function') {
+        ((node: any): Element).scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+  }, [viewingNode]);
+
+  return (
+    <Stepper
+      nonLinear
+      activeStep={viewingIndex}
+      orientation="vertical"
+      className={classes.root}
+    >
+      {steps.map((s, idx) => {
+        const fail = s.status === STEP_STATUS.FAIL;
+
+        const labelProps = {
+          error: fail
+        };
+
+        const stepButtonProps = {};
+
+        if (workingStep === s) {
+          stepButtonProps.icon = (
+            <Loop
+              className={clsx(classes.stepIconDoing, {
+                [classes.fail]: fail
+              })}
+            />
+          );
+        }
+
+        if (s === viewingStep) {
+          stepButtonProps.ref = viewingRef;
+        } else {
+          stepButtonProps.ref = null;
+        }
+
+        return (
+          <Step key={s.code}>
+            <StepButton
+              completed={s.status === STEP_STATUS.FINISHED}
+              onClick={() => jumpTo(idx)}
+              className={classes.stepButton}
+              {...stepButtonProps}
+              ref={s === viewingStep ? viewingRef : () => {
+              }}
+            >
+              <StepLabel {...labelProps}>
+                <Typography variant="h6">{s.code}</Typography>
+              </StepLabel>
+            </StepButton>
+            <StepContent>
+              <Timer step={s}/>
+              {(Object.keys(s.payload?.info || {}) || []).map(k => (
+                <div className={classes.infoRow} key={k}>
+                  <Typography variant="body1">{k || ''}</Typography>
+                  <Typography variant="body1">
+                    {s.payload?.info && s.payload?.info[k] || ''}
+                  </Typography>
+                </div>
+              ))}
+            </StepContent>
+          </Step>
+        );
+      })}
+    </Stepper>
+  );
+};
+
+export default connect<Props, ownProps, SProps, DProps, _, _>(
+  mapState,
+  mapDispatch
+)(StepperContainer);
