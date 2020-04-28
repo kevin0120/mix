@@ -12,8 +12,8 @@ export function toolEnableApi(toolSN: string, ControllerSN: string = '', enable:
 }
 
 export function psetApi(toolSN: string = '', ControllerSN: string = '', stepCode: number, userIDs: Array<number>,
-                        pset: string, sequence: number,
-                        total: number, workorderCode: number, scannerCode: string = '', batch = 0, count = 1): Promise<any> {
+  pset: string, sequence: number,
+  total: number, workorderCode: number, scannerCode: string = '', batch = 0, count = 1): Promise<any> {
   let psetNum = pset;
   if (typeof pset === 'string') {
     psetNum = parseInt(pset, 10);
@@ -47,5 +47,23 @@ export function getPestListApi(toolSN, ControllerSN): Promise<any> {
   return rushSendApi('WS_TOOL_PSET_LIST', {
     controller_sn: ControllerSN,
     tool_sn: toolSN
+  });
+}
+
+export function apiManualSetResult({
+  tool_sn,
+  controller_sn,
+  measure_result,
+  measure_torque,
+  measure_angle,
+  count
+}) {
+  return rushSendApi('WS_TOOL_RESULT_SET', {
+    tool_sn,
+    controller_sn,
+    measure_result,
+    measure_torque,
+    measure_angle,
+    count
   });
 }
